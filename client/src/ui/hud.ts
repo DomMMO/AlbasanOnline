@@ -16,6 +16,10 @@ const playerHpFill = $("player-hp-fill");
 const playerHpText = $("player-hp-text");
 const playerRageFill = $("player-rage-fill");
 const playerRageText = $("player-rage-text");
+const dockHpFill = $("dock-hp-fill");
+const dockHpText = $("dock-hp-text");
+const dockRageFill = $("dock-rage-fill");
+const dockRageText = $("dock-rage-text");
 
 const targetFrame = $("target-frame");
 const targetName = $("target-name");
@@ -102,12 +106,24 @@ export interface PlayerFrameData {
 export function updatePlayerFrame(data: PlayerFrameData) {
   playerName.textContent = data.name;
   playerLevel.textContent = `Sv ${data.level}`;
-  playerHpFill.style.width = percent(data.hp, data.maxHp);
-  playerHpText.textContent = data.shield > 0 ? `${data.hp} / ${data.maxHp} (+${data.shield})` : `${data.hp} / ${data.maxHp}`;
-  playerHpFill.parentElement!.classList.toggle("shielded", data.shield > 0);
-  playerRageFill.style.width = percent(data.resource, data.maxResource);
-  playerRageText.textContent = `${data.resource} / ${data.maxResource}`;
-  playerRageFill.parentElement!.classList.toggle("mana", data.resourceType === "mana");
+  const hpText = data.shield > 0 ? `${data.hp} / ${data.maxHp} (+${data.shield})` : `${data.hp} / ${data.maxHp}`;
+  // The same bars twice: in the player frame and above the hotbar.
+  for (const [fill, text] of [
+    [playerHpFill, playerHpText],
+    [dockHpFill, dockHpText],
+  ]) {
+    fill.style.width = percent(data.hp, data.maxHp);
+    text.textContent = hpText;
+    fill.parentElement!.classList.toggle("shielded", data.shield > 0);
+  }
+  for (const [fill, text] of [
+    [playerRageFill, playerRageText],
+    [dockRageFill, dockRageText],
+  ]) {
+    fill.style.width = percent(data.resource, data.maxResource);
+    text.textContent = `${data.resource} / ${data.maxResource}`;
+    fill.parentElement!.classList.toggle("mana", data.resourceType === "mana");
+  }
   xpFill.style.width = percent(data.xp, data.xpToNext);
   xpText.textContent = `XP ${data.xp} / ${data.xpToNext}`;
   currentResource = data.resource;

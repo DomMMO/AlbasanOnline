@@ -97,6 +97,7 @@ Ana Merkez'deki kırmızı portaldan (seviye 5+) girilen, herkesin herkese sald�
 | P | Pasif ağaç |
 | T | Şehir portalı (bulunduğun yerde açılır) |
 | L | PvP sıralaması |
+| M | Mini harita aç/kapat (sağ üst: sarı sen, yeşil grup arkadaşların, beyaz diğer oyuncular, mavi NPC, mor portal) |
 | /davet İsim, /p, /ayril | Grup |
 | /duello İsim | Yanındaki oyuncuyu düelloya davet et |
 | I veya C | Karakter ve envanter penceresi |
@@ -306,7 +307,7 @@ Surlarla çevrili şehir; mob yok, PvP yok. Ortada çeşmeli meydan, kuzey cadde
 
 ### Pazar (oyuncudan oyuncuya satış)
 
-Knight Online tarzı tezgâh. Şehrin güneyindeki **tuğla döşeli pazar meydanına** gir, ekranda çıkan **Pazar Kur** düğmesine bas.
+Knight Online tarzı tezgâh. Şehrin güneyindeki **tuğla döşeli pazar meydanına** gir (girişinde **PAZAR** tabelası var, alan yerde altın çizgiyle çevrili ve mini haritada altın renkte görünür; içine adım atınca ekranda haber verilir), ekranda çıkan **Pazar Kur** düğmesine bas.
 
 1. Tezgâha bir ad ver (boş bırakırsan "İsim'in Tezgâhı" olur).
 2. Envanterde item'a sağ tıkla ya da pencereye sürükle (en fazla 8 item), her birine **birim fiyat** yaz.
