@@ -1,5 +1,6 @@
 import {
   classOf,
+  classQuestItems,
   distance,
   ITEMS,
   MAX_ACTIVE_QUESTS,
@@ -76,12 +77,12 @@ export function abandonQuest(game: Game, sessionId: string, questId: string) {
 
 /** Reward items for this player's class. */
 function rewardItems(quest: QuestDef, cls: string) {
-  return [...(quest.reward.items ?? []), ...(quest.reward.classItems?.[classOf(cls).id] ?? [])].filter((r) => ITEMS[r.item]);
+  return [...(quest.reward.items ?? []), ...classQuestItems(quest, cls)].filter((r) => ITEMS[r.item]);
 }
 
 /** Would the rewards fit after the collected items are taken? Tried on a copy of the inventory. */
 function rewardsFit(inv: InventoryData, quest: QuestDef, cls: string): boolean {
-  const copy: InventoryData = { gold: inv.gold, slots: inv.slots.map((s) => (s ? { ...s } : null)), equipment: inv.equipment };
+  const copy: InventoryData = { gold: inv.gold, slots: inv.slots.map((s) => (s ? { ...s } : null)), equipment: inv.equipment, passives: inv.passives };
   for (const objective of quest.objectives) if (objective.type === "collect") takeItems(copy, objective.item, objective.count);
   return rewardItems(quest, cls).every((reward) => addItem(copy, reward.item, reward.qty ?? 1) === 0);
 }

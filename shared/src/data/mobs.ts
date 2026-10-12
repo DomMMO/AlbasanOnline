@@ -1,4 +1,6 @@
 import type { Appearance } from "./appearance";
+import { DUNGEON_MOBS } from "./dungeonMobs";
+import { gearDrops } from "./loot";
 
 export interface LootTable {
   gold: [min: number, max: number];
@@ -49,17 +51,8 @@ export interface MobDef {
   /** Drawn this many times bigger (integer keeps pixels crisp). */
   scale?: number;
   boss?: BossDef;
-}
-
-type Drop = LootTable["drops"][number];
-
-/** Every weapon and armour piece of one gear tier (see gear.ts), each with the same chance. */
-function gearDrops(tier: number, chance: number): Drop[] {
-  const ids = [
-    ...["sword", "axe", "staff", "mace"].map((line) => `${line}_${tier}`),
-    ...["plate", "robe"].flatMap((set) => ["head", "chest", "legs", "feet"].map((piece) => `${set}_${piece}_${tier}`)),
-  ];
-  return ids.map((item) => ({ item, chance }));
+  /** Only exists at night (NIGHT_ONLY_POWER stronger, and as much more rewarding). */
+  nightOnly?: boolean;
 }
 
 export const MOBS: Record<string, MobDef> = {
@@ -148,6 +141,68 @@ export const MOBS: Record<string, MobDef> = {
         { item: "copper_earring", chance: 0.015 },
         { item: "silver_ring", chance: 0.006 },
         { item: "return_scroll", chance: 0.04 },
+      ],
+    },
+  },
+
+  // ---- Night only, valley ----
+  shadow_slime: {
+    id: "shadow_slime",
+    name: "Gölge Balçığı",
+    level: 3,
+    maxHp: 60,
+    attack: 9,
+    defense: 1,
+    attackSpeedMs: 2000,
+    speed: 34,
+    xp: 26,
+    aggroRange: 48,
+    respawnMs: 15_000,
+    nightOnly: true,
+    appearance: { type: "slime", color: 0x4b2d7a },
+    loot: {
+      gold: [3, 7],
+      drops: [
+        { item: "night_essence", chance: 0.35 },
+        { item: "slime_gel", chance: 0.5, min: 1, max: 2 },
+        { item: "minor_hp_potion", chance: 0.12 },
+        { item: "minor_mana_potion", chance: 0.12 },
+        { item: "upgrade_scroll_low", chance: 0.1 },
+        { item: "leather_cap", chance: 0.05 },
+        { item: "worn_boots", chance: 0.05 },
+        { item: "copper_ring", chance: 0.025 },
+      ],
+    },
+  },
+  ghost_wolf: {
+    id: "ghost_wolf",
+    name: "Hayalet Kurt",
+    level: 6,
+    maxHp: 150,
+    attack: 18,
+    defense: 4,
+    attackSpeedMs: 1700,
+    speed: 70,
+    xp: 65,
+    aggroRange: 64,
+    respawnMs: 20_000,
+    nightOnly: true,
+    appearance: { type: "wolf", fur: 0xc8d4ff },
+    loot: {
+      gold: [8, 16],
+      drops: [
+        { item: "night_essence", chance: 0.5 },
+        { item: "wolf_pelt", chance: 0.4 },
+        { item: "hp_potion", chance: 0.1 },
+        { item: "mana_potion", chance: 0.1 },
+        { item: "upgrade_scroll_low", chance: 0.12 },
+        { item: "upgrade_scroll_mid", chance: 0.05 },
+        { item: "wolf_fang_blade", chance: 0.04 },
+        { item: "wolf_hide_leggings", chance: 0.05 },
+        { item: "iron_helm", chance: 0.04 },
+        { item: "copper_necklace", chance: 0.02 },
+        { item: "silver_ring", chance: 0.012 },
+        { item: "protection_charm", chance: 0.006 },
       ],
     },
   },
@@ -448,6 +503,68 @@ export const MOBS: Record<string, MobDef> = {
       ],
     },
   },
+  // ---- Night only, Dark Forest ----
+  night_wraith: {
+    id: "night_wraith",
+    name: "Gece Hortlağı",
+    level: 13,
+    maxHp: 460,
+    attack: 40,
+    defense: 13,
+    attackSpeedMs: 2100,
+    speed: 56,
+    xp: 185,
+    aggroRange: 72,
+    respawnMs: 20_000,
+    nightOnly: true,
+    appearance: { type: "humanoid", tunic: 0x2a2a44, skin: 0xb8c4d8, hair: 0xe8eef8 },
+    loot: {
+      gold: [16, 32],
+      drops: [
+        { item: "night_essence", chance: 0.6 },
+        { item: "bone_dust", chance: 0.3 },
+        { item: "large_hp_potion", chance: 0.1 },
+        { item: "large_mana_potion", chance: 0.1 },
+        { item: "upgrade_scroll_mid", chance: 0.06 },
+        { item: "upgrade_scroll_high", chance: 0.008 },
+        { item: "ruby_necklace", chance: 0.012 },
+        { item: "spirit_stone", chance: 0.012 },
+        ...gearDrops(2, 0.008),
+        ...gearDrops(3, 0.004),
+      ],
+    },
+  },
+  moon_wolf: {
+    id: "moon_wolf",
+    name: "Ay Kurdu",
+    level: 16,
+    maxHp: 600,
+    attack: 48,
+    defense: 16,
+    attackSpeedMs: 1600,
+    speed: 74,
+    xp: 240,
+    aggroRange: 72,
+    respawnMs: 25_000,
+    nightOnly: true,
+    appearance: { type: "wolf", fur: 0x9aa8d8 },
+    loot: {
+      gold: [20, 40],
+      drops: [
+        { item: "night_essence", chance: 0.7, min: 1, max: 2 },
+        { item: "dark_wolf_pelt", chance: 0.4 },
+        { item: "super_hp_potion", chance: 0.06 },
+        { item: "upgrade_scroll_mid", chance: 0.08 },
+        { item: "upgrade_scroll_high", chance: 0.012 },
+        { item: "protection_charm", chance: 0.006 },
+        { item: "moonstone_earring", chance: 0.012 },
+        { item: "sapphire_ring", chance: 0.008 },
+        { item: "spirit_stone", chance: 0.015 },
+        ...gearDrops(3, 0.008),
+        ...gearDrops(4, 0.003),
+      ],
+    },
+  },
   bandit_chief: {
     id: "bandit_chief",
     name: "Haydut Reisi Kara Murat",
@@ -490,4 +607,5 @@ export const MOBS: Record<string, MobDef> = {
       addCount: 2,
     },
   },
+  ...DUNGEON_MOBS,
 };

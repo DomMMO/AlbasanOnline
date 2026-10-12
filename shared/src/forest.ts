@@ -1,6 +1,7 @@
 import { TILE_SIZE } from "./constants";
 import type { Decor, DungeonLayout, SpawnZone } from "./dungeons";
 import { mulberry32, Tile, valueNoise } from "./map";
+import { BIG_DUNGEONS } from "./bigDungeons";
 
 // Kara Orman (Dark Forest), levels 10-20: north of the Starting Valley. A dark wood
 // with a swamp, the bandits' camp, an old graveyard, the orcs' hollow and a bear den.
@@ -39,6 +40,9 @@ export const FOREST_SPAWN_ZONES: SpawnZone[] = [
   { mob: "skeleton", tx: AREAS.graveyard.tx, ty: AREAS.graveyard.ty, radius: 6, count: 8 },
   { mob: "orc", tx: AREAS.orcs.tx, ty: AREAS.orcs.ty, radius: 6, count: 7 },
   { mob: "dire_bear", tx: AREAS.bears.tx, ty: AREAS.bears.ty, radius: 4, count: 3 },
+  // Night only.
+  { mob: "moon_wolf", tx: AREAS.wolves.tx, ty: AREAS.wolves.ty, radius: 6, count: 3 },
+  { mob: "night_wraith", tx: AREAS.graveyard.tx, ty: AREAS.graveyard.ty, radius: 6, count: 4 },
   { mob: "bandit_chief", tx: AREAS.bandits.tx, ty: AREAS.bandits.ty - 3, radius: 1, count: 1 },
 ];
 
@@ -88,6 +92,13 @@ export function buildForest(): DungeonLayout {
   path(12, 33, 12, 25);
   path(52, 35, 52, 25);
   path(41, 27, 41, 25);
+
+  // Big dungeon entrances: a clear patch around each one and the spot in front of it.
+  for (const { forestTile } of Object.values(BIG_DUNGEONS)) {
+    for (let y = forestTile.ty - 1; y <= forestTile.ty + 3; y++) {
+      for (let x = forestTile.tx - 1; x <= forestTile.tx + 1; x++) tiles[y][x] = Tile.DarkGrass;
+    }
+  }
 
   const decor: Decor[] = [];
   const solid = (tx: number, ty: number, w = 1, h = 1) => {

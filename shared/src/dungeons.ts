@@ -149,3 +149,102 @@ export function buildJackLair(): DungeonLayout {
 
   return { map: { width, height, tiles, spawn: px(17, 24) }, mobs: [{ mob: "pumpkin_jack", ...px(17, 10) }] };
 }
+
+// ---- Big dungeons -----------------------------------------------------------------
+// Laid out by a generator: a chain of rooms on a grid, snaking left-right and down a row,
+// joined by corridors. Rooms are an entrance, mob packs and boss rooms; the last boss
+// room holds the exit, which opens once every boss in the dungeon is dead.
+
+export type DungeonRoom =
+  | { kind: "entrance" }
+  | { kind: "pack"; mobs: [mob: string, count: number][] }
+  | { kind: "boss"; boss: string; guards?: [mob: string, count: number][]; final?: boolean };
+
+export interface DungeonSpec {
+  seed: number;
+  wall: Tile;
+  floor: Tile;
+  rooms: DungeonRoom[];
+  /** Rooms per row. */
+  cols?: number;
+}
+
+export interface BuiltDungeon extends DungeonLayout {
+  /** Way out from the entrance room (always open). */
+  entrancePortal: { x: number; y: number };
+  /** Way out from the final boss room (opens when the dungeon is cleared). */
+  exitPortal: { x: number; y: number };
+}
+
+const CELL_W = 22;
+const CELL_H = 17;
+
+export function buildDungeon(spec: DungeonSpec): BuiltDungeon {
+  const cols = spec.cols ?? 4;
+  const rows = Math.ceil(spec.rooms.length / cols);
+  const width = cols * CELL_W + 2;
+  const height = rows * CELL_H + 2;
+  const tiles: Tile[][] = Array.from({ length: height }, () => Array(width).fill(spec.wall));
+  const rand = mulberry32(spec.seed);
+  const carve = (x: number, y: number, w: number, h: number) => {
+    for (let ty = y; ty < y + h; ty++) for (let tx = x; tx < x + w; tx++) if (ty > 0 && tx > 0 && ty < height - 1 && tx < width - 1) tiles[ty][tx] = spec.floor;
+  };
+  const jitter = () => Math.floor(rand() * 3) - 1;
+
+  const rects = spec.rooms.map((room, i) => {
+    const row = Math.floor(i / cols);
+    const col = row % 2 === 0 ? i % cols : cols - 1 - (i % cols);
+    const [baseW, baseH] = room.kind === "entrance" ? [10, 8] : room.kind === "pack" ? [15, 11] : room.final ? [19, 14] : [17, 13];
+    const w = baseW + Math.floor(rand() * 2);
+    const h = baseH + Math.floor(rand() * 2);
+    return {
+      x: 1 + col * CELL_W + Math.floor((CELL_W - w) / 2) + jitter(),
+      y: 1 + row * CELL_H + Math.floor((CELL_H - h) / 2) + jitter(),
+      w,
+      h,
+    };
+  });
+  for (const r of rects) carve(r.x, r.y, r.w, r.h);
+  const centre = (r: (typeof rects)[number]) => ({ x: r.x + Math.floor(r.w / 2), y: r.y + Math.floor(r.h / 2) });
+  for (let i = 1; i < rects.length; i++) {
+    const a = centre(rects[i - 1]);
+    const b = centre(rects[i]);
+    carve(Math.min(a.x, b.x) - 1, a.y - 1, Math.abs(a.x - b.x) + 3, 3);
+    carve(b.x - 1, Math.min(a.y, b.y) - 1, 3, Math.abs(a.y - b.y) + 3);
+  }
+
+  const mobs: MobPlacement[] = [];
+  let entrancePortal = { x: 0, y: 0 };
+  let exitPortal = { x: 0, y: 0 };
+  let spawn = { x: 0, y: 0 };
+  spec.rooms.forEach((room, i) => {
+    const r = rects[i];
+    const c = centre(r);
+    const scatter = (list: [string, number][], keepClear = 0) => {
+      for (const [mob, count] of list) {
+        for (let n = 0; n < count; n++) {
+          let tx: number;
+          let ty: number;
+          do {
+            tx = r.x + 2 + Math.floor(rand() * (r.w - 4));
+            ty = r.y + 2 + Math.floor(rand() * (r.h - 4));
+          } while (keepClear > 0 && Math.hypot(tx - c.x, ty - c.y) < keepClear);
+          mobs.push({ mob, ...px(tx, ty) });
+        }
+      }
+    };
+    if (room.kind === "entrance") {
+      spawn = px(c.x, c.y);
+      entrancePortal = px(r.x + 2, r.y + 1);
+    } else if (room.kind === "pack") {
+      scatter(room.mobs);
+    } else {
+      mobs.push({ mob: room.boss, ...px(c.x, c.y - 1) });
+      // Guards stand off to the sides so the boss can be pulled on its own with care.
+      scatter(room.guards ?? [], 5);
+      if (room.final) exitPortal = px(r.x + 2, r.y + 1);
+    }
+  });
+
+  return { map: { width, height, tiles, spawn }, mobs, entrancePortal, exitPortal };
+}

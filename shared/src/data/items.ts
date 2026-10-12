@@ -60,7 +60,10 @@ export type IconShape =
   | "coin"
   | "fang"
   | "meat"
-  | "bowl";
+  | "bowl"
+  | "jewel_major"
+  | "jewel_minor"
+  | "jewel_greater";
 
 export interface ItemStats {
   attack?: number;
@@ -97,14 +100,16 @@ export interface ItemDef {
   questItem?: boolean;
   /** How worn armour looks on the character: plain cloth/leather, chain "mail", or shiny "plate". */
   look?: "mail" | "plate";
+  /** Passive tree jewel: "major" goes in a big socket, "greater" only in a greater one, "minor" in a small one. */
+  jewel?: "major" | "minor" | "greater";
   description?: string;
 }
 
 export const POTION_COOLDOWN_MS = 10_000;
 
 const def = (item: ItemDef) => item;
-const MELEE: ClassId[] = ["warrior"];
-const CASTERS: ClassId[] = ["mage", "priest"];
+const MELEE: ClassId[] = ["warrior", "guardian"];
+const CASTERS: ClassId[] = ["mage", "priest", "necromancer"];
 
 export const ITEMS: Record<string, ItemDef> = Object.fromEntries(
   [
@@ -156,6 +161,11 @@ export const ITEMS: Record<string, ItemDef> = Object.fromEntries(
     // ---- Materials (sold for gold)
     def({ id: "slime_gel", name: "Balçık Jölesi", rarity: "common", level: 1, maxStack: 50, sellPrice: 1, icon: { shape: "blob", color: 0x6fcf5a } }),
     def({ id: "wolf_pelt", name: "Kurt Postu", rarity: "common", level: 1, maxStack: 50, sellPrice: 3, icon: { shape: "pelt", color: 0x8a8f99 } }),
+    // ---- Passive tree jewels (see passives.ts); each rolls one effect when it drops
+    def({ id: "major_jewel", jewel: "major", name: "Büyük Mücevher", rarity: "epic", level: 1, maxStack: 1, sellPrice: 40, icon: { shape: "jewel_major", color: 0xb65cff }, description: "Pasif ağaçta büyük bir slota takılır; altındaki 5 küçük slotu açar. Nadirliği arttıkça etkisi güçlenir." }),
+    def({ id: "greater_jewel", jewel: "greater", name: "Kadim Mücevher", rarity: "legendary", level: 1, maxStack: 1, sellPrice: 150, icon: { shape: "jewel_greater", color: 0xff8000 }, description: "Sadece pasif ağacın Kadim Yuvalarına (1, 6, 11 ve 16. yuvalar) takılır. Güçlü ve özel bir etkisi vardır; nadirliği arttıkça güçlenir." }),
+    def({ id: "minor_jewel", jewel: "minor", name: "Küçük Mücevher", rarity: "uncommon", level: 1, maxStack: 1, sellPrice: 12, icon: { shape: "jewel_minor", color: 0x1eff00 }, description: "Pasif ağaçta, büyük mücevher takılı bir slotun küçük slotlarına takılır. Nadirliği arttıkça etkisi güçlenir." }),
+    def({ id: "night_essence", name: "Gece Özü", rarity: "rare", level: 1, maxStack: 50, sellPrice: 15, icon: { shape: "gem", color: 0x7a5cff }, description: "Sadece gece doğan yaratıklardan düşer. Tüccarlar iyi para verir." }),
     def({ id: "goblin_ear", name: "Goblin Kulağı", rarity: "common", level: 1, maxStack: 50, sellPrice: 5, icon: { shape: "ear", color: 0x7cb342 } }),
     ...GEAR,
   ].map((item) => [item.id, item]),

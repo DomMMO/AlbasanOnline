@@ -1,5 +1,6 @@
 import {
   ITEMS,
+  itemRarity,
   RARITY_COLORS,
   STALL_MAX_PRICE,
   STALL_SLOTS,
@@ -10,7 +11,7 @@ import {
   type StallListingInput,
   type StallListingView,
 } from "../../../shared/src";
-import { iconUrl } from "../gfx/icons";
+import { itemIconUrl } from "../gfx/icons";
 import { DRAG_TYPE, inventoryState } from "./inventory";
 import { hideTooltip, showItemTooltip } from "./tooltip";
 
@@ -153,14 +154,14 @@ function itemRow(item: ItemView, extra: HTMLElement[]): HTMLElement {
   const row = document.createElement("div");
   row.className = "stall-row";
   const img = document.createElement("img");
-  img.src = iconUrl(def.icon.shape, def.icon.color);
+  img.src = itemIconUrl(def, item.affixes);
   const name = document.createElement("span");
   name.className = "name";
   name.textContent = `${def.name}${item.enhance ? ` +${item.enhance}` : ""}${item.qty > 1 ? ` x${item.qty}` : ""}`;
-  name.style.color = RARITY_COLORS[def.rarity];
+  name.style.color = RARITY_COLORS[itemRarity(def, item.affixes)];
   row.append(img, name, ...extra);
   row.addEventListener("mouseenter", () =>
-    showItemTooltip(def, { qty: item.qty, enhance: item.enhance, playerLevel: actions.playerLevel() }, img),
+    showItemTooltip(def, { qty: item.qty, enhance: item.enhance, affixes: item.affixes, playerLevel: actions.playerLevel() }, img),
   );
   row.addEventListener("mouseleave", hideTooltip);
   return row;

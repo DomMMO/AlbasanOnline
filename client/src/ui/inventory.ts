@@ -1,15 +1,19 @@
 import {
+  ATTRIBUTE_HELP,
+  ATTRIBUTE_IDS,
+  ATTRIBUTE_NAMES,
   EQUIP_SLOT_NAMES,
   EQUIP_SLOTS,
   glowTier,
   INVENTORY_SIZE,
+  itemRarity,
   ITEMS,
   type EquipSlot,
   type InventoryEvent,
   type ItemView,
   type SlotRef,
 } from "../../../shared/src";
-import { iconUrl } from "../gfx/icons";
+import { itemIconUrl } from "../gfx/icons";
 import { hideTooltip, showItemTooltip } from "./tooltip";
 import { isTouchDevice } from "./touch";
 
@@ -49,20 +53,23 @@ export function renderSlot(el: HTMLElement, item: ItemView | null | undefined) {
   const def = item ? ITEMS[item.defId] : undefined;
   if (!item || !def) return;
   const img = document.createElement("img");
-  img.src = iconUrl(def.icon.shape, def.icon.color);
+  img.src = itemIconUrl(def, item.affixes);
   img.draggable = false;
   el.append(img);
-  el.style.setProperty("--rarity", `var(--rarity-${def.rarity})`);
+  el.style.setProperty("--rarity", `var(--rarity-${itemRarity(def, item.affixes)})`);
   if (item.qty > 1) el.append(Object.assign(document.createElement("span"), { className: "qty", textContent: String(item.qty) }));
   if (item.enhance > 0) el.append(Object.assign(document.createElement("span"), { className: "plus", textContent: `+${item.enhance}` }));
 }
 
-function itemAt(ref: SlotRef): ItemView | null | undefined {
+/** Bag and equipment slots (the passive tree has its own window). */
+type BagRef = Exclude<SlotRef, { area: "passive" }>;
+
+function itemAt(ref: BagRef): ItemView | null | undefined {
   if (!state) return null;
   return ref.area === "inv" ? state.slots[ref.index] : state.equipment[ref.slot];
 }
 
-function makeSlot(ref: SlotRef, label?: string): HTMLElement {
+function makeSlot(ref: BagRef, label?: string): HTMLElement {
   const el = document.createElement("div");
   el.className = "item-slot";
   if (label) el.dataset.label = label;
@@ -106,7 +113,7 @@ function makeSlot(ref: SlotRef, label?: string): HTMLElement {
     const def = item && ITEMS[item.defId];
     if (!item || !def) return;
     const hint = ref.area === "inv" ? actions.activateHint(ref.index) : "Sağ tık: çıkar";
-    showItemTooltip(def, { qty: item.qty, enhance: item.enhance, playerLevel: actions.playerLevel(), footer: [{ text: hint }] }, el);
+    showItemTooltip(def, { qty: item.qty, enhance: item.enhance, affixes: item.affixes, playerLevel: actions.playerLevel(), footer: [{ text: hint }] }, el);
   });
   el.addEventListener("mouseleave", hideTooltip);
   return el;
@@ -145,10 +152,12 @@ export function updateInventory(event: InventoryEvent) {
     el.draggable = !!event.slots[index];
   });
   goldEl.textContent = event.gold.toLocaleString("tr-TR");
-  const { attack, defense, maxHp, attackSpeedMs } = event.stats;
+  const { attack, defense, maxHp, attackSpeedMs, critChance, lifeSteal, attributes } = event.stats;
   statsEl.innerHTML = `
     <span>Saldırı <b>${attack}</b></span><span>Savunma <b>${defense}</b></span>
-    <span>Can <b>${maxHp}</b></span><span>Hız <b>${(attackSpeedMs / 1000).toFixed(1)} sn</b></span>`;
+    <span>Can <b>${maxHp}</b></span><span>Hız <b>${(attackSpeedMs / 1000).toFixed(2)} sn</b></span>
+    <span>Kritik <b>%${(critChance * 100).toFixed(1)}</b></span><span>Can Çalma <b>%${Math.round(lifeSteal * 100)}</b></span>
+    ${ATTRIBUTE_IDS.map((id) => `<span title="${ATTRIBUTE_HELP[id]}">${ATTRIBUTE_NAMES[id]} <b>${attributes[id]}</b></span>`).join("")}`;
 }
 
 export function inventoryState() {

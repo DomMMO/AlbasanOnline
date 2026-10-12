@@ -1,4 +1,6 @@
 import type { EquipSlot } from "./data/items";
+import type { Affix } from "./data/affixes";
+import type { PassiveSocketView } from "./data/passives";
 import type { CombatStats } from "./data/progression";
 import type { ZoneId } from "./zones";
 import type { QuestProgress } from "./data/quests";
@@ -31,6 +33,9 @@ export const Msg = {
   QuestAccept: "questAccept",
   QuestTurnIn: "questTurnIn",
   QuestAbandon: "questAbandon",
+  /** T: open a town portal where you stand. */
+  OpenTownPortal: "openTownPortal",
+  UseTownPortal: "useTownPortal",
   // server -> client
   Pong: "pong",
   Combat: "combat",
@@ -91,6 +96,21 @@ export interface UsePortalMessage {
   portalId: string;
 }
 
+export interface UseTownPortalMessage {
+  /** Key in the room state's townPortals. */
+  portalId: string;
+}
+
+/** A player's town portal: the far end leads to town, the town end (`back`) leads back out. */
+export interface TownPortalView {
+  owner: string;
+  x: number;
+  y: number;
+  /** Destination zone id. */
+  to: string;
+  back: boolean;
+}
+
 /** Tells the client to leave this room and join `zone` using `ticket`. */
 export interface TransferEvent {
   zone: ZoneId;
@@ -144,7 +164,8 @@ export interface CombatEvent {
 /** Broadcast once per swing/skill so clients can animate it (damage comes separately as CombatEvent). */
 export interface AttackEvent {
   sourceId: string;
-  sourceKind: EntityKind;
+  /** "minion" = a necromancer's summon. */
+  sourceKind: EntityKind | "minion";
   /** Absent for untargeted skills such as Whirlwind. */
   targetId?: string;
   targetKind?: EntityKind;
@@ -259,15 +280,23 @@ export interface ItemView {
   qty: number;
   /** +N upgrade level (Phase 3). */
   enhance: number;
+  /** Random modifiers (equipment only): 1 = worst, 5 = best. */
+  affixes?: Affix[];
 }
 
-export type SlotRef = { area: "inv"; index: number } | { area: "equip"; slot: EquipSlot };
+/** passive: big socket `socket`; `minor` = one of its small sockets (null = the big one). */
+export type SlotRef =
+  | { area: "inv"; index: number }
+  | { area: "equip"; slot: EquipSlot }
+  | { area: "passive"; socket: number; minor: number | null };
 
 /** Full inventory snapshot, sent to the owner only whenever it changes. */
 export interface InventoryEvent {
   gold: number;
   slots: (ItemView | null)[];
   equipment: Partial<Record<EquipSlot, ItemView>>;
+  /** Passive tree: 20 big sockets, each with 5 small ones. */
+  passives: PassiveSocketView[];
   stats: CombatStats;
 }
 
@@ -399,6 +428,8 @@ export interface PlayerView {
   shield: number;
   /** Frozen in place (Frost Nova in PvP): can't move. */
   rooted: boolean;
+  /** Kalkan Duvarı is up (takes less damage). */
+  guarded: boolean;
   /** PvP spawn protection: players can't hurt this player yet. */
   protected: boolean;
   /** PvP stats, shown on the nameplate tooltip and leaderboard. */
@@ -424,6 +455,8 @@ export interface MobView {
   rooted: boolean;
   /** Session id of the player it is attacking ("" = none): shows tanks who has aggro. */
   aggroId: string;
+  /** Stronger than normal: an outdoor mob at night, or a night-only creature. */
+  empowered: boolean;
   x: number;
   y: number;
   dir: Direction;
@@ -431,6 +464,17 @@ export interface MobView {
   level: number;
   hp: number;
   maxHp: number;
+}
+
+/** A player's summoned minion (necromancer skeleton). Friendly to its owner's party. */
+export interface MinionView {
+  /** Skill that summoned it (its look and name come from the skill). */
+  skill: string;
+  ownerId: string;
+  x: number;
+  y: number;
+  dir: Direction;
+  moving: boolean;
 }
 
 export interface LootView {

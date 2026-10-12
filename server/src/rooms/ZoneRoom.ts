@@ -10,6 +10,7 @@ import {
   ZONES,
   type TransferEvent,
   type UsePortalMessage,
+  type UseTownPortalMessage,
   type ZoneDef,
   isAxis,
   Msg,
@@ -48,7 +49,19 @@ import { forgetInstance, instanceFor, refreshFor, registerInstance, respond, sam
 import { claimCharacter } from "../game/presence";
 import { consumeTicket, issueTicket } from "../game/tickets";
 import { onlineCharacters } from "../game/registry";
-import { WorldState } from "./schema/WorldState";
+import { TownPortal, WorldState } from "./schema/WorldState";
+import {
+  closeTownPortal,
+  isPortalRoom,
+  onTownPortalsChanged,
+  openTownPortal,
+  portalsIn,
+  roomHasPortal,
+  townPortalOf,
+} from "../game/townPortal";
+
+/** A town portal survives a logout this long (the player may just be changing zones). */
+const TOWN_PORTAL_LOGOUT_GRACE_MS = 20_000;
 
 // One room = one running zone: the shared open world, or a private dungeon instance.
 // The room is only the network boundary: it authenticates, validates incoming
@@ -70,6 +83,9 @@ export class ZoneRoom extends Room<WorldState> {
   /** sessionId -> releases the character claim after the final save. */
   private releases = new Map<string, () => void>();
   private saveQueue: Promise<void> = Promise.resolve();
+  private stopPortalSync: (() => void) | null = null;
+  /** Instances: kept alive (autoDispose off) because a town portal leads here. */
+  private keptForPortal = false;
 
   onCreate(options: { zoneId?: string }) {
     if (!isZoneId(options.zoneId)) throw new Error(`unknown zone ${options.zoneId}`);
@@ -175,6 +191,12 @@ export class ZoneRoom extends Room<WorldState> {
     this.onMessage(Msg.UsePortal, (client, message: Partial<UsePortalMessage>) => {
       if (typeof message?.portalId === "string") this.usePortal(client, message.portalId);
     });
+    this.onMessage(Msg.OpenTownPortal, (client) => this.openTownPortal(client));
+    this.onMessage(Msg.UseTownPortal, (client, message: Partial<UseTownPortalMessage>) => {
+      if (typeof message?.portalId === "string") this.useTownPortal(client, message.portalId);
+    });
+    this.stopPortalSync = onTownPortalsChanged(() => this.syncTownPortals());
+    this.syncTownPortals();
 
     // Fixed-step simulation driven by real elapsed time. Timers fire late (on Windows a
     // 50 ms interval runs every ~60 ms), so run as many ticks as time has passed;
@@ -223,6 +245,11 @@ export class ZoneRoom extends Room<WorldState> {
       const character = await loadCharacter(auth.characterId, auth.account.id);
       if (!character) throw new ServerError(404, "Karakter bulunamadı");
       this.game.addPlayer(client.sessionId, character, auth.arriveAt);
+      // Entering any map other than town or the portal's own closes the town portal.
+      const portal = townPortalOf(character.id);
+      if (portal && this.zone.id !== HOME_ZONE && !isPortalRoom(portal, this.zone.id, this.roomId, this.zone.instanced)) {
+        closeTownPortal(character.id);
+      }
       onlineCharacters.set(character.id, { characterId: character.id, game: this.game, sessionId: client.sessionId, name: character.name });
       if (this.zone.instanced) registerInstance(character.id, this.zone.id, this.roomId);
       refreshFor(character.id);
@@ -243,6 +270,12 @@ export class ZoneRoom extends Room<WorldState> {
     } finally {
       // Unregistered only after the final save, so a GM change can't slip between the two.
       if (characterId !== undefined) onlineCharacters.delete(characterId, client.sessionId);
+      // Logged out (rather than changing zones): the town portal goes too.
+      if (characterId !== undefined && townPortalOf(characterId)) {
+        setTimeout(() => {
+          if (!onlineCharacters.get(characterId)) closeTownPortal(characterId);
+        }, TOWN_PORTAL_LOGOUT_GRACE_MS);
+      }
       this.game.removePlayer(client.sessionId);
       this.releases.get(client.sessionId)?.();
       this.releases.delete(client.sessionId);
@@ -274,7 +307,63 @@ export class ZoneRoom extends Room<WorldState> {
   }
 
   onDispose() {
+    this.stopPortalSync?.();
     forgetInstance(this.roomId);
+  }
+
+  /** T: a portal to town right where the player stands (replacing their previous one). */
+  private openTownPortal(client: Client) {
+    const player = this.state.players.get(client.sessionId);
+    const runtime = this.game.playerRuntime.get(client.sessionId);
+    if (!player || !runtime || player.dead) return;
+    if (this.zone.id === HOME_ZONE) return notice(this.game, client.sessionId, "Zaten Ana Merkez'desin");
+    openTownPortal({ characterId: runtime.characterId, owner: player.name, zone: this.zone.id, roomId: this.roomId, x: player.x, y: player.y });
+    notice(this.game, client.sessionId, "Şehir portalı açıldı", "#74c0fc");
+  }
+
+  private useTownPortal(client: Client, portalId: string) {
+    const player = this.state.players.get(client.sessionId);
+    const runtime = this.game.playerRuntime.get(client.sessionId);
+    const view = this.state.townPortals.get(portalId);
+    const entry = runtime ? townPortalOf(runtime.characterId) : undefined;
+    if (!player || !runtime || !view || player.dead) return;
+    if (!entry || !portalId.startsWith(`${runtime.characterId}:`)) return notice(this.game, client.sessionId, "Bu portal senin değil");
+    if (distance(player, view) > PORTAL_RANGE) return notice(this.game, client.sessionId, "Çok uzak");
+    closeStall(this.game, client.sessionId);
+    const transfer: TransferEvent = view.back
+      ? {
+          zone: entry.zone,
+          ticket: issueTicket(runtime.characterId, entry.zone, { x: entry.x, y: entry.y }),
+          roomId: ZONES[entry.zone].instanced ? entry.roomId : undefined,
+        }
+      : { zone: HOME_ZONE, ticket: issueTicket(runtime.characterId, HOME_ZONE, entry.townSpot) };
+    client.send(Msg.Transfer, transfer);
+  }
+
+  /** Mirrors the town portals that stand in this room into the synced state. */
+  private syncTownPortals() {
+    const placed = portalsIn(this.zone.id, this.roomId, this.zone.instanced);
+    const keys = new Set(placed.map((p) => p.key));
+    for (const key of [...this.state.townPortals.keys()]) if (!keys.has(key)) this.state.townPortals.delete(key);
+    for (const p of placed) {
+      const current = this.state.townPortals.get(p.key);
+      if (current && current.x === p.x && current.y === p.y) continue;
+      const portal = new TownPortal();
+      portal.owner = p.entry.owner;
+      portal.x = p.x;
+      portal.y = p.y;
+      portal.to = p.back ? p.entry.zone : HOME_ZONE;
+      portal.back = p.back;
+      this.state.townPortals.set(p.key, portal);
+    }
+    // An instance with a portal into it stays open while its players are away.
+    if (this.zone.instanced) {
+      const keep = roomHasPortal(this.roomId);
+      this.autoDispose = !keep;
+      // Kept open only for a portal that has now closed: nobody is coming back.
+      if (!keep && this.keptForPortal && this.clients.length === 0) void this.disconnect();
+      this.keptForPortal = keep;
+    }
   }
 
   /**
@@ -303,6 +392,9 @@ function parseSlotRef(value: unknown): SlotRef | null {
   const ref = value as Record<string, unknown>;
   if (ref.area === "inv" && typeof ref.index === "number") return { area: "inv", index: ref.index };
   if (ref.area === "equip" && EQUIP_SLOTS.includes(ref.slot as EquipSlot)) return { area: "equip", slot: ref.slot as EquipSlot };
+  if (ref.area === "passive" && typeof ref.socket === "number" && (ref.minor === null || typeof ref.minor === "number")) {
+    return { area: "passive", socket: ref.socket, minor: ref.minor };
+  }
   return null;
 }
 

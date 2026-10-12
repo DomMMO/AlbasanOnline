@@ -28,6 +28,8 @@ export const MELEE_RANGE = 26;
 export const MOB_ATTACK_RANGE = 18;
 /** A mob that gets this far from its spawn point gives up and walks home at full health. */
 export const MOB_LEASH_RANGE = TILE_SIZE * 12;
+/** Players this many levels above a mob are left alone: it won't attack them and shies away a little. */
+export const MOB_FEAR_LEVEL_GAP = 5;
 
 export const GLOBAL_COOLDOWN_MS = 1000;
 /** No damage dealt or taken for this long = out of combat (health regen, rage decay). */

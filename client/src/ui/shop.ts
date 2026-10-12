@@ -63,6 +63,7 @@ export function openShop(npc: NpcDef) {
           def,
           {
             playerLevel: actions.playerLevel(),
+            affixHint: "1 rastgele stat (dükkân malı)",
             footer: [
               { text: `Fiyat: ${def.buyPrice} altın`, color: "#ffd34d" },
               { text: def.maxStack > 1 ? "Tık: 1 al · Shift+tık: 5 al" : "Tık: satın al" },

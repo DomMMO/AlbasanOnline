@@ -30,7 +30,11 @@ Karakter oluştururken sınıf seçilir:
 | **Savaşçı** (yakın dövüş, ileride tank) | Öfke: vurdukça ve hasar aldıkça dolar | Ağır Darbe | Girdap (çevreye) | İkinci Nefes (can) |
 | **Büyücü** (uzaktan hasar) | Mana | Ateş Topu (1,5 sn büyü) | Buz Halkası (çevredekileri 4 sn dondurur) | Yıldırım (anında) |
 | **Şifacı** (iyileştirici) | Mana | Kutsal Işık (1,2 sn büyü) | Şifa (1,5 sn büyü; hedef oyuncu ya da kendin) | Koruyucu Kalkan (hasar emer) |
+| **Muhafız** (tank) | Öfke | Kalkan Darbesi (güçlü tek hedef) | Meydan Okuma (çevreye vurur, hepsinin dikkatini çeker) | Kalkan Duvarı (8 sn %50 az hasar, öfke istemez) |
+| **Nekromant** (çağırıcı) | Mana | Ruh Emme (1,3 sn büyü; hasarın %40'ı kadar can emer) | İskelet Çağır (25 sn, hedefine saldırır) | Kemik Patlaması (çevreye) |
 
+- Muhafız vurduğu her düşmanın dikkatini (aggro) anında diğer oyunculardan alır ve her hasarı %10 az yer. Savaşçı'nın kılıç, balta ve plaka zırhlarını kuşanır; görevlerde Savaşçı ödüllerini alır.
+- Nekromant asa (Büyücü asaları dahil) ve cübbe kuşanır; görevlerde Büyücü'nün sınıf ödüllerini alır. İskelet sahibinin saldırdığı hedefe, yoksa sahibine saldıran yaratığa vurur; sahibi ölünce ya da bölge değiştirince kaybolur. Yaratıklar iskelete saldırmaz.
 - Büyü süresi olan skill'lerde büyü barı dolar; **yürürsen büyü iptal olur**.
 - Uzak saldırılar ağaç ve duvarların arkasına yapılamaz (görüş hattı).
 - Başka bir oyuncuya tıklamak onu dost hedef yapar (Şifa ve Kalkan için).
@@ -82,6 +86,8 @@ Ana Merkez'deki kırmızı portaldan (seviye 5+) girilen, herkesin herkese sald�
 | 4 / 5 | İksirler (sınıfa göre can / mana) |
 | Enter | Sohbet |
 | J | Görev günlüğü |
+| P | Pasif ağaç |
+| T | Şehir portalı (bulunduğun yerde açılır) |
 | L | PvP sıralaması |
 | /davet İsim, /p, /ayril | Grup |
 | I veya C | Karakter ve envanter penceresi |
@@ -187,6 +193,87 @@ Knight Online ve Metin2'den esinlenen 88 yeni item (Sv 3-22), çoğu `shared/src
 - **İksirler:** Büyük ve Süper Can/Mana İksiri. **Geri Dönüş Parşömeni:** savaşta değilken seni Ana Merkez'e ışınlar.
 - **Materyaller:** Kara Kurt Postu, Zehir Kesesi, Haydut Nişanı, Kemik Tozu, Ork Dişi, Ayı Pençesi, nadir **Ruh Taşı** (pahalı satılır, tekrarlanabilir görevde Yüksek parşömene dönüşür). **Mühür Parçası** görev eşyasıdır, satılamaz.
 - İpucu kutusunda item'ı hangi sınıfların kullanabileceği yazar.
+
+### Gece ve gündüz
+
+Sunucunun tek bir oyun saati var: **1 oyun günü 48 gerçek dakika** (1 oyun dakikası = 2 sn). Saat ekranın üst ortasında görünür; açık alanlar (şehir, vadi, Kara Orman, arena) akşam kararır.
+
+- **Gece 20:00-06:00:** açık alandaki tüm yaratıklar **%20 daha güçlü** (can, saldırı, savunma, boss yetenekleri) ve **%20 daha ödüllü** (XP, altın, drop şansı, item'ların daha çok statlı düşmesi). Güçlenmiş yaratıklar mor tonda görünür, hedef çerçevesinde "Gece gücü" yazar. Zindanlar etkilenmez.
+- **Gece yaratıkları** sadece gece doğar, **%50 daha güçlü ve ödüllüdür**, şafakta (savaşta değillerse) kaybolur. **Gece Özü** düşürürler (tüccara iyi satılır).
+
+| Bölge | Yaratık | Sv |
+| --- | --- | --- |
+| Başlangıç Vadisi, balçık alanları | Gölge Balçığı | 3 |
+| Başlangıç Vadisi, kurt alanı | Hayalet Kurt | 6 |
+| Kara Orman, mezarlık | Gece Hortlağı | 13 |
+| Kara Orman, kurt alanı | Ay Kurdu | 16 |
+
+- GM paneldeki **Dünya Saati** kartından saat ayarlanır, hazır düğmelerle sabah/akşam/gece yapılır ya da zaman durdurulur. Ayar veritabanına kaydedilir (`world_settings`), sunucu yeniden başlasa da korunur.
+- Saat ve oranlar `shared/src/daynight.ts`, sunucu saati `server/src/game/worldClock.ts` içindedir.
+
+### Item statları (Path of Exile tarzı)
+
+Her ekipman (silah, zırh, takı) **1 ile 5 arası rastgele stat** ile oluşur. Item'ın değeri stat sayısından anlaşılır: ismin rengi ve ipucundaki yıldızlar stat sayısını gösterir.
+
+| Stat sayısı | 1 | 2 | 3 | 4 | 5 |
+| --- | --- | --- | --- | --- | --- |
+| Renk | Sıradan (beyaz) | Kaliteli (yeşil) | Nadir (mavi) | Destansı (mor) | Efsanevi (turuncu) |
+| Düşme şansı | %40 | %28 | %18 | %10 | %4 |
+| Satış değeri | x1 | x1,5 | x2,5 | x4 | x7 |
+
+- Olası statlar (her biri bir item'da en fazla bir kez): Saldırı, Savunma, Can, % Saldırı, % Can, Kritik Vuruş Şansı, Saldırı Hızı, Can Çalma. Değer aralıkları item seviyesiyle büyür.
+- Gece yaratıkları daha çok statlı item düşürür. Dükkân malları ve başlangıç ekipmanı hep 1 statlıdır. 5 statlı bir item bulmak tüm sunucuya duyurulur.
+- Stat'lar +N basmayla değişmez; item pazarda el değiştirince statları da gider. Bu sistemden önce var olan ekipmanlar ilk yüklendiklerinde bir kez stat atar.
+- GM panelinde item verirken **Stat** alanıyla stat sayısı seçilebilir (0 = normal drop gibi rastgele).
+- Kurallar `shared/src/data/affixes.ts` içindedir; statlar `items.affixes` (JSONB) kolonunda saklanır.
+
+### Pasif ağaç (P)
+
+Sabit düğümleri yok: **20 büyük boş slot** var, seviye 2'den 21'e kadar her seviyede bir tanesi açılır. Her büyük slotun altında **5 küçük slot** vardır.
+
+Ekran bir çemberdir: 20 büyük yuva çemberin etrafında durur. Bir yuvaya tıklayınca çember döner, yuva en üste gelir ve sarı bir çizgiyle ortadaki küçük çembere bağlanır; 5 küçük yuva orada (dördü çemberin üstünde, biri ortasında) görünür. **1, 6, 11 ve 16. yuvalar Kadim Yuva'dır** (kırmızı halka ve dört elmas işareti; seçili yuva sadece büyür ve sarı halkayla belirtilir, Kadim Yuva seçiliyken küçük yuvalara inen çizgi kırmızıdır): Büyük Mücevher'in yanı sıra **Kadim Mücevher** de alır.
+
+- **Kadim Mücevher** (çok nadir; boss'larda %8): güçlü ve özel bir etki. +1 İskelet (aynı anda bir iskelet daha, en çok +2), skill bekleme süresi kısalması, öfke/mana bedeli azalması, alınan hasar azalması, kritik hasarı, öldürünce can yenileme, savaşta can yenilenmesi, XP bonusu, iskelet hasarı.
+
+- Büyük slota **Büyük Mücevher** takılır. Tek ve büyük bir etkisi vardır: bir skill'in etkisi %10-30 artar (ör. "Girdap etkisi %20 artar"), ya da büyük bir genel bonus (% Saldırı, % Can, Kritik, Saldırı Hızı, Can Çalma, iskelet hasarı, kritik hasarı, bekleme süresi, XP).
+- Büyük mücevher takılı olan slotun küçük slotlarına **Küçük Mücevher** takılır. Her biri bir özellik verir (ör. "+5 Güç").
+- Mücevherler her yaratıktan düşebilir (normal %3 küçük / %1 büyük, elitler ve boss'lar çok daha sık). Değerleri düşüren yaratığın seviyesiyle büyür. Gece oranları artar.
+- Mücevherler yuvarlaktır: büyükler altın çerçeveli iri taş, küçükler çerçevesiz ufak taş. Her mücevher bir **nadirlikle** düşer (Sıradan %40 … Efsanevi %4, gece daha iyi); rengi nadirliğini gösterir, nadir olan değer aralığının üst kısmından gelir.
+- Takmak için envanterden sürükle ya da sağ tıkla (ilk uygun boş slota gider). Çıkarmak için slotta sağ tık ya da envantere sürükle. Küçük mücevherleri dururken büyük mücevher çıkarılamaz, başka bir büyükle değiştirilebilir.
+
+| Özellik | Her puan |
+| --- | --- |
+| Güç | +1 Saldırı, +2 Can |
+| Çeviklik | +%0,2 Kritik, +%0,3 Saldırı Hızı |
+| Zeka | +4 Mana, +%0,5 tüm skill etkisi |
+| Dayanıklılık | +5 Can, +0,5 Savunma |
+
+Kurallar `shared/src/data/passives.ts` ve `shared/src/data/affixes.ts`, sunucu tarafı `server/src/game/passives.ts` içindedir. Takılı mücevherler `items` tablosunda `container = 'passive'` olarak saklanır.
+
+### Şehir portalı (T)
+
+**T**'ye basınca bulunduğun yerde (zindan dahil, şehir hariç) Ana Merkez'e bir portal açılır. Şehirde de seni tam bıraktığın yere geri götüren bir portal durur; ikisine **E** ya da tıklamayla girilir. Portal sen başka bir haritaya girene ya da oyundan çıkana kadar (20 sn tolerans) durur; yeni bir T eskisinin yerini alır. Portal açık olduğu sürece zindan kopyası kapanmaz, döndüğünde her şey bıraktığın gibidir. Portalları herkes görür, sadece sahibi kullanabilir. Kod: `server/src/game/townPortal.ts`.
+
+### Büyük zindanlar (Kara Orman)
+
+Kara Orman'dan girilen beş zindan. Goblin Mağarası'ndan çok daha uzundur: odalar zinciri boyunca 40'tan fazla yaratık ve kendi odalarında 3-4 boss. Sondaki çıkış portalı **bütün boss'lar ölünce** açılır. Haritalar `shared/src/dungeons.ts` içindeki üreteçle oluşturulur, zindanlar `shared/src/bigDungeons.ts`, yaratıkları `shared/src/data/dungeonMobs.ts` içindedir.
+
+| Zindan | Giriş (Kara Orman) | Sv | Boss'lar |
+| --- | --- | --- | --- |
+| Terk Edilmiş Maden | ana yolun batı ucu | 9+ | Ustabaşı Dorak, Kristal Golem, **Maden Kralı Gırtlak** |
+| Batık Tapınak | bataklığın kuzeydoğusu | 12+ | Taş Muhafız, Kurban Rahibesi Selvara, Gelgit Canavarı, **Batık Kral Nerion** |
+| Kemik Mahzeni | mezarlığın kuzeyi | 15+ | Mezar Bekçisi Orvak, Kemik Canavar, **Lich Azgor** |
+| Ork Kalesi | ork oyuğunun güneybatısı | 18+ | Kapı Bekçisi Grom, Kurt Binicisi Uruk, Şaman Zulgar, **Savaş Lordu Mog'Thar** |
+| Ejder İni | kuzey yolunun sonu | 21+ | Kül Muhafızı, Lav Devi, Ejder Rahibi Vael, **Kadim Ejder Azhdar** (Mühür Parçası düşürür) |
+
+### Arayüz eklentileri
+
+- Sağ üstte çevrimiçi sayısının yanında karakterin **X / Y** kare koordinatı yazar.
+- **Damage meter** (sağ altta, Details! tarzı): modlar Damage Done, Healing Done, Damage Taken; her satırda toplam, saniyelik değer (DPS / HPS / DTPS) ve pay birlikte görünür. Savaşlar Current Segment, geçmiş savaşlar ve Overall olarak ayrılır. İskeletin hasarı sahibine sayılır. ⟲ ile sıfırlanır; Esc → Ayarlar → "Hasar ölçeri göster" ile açılıp kapanır.
+
+### Yaratıklar ve seviye farkı
+
+Kendinden **5 ya da daha çok seviye yüksek** bir oyuncuya yaratıklar saldırmaz; yakından geçerse yavaşça biraz geri çekilir (yuvasından fazla uzaklaşmadan). Saldırırsan karşılık verir. Boss'lar geri çekilmez.
 
 ### Ana Merkez (şehir)
 
@@ -323,6 +410,8 @@ client/
 | 7 | Grup sistemi: davet, grup çerçeveleri, ortak XP/ganimet, tehdit rolleri, grup zindanları | ✅ |
 | 7.5 | Ana Merkez (şehir, dükkânlar, çeşme), oyuncu pazarı, ışınlanma kapıları, kayıtlı bölge | ✅ |
 | 7.6 | Hikaye, görev zincirleri, Kara Orman (Sv 10-20) ve saha boss'u, takı slotları, 88 yeni item | ✅ |
+| 7.7 | Gece/gündüz döngüsü, gece yaratıkları, PoE tarzı rastgele item statları | ✅ |
+| 7.8 | Nekromant sınıfı, mücevherli pasif ağaç, Güç/Çeviklik/Zeka/Dayanıklılık, seviye farkında yaratıkların çekinmesi | ✅ |
 | 8 | Optimizasyon, anti-cheat, yedekleme, alfa testi | ⏳ |
 
 Faz 2 bitince oyun oynanabilir hale gelir. Sonraki fazlar bunun üzerine eklenir.

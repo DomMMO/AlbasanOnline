@@ -1,5 +1,6 @@
 import {
   isUpgradeable,
+  MAX_AFFIXES,
   ITEMS,
   MAX_ENHANCE,
   MAX_LEVEL,
@@ -109,7 +110,8 @@ export async function getCharacter(characterId: number): Promise<CharacterSnapsh
   };
 }
 
-export async function giveItem(characterId: number, itemId: string, qty: number, enhance: number) {
+/** `affixCount` 1-5 gives equipment exactly that many modifiers; 0 rolls them as a drop would. */
+export async function giveItem(characterId: number, itemId: string, qty: number, enhance: number, affixCount = 0) {
   const def = ITEMS[itemId];
   if (!def) throw new GmError("Böyle bir item yok");
   const amount = Math.floor(qty);
@@ -117,10 +119,13 @@ export async function giveItem(characterId: number, itemId: string, qty: number,
   const plus = Math.floor(enhance) || 0;
   if (plus < 0 || plus > MAX_ENHANCE) throw new GmError(`+N 0-${MAX_ENHANCE} arası olmalı`);
   if (plus > 0 && !isUpgradeable(def)) throw new GmError("Bu item yükseltilemez, +N verilemez");
+  const count = Math.floor(affixCount) || 0;
+  if (count < 0 || count > MAX_AFFIXES) throw new GmError(`Stat sayısı 0-${MAX_AFFIXES} arası olmalı (0 = rastgele)`);
+  if (count > 0 && !def.slot) throw new GmError("Stat sayısı sadece ekipmanda seçilebilir");
 
   const left = await withInventory(
     characterId,
-    (inv) => addItem(inv, itemId, amount, plus),
+    (inv) => addItem(inv, itemId, amount, plus, count ? { count } : {}),
     (left) => `GM sana ${def.name}${plus ? ` +${plus}` : ""}${amount - left > 1 ? ` x${amount - left}` : ""} verdi`,
   );
   return { given: amount - left, leftover: left };
@@ -137,6 +142,19 @@ export async function removeItem(characterId: number, uid: string) {
     for (const [slot, stack] of Object.entries(inv.equipment)) {
       if (stack?.uid === uid) {
         delete inv.equipment[slot as EquipSlot];
+        return stack;
+      }
+    }
+    for (const socket of inv.passives) {
+      if (socket.major?.uid === uid) {
+        const stack = socket.major;
+        socket.major = null;
+        return stack;
+      }
+      const minor = socket.minors.findIndex((stack) => stack?.uid === uid);
+      if (minor !== -1) {
+        const stack = socket.minors[minor]!;
+        socket.minors[minor] = null;
         return stack;
       }
     }

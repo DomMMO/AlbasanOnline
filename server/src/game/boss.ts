@@ -126,6 +126,7 @@ function startCast(game: Game, mobId: string, mob: Mob, ability: BossAbility, ta
 
 function resolveCast(game: Game, mobId: string, mob: Mob, cast: Cast) {
   const { ability } = cast;
+  const power = game.mobRuntime.get(mobId)?.power ?? 1;
   let hits: (player: { x: number; y: number }) => boolean;
 
   if (ability.type === "charge") {
@@ -137,7 +138,7 @@ function resolveCast(game: Game, mobId: string, mob: Mob, cast: Cast) {
       uy: (cast.toY - cast.y) / len,
       remaining: len,
       width: ability.width,
-      damage: ability.damage,
+      damage: ability.damage * power,
       hit: new Set(),
     };
     game.io.broadcast(Msg.Attack, { sourceId: mobId, sourceKind: "mob", skill: "charge" } satisfies AttackEvent);
@@ -156,7 +157,7 @@ function resolveCast(game: Game, mobId: string, mob: Mob, cast: Cast) {
     if (player.dead || !hits(player)) return;
     const playerRuntime = game.playerRuntime.get(sessionId);
     if (!playerRuntime) return;
-    const hit = rollDamage(ability.damage, playerRuntime.stats.defense, game.random);
+    const hit = rollDamage(ability.damage * power, playerRuntime.stats.defense, game.random);
     hitPlayer(game, mobId, sessionId, player, hit.amount, hit.crit);
   });
 }
@@ -233,6 +234,9 @@ export function resetBoss(mob: Mob, runtime: MobRuntime) {
 export function bossDefeated(game: Game, runtime: MobRuntime) {
   // Field bosses come back after a while; only dungeon bosses open the way on.
   if (!game.zone.instanced) return announce(game, `${runtime.def.name} yenildi!`);
+  // Big dungeons have several bosses: the way out opens with the last one.
+  const left = [...game.mobRuntime.values()].filter((r) => r.boss).length;
+  if (left > 0) return announce(game, `${runtime.def.name} yenildi! (${left} boss kaldı)`);
   game.state.cleared = true;
   announce(game, `${runtime.def.name} yenildi! Yeni portal açıldı.`);
 }

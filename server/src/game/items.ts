@@ -13,6 +13,10 @@ import {
   NPCS,
   POTION_COOLDOWN_MS,
   classOf,
+  itemRarity,
+  itemSellPrice,
+  JEWEL_DROPS,
+  MAX_AFFIXES,
   RARITY_COLORS,
   statsWithEquipment,
   type EquipSlot,
@@ -24,8 +28,10 @@ import {
 } from "../../../shared/src";
 import { Loot } from "../rooms/schema/WorldState";
 import { broadcastCombat } from "./combat";
+import { broadcastSystem } from "./chat";
 import type { Game } from "./Game";
-import { addItem, equippedItems, hasSpaceFor, indexOfItem, newStack, removeAt, toView, type ItemStack } from "./inventory";
+import { addItem, equippedItems, hasSpaceFor, indexOfItem, newStack, removeAt, socketedJewels, toView, type ItemStack } from "./inventory";
+import { autoSocket, socketJewel, unsocketJewel } from "./passives";
 import { partyIdOf } from "./party";
 
 // Everything players do with items: equip, use, move, loot, buy, sell.
@@ -54,9 +60,10 @@ export function refreshStats(game: Game, sessionId: string) {
   const player = game.state.players.get(sessionId);
   const runtime = game.playerRuntime.get(sessionId);
   if (!player || !runtime) return;
-  runtime.stats = statsWithEquipment(player.cls, player.level, equippedItems(runtime.inventory));
+  runtime.stats = statsWithEquipment(player.cls, player.level, [...equippedItems(runtime.inventory), ...socketedJewels(runtime.inventory)]);
   player.maxHp = runtime.stats.maxHp;
-  player.maxResource = classOf(player.cls).maxResource(player.level);
+  const cls = classOf(player.cls);
+  player.maxResource = cls.maxResource(player.level) + (cls.resource === "mana" ? runtime.stats.manaBonus : 0);
   player.resource = Math.min(player.resource, player.maxResource);
   const { equipment } = runtime.inventory;
   player.weapon = equipment.weapon?.defId ?? "";
@@ -141,6 +148,16 @@ export function moveItem(game: Game, sessionId: string, from: SlotRef, to: SlotR
     return equipFromInventory(game, sessionId, from.index);
   }
 
+  if (from.area === "inv" && to.area === "passive") {
+    if (!validIndex(from.index)) return;
+    return socketJewel(game, sessionId, from.index, to.socket, to.minor);
+  }
+
+  if (from.area === "passive" && to.area === "inv") {
+    if (!validIndex(to.index)) return;
+    return unsocketJewel(game, sessionId, from.socket, from.minor, to.index);
+  }
+
   if (from.area === "equip" && to.area === "inv") {
     if (!validIndex(to.index)) return;
     const target = inv.slots[to.index];
@@ -166,6 +183,7 @@ export function useItem(game: Game, sessionId: string, index: number | undefined
   if (!stack || !def) return;
 
   if (def.slot) return equipFromInventory(game, sessionId, index);
+  if (def.jewel) return autoSocket(game, sessionId, index);
   if (def.recall) return recall(game, sessionId, index);
   if (!def.heal && !def.mana) return;
 
@@ -203,15 +221,21 @@ function recall(game: Game, sessionId: string, index: number) {
 
 // ---- Loot ----------------------------------------------------------------------
 
-export function dropLoot(game: Game, x: number, y: number, mobDef: MobDef, ownerId: string | null) {
+/** `power` > 1 (night): more gold, likelier drops and better item modifiers. */
+export function dropLoot(game: Game, x: number, y: number, mobDef: MobDef, ownerId: string | null, power = 1) {
   const { gold: [min, max], drops } = mobDef.loot;
-  const contents: LootContents = { gold: min + Math.floor(game.random() * (max - min + 1)), items: [] };
+  const contents: LootContents = { gold: Math.round((min + Math.floor(game.random() * (max - min + 1))) * power), items: [] };
   for (const drop of drops) {
-    if (game.random() >= drop.chance) continue;
+    if (game.random() >= drop.chance * power) continue;
     const lo = drop.min ?? 1;
     const hi = drop.max ?? lo;
-    contents.items.push(newStack(drop.item, lo + Math.floor(game.random() * (hi - lo + 1)), drop.enhance ?? 0));
+    contents.items.push(newStack(drop.item, lo + Math.floor(game.random() * (hi - lo + 1)), drop.enhance ?? 0, { luck: power }));
   }
+  // Passive tree jewels can drop from anything; their effects scale with the mob's level.
+  const jewelOdds = mobDef.boss ? JEWEL_DROPS.boss : (mobDef.scale ?? 1) > 1 ? JEWEL_DROPS.elite : JEWEL_DROPS.normal;
+  if (game.random() < jewelOdds.minor * power) contents.items.push(newStack("minor_jewel", 1, 0, { level: mobDef.level, luck: power }));
+  if (game.random() < jewelOdds.major * power) contents.items.push(newStack("major_jewel", 1, 0, { level: mobDef.level, luck: power }));
+  if (game.random() < jewelOdds.greater * power) contents.items.push(newStack("greater_jewel", 1, 0, { level: mobDef.level, luck: power }));
 
   const lootId = game.newId("l");
   const loot = new Loot();
@@ -250,10 +274,11 @@ export function pickupLoot(game: Game, sessionId: string, lootId: string) {
   }
   const leftovers: ItemStack[] = [];
   for (const stack of contents.items) {
-    const left = addItem(ctx.inv, stack.defId, stack.qty, stack.enhance);
+    const left = addItem(ctx.inv, stack.defId, stack.qty, stack.enhance, stack.affixes);
     const taken = stack.qty - left;
     const def = ITEMS[stack.defId];
-    if (taken > 0) notice(game, sessionId, `${def.name}${taken > 1 ? ` x${taken}` : ""}`, RARITY_COLORS[def.rarity]);
+    if (taken > 0) notice(game, sessionId, `${def.name}${taken > 1 ? ` x${taken}` : ""}`, RARITY_COLORS[itemRarity(def, stack.affixes)]);
+    if (taken > 0 && stack.affixes.length === MAX_AFFIXES) broadcastSystem(`${ctx.player.name}, ${MAX_AFFIXES} statlı ${def.name} buldu!`);
     if (left > 0) leftovers.push({ ...stack, qty: left });
   }
   contents.items = leftovers;
@@ -285,7 +310,8 @@ export function buy(game: Game, sessionId: string, npcId: string, itemId: string
   if (ctx.inv.gold < cost) return notice(game, sessionId, "Yeterli altının yok");
   if (!hasSpaceFor(ctx.inv, itemId, amount)) return notice(game, sessionId, "Envanter dolu");
   ctx.inv.gold -= cost;
-  addItem(ctx.inv, itemId, amount);
+  // Merchant gear is plain: always a single modifier.
+  addItem(ctx.inv, itemId, amount, 0, { count: 1 });
   notice(game, sessionId, `${def.name}${amount > 1 ? ` x${amount}` : ""} alındı (-${cost} altın)`, GOLD_COLOR);
   changed(game, sessionId);
 }
@@ -297,7 +323,7 @@ export function sell(game: Game, sessionId: string, npcId: string, index: number
   if (!stack) return;
   const def = ITEMS[stack.defId];
   if (def.questItem) return notice(game, sessionId, "Görev eşyası satılamaz");
-  const value = def.sellPrice * stack.qty;
+  const value = itemSellPrice(def, stack.affixes) * stack.qty;
   ctx.inv.slots[index] = null;
   ctx.inv.gold += value;
   notice(game, sessionId, `${def.name}${stack.qty > 1 ? ` x${stack.qty}` : ""} satıldı (+${value} altın)`, GOLD_COLOR);

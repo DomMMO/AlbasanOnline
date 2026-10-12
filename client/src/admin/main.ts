@@ -1,16 +1,20 @@
 import {
   EQUIP_SLOT_NAMES,
   EQUIP_SLOTS,
+  formatClock,
   glowTier,
+  hasAffixes,
   isUpgradeable,
+  itemRarity,
   ITEMS,
+  MAX_AFFIXES,
   MAX_ENHANCE,
   RARITY_COLORS,
   type EquipSlot,
   type ItemDef,
   type ItemView,
 } from "../../../shared/src";
-import { iconUrl } from "../gfx/icons";
+import { iconUrl, itemIconUrl } from "../gfx/icons";
 import { getToken } from "../net/api";
 import { hideTooltip, showItemTooltip } from "../ui/tooltip";
 
@@ -100,8 +104,8 @@ function itemCell(item: ItemView | null | undefined, label?: string): HTMLElemen
   cell.classList.add("filled");
   const tier = glowTier(item.enhance);
   if (tier) cell.classList.add(`glow-${tier}`);
-  cell.style.setProperty("--rarity", `var(--rarity-${def.rarity})`);
-  cell.innerHTML = `<img src="${iconUrl(def.icon.shape, def.icon.color)}" alt="" />`;
+  cell.style.setProperty("--rarity", `var(--rarity-${itemRarity(def, item.affixes)})`);
+  cell.innerHTML = `<img src="${itemIconUrl(def, item.affixes)}" alt="" />`;
   if (item.qty > 1) cell.insertAdjacentHTML("beforeend", `<span class="qty">${item.qty}</span>`);
   if (item.enhance) cell.insertAdjacentHTML("beforeend", `<span class="plus">+${item.enhance}</span>`);
 
@@ -116,7 +120,7 @@ function itemCell(item: ItemView | null | undefined, label?: string): HTMLElemen
   cell.append(remove);
 
   cell.addEventListener("mouseenter", () =>
-    showItemTooltip(def, { qty: item.qty, enhance: item.enhance, playerLevel: selected?.level ?? 1 }, cell),
+    showItemTooltip(def, { qty: item.qty, enhance: item.enhance, affixes: item.affixes, playerLevel: selected?.level ?? 1 }, cell),
   );
   cell.addEventListener("mouseleave", hideTooltip);
   return cell;
@@ -137,7 +141,8 @@ function render(detail: CharacterDetail) {
   $("gm-inventory").replaceChildren(...detail.slots.map((item) => itemCell(item)));
 
   const actionText: Record<string, (d: Record<string, unknown>) => string> = {
-    give: (d) => `${ITEMS[String(d.itemId)]?.name ?? d.itemId}${Number(d.enhance) ? ` +${d.enhance}` : ""} x${d.qty} verdi`,
+    give: (d) =>
+      `${ITEMS[String(d.itemId)]?.name ?? d.itemId}${Number(d.enhance) ? ` +${d.enhance}` : ""}${Number(d.affixes) ? ` (${d.affixes} statlı)` : ""} x${d.qty} verdi`,
     remove: () => "item sildi",
     gold: (d) => `${Number(d.amount) > 0 ? "+" : ""}${d.amount} altın`,
     level: (d) => `seviye → ${d.level}`,
@@ -185,6 +190,7 @@ const CATEGORIES: [string, (def: ItemDef) => boolean][] = [
   ["Zırhlar", (d) => !!d.slot && d.slot !== "weapon"],
   ["Tüketilebilir", (d) => !!d.heal],
   ["Yükseltme", (d) => d.id.startsWith("upgrade_scroll") || d.id === "protection_charm"],
+  ["Mücevher", (d) => !!d.jewel],
 ];
 
 function category(def: ItemDef) {
@@ -234,6 +240,10 @@ function pickItem(def: ItemDef) {
   enhance.disabled = !isUpgradeable(def);
   enhance.max = String(MAX_ENHANCE);
   if (enhance.disabled) enhance.value = "0";
+  const affixes = $<HTMLInputElement>("give-affixes");
+  affixes.disabled = !def.slot;
+  affixes.max = String(MAX_AFFIXES);
+  if (affixes.disabled) affixes.value = "0";
   $<HTMLButtonElement>("give-button").disabled = false;
   renderCatalog();
 }
@@ -244,7 +254,63 @@ $("give-form").addEventListener("submit", (event) => {
   if (!selectedItem) return;
   const qty = Number($<HTMLInputElement>("give-qty").value);
   const enhance = Number($<HTMLInputElement>("give-enhance").value);
-  act("give", { itemId: selectedItem.id, qty, enhance }, `${selectedItem.name}${enhance ? ` +${enhance}` : ""} x${qty} verildi`);
+  const affixes = Number($<HTMLInputElement>("give-affixes").value);
+  act("give", { itemId: selectedItem.id, qty, enhance, affixes }, `${selectedItem.name}${enhance ? ` +${enhance}` : ""} x${qty} verildi`);
+});
+
+// ---- World clock ----------------------------------------------------------------
+
+interface ClockInfo {
+  minute: number;
+  paused: boolean;
+  night: boolean;
+  msPerMinute: number;
+}
+
+let clock: ClockInfo | null = null;
+let clockFetchedAt = 0;
+
+function renderClock() {
+  if (!clock) return;
+  // Between polls, run the clock locally so the display keeps ticking.
+  const elapsed = clock.paused ? 0 : (Date.now() - clockFetchedAt) / clock.msPerMinute;
+  const minute = (clock.minute + elapsed) % (24 * 60);
+  $("clock-now").textContent = `${clock.night ? "☾" : "☀"} ${formatClock(minute)}`;
+  const state = $("clock-state");
+  state.textContent = clock.paused ? "Durduruldu" : clock.night ? "Gece" : "Gündüz";
+  state.classList.toggle("on", !clock.paused);
+  $("clock-pause").textContent = clock.paused ? "▶ Devam ettir" : "⏸ Zamanı durdur";
+}
+
+function setClock(info: ClockInfo) {
+  clock = info;
+  clockFetchedAt = Date.now();
+  renderClock();
+}
+
+async function changeClock(body: { minute?: number; paused?: boolean }, success: string) {
+  try {
+    setClock(await api<ClockInfo>("POST", "/admin/clock", body));
+    toast(success);
+  } catch (error) {
+    toast((error as Error).message, true);
+  }
+}
+
+$("clock-form").addEventListener("submit", (event) => {
+  event.preventDefault();
+  const [h, m] = $<HTMLInputElement>("clock-input").value.split(":").map(Number);
+  if (!Number.isInteger(h) || !Number.isInteger(m)) return;
+  changeClock({ minute: h * 60 + m }, `Saat ${formatClock(h * 60 + m)} yapıldı`);
+});
+document.querySelectorAll<HTMLButtonElement>(".clock-buttons [data-minute]").forEach((button) =>
+  button.addEventListener("click", () => {
+    const minute = Number(button.dataset.minute);
+    changeClock({ minute }, `Saat ${formatClock(minute)} yapıldı`);
+  }),
+);
+$("clock-pause").addEventListener("click", () => {
+  if (clock) changeClock({ paused: !clock.paused }, clock.paused ? "Zaman akıyor" : "Zaman durduruldu");
 });
 
 // ---- Start ----------------------------------------------------------------------
@@ -263,6 +329,11 @@ async function start() {
     $("admin-main").hidden = false;
     renderCatalog();
     await search();
+    setClock(await api<ClockInfo>("GET", "/admin/clock"));
+    setInterval(renderClock, 1000);
+    setInterval(() => {
+      if (!document.hidden) api<ClockInfo>("GET", "/admin/clock").then(setClock).catch(() => {});
+    }, 15000);
     // Keep an online character's view fresh while they play.
     setInterval(() => {
       if (selected && !document.hidden) {

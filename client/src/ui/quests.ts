@@ -1,5 +1,6 @@
 import {
   classOf,
+  classQuestItems,
   ITEMS,
   NPCS,
   QUESTS,
@@ -206,7 +207,7 @@ function objectiveLines(quest: QuestDef, entry: QuestProgress | undefined): HTML
 }
 
 function rewardItems(quest: QuestDef): QuestRewardItem[] {
-  return [...(quest.reward.items ?? []), ...(quest.reward.classItems?.[classOf(actions.playerClass()).id] ?? [])];
+  return [...(quest.reward.items ?? []), ...classQuestItems(quest, actions.playerClass())];
 }
 
 function rewardBlock(quest: QuestDef): HTMLElement {

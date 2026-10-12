@@ -9,9 +9,11 @@ import { waitForDatabase } from "./db/pool";
 import { createAdminRouter } from "./http/admin";
 import { createApiRouter } from "./http/api";
 import { ZoneRoom } from "./rooms/ZoneRoom";
+import { loadWorldClock } from "./game/worldClock";
 
 await waitForDatabase();
 await runMigrations();
+await loadWorldClock();
 
 // One HTTP server: REST API under /api, Colyseus matchmaking + WebSockets on the same port.
 const app = express();
