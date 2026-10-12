@@ -31,6 +31,7 @@ import { closeStall, type StallState } from "./market";
 import { questsFromStored, sendQuestLog } from "./quests";
 import { nightChanged, spawnInitialMobs, updateMobs } from "./mobs";
 import { dismissMinions, updateMinions, type MinionRuntime } from "./minions";
+import { loseDuel, updateDuels, type DuelInvite, type DuelState } from "./duel";
 import { worldMinute } from "./worldClock";
 import type { SpawnZone } from "../../../shared/src";
 
@@ -86,6 +87,10 @@ export interface PlayerRuntime {
   browsing: string | null;
   /** Quest log: active quests with kill counts, and completed ones. */
   quests: Map<string, QuestProgress>;
+  /** The duel we are in (counting down or fighting). */
+  duel: DuelState | null;
+  /** A duel challenge waiting for our answer. */
+  duelInvite: DuelInvite | null;
 }
 
 export type MobMode = "idle" | "chase" | "return";
@@ -163,6 +168,7 @@ export class Game {
     updateMobs(this);
     updateMinions(this);
     updatePlayerCombat(this);
+    updateDuels(this);
   }
 
   /**
@@ -218,6 +224,8 @@ export class Game {
       stall: null,
       browsing: null,
       quests: questsFromStored(character.quests),
+      duel: null,
+      duelInvite: null,
     });
 
     refreshStats(this, sessionId);
@@ -260,6 +268,7 @@ export class Game {
   }
 
   removePlayer(sessionId: string) {
+    loseDuel(this, sessionId, "left");
     closeStall(this, sessionId);
     dismissMinions(this, sessionId);
     forgetPlayer(this, sessionId);

@@ -55,6 +55,14 @@ En fazla 5 kişi. Bir oyuncuya tıklayıp hedef çerçevesindeki **Gruba davet e
 
 Gruplar sunucu belleğinde tutulur: sunucu yeniden başlarsa dağılır.
 
+### Düello
+
+Yanındaki bir oyuncuya tıklayıp hedef çerçevesindeki **Düello**'ya bas ya da sohbete `/duello İsim` yaz (en fazla 6 kare uzaktaki oyuncuya). Karşı taraf kabul edince 3 saniyelik geri sayımdan sonra ikiniz birbirinize düşman olursunuz; başkaları etkilenmez.
+
+- Kimse ölmez: kaybedenin canı 1'de kalır ve kazanan herkese duyurulur. PvP puanı, ganimet ya da XP değişmez.
+- 2 dakikada biten olmazsa berabere; 25 kareden fazla uzaklaşırsanız düello iptal olur. Bölgeden çıkan ya da oyundan ayrılan kaybeder.
+- Kan Arenası'nda düello yoktur (orada zaten herkes düşman). Grup arkadaşınla da düello yapabilirsin.
+
 ### Kan Arenası (PvP)
 
 Ana Merkez'deki kırmızı portaldan (seviye 5+) girilen, herkesin herkese saldırabildiği ortak arena.
@@ -90,6 +98,7 @@ Ana Merkez'deki kırmızı portaldan (seviye 5+) girilen, herkesin herkese sald�
 | T | Şehir portalı (bulunduğun yerde açılır) |
 | L | PvP sıralaması |
 | /davet İsim, /p, /ayril | Grup |
+| /duello İsim | Yanındaki oyuncuyu düelloya davet et |
 | I veya C | Karakter ve envanter penceresi |
 | E | Yakındaki sandığı aç / NPC ile konuş / portal / tezgâha bak |
 | Sağ tık (envanterde) | Kuşan, kullan; dükkân açıkken sat |

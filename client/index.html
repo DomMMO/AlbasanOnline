@@ -48,7 +48,10 @@
       <div id="target-frame" class="frame" hidden>
         <div class="frame-title"><span id="target-name"></span><span id="target-level" class="lvl"></span></div>
         <div class="bar hp"><div id="target-hp-fill" class="fill"></div><span id="target-hp-text"></span></div>
-        <button id="target-invite" type="button" tabindex="-1" hidden>Gruba davet et</button>
+        <div class="target-actions">
+          <button id="target-invite" type="button" tabindex="-1" hidden>Gruba davet et</button>
+          <button id="target-duel" type="button" tabindex="-1" hidden>Düello</button>
+        </div>
       </div>
 
       <div id="party-frames" hidden></div>
@@ -58,6 +61,14 @@
         <div class="row">
           <button id="party-accept" type="button" tabindex="-1">Kabul</button>
           <button id="party-decline" type="button" tabindex="-1">Reddet</button>
+        </div>
+      </div>
+
+      <div id="duel-invite" class="window" hidden>
+        <p id="duel-invite-text"></p>
+        <div class="row">
+          <button id="duel-accept" type="button" tabindex="-1">Kabul</button>
+          <button id="duel-decline" type="button" tabindex="-1">Reddet</button>
         </div>
       </div>
 
@@ -251,6 +262,7 @@
           <tr><td>/p mesaj</td><td>Grup sohbeti</td></tr>
           <tr><td>/davet İsim</td><td>Gruba davet et</td></tr>
           <tr><td>/ayril · /at İsim</td><td>Gruptan ayrıl · at (lider)</td></tr>
+          <tr><td>/duello İsim</td><td>Yanındaki oyuncuyu düelloya davet et</td></tr>
         </table>
         <button type="button" class="secondary menu-back">Geri</button>
       </div>

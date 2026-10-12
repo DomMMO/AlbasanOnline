@@ -26,6 +26,7 @@ export const Msg = {
   /** Sent once the client's handlers are ready; the server replies with the inventory snapshot. */
   RequestInventory: "requestInventory",
   PartyRespond: "partyRespond",
+  DuelRespond: "duelRespond",
   StallOpen: "stallOpen",
   StallClose: "stallClose",
   StallBrowse: "stallBrowse",
@@ -55,6 +56,9 @@ export const Msg = {
   PvpKill: "pvpKill",
   PartyUpdate: "partyUpdate",
   PartyInvite: "partyInvite",
+  DuelInvite: "duelInvite",
+  /** Your duel started or ended (only the two duellists get it). */
+  DuelState: "duelState",
   /** A stall's contents (reply to StallBrowse, and pushed to browsers when it changes). */
   StallContents: "stallContents",
   /** The stall you were browsing closed. */
@@ -217,6 +221,19 @@ export interface PartyInviteEvent {
 
 export interface PartyRespondMessage {
   accept: boolean;
+}
+
+export interface DuelInviteEvent {
+  from: string;
+}
+
+export interface DuelRespondMessage {
+  accept: boolean;
+}
+
+export interface DuelStateEvent {
+  /** Session id of the player you are fighting, or null when the duel is over. */
+  opponent: string | null;
 }
 
 /** A player killed another player in a PvP zone. */

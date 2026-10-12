@@ -34,6 +34,8 @@ import {
   type PvpKillEvent,
   type PartyInviteEvent,
   type PartyUpdateEvent,
+  type DuelInviteEvent,
+  type DuelStateEvent,
   type SkillDef,
   type BossCastEvent,
   type PortalDef,
@@ -67,6 +69,7 @@ import { setDollLook, updateDoll } from "../ui/doll";
 import { addChatMessage, initChat } from "../ui/chat";
 import { addKillFeed, initLeaderboard, setPvpStats, toggleLeaderboard } from "../ui/pvp";
 import { initParty, renderParty, showInvite } from "../ui/party";
+import { initDuel, showDuelInvite } from "../ui/duel";
 import { isMenuOpen, menuBack, openMenu } from "../ui/menu";
 import { closeTopWindow, registerWindow } from "../ui/windows";
 import { getSettings, onSettingsChange } from "../settings";
@@ -192,6 +195,8 @@ export class WorldScene extends Phaser.Scene {
   private hotbar: hud.HotbarEntry[] = [];
   /** Our party: id (for loot ownership) and members' session ids in this room. */
   private party: { id: string | null; sessions: Set<string> } = { id: null, sessions: new Set() };
+  /** Session id of the player we are duelling (fight started), or null. */
+  private duelOpponent: string | null = null;
   /** Re-checks a loot chest's visibility (ownership can change with the party). */
   private lootSyncs = new Map<string, () => void>();
   /** Pulsing rings under players who are casting, by session id. */
@@ -353,6 +358,7 @@ export class WorldScene extends Phaser.Scene {
       respond: (accept) => this.room.send(Msg.PartyRespond, { accept }),
       leave: () => this.room.send(Msg.Chat, { text: "/ayril" }),
     });
+    initDuel((accept) => this.room.send(Msg.DuelRespond, { accept }));
     hud.onRespawnClicked(() => this.room.send(Msg.Respawn));
 
     const playerLevel = () => this.local?.state.level ?? 1;
@@ -606,6 +612,11 @@ export class WorldScene extends Phaser.Scene {
     this.room.onMessage(Msg.PvpKill, (event: PvpKillEvent) => addKillFeed(event, this.local?.state.name ?? ""));
     this.room.onMessage(Msg.PartyInvite, (event: PartyInviteEvent) => showInvite(event.from));
     this.room.onMessage(Msg.PartyUpdate, (event: PartyUpdateEvent) => this.onPartyUpdate(event));
+    this.room.onMessage(Msg.DuelInvite, (event: DuelInviteEvent) => showDuelInvite(event.from));
+    this.room.onMessage(Msg.DuelState, (event: DuelStateEvent) => {
+      this.duelOpponent = event.opponent;
+      this.refreshHostility();
+    });
     // Anything sent while the scene was still loading was dropped; ask for the inventory again.
     this.room.send(Msg.RequestInventory);
     this.room.onMessage(Msg.SkillUsed, (event: SkillUsedEvent) =>
@@ -648,10 +659,15 @@ export class WorldScene extends Phaser.Scene {
     if (notifyServer) this.room.send(Msg.SetTarget, { targetId, attack } satisfies SetTargetMessage);
     if (previous && previous !== targetId) this.refreshMobHealth(previous);
     if (targetId) this.refreshMobHealth(targetId);
+    this.drawTargetRing();
+    this.refreshTargetFrame();
+  }
+
+  private drawTargetRing() {
+    const targetId = this.targetId;
     const isPlayer = targetId !== null && this.players.has(targetId);
     const ringColor = isPlayer ? (this.isEnemyPlayer(targetId!) ? ENEMY_PLAYER_COLOR : FRIENDLY_COLOR) : HOSTILE_COLOR;
     this.targetRing.clear().lineStyle(1, ringColor, 1).strokeEllipse(0, 0, 18, 7);
-    this.refreshTargetFrame();
   }
 
   /** Tab: nearest enemy first (mobs, and players in PvP zones), then cycle outward. */
@@ -683,9 +699,17 @@ export class WorldScene extends Phaser.Scene {
     return loot.owner === "" || loot.owner === this.room.sessionId || (this.party.id !== null && loot.owner === `party:${this.party.id}`);
   }
 
-  /** In PvP zones, everyone outside our party is hostile. */
+  /** In PvP zones, everyone outside our party is hostile; elsewhere only our duel opponent. */
   private isEnemyPlayer(sessionId: string) {
+    if (sessionId === this.duelOpponent) return true;
     return !!this.zone.pvp && sessionId !== this.room.sessionId && !this.party.sessions.has(sessionId);
+  }
+
+  /** Who is hostile changed (party, duel): name colours, target ring and frame. */
+  private refreshHostility() {
+    for (const [sessionId, remote] of this.players) remote.view.setNameColor(this.isEnemyPlayer(sessionId) ? "#ff6b6b" : "#ffffff");
+    this.drawTargetRing();
+    this.refreshTargetFrame();
   }
 
   private onPartyUpdate(event: PartyUpdateEvent) {
@@ -695,9 +719,8 @@ export class WorldScene extends Phaser.Scene {
     renderParty(event, this.local?.state.name ?? "", this.zone.id);
     if (!changed) return;
     // Party changes who is hostile (PvP), which loot we can open and the target frame.
-    for (const [sessionId, remote] of this.players) remote.view.setNameColor(this.isEnemyPlayer(sessionId) ? "#ff6b6b" : "#ffffff");
     for (const sync of this.lootSyncs.values()) sync();
-    this.refreshTargetFrame();
+    this.refreshHostility();
   }
 
   /** Talking to an NPC: quest givers open the conversation first, others their shop or forge. */
@@ -960,6 +983,8 @@ export class WorldScene extends Phaser.Scene {
     if (friend) {
       const { name, level, hp, maxHp, cls } = friend.state;
       const canInvite = !this.party.sessions.has(this.targetId!);
+      // Arena fights need no duel; one duel at a time.
+      const canDuel = !this.zone.pvp && this.duelOpponent === null;
       hud.setTargetFrame({
         name,
         level,
@@ -968,6 +993,7 @@ export class WorldScene extends Phaser.Scene {
         color: this.isEnemyPlayer(this.targetId!) ? "#ff6b6b" : "#4cd964",
         subtitle: classOf(cls).name,
         onInvite: canInvite ? () => this.room.send(Msg.Chat, { text: `/davet ${name}` }) : undefined,
+        onDuel: canDuel ? () => this.room.send(Msg.Chat, { text: `/duello ${name}` }) : undefined,
       });
       return;
     }

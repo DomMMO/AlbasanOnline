@@ -26,6 +26,10 @@ const targetInvite = $<HTMLButtonElement>("target-invite");
 let inviteCallback: (() => void) | null = null;
 targetInvite.addEventListener("mousedown", (e) => e.preventDefault());
 targetInvite.addEventListener("click", () => inviteCallback?.());
+const targetDuel = $<HTMLButtonElement>("target-duel");
+let duelCallback: (() => void) | null = null;
+targetDuel.addEventListener("mousedown", (e) => e.preventDefault());
+targetDuel.addEventListener("click", () => duelCallback?.());
 
 const hotbar = $("hotbar");
 const xpFill = $("xp-fill");
@@ -41,7 +45,7 @@ export function showHud() {
 /** Leaving the game (character switch / logout): hide the HUD and every in-game window. */
 export function resetGameUi() {
   hud.hidden = true;
-  for (const id of ["inventory-window", "shop-window", "upgrade-window", "leaderboard", "party-frames", "party-invite", "boss-bar", "cast-bar", "target-frame", "pvp-stats", "death", "loading", "tooltip", "stall-button", "stall-setup", "stall-browse", "npc-dialog", "quest-log", "quest-tracker", "passive-window"]) {
+  for (const id of ["inventory-window", "shop-window", "upgrade-window", "leaderboard", "party-frames", "party-invite", "duel-invite", "boss-bar", "cast-bar", "target-frame", "pvp-stats", "death", "loading", "tooltip", "stall-button", "stall-setup", "stall-browse", "npc-dialog", "quest-log", "quest-tracker", "passive-window"]) {
     document.getElementById(id)!.hidden = true;
   }
   document.getElementById("killfeed")!.replaceChildren();
@@ -148,6 +152,8 @@ export interface TargetFrameData {
   aggro?: string;
   /** Shows the "Gruba davet et" button when set. */
   onInvite?: () => void;
+  /** Shows the "Düello" button when set. */
+  onDuel?: () => void;
 }
 
 export function setTargetFrame(data: TargetFrameData | null) {
@@ -160,6 +166,8 @@ export function setTargetFrame(data: TargetFrameData | null) {
   targetHpText.textContent = data.aggro ? `${data.hp} / ${data.maxHp}  → ${data.aggro}` : `${data.hp} / ${data.maxHp}`;
   inviteCallback = data.onInvite ?? null;
   targetInvite.hidden = !data.onInvite;
+  duelCallback = data.onDuel ?? null;
+  targetDuel.hidden = !data.onDuel;
 }
 
 // ---- Hotbar ------------------------------------------------------------
