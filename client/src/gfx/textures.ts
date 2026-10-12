@@ -56,6 +56,11 @@ const TILE_COLORS: Record<Tile, { base: string; speckle: string[] }> = {
   [Tile.DarkGrass]: { base: "#2f5a2c", speckle: ["#386a33", "#264a24", "#3f5a2a"] },
   [Tile.Bridge]: { base: "#94643a", speckle: ["#a0703f", "#86592f"] },
 };
+/** A tile's main colour (the minimap paints one pixel of it per tile). */
+export function tileBaseColor(tile: Tile): string {
+  return TILE_COLORS[tile].base;
+}
+
 const WALL_FACE_COLORS = { base: "#3b3430", speckle: ["#4a423d", "#2c2724"] };
 const TOWN_WALL_FACE_COLORS = { base: "#6b655b", speckle: ["#746e64", "#625c53"] };
 

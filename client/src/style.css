@@ -361,7 +361,7 @@ table.controls td:first-child {
 /* ---- Cast bar ---- */
 
 #cast-bar {
-  bottom: 96px;
+  bottom: 132px;
   left: 50%;
   transform: translateX(-50%);
   width: 220px;
@@ -514,7 +514,8 @@ table.controls td:first-child {
 
 #killfeed {
   top: 40px;
-  right: 8px;
+  /* Left of the minimap. */
+  right: 196px;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -721,6 +722,74 @@ table.controls td:first-child {
   color: #74c0fc;
 }
 
+/* ---- Minimap ---- */
+
+#minimap {
+  top: 40px;
+  right: 8px;
+  width: auto;
+  align-items: center;
+  pointer-events: none;
+}
+
+#minimap-zone {
+  align-self: stretch;
+  font-size: 11px;
+  font-weight: bold;
+  text-align: center;
+  color: var(--accent);
+}
+
+#minimap-canvas {
+  display: block;
+  image-rendering: pixelated;
+  border: 1px solid #000;
+}
+
+#minimap-legend {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 9px;
+  color: #fffc;
+}
+
+#minimap-legend i {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-left: 4px;
+  border: 1px solid #000;
+  border-radius: 50%;
+}
+
+#minimap-legend .self {
+  background: #ffe14d;
+}
+
+#minimap-legend .party {
+  background: #4cd964;
+}
+
+#minimap-legend .player {
+  background: #fff;
+}
+
+/* Under the damage meter. */
+body.touch #minimap {
+  top: 196px;
+}
+
+@media (max-width: 600px) {
+  #minimap-canvas {
+    width: 112px;
+  }
+
+  #minimap-legend {
+    display: none;
+  }
+}
+
 #netinfo {
   top: 8px;
   right: 8px;
@@ -783,6 +852,27 @@ table.controls td:first-child {
   flex-direction: column;
   align-items: center;
   gap: 6px;
+}
+
+/* Health and rage/mana right above the skills, as wide as the hotbar. */
+#action-dock {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+#action-dock .bar.hp {
+  height: 16px;
+}
+
+#action-dock .bar.rage {
+  height: 11px;
+}
+
+#action-dock .bar.rage span {
+  display: block;
+  font-size: 9px;
+  line-height: 11px;
 }
 
 #hotbar {
@@ -862,8 +952,11 @@ table.controls td:first-child {
 }
 
 #help {
-  bottom: 70px;
+  /* Right of the hotbar, wrapping instead of running under it. */
+  bottom: 16px;
   right: 8px;
+  max-width: calc(50% - 160px);
+  text-align: right;
   font-size: 11px;
   color: #fffa;
   text-shadow: 1px 1px 0 #000;
@@ -896,6 +989,23 @@ table.controls td:first-child {
   flex-direction: column;
   gap: 8px;
   max-width: calc(100vw - 16px);
+}
+
+/*
+ * Tall windows scroll their contents, never the window itself: the gold corner
+ * brackets (.window::before) stick out 5px and would make the window scroll sideways.
+ */
+.window-scroll {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.window-scroll > * {
+  flex-shrink: 0;
 }
 
 .window-title {
@@ -1505,7 +1615,7 @@ table.controls td:first-child {
 /* ---- Player market ---- */
 
 #stall-button {
-  bottom: 84px;
+  bottom: 118px;
   left: 50%;
   transform: translateX(-50%);
   font: inherit;
@@ -1651,7 +1761,6 @@ table.controls td:first-child {
   transform: translateX(-50%);
   width: 420px;
   max-height: calc(100vh - 180px);
-  overflow-y: auto;
 }
 
 #quest-log {
@@ -1659,7 +1768,6 @@ table.controls td:first-child {
   left: 240px;
   width: 360px;
   max-height: calc(100vh - 160px);
-  overflow-y: auto;
 }
 
 @media (max-width: 760px) {
@@ -1845,7 +1953,8 @@ table.controls td:first-child {
 }
 
 #quest-tracker {
-  top: 190px;
+  /* Under the minimap. */
+  top: 216px;
   right: 8px;
   width: 220px;
   padding: 6px 8px;
@@ -1907,7 +2016,7 @@ body.touch #game {
 
 #joystick {
   left: 18px;
-  bottom: 86px;
+  bottom: 120px;
   width: 124px;
   height: 124px;
   border-radius: 50%;
@@ -1931,7 +2040,7 @@ body.touch #game {
 
 #touch-actions {
   right: 16px;
-  bottom: 86px;
+  bottom: 120px;
   display: grid;
   grid-template-columns: 58px 58px;
   grid-template-areas:
@@ -1982,7 +2091,7 @@ body.touch #game {
 
 #touch-menu {
   right: 8px;
-  bottom: 240px;
+  bottom: 274px;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -2013,7 +2122,7 @@ body.touch #help {
 }
 
 body.touch #stall-button {
-  bottom: 160px;
+  bottom: 194px;
 }
 
 /* =====================================================================================
@@ -2654,7 +2763,6 @@ body.touch #clock {
   transform: translateX(-50%);
   width: min(540px, calc(100vw - 16px));
   max-height: calc(100vh - 70px);
-  overflow-y: auto;
 }
 
 #passive-summary {

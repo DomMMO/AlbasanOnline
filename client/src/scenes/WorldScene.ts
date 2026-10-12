@@ -70,6 +70,7 @@ import { addChatMessage, initChat } from "../ui/chat";
 import { addKillFeed, initLeaderboard, setPvpStats, toggleLeaderboard } from "../ui/pvp";
 import { initParty, renderParty, showInvite } from "../ui/party";
 import { initDuel, showDuelInvite } from "../ui/duel";
+import { drawMinimap, setMinimapZone, toggleMinimap, type MinimapDot } from "../ui/minimap";
 import { isMenuOpen, menuBack, openMenu } from "../ui/menu";
 import { closeTopWindow, registerWindow } from "../ui/windows";
 import { getSettings, onSettingsChange } from "../settings";
@@ -197,6 +198,10 @@ export class WorldScene extends Phaser.Scene {
   private party: { id: string | null; sessions: Set<string> } = { id: null, sessions: new Set() };
   /** Session id of the player we are duelling (fight started), or null. */
   private duelOpponent: string | null = null;
+  /** Standing on the market square last frame (to greet the player when they step on it). */
+  private wasInMarket = false;
+  /** Game time of the next minimap redraw (a few times a second is plenty). */
+  private nextMinimapAt = 0;
   /** Re-checks a loot chest's visibility (ownership can change with the party). */
   private lootSyncs = new Map<string, () => void>();
   /** Pulsing rings under players who are casting, by session id. */
@@ -253,6 +258,7 @@ export class WorldScene extends Phaser.Scene {
     tilemap.createLayer(0, tileset, 0, 0)!.setDepth(-1);
     const decor = zoneLayout(this.zone.id).decor;
     if (decor) drawDecor(this, decor);
+    setMinimapZone(this.map, this.zone.name);
 
     const camera = this.cameras.main;
     camera.setBounds(0, 0, this.map.width * TILE_SIZE, this.map.height * TILE_SIZE);
@@ -345,6 +351,7 @@ export class WorldScene extends Phaser.Scene {
     this.controls.onPressed(Action.Interact, () => this.interact());
     this.controls.onPressed(Action.QuestLog, () => toggleQuestLog());
     this.controls.onPressed(Action.PassiveTree, () => togglePassives());
+    this.controls.onPressed(Action.Minimap, () => toggleMinimap());
     this.controls.onPressed(Action.TownPortal, () => {
       if (this.local && !this.local.state.dead && !this.leaving) this.room.send(Msg.OpenTownPortal);
     });
@@ -1197,7 +1204,25 @@ export class WorldScene extends Phaser.Scene {
     local.curr = pos;
   }
 
-  update(_time: number, delta: number) {
+  /** You, your party (green), other players, NPCs and portals. */
+  private refreshMinimap() {
+    const local = this.local;
+    if (!local) return;
+    const dots: MinimapDot[] = [{ x: local.view.x, y: local.view.y, kind: "self" }];
+    for (const [sessionId, remote] of this.players) {
+      const kind = this.party.sessions.has(sessionId) ? "party" : this.isEnemyPlayer(sessionId) ? "enemy" : "player";
+      dots.push({ x: remote.view.x, y: remote.view.y, kind });
+    }
+    for (const id of this.zone.npcs) dots.push({ x: NPCS[id].x, y: NPCS[id].y, kind: "npc" });
+    for (const portal of this.zone.portals) dots.push({ x: portal.x, y: portal.y, kind: "portal" });
+    drawMinimap(dots);
+  }
+
+  update(time: number, delta: number) {
+    if (time >= this.nextMinimapAt) {
+      this.nextMinimapAt = time + 100;
+      this.refreshMinimap();
+    }
     // Fixed-step simulation at the server's tick rate; clamp so a backgrounded tab doesn't burst.
     this.tickAccumulator = Math.min(this.tickAccumulator + delta, TICK_MS * 5);
     while (this.tickAccumulator >= TICK_MS) {
@@ -1222,7 +1247,10 @@ export class WorldScene extends Phaser.Scene {
 
     if (local) {
       this.checkGates(local);
-      setStallButtonVisible(this.onMarketTile(local));
+      const inMarket = this.onMarketTile(local);
+      if (inMarket && !this.wasInMarket) hud.showMessage("Pazar alanı: burada tezgâh açıp eşya satabilirsin", "info", "#e8c33a");
+      this.wasInMarket = inMarket;
+      setStallButtonVisible(inMarket);
       const sellerId = browsingSeller();
       const seller = sellerId ? this.players.get(sellerId) : undefined;
       if (sellerId && (!seller || distance(local.view, seller.view) > STALL_RANGE + TILE_SIZE)) closeBrowse();
