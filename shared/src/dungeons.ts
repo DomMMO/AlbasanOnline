@@ -29,6 +29,8 @@ export type Decor =
   | { kind: "torch"; tx: number; ty: number }
   /** A wooden signboard on two posts with a word on it (walk-through, not solid). */
   | { kind: "signboard"; tx: number; ty: number; w: number; text: string }
+  /** A wooden fence along these tiles (they are solid); each post joins its neighbours. */
+  | { kind: "fence"; tiles: { tx: number; ty: number }[] }
   /** A painted line around an area on the ground (the market square). */
   | { kind: "groundFrame"; tx: number; ty: number; w: number; h: number; color: number };
 

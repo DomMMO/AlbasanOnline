@@ -307,7 +307,7 @@ Surlarla çevrili şehir; mob yok, PvP yok. Ortada çeşmeli meydan, kuzey cadde
 
 ### Pazar (oyuncudan oyuncuya satış)
 
-Knight Online tarzı tezgâh. Şehrin güneyindeki **tuğla döşeli pazar meydanına** gir (girişinde **PAZAR** tabelası var, alan yerde altın çizgiyle çevrili ve mini haritada altın renkte görünür; içine adım atınca ekranda haber verilir), ekranda çıkan **Pazar Kur** düğmesine bas.
+Knight Online tarzı tezgâh. Şehrin güneyindeki **tuğla döşeli pazar meydanına** gir (etrafı çitle çevrili; girişler kuzeyde **PAZAR** tabelasının altında ve doğu/batı kenarlarının ortasında. Alan yerde altın çizgiyle de belli ve mini haritada altın renkte görünür; içine adım atınca ekranda haber verilir), ekranda çıkan **Pazar Kur** düğmesine bas.
 
 1. Tezgâha bir ad ver (boş bırakırsan "İsim'in Tezgâhı" olur).
 2. Envanterde item'a sağ tıkla ya da pencereye sürükle (en fazla 8 item), her birine **birim fiyat** yaz.
