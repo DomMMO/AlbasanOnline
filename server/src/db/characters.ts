@@ -56,10 +56,10 @@ async function transaction<T>(fn: (client: pg.PoolClient) => Promise<T>): Promis
 async function insertItems(client: pg.PoolClient, characterId: number, items: StoredItem[]) {
   if (items.length === 0) return;
   await client.query(
-    `INSERT INTO items (uid, character_id, def_id, qty, enhance, container, position)
-     SELECT uid, $1, def_id, qty, enhance, container, position
-     FROM unnest($2::uuid[], $3::text[], $4::int[], $5::int[], $6::text[], $7::text[])
-       AS t(uid, def_id, qty, enhance, container, position)`,
+    `INSERT INTO items (uid, character_id, def_id, qty, enhance, container, position, affixes)
+     SELECT uid, $1, def_id, qty, enhance, container, position, affixes
+     FROM unnest($2::uuid[], $3::text[], $4::int[], $5::int[], $6::text[], $7::text[], $8::jsonb[])
+       AS t(uid, def_id, qty, enhance, container, position, affixes)`,
     [
       characterId,
       items.map((i) => i.uid),
@@ -68,6 +68,7 @@ async function insertItems(client: pg.PoolClient, characterId: number, items: St
       items.map((i) => i.enhance),
       items.map((i) => i.container),
       items.map((i) => i.position),
+      items.map((i) => JSON.stringify(i.affixes ?? [])),
     ],
   );
 }
@@ -102,7 +103,7 @@ export async function createCharacter(accountId: number, name: string, color: nu
 
     const starter: StoredItem[] = [
       ...Object.entries(starterEquipment).map(([slot, defId]) => ({
-        ...newStack(defId!, 1),
+        ...newStack(defId!, 1, 0, { count: 1 }),
         container: "equipment" as const,
         position: slot,
       })),
@@ -127,7 +128,7 @@ export async function loadCharacter(characterId: number, accountId: number): Pro
   );
   if (!rows[0]) return null;
   const items = await pool.query<StoredItem>(
-    `SELECT uid, def_id AS "defId", qty, enhance, container, position FROM items WHERE character_id = $1`,
+    `SELECT uid, def_id AS "defId", qty, enhance, container, position, affixes FROM items WHERE character_id = $1`,
     [characterId],
   );
   const quests = await pool.query<QuestProgress>(

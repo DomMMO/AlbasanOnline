@@ -85,6 +85,30 @@ export function frostRing(scene: Phaser.Scene, at: Point, radius: number) {
   scene.tweens.add({ targets: g, alpha: 0, delay: 300, duration: 300, onComplete: () => g.destroy() });
 }
 
+/** Shards of bone flying out in a ring (Kemik Patlaması), also used when a skeleton crumbles. */
+export function boneBurst(scene: Phaser.Scene, at: Point, radius: number) {
+  const count = 12;
+  for (let i = 0; i < count; i++) {
+    const angle = (i / count) * Math.PI * 2;
+    const g = scene.add.graphics().setDepth(100000);
+    g.fillStyle(i % 3 ? 0xf1f3f5 : 0xced4da, 1).fillRect(-2, -1, 4, 2);
+    g.setPosition(at.x, at.y - CHEST).setRotation(angle);
+    scene.tweens.add({
+      targets: g,
+      x: at.x + Math.cos(angle) * radius,
+      y: at.y - CHEST + Math.sin(angle) * radius * 0.5,
+      alpha: 0,
+      duration: 380,
+      ease: "Cubic.easeOut",
+      onComplete: () => g.destroy(),
+    });
+  }
+  const ring = scene.add.graphics().setDepth(at.y + 20).setPosition(at.x, at.y - 2);
+  ring.lineStyle(2, 0xdee2e6, 0.8).strokeEllipse(0, 0, radius * 2, radius);
+  ring.setScale(0.2);
+  scene.tweens.add({ targets: ring, scale: 1, alpha: 0, duration: 420, onComplete: () => ring.destroy() });
+}
+
 /** Ring that pulses under a caster while a spell is being cast; call the returned function to remove it. */
 export function castingGlow(scene: Phaser.Scene, follow: () => Point, color: number): () => void {
   const g = scene.add.graphics().setDepth(0.6);

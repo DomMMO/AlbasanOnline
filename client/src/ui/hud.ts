@@ -1,4 +1,4 @@
-import { POTION_COOLDOWN_MS, type ItemDef, type SkillDef } from "../../../shared/src";
+import { darkness, formatClock, isNight, POTION_COOLDOWN_MS, type ItemDef, type SkillDef } from "../../../shared/src";
 import { iconUrl } from "../gfx/icons";
 
 // Game UI lives in the DOM: easier to build, style and make responsive than
@@ -41,14 +41,38 @@ export function showHud() {
 /** Leaving the game (character switch / logout): hide the HUD and every in-game window. */
 export function resetGameUi() {
   hud.hidden = true;
-  for (const id of ["inventory-window", "shop-window", "upgrade-window", "leaderboard", "party-frames", "party-invite", "boss-bar", "cast-bar", "target-frame", "pvp-stats", "death", "loading", "tooltip", "stall-button", "stall-setup", "stall-browse", "npc-dialog", "quest-log", "quest-tracker"]) {
+  for (const id of ["inventory-window", "shop-window", "upgrade-window", "leaderboard", "party-frames", "party-invite", "boss-bar", "cast-bar", "target-frame", "pvp-stats", "death", "loading", "tooltip", "stall-button", "stall-setup", "stall-browse", "npc-dialog", "quest-log", "quest-tracker", "passive-window"]) {
     document.getElementById(id)!.hidden = true;
   }
   document.getElementById("killfeed")!.replaceChildren();
+  nightOverlay.style.opacity = "0";
+}
+
+const clock = $("clock");
+const nightOverlay = $("night-overlay");
+
+/** World clock in the corner; outdoor zones also darken at night. */
+export function setClock(minute: number, outdoor: boolean) {
+  const night = isNight(minute);
+  clock.textContent = `${night ? "☾" : "☀"} ${formatClock(minute)}`;
+  clock.classList.toggle("night", night);
+  clock.title = night ? "Gece: yaratıklar %20 daha güçlü ve ödüllü, gece yaratıkları dolaşıyor" : "Gündüz";
+  nightOverlay.style.opacity = String(outdoor ? darkness(minute) * 0.6 : 0);
 }
 
 export function setOnlineCount(count: number) {
   online.textContent = `Çevrimiçi: ${count}`;
+}
+
+const position = $("hud-pos");
+let lastPosition = "";
+
+/** Our tile coordinates next to the online count. */
+export function setPosition(x: number, y: number) {
+  const text = `X: ${Math.floor(x / 16)} Y: ${Math.floor(y / 16)}`;
+  if (text === lastPosition) return;
+  lastPosition = text;
+  position.textContent = text;
 }
 
 export function setPing(ms: number) {

@@ -300,3 +300,24 @@ body.admin {
   color: #fff;
   background: var(--error);
 }
+
+/* ---- World clock ---- */
+
+.clock-now {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 28px;
+  margin: 4px 0;
+}
+
+.clock-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+#clock-card {
+  grid-column: 1 / -1;
+}

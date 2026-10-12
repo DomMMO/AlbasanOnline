@@ -22,7 +22,9 @@ import {
   WARRIOR_THREAT_MULTIPLIER,
   REGEN_PER_SECOND,
   rollDamage,
+  CRIT_MULTIPLIER,
   SKILLS,
+  skillPower,
   xpForKill,
   xpToNextLevel,
   type AttackEvent,
@@ -43,6 +45,7 @@ import { questKill } from "./quests";
 import { addThreat, spawnMob } from "./mobs";
 import { sameParty } from "./party";
 import { recordPvpKill } from "./pvp";
+import { dismissMinions, summonMinion } from "./minions";
 
 // All damage, healing, XP and death go through this file. The client never
 // decides any of it; it only asks ("use skill X") and displays the results.
@@ -57,7 +60,7 @@ function fail(game: Game, sessionId: string, message: string) {
   game.io.send(sessionId, Msg.SkillError, { message } satisfies SkillErrorEvent);
 }
 
-type Enemy = { kind: "mob"; id: string; entity: Mob } | { kind: "player"; id: string; entity: Player };
+export type Enemy = { kind: "mob"; id: string; entity: Mob } | { kind: "player"; id: string; entity: Player };
 
 /** Party members are never enemies, even in PvP zones. */
 function partyMates(game: Game, a: string, b: string): boolean {
@@ -67,7 +70,7 @@ function partyMates(game: Game, a: string, b: string): boolean {
 }
 
 /** A hostile target: any mob, or (in PvP zones) another living player outside your party. */
-function enemyAt(game: Game, sessionId: string, targetId: string | null): Enemy | undefined {
+export function enemyAt(game: Game, sessionId: string, targetId: string | null): Enemy | undefined {
   if (!targetId) return undefined;
   const mob = game.state.mobs.get(targetId);
   if (mob) return { kind: "mob", id: targetId, entity: mob };
@@ -86,17 +89,41 @@ function dropProtection(game: Game, sessionId: string) {
   }
 }
 
-/** Damage from a player to an enemy (mob or, in PvP, another player). */
-function hitEnemy(game: Game, sessionId: string, enemy: Enemy, attackValue: number) {
+/** A minion's swing: damage counts as its owner's. */
+export function minionStrike(game: Game, minionId: string, ownerId: string, enemy: Enemy, attackValue: number) {
+  game.io.broadcast(Msg.Attack, { sourceId: minionId, sourceKind: "minion", targetId: enemy.id, targetKind: enemy.kind } satisfies AttackEvent);
+  const owner = game.playerRuntime.get(ownerId);
+  if (owner) owner.lastCombatAt = game.now();
+  dropProtection(game, ownerId);
+  hitEnemy(game, ownerId, enemy, attackValue);
+}
+
+/** Damage from a player to an enemy (mob or, in PvP, another player). Returns the damage dealt. */
+function hitEnemy(game: Game, sessionId: string, enemy: Enemy, attackValue: number): number {
+  const stats = game.playerRuntime.get(sessionId)?.stats;
+  const critChance = stats?.critChance;
+  let dealt: number;
   if (enemy.kind === "mob") {
-    const hit = rollDamage(attackValue, mobDefense(game, enemy.id), game.random);
+    const hit = rollDamage(attackValue, mobDefense(game, enemy.id), game.random, critChance, CRIT_MULTIPLIER + (stats?.critDamage ?? 0));
+    dealt = Math.min(hit.amount, enemy.entity.hp);
     damageMob(game, sessionId, enemy.id, enemy.entity, hit.amount, hit.crit);
-    return;
+  } else {
+    const victimRuntime = game.playerRuntime.get(enemy.id);
+    if (!victimRuntime || enemy.entity.protected) return 0;
+    const hit = rollDamage(attackValue * PVP_DAMAGE_MULTIPLIER, victimRuntime.stats.defense, game.random, critChance, CRIT_MULTIPLIER + (stats?.critDamage ?? 0));
+    dealt = Math.min(hit.amount, enemy.entity.hp);
+    hitPlayer(game, sessionId, enemy.id, enemy.entity, hit.amount, hit.crit);
   }
-  const victimRuntime = game.playerRuntime.get(enemy.id);
-  if (!victimRuntime || enemy.entity.protected) return;
-  const hit = rollDamage(attackValue * PVP_DAMAGE_MULTIPLIER, victimRuntime.stats.defense, game.random);
-  hitPlayer(game, sessionId, enemy.id, enemy.entity, hit.amount, hit.crit);
+  if (stats?.lifeSteal) lifeSteal(game, sessionId, dealt * stats.lifeSteal);
+  return dealt;
+}
+
+/** Item modifier: part of the damage dealt comes back as health. */
+function lifeSteal(game: Game, sessionId: string, amount: number) {
+  const player = game.state.players.get(sessionId);
+  if (!player || player.dead) return;
+  const healed = Math.min(Math.floor(amount), player.maxHp - player.hp);
+  if (healed > 0) player.hp += healed;
 }
 
 /** Every enemy within `radius` of the caster. */
@@ -161,7 +188,7 @@ export function useSkill(game: Game, sessionId: string, skillId: string) {
   if (now < (runtime.cooldowns.get(skill.id) ?? 0)) return fail(game, sessionId, "Henüz hazır değil");
   const resolved = resolveTarget(game, sessionId, player, runtime, skill);
   if (typeof resolved === "string") return fail(game, sessionId, resolved);
-  if (player.resource < skill.cost) return fail(game, sessionId, usesRage(player) ? "Yeterli öfke yok" : "Yeterli mana yok");
+  if (player.resource < skillCost(runtime, skill)) return fail(game, sessionId, usesRage(player) ? "Yeterli öfke yok" : "Yeterli mana yok");
 
   if (skill.castMs > 0) {
     // Cast time: start now, resolve in updatePlayerCombat. Moving cancels it.
@@ -179,11 +206,18 @@ export function useSkill(game: Game, sessionId: string, skillId: string) {
   performSkill(game, sessionId, player, runtime, skill, resolved.targetId);
 }
 
+/** Rage / mana a skill costs this player (passive tree jewels can lower it). */
+function skillCost(runtime: PlayerRuntime, skill: SkillDef): number {
+  return Math.ceil(skill.cost * (1 - runtime.stats.costReduction));
+}
+
 /** Applies a skill's effect, pays its cost and starts its cooldown. */
 function performSkill(game: Game, sessionId: string, player: Player, runtime: PlayerRuntime, skill: SkillDef, targetId: string | null) {
   const now = game.now();
   const effect = skill.effect;
-  const attack = runtime.stats.attack;
+  // Passive tree jewels (and Zeka) make skills stronger.
+  const power = skillPower(runtime.stats, skill.id);
+  const attack = runtime.stats.attack * power;
   const self = { sourceId: sessionId, sourceKind: "player" as const, skill: skill.id };
 
   switch (effect.type) {
@@ -195,7 +229,33 @@ function performSkill(game: Game, sessionId: string, player: Player, runtime: Pl
       // Melee classes keep swinging at what they hit.
       if (!classOf(player.cls).autoAttack.ranged) runtime.attacking = true;
       runtime.lastCombatAt = now;
-      hitEnemy(game, sessionId, enemy, attack * effect.multiplier + effect.bonus);
+      hitEnemy(game, sessionId, enemy, attack * effect.multiplier + effect.bonus * power);
+      break;
+    }
+    case "drain": {
+      const enemy = enemyAt(game, sessionId, targetId);
+      if (!enemy) return fail(game, sessionId, "Hedef yok");
+      dropProtection(game, sessionId);
+      broadcastAttack(game, player, { ...self, targetId: enemy.id, targetKind: enemy.kind }, enemy.entity);
+      runtime.lastCombatAt = now;
+      const dealt = hitEnemy(game, sessionId, enemy, attack * effect.multiplier + effect.bonus * power);
+      const healed = player.dead ? 0 : Math.min(Math.round(dealt * effect.healFraction), player.maxHp - player.hp);
+      if (healed > 0) {
+        player.hp += healed;
+        broadcastCombat(game, { sourceId: sessionId, targetId: sessionId, targetKind: "player", amount: healed, crit: false, heal: true });
+      }
+      break;
+    }
+    case "guard": {
+      runtime.guardUntil = now + effect.durationMs;
+      runtime.guardReduction = effect.reduction;
+      player.guarded = true;
+      broadcastAttack(game, player, self);
+      break;
+    }
+    case "summon": {
+      summonMinion(game, sessionId, skill as SkillDef & { effect: typeof effect }, attack * effect.multiplier * (1 + runtime.stats.minionDamage), runtime.stats.minionCount);
+      broadcastAttack(game, player, self);
       break;
     }
     case "whirlwind":
@@ -217,7 +277,7 @@ function performSkill(game: Game, sessionId: string, player: Player, runtime: Pl
       break;
     }
     case "heal": {
-      const amount = Math.min(Math.round(player.maxHp * effect.percent), player.maxHp - player.hp);
+      const amount = Math.min(Math.round(player.maxHp * effect.percent * power), player.maxHp - player.hp);
       player.hp += amount;
       broadcastAttack(game, player, { ...self, targetId: sessionId, targetKind: "player" });
       broadcastCombat(game, { sourceId: sessionId, targetId: sessionId, targetKind: "player", amount, crit: false, heal: true });
@@ -226,7 +286,7 @@ function performSkill(game: Game, sessionId: string, player: Player, runtime: Pl
     case "healTarget": {
       const friend = targetId ? game.state.players.get(targetId) : undefined;
       if (!friend || friend.dead || !targetId) return fail(game, sessionId, "Hedef yok");
-      const amount = Math.min(Math.round(attack * effect.multiplier + effect.bonus), friend.maxHp - friend.hp);
+      const amount = Math.min(Math.round(attack * effect.multiplier + effect.bonus * power), friend.maxHp - friend.hp);
       friend.hp += amount;
       addHealThreat(game, sessionId, targetId, amount);
       broadcastAttack(game, player, { ...self, targetId, targetKind: "player" }, targetId === sessionId ? undefined : friend);
@@ -237,18 +297,19 @@ function performSkill(game: Game, sessionId: string, player: Player, runtime: Pl
       const friend = targetId ? game.state.players.get(targetId) : undefined;
       const friendRuntime = targetId ? game.playerRuntime.get(targetId) : undefined;
       if (!friend || friend.dead || !friendRuntime || !targetId) return fail(game, sessionId, "Hedef yok");
-      friend.shield = Math.round(attack * effect.multiplier + effect.bonus);
+      friend.shield = Math.round(attack * effect.multiplier + effect.bonus * power);
       friendRuntime.shieldUntil = now + effect.durationMs;
       broadcastAttack(game, player, { ...self, targetId, targetKind: "player" }, targetId === sessionId ? undefined : friend);
       break;
     }
   }
 
-  player.resource = Math.max(0, player.resource - skill.cost);
-  if (skill.cooldownMs > 0) runtime.cooldowns.set(skill.id, now + skill.cooldownMs);
+  player.resource = Math.max(0, player.resource - skillCost(runtime, skill));
+  const cooldownMs = Math.round(skill.cooldownMs * (1 - runtime.stats.cooldownReduction));
+  if (cooldownMs > 0) runtime.cooldowns.set(skill.id, now + cooldownMs);
   game.io.send(sessionId, Msg.SkillUsed, {
     skillId: skill.id,
-    cooldownMs: skill.cooldownMs,
+    cooldownMs,
     // Cast-time skills already triggered the GCD when the cast started.
     gcdMs: skill.triggersGcd && skill.castMs === 0 ? GLOBAL_COOLDOWN_MS : 0,
   } satisfies SkillUsedEvent);
@@ -272,7 +333,7 @@ function finishCast(game: Game, sessionId: string, player: Player, runtime: Play
   const resolved = resolveTarget(game, sessionId, player, runtime, skill, CAST_RANGE_TOLERANCE);
   runtime.targetId = savedTarget;
   if (typeof resolved === "string") return cancelCast(game, sessionId, resolved);
-  if (player.resource < skill.cost) return cancelCast(game, sessionId, "Yeterli mana yok");
+  if (player.resource < skillCost(runtime, skill)) return cancelCast(game, sessionId, "Yeterli mana yok");
 
   runtime.casting = null;
   game.io.broadcast(Msg.CastEnd, { sourceId: sessionId, interrupted: false } satisfies CastEndEvent);
@@ -309,6 +370,7 @@ export function updatePlayerCombat(game: Game) {
     if (enemy && !runtime.casting && now >= runtime.nextSwingAt) autoAttack(game, sessionId, player, runtime, enemy);
 
     if (player.shield > 0 && now >= runtime.shieldUntil) player.shield = 0;
+    if (player.guarded && now >= runtime.guardUntil) player.guarded = false;
     if (player.rooted && now >= runtime.rootedUntil) player.rooted = false;
     if (player.protected && now >= runtime.protectedUntil) player.protected = false;
 
@@ -316,6 +378,7 @@ export function updatePlayerCombat(game: Game) {
       runtime.nextRegenAt = now + REGEN_INTERVAL_MS;
       const inCombat = now - runtime.lastCombatAt < COMBAT_TIMEOUT_MS;
       if (!inCombat) player.hp = Math.min(player.maxHp, player.hp + Math.ceil(player.maxHp * REGEN_PER_SECOND));
+      else if (runtime.stats.combatRegen > 0) player.hp = Math.min(player.maxHp, player.hp + Math.ceil(player.maxHp * runtime.stats.combatRegen));
       if (usesRage(player)) {
         if (!inCombat) player.resource = Math.max(0, player.resource - RAGE_DECAY_PER_SECOND);
       } else {
@@ -357,7 +420,7 @@ function rootMob(game: Game, mobId: string, mob: Mob, durationMs: number) {
 export function mobAttackPlayer(game: Game, mobId: string, mobRuntime: MobRuntime, sessionId: string, player: Player) {
   const runtime = game.playerRuntime.get(sessionId);
   if (!runtime || player.dead) return;
-  const hit = rollDamage(mobRuntime.def.attack, runtime.stats.defense, game.random);
+  const hit = rollDamage(mobRuntime.def.attack * mobRuntime.power, runtime.stats.defense, game.random);
   game.io.broadcast(Msg.Attack, { sourceId: mobId, sourceKind: "mob", targetId: sessionId, targetKind: "player" } satisfies AttackEvent);
   hitPlayer(game, mobId, sessionId, player, hit.amount, hit.crit);
 }
@@ -368,6 +431,9 @@ export function hitPlayer(game: Game, sourceId: string, sessionId: string, playe
   if (!runtime || player.dead) return;
   runtime.lastCombatAt = game.now();
   if (usesRage(player)) player.resource = Math.min(RAGE_MAX, player.resource + RAGE_PER_HIT_TAKEN);
+  // Tanks shrug off part of every hit; Kalkan Duvarı on top of that.
+  const guard = game.now() < runtime.guardUntil ? 1 - runtime.guardReduction : 1;
+  amount = Math.max(1, Math.round(amount * (classOf(player.cls).damageTaken ?? 1) * guard * (1 - runtime.stats.damageReduction)));
   const absorbed = Math.min(player.shield, amount);
   player.shield -= absorbed;
   const taken = amount - absorbed;
@@ -398,11 +464,16 @@ function damageMob(game: Game, sessionId: string, mobId: string, mob: Mob, amoun
   runtime.taggedBy ??= sessionId;
   // Warriors are the tanks: their damage holds aggro better.
   const attacker = game.state.players.get(sessionId);
+  // Guardians taunt: any hit puts them on top of the threat table at once.
+  if (attacker && classOf(attacker.cls).tauntOnHit) {
+    const top = Math.max(0, ...[...runtime.threat].filter(([id]) => id !== sessionId).map(([, threat]) => threat));
+    if ((runtime.threat.get(sessionId) ?? 0) <= top) runtime.threat.set(sessionId, top + 1);
+  }
   addThreat(game, runtime, sessionId, dealt * (attacker && usesRage(attacker) ? WARRIOR_THREAT_MULTIPLIER : 1));
   broadcastCombat(game, { sourceId: sessionId, targetId: mobId, targetKind: "mob", amount, crit, heal: false });
 
   if (runtime.boss) bossDamaged(game, mob, runtime);
-  if (mob.hp === 0) killMob(game, mobId, mob, runtime);
+  if (mob.hp === 0) killMob(game, mobId, mob, runtime, sessionId);
 }
 
 /** Healing draws threat from every mob fighting the healed player. */
@@ -425,14 +496,25 @@ function xpRecipients(game: Game, taggerId: string, at: { x: number; y: number }
   return recipients;
 }
 
-function killMob(game: Game, mobId: string, mob: Mob, runtime: MobRuntime) {
+function killMob(game: Game, mobId: string, mob: Mob, runtime: MobRuntime, killerId: string) {
+  // Passive tree: the killing blow heals.
+  const killer = game.state.players.get(killerId);
+  const killHeal = game.playerRuntime.get(killerId)?.stats.killHeal ?? 0;
+  if (killer && !killer.dead && killHeal > 0) {
+    const healed = Math.min(Math.round(killer.maxHp * killHeal), killer.maxHp - killer.hp);
+    if (healed > 0) {
+      killer.hp += healed;
+      broadcastCombat(game, { sourceId: killerId, targetId: killerId, targetKind: "player", amount: healed, crit: false, heal: true });
+    }
+  }
   if (runtime.taggedBy) {
     // Split between nearby party members, with a bonus for grouping.
     const recipients = xpRecipients(game, runtime.taggedBy, mob);
     const share = (1 + PARTY_XP_BONUS * (recipients.length - 1)) / recipients.length;
     for (const sessionId of recipients) {
       const player = game.state.players.get(sessionId)!;
-      grantXp(game, sessionId, player, Math.floor(xpForKill(runtime.def.xp, mob.level, player.level) * share));
+      const xpBonus = 1 + (game.playerRuntime.get(sessionId)?.stats.xpBonus ?? 0);
+      grantXp(game, sessionId, player, Math.floor(xpForKill(runtime.def.xp * runtime.power, mob.level, player.level) * share * xpBonus));
       questKill(game, sessionId, runtime.def.id);
     }
   }
@@ -443,7 +525,7 @@ function killMob(game: Game, mobId: string, mob: Mob, runtime: MobRuntime) {
       playerRuntime.attacking = false;
     }
   }
-  dropLoot(game, mob.x, mob.y, runtime.def, runtime.taggedBy);
+  dropLoot(game, mob.x, mob.y, runtime.def, runtime.taggedBy, runtime.power);
   game.state.mobs.delete(mobId);
   game.mobRuntime.delete(mobId);
   if (runtime.boss) bossDefeated(game, runtime);
@@ -453,10 +535,13 @@ function killMob(game: Game, mobId: string, mob: Mob, runtime: MobRuntime) {
 
 function killPlayer(game: Game, sessionId: string, player: Player, runtime: PlayerRuntime) {
   cancelCast(game, sessionId);
+  dismissMinions(game, sessionId);
   player.dead = true;
   player.moving = false;
   player.shield = 0;
   player.rooted = false;
+  player.guarded = false;
+  runtime.guardUntil = 0;
   if (usesRage(player)) player.resource = 0;
   runtime.targetId = null;
   runtime.attacking = false;
@@ -480,7 +565,8 @@ export function grantXp(game: Game, sessionId: string, player: Player, amount: n
 }
 
 function mobDefense(game: Game, mobId: string) {
-  return game.mobRuntime.get(mobId)?.def.defense ?? 0;
+  const runtime = game.mobRuntime.get(mobId);
+  return runtime ? runtime.def.defense * runtime.power : 0;
 }
 
 /** Announces a player's swing or spell; standing players turn to face their target. */

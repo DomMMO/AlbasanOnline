@@ -27,6 +27,8 @@ export class Player extends Schema {
   @type("uint16") shield = 0;
   /** Frozen in place (Frost Nova in PvP). */
   @type("boolean") rooted = false;
+  /** Kalkan Duvarı is up. */
+  @type("boolean") guarded = false;
   /** PvP spawn protection. */
   @type("boolean") protected = false;
   @type("uint16") pvpRating = 1000;
@@ -59,6 +61,29 @@ export class Mob extends Schema {
   @type("boolean") rooted = false;
   /** Session id of the player it is attacking ("" = none). */
   @type("string") aggroId = "";
+  /** Night-strengthened (or a night-only creature). */
+  @type("boolean") empowered = false;
+}
+
+/** A player's summon (necromancer skeleton). Its look comes from the skill that summoned it. */
+export class Minion extends Schema {
+  @type("string") skill = "";
+  @type("string") ownerId = "";
+  @type("number") x = 0;
+  @type("number") y = 0;
+  @type("uint8") dir: Direction = Direction.Down;
+  @type("boolean") moving = false;
+}
+
+/** A town portal end (see game/townPortal.ts). Only its owner can use it. */
+export class TownPortal extends Schema {
+  @type("string") owner = "";
+  @type("number") x = 0;
+  @type("number") y = 0;
+  /** Destination zone id. */
+  @type("string") to = "";
+  /** The town end, leading back out. */
+  @type("boolean") back = false;
 }
 
 export class Loot extends Schema {
@@ -73,7 +98,11 @@ export class WorldState extends Schema {
   @type("string") zone = "world";
   /** Instanced zones: the boss is dead. */
   @type("boolean") cleared = false;
+  /** World clock, minute of the day (0-1439). Shared by every zone. */
+  @type("uint16") clock = 0;
   @type({ map: Player }) players = new MapSchema<Player>();
   @type({ map: Mob }) mobs = new MapSchema<Mob>();
   @type({ map: Loot }) loot = new MapSchema<Loot>();
+  @type({ map: Minion }) minions = new MapSchema<Minion>();
+  @type({ map: TownPortal }) townPortals = new MapSchema<TownPortal>();
 }

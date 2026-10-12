@@ -3,6 +3,7 @@ import {
   ITEMS,
   MAX_GOLD,
   Msg,
+  itemRarity,
   RARITY_COLORS,
   STALL_MAX_PRICE,
   STALL_RANGE,
@@ -207,7 +208,7 @@ export function buyFromStall(game: Game, sessionId: string, sellerId: string, ui
   seller.inv.gold += total;
 
   const label = `${def.name}${stack.enhance ? ` +${stack.enhance}` : ""}${qty > 1 ? ` x${qty}` : ""}`;
-  notice(game, sessionId, `${label} alındı (-${total.toLocaleString("tr-TR")} altın)`, RARITY_COLORS[def.rarity]);
+  notice(game, sessionId, `${label} alındı (-${total.toLocaleString("tr-TR")} altın)`, RARITY_COLORS[itemRarity(def, stack.affixes)]);
   notice(game, sellerId, `${label} satıldı (+${total.toLocaleString("tr-TR")} altın)`, GOLD_COLOR);
   // Sellers often step away from the keyboard: leave a line in their chat too.
   const line: ChatEvent = {

@@ -8,6 +8,7 @@ import {
   SPAWN_PROTECTION_MS,
   stepMovement,
   TICK_MS,
+  statsWithEquipment,
   type CombatStats,
   type InputMessage,
   type MobDef,
@@ -16,6 +17,9 @@ import {
   type ZoneId,
   type QuestProgress,
   zoneLayout,
+  isNight,
+  Msg,
+  type NoticeEvent,
 } from "../../../shared/src";
 import type { CharacterProgress, CharacterRecord } from "../db/characters";
 import { Player, type WorldState } from "../rooms/schema/WorldState";
@@ -25,7 +29,9 @@ import { refreshStats, sendInventory, type LootContents } from "./items";
 import type { BossState } from "./boss";
 import { closeStall, type StallState } from "./market";
 import { questsFromStored, sendQuestLog } from "./quests";
-import { spawnInitialMobs, updateMobs } from "./mobs";
+import { nightChanged, spawnInitialMobs, updateMobs } from "./mobs";
+import { dismissMinions, updateMinions, type MinionRuntime } from "./minions";
+import { worldMinute } from "./worldClock";
 import type { SpawnZone } from "../../../shared/src";
 
 // The game simulation, independent of networking. The room feeds it messages and
@@ -60,6 +66,9 @@ export interface PlayerRuntime {
   /** A spell with a cast time in progress. */
   casting: { skillId: string; endsAt: number; targetId: string | null } | null;
   shieldUntil: number;
+  /** Kalkan Duvarı: takes `guardReduction` less damage until then. */
+  guardUntil: number;
+  guardReduction: number;
   /** GM accounts get a tag in chat. */
   isAdmin: boolean;
   /** Recent chat message times, for flood protection. */
@@ -97,6 +106,8 @@ export interface MobRuntime {
   /** Frost Nova: can't move until then. */
   rootedUntil: number;
   boss?: BossState;
+  /** Stat and reward multiplier: 1, NIGHT_POWER at night outdoors, NIGHT_ONLY_POWER for night creatures. */
+  power: number;
 }
 
 const MAX_QUEUED_INPUTS = 20;
@@ -106,7 +117,12 @@ export class Game {
   readonly playerRuntime = new Map<string, PlayerRuntime>();
   readonly mobRuntime = new Map<string, MobRuntime>();
   readonly lootContents = new Map<string, LootContents>();
+  readonly minionRuntime = new Map<string, MinionRuntime>();
   readonly random = Math.random;
+  /** Night in an outdoor zone: mobs are stronger and night creatures are out. */
+  night = false;
+  /** Spawn areas of night-only creatures waiting for dark. */
+  readonly dormantSpawns: SpawnZone[] = [];
 
   private time = 0;
   /** Most players this (instanced) zone has had at once; bosses are scaled to it. */
@@ -121,6 +137,8 @@ export class Game {
   ) {
     this.map = zoneLayout(zone.id).map;
     state.zone = zone.id;
+    state.clock = Math.floor(worldMinute());
+    this.night = !!zone.outdoor && isNight(state.clock);
     spawnInitialMobs(this);
   }
 
@@ -139,9 +157,11 @@ export class Game {
 
   tick() {
     this.time += TICK_MS;
+    this.updateClock();
     this.runTimers();
     this.state.players.forEach((player, sessionId) => this.applyQueuedInputs(sessionId, player, this.playerRuntime.get(sessionId)!));
     updateMobs(this);
+    updateMinions(this);
     updatePlayerCombat(this);
   }
 
@@ -176,7 +196,7 @@ export class Game {
       inputQueue: [],
       lastQueuedSeq: 0,
       inputBudget: MAX_INPUT_BURST,
-      stats: { maxHp: 1, attack: 0, defense: 0, attackSpeedMs: 2000 }, // set by refreshStats below
+      stats: statsWithEquipment(character.class, 1, []), // set by refreshStats below
       inventory: fromStored(character.gold, character.items),
       targetId: null,
       attacking: false,
@@ -187,6 +207,8 @@ export class Game {
       nextRegenAt: 0,
       casting: null,
       shieldUntil: 0,
+      guardUntil: 0,
+      guardReduction: 0,
       isAdmin: false,
       chatTimes: [],
       rootedUntil: 0,
@@ -239,6 +261,7 @@ export class Game {
 
   removePlayer(sessionId: string) {
     closeStall(this, sessionId);
+    dismissMinions(this, sessionId);
     forgetPlayer(this, sessionId);
     this.state.players.delete(sessionId);
     this.playerRuntime.delete(sessionId);
@@ -315,6 +338,20 @@ export class Game {
     player.moving = processed > 0;
     // Moving interrupts spells with a cast time.
     if (processed > 0 && runtime.casting) cancelCast(this, sessionId, "Büyü iptal edildi");
+  }
+
+  private updateClock() {
+    const minute = Math.floor(worldMinute());
+    if (this.state.clock !== minute) this.state.clock = minute;
+    const night = !!this.zone.outdoor && isNight(minute);
+    if (night === this.night) return;
+    this.night = night;
+    nightChanged(this);
+    // Town has no mobs; only hunting grounds announce it.
+    if ((zoneLayout(this.zone.id).spawnZones ?? []).length > 0) {
+      const message = night ? "Gece çöktü: yaratıklar güçlendi, gece yaratıkları ortaya çıktı!" : "Şafak söktü: gece yaratıkları çekildi.";
+      this.io.broadcast(Msg.Notice, { message, color: night ? "#b197fc" : "#ffd34d" } satisfies NoticeEvent);
+    }
   }
 
   private runTimers() {

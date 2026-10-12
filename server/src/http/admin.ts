@@ -11,6 +11,7 @@ import {
   setLevel,
 } from "../game/gm";
 import { fail, requireAuth, type AuthedRequest } from "./api";
+import { clockInfo, setWorldClock } from "../game/worldClock";
 
 // GM tools. Every route requires an admin account; every change is written to admin_log.
 
@@ -47,7 +48,7 @@ export function createAdminRouter() {
 
   router.post(
     "/characters/:id/give",
-    action("give", (id, body) => giveItem(id, String(body.itemId), Number(body.qty), Number(body.enhance))),
+    action("give", (id, body) => giveItem(id, String(body.itemId), Number(body.qty), Number(body.enhance), Number(body.affixes) || 0)),
   );
   router.post(
     "/characters/:id/remove",
@@ -61,6 +62,20 @@ export function createAdminRouter() {
     "/characters/:id/level",
     action("level", (id, body) => setLevel(id, Number(body.level))),
   );
+
+  // World clock (day/night). Every zone reads it on its next tick.
+  router.get("/clock", (_req, res) => {
+    res.json(clockInfo());
+  });
+  router.post("/clock", async (req, res) => {
+    const body = (req.body ?? {}) as { minute?: unknown; paused?: unknown };
+    const minute = body.minute === undefined ? undefined : Math.floor(Number(body.minute));
+    const paused = typeof body.paused === "boolean" ? body.paused : undefined;
+    if (minute !== undefined && !(minute >= 0 && minute < 24 * 60)) throw new GmError("Saat 00:00-23:59 arası olmalı");
+    await setWorldClock({ minute, paused });
+    console.log(`[admin] ${(req as AuthedRequest).account.username} set the clock: ${JSON.stringify({ minute, paused })}`);
+    res.json(clockInfo());
+  });
 
   router.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
     if (error instanceof GmError) return fail(res, error.status, error.message);

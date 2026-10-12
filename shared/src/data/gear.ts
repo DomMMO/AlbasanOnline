@@ -7,10 +7,12 @@ import type { EquipSlot, IconShape, ItemDef, Rarity } from "./items";
 // Dark Forest mobs. Stats follow a formula per tier so the lines stay balanced;
 // hand-written items live in items.ts.
 
-const WARRIOR: ClassId[] = ["warrior"];
-const CASTERS: ClassId[] = ["mage", "priest"];
+/** Swords, axes and plate: warriors and guardians. */
+const WARRIOR: ClassId[] = ["warrior", "guardian"];
+const CASTERS: ClassId[] = ["mage", "priest", "necromancer"];
 const PRIEST: ClassId[] = ["priest"];
-const MAGE: ClassId[] = ["mage"];
+/** Staves: mages and necromancers. */
+const MAGE: ClassId[] = ["mage", "necromancer"];
 
 /** Rarity by tier index (0 = first tier of a line). */
 const TIER_RARITY: Rarity[] = ["uncommon", "uncommon", "rare", "rare", "epic"];

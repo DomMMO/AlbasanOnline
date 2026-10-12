@@ -115,6 +115,27 @@ const MIGRATIONS: { version: number; name: string; sql: string }[] = [
       );
     `,
   },
+  {
+    version: 7,
+    name: "item modifiers, world settings (day/night clock)",
+    sql: `
+      -- Random equipment modifiers: [{ "id": "attack", "value": 7 }, ...]
+      ALTER TABLE items ADD COLUMN affixes JSONB NOT NULL DEFAULT '[]';
+      CREATE TABLE world_settings (
+        key        TEXT PRIMARY KEY,
+        value      JSONB NOT NULL,
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+      );
+    `,
+  },
+  {
+    version: 8,
+    name: "passive tree jewels",
+    sql: `
+      ALTER TABLE items DROP CONSTRAINT items_container_check;
+      ALTER TABLE items ADD CONSTRAINT items_container_check CHECK (container IN ('inventory', 'equipment', 'passive'));
+    `,
+  },
 ];
 
 export async function runMigrations() {

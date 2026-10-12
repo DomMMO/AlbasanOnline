@@ -6,6 +6,7 @@ import {
   directionToward,
   distance,
   isUpgradeable,
+  itemSellPrice,
   ITEMS,
   LOOT_RANGE,
   MOBS,
@@ -46,6 +47,8 @@ import {
   type LevelUpEvent,
   type LootView,
   type MobView,
+  type MinionView,
+  type TownPortalView,
   type NoticeEvent,
   type NpcDef,
   type UpgradeResultEvent,
@@ -67,7 +70,9 @@ import { initParty, renderParty, showInvite } from "../ui/party";
 import { isMenuOpen, menuBack, openMenu } from "../ui/menu";
 import { closeTopWindow, registerWindow } from "../ui/windows";
 import { getSettings, onSettingsChange } from "../settings";
-import { burst, castingGlow, frostRing, healSparkles, holyBeam, lightning, projectile } from "../fx/spells";
+import { boneBurst, burst, castingGlow, frostRing, healSparkles, holyBeam, lightning, projectile } from "../fx/spells";
+import { initPassives, togglePassives, updatePassives } from "../ui/passives";
+import { initDamageMeter, recordCombat } from "../ui/damageMeter";
 import { INTERPOLATION_DELAY_MS, SnapshotBuffer } from "../entities/SnapshotBuffer";
 import { floatingText } from "../fx/floatingText";
 import { ringEffect } from "../fx/slash";
@@ -206,6 +211,10 @@ export class WorldScene extends Phaser.Scene {
   private local?: LocalPlayer;
   private players = new Map<string, Remote<PlayerView>>();
   private mobs = new Map<string, Remote<MobView>>();
+  /** Summoned minions (necromancer skeletons). */
+  private minions = new Map<string, Remote<MinionView>>();
+  /** Town portal ends standing in this zone (T). */
+  private townPortals = new Map<string, { state: TownPortalView; view: EntityView }>();
   private loot = new Map<string, { state: LootView; view: EntityView }>();
 
   private targetId: string | null = null;
@@ -317,6 +326,7 @@ export class WorldScene extends Phaser.Scene {
     registerWindow("upgrade-window", closeUpgrade);
     registerWindow("npc-dialog", closeNpcDialog);
     registerWindow("quest-log", () => toggleQuestLog(false));
+    registerWindow("passive-window", () => togglePassives(false));
     registerWindow("leaderboard", () => void toggleLeaderboard(false));
     registerWindow("stall-browse", closeBrowse);
     this.controls.onPressed(Action.ClearTarget, () => {
@@ -329,6 +339,10 @@ export class WorldScene extends Phaser.Scene {
     this.controls.onPressed(Action.ToggleInventory, () => toggleInventory());
     this.controls.onPressed(Action.Interact, () => this.interact());
     this.controls.onPressed(Action.QuestLog, () => toggleQuestLog());
+    this.controls.onPressed(Action.PassiveTree, () => togglePassives());
+    this.controls.onPressed(Action.TownPortal, () => {
+      if (this.local && !this.local.state.dead && !this.leaving) this.room.send(Msg.OpenTownPortal);
+    });
     HOTBAR_ACTIONS.forEach((action, index) => this.controls.onPressed(action, () => this.useHotbar(index)));
 
     initChat((text) => this.room.send(Msg.Chat, { text }));
@@ -361,13 +375,15 @@ export class WorldScene extends Phaser.Scene {
         if (!item || !def) return "";
         if (openUpgradeNpc()) return isUpgradeable(def) ? "Sağ tık: yükseltmeye koy" : "Yükseltilemez";
         if (isStallSetupOpen() && !isStallOpen()) return "Sağ tık: tezgâha koy";
-        if (openShopNpc()) return `Sağ tık: sat (${def.sellPrice * item.qty} altın)`;
+        if (openShopNpc()) return `Sağ tık: sat (${itemSellPrice(def, item.affixes) * item.qty} altın)`;
         if (def.slot) return "Sağ tık: kuşan";
+        if (def.jewel) return "Sağ tık: pasif ağaca tak (P)";
         if (def.heal || def.mana || def.recall) return "Sağ tık: kullan";
-        return `Satış değeri: ${def.sellPrice * item.qty} altın`;
+        return `Satış değeri: ${itemSellPrice(def, item.affixes) * item.qty} altın`;
       },
       playerLevel,
     });
+    initPassives({ move: (from, to) => this.room.send(Msg.MoveItem, { from, to }), playerLevel });
     initShop({
       buy: (npcId, itemId, qty) => this.room.send(Msg.Buy, { npcId, itemId, qty }),
       sell: (npcId, index) => this.room.send(Msg.Sell, { npcId, index }),
@@ -480,7 +496,7 @@ export class WorldScene extends Phaser.Scene {
       const sync = () => {
         remote.buffer.push(mob.x, mob.y, mob.dir);
         this.refreshMobHealth(mobId);
-        view.setBaseTint(mob.rooted ? 0x9ad5ff : mob.enraged ? 0xff7070 : null);
+        view.setBaseTint(mob.rooted ? 0x9ad5ff : mob.enraged ? 0xff7070 : mob.empowered ? 0xc4b0ff : null);
         if (mobId === this.targetId) this.refreshTargetFrame();
       };
       sync();
@@ -493,6 +509,7 @@ export class WorldScene extends Phaser.Scene {
     };
     syncPortals();
     $(this.room.state).listen("cleared", syncPortals);
+    $(this.room.state).listen("clock", (minute: number) => hud.setClock(minute, !!this.zone.outdoor));
 
     $(this.room.state).loot.onAdd((loot: LootView, lootId: string) => {
       const view = new EntityView(this, loot.x, loot.y, { type: "chest" });
@@ -516,6 +533,40 @@ export class WorldScene extends Phaser.Scene {
       this.lootSyncs.delete(lootId);
     });
 
+    $(this.room.state).townPortals.onAdd((portal: TownPortalView, portalId: string) => {
+      this.townPortals.get(portalId)?.view.destroy(true);
+      const label = `${portal.owner} → ${ZONES[portal.to as ZoneId]?.name ?? portal.to}`;
+      const view = new EntityView(this, portal.x, portal.y, { type: "portal", style: portal.back ? "exit" : "gate" }, label, "#74c0fc");
+      view.sprite.setInteractive({ useHandCursor: true });
+      view.sprite.on("pointerdown", () => this.useTownPortal(portalId));
+      teleportIn(this, view);
+      this.townPortals.set(portalId, { state: portal, view });
+    });
+    $(this.room.state).townPortals.onRemove((_portal: TownPortalView, portalId: string) => {
+      this.townPortals.get(portalId)?.view.destroy(true);
+      this.townPortals.delete(portalId);
+    });
+
+    $(this.room.state).minions.onAdd((minion: MinionView, minionId: string) => {
+      const skill = SKILLS[minion.skill];
+      if (!skill || skill.effect.type !== "summon") return;
+      const owner = this.playerState(minion.ownerId);
+      const name = owner ? `${skill.effect.name} (${owner.name})` : skill.effect.name;
+      const view = new EntityView(this, minion.x, minion.y, skill.effect.appearance, name, "#b2f2bb");
+      const remote = { state: minion, view, buffer: new SnapshotBuffer() };
+      this.minions.set(minionId, remote);
+      burst(this, minion, 0x495057, 10);
+      const sync = () => remote.buffer.push(minion.x, minion.y, minion.dir);
+      sync();
+      $(minion).onChange(sync);
+    });
+    $(this.room.state).minions.onRemove((minion: MinionView, minionId: string) => {
+      const remote = this.minions.get(minionId);
+      if (remote) boneBurst(this, remote.view, 14);
+      remote?.view.destroy(true);
+      this.minions.delete(minionId);
+    });
+
     $(this.room.state).mobs.onRemove((_mob: MobView, mobId: string) => {
       this.mobs.get(mobId)?.view.destroy(true);
       this.mobs.delete(mobId);
@@ -527,7 +578,21 @@ export class WorldScene extends Phaser.Scene {
 
   private bindMessages() {
     this.room.onMessage(Msg.Pong, (sentAt: number) => hud.setPing(performance.now() - sentAt));
-    this.room.onMessage(Msg.Combat, (event: CombatEvent) => this.showCombatEvent(event));
+    initDamageMeter();
+    this.room.onMessage(Msg.Combat, (event: CombatEvent) => {
+      this.showCombatEvent(event);
+      recordCombat(event, {
+        actor: (sessionId) => {
+          if (sessionId !== this.room.sessionId && !this.party.sessions.has(sessionId)) return undefined;
+          const player = this.playerState(sessionId);
+          return player ? { name: player.name, cls: player.cls } : undefined;
+        },
+        enemyName: (e) => {
+          if (e.targetKind === "mob") return MOBS[this.mobs.get(e.targetId)?.state.kind ?? ""]?.name;
+          return this.playerState(e.targetId)?.name;
+        },
+      });
+    });
     this.room.onMessage(Msg.Attack, (event: AttackEvent) => this.showAttack(event));
     this.room.onMessage(Msg.Transfer, (event: TransferEvent) => this.teleport(event));
     this.room.onMessage(Msg.MyStall, (event: MyStallEvent) => onMyStall(event));
@@ -550,6 +615,7 @@ export class WorldScene extends Phaser.Scene {
     this.room.onMessage(Msg.Notice, (event: NoticeEvent) => hud.showMessage(event.message, "info", event.color));
     this.room.onMessage(Msg.Inventory, (event: InventoryEvent) => {
       updateInventory(event);
+      updatePassives(event);
       updateDoll(event.equipment);
       refreshShop();
       refreshUpgrade();
@@ -666,6 +732,21 @@ export class WorldScene extends Phaser.Scene {
   /** Portals that are currently open (some only after the boss is dead). */
   private portalOpen(def: PortalDef) {
     return !def.requiresClear || this.room.state.cleared;
+  }
+
+  /** Our own town portal (others' are just scenery to us). */
+  private ownTownPortal(portalId: string) {
+    const portal = this.townPortals.get(portalId);
+    return portal && portal.state.owner === this.local?.state.name ? portal : undefined;
+  }
+
+  private useTownPortal(portalId: string) {
+    const local = this.local;
+    const portal = this.ownTownPortal(portalId);
+    if (!local || local.state.dead || this.leaving) return;
+    if (!portal) return hud.showMessage("Bu portal senin değil");
+    if (distance(local.view, portal.state) > PORTAL_RANGE) return hud.showMessage("Çok uzak");
+    this.room.send(Msg.UseTownPortal, { portalId });
   }
 
   private usePortal(def: PortalDef) {
@@ -816,6 +897,10 @@ export class WorldScene extends Phaser.Scene {
     if (!local) return;
     const portal = this.portals.find((p) => this.portalOpen(p.def) && distance(local.view, p.def) <= PORTAL_RANGE);
     if (portal) return this.usePortal(portal.def);
+    const townPortal = [...this.townPortals.keys()].find(
+      (id) => this.ownTownPortal(id) && distance(local.view, this.townPortals.get(id)!.state) <= PORTAL_RANGE,
+    );
+    if (townPortal) return this.useTownPortal(townPortal);
     const npc = this.zone.npcs.map((id) => NPCS[id]).find((n) => distance(local.view, n) <= NPC_RANGE);
     if (npc) return this.talkTo(npc);
     const stall = [...this.players].find(([, p]) => p.state.stall && distance(local.view, p.view) <= STALL_RANGE);
@@ -891,9 +976,10 @@ export class WorldScene extends Phaser.Scene {
       hud.setTargetFrame(null);
       return;
     }
-    const { kind, level, hp, maxHp, aggroId } = mob.state;
+    const { kind, level, hp, maxHp, aggroId, empowered } = mob.state;
     hud.setTargetFrame({
       name: MOBS[kind].name,
+      subtitle: MOBS[kind].nightOnly ? "Gece yaratığı" : empowered ? "Gece gücü" : undefined,
       level,
       hp,
       maxHp,
@@ -902,8 +988,9 @@ export class WorldScene extends Phaser.Scene {
     });
   }
 
-  private viewFor(id: string, kind: "player" | "mob"): EntityView | undefined {
+  private viewFor(id: string, kind: "player" | "mob" | "minion"): EntityView | undefined {
     if (kind === "mob") return this.mobs.get(id)?.view;
+    if (kind === "minion") return this.minions.get(id)?.view;
     if (id === this.room.sessionId) return this.local?.view;
     return this.players.get(id)?.view;
   }
@@ -932,9 +1019,9 @@ export class WorldScene extends Phaser.Scene {
       this.showSpell(skill, source, target);
     } else if (!skill && caster && classOf(caster.cls).autoAttack.ranged && target) {
       // Casters' plain attacks: a small bolt from the staff.
-      projectile(this, source, target, caster.cls === "priest" ? 0xffe066 : 0xb197fc, 2);
+      projectile(this, source, target, caster.cls === "priest" ? 0xffe066 : caster.cls === "necromancer" ? 0x69db7c : 0xb197fc, 2);
     } else {
-      const kind: SwingKind = event.skill === "whirlwind" ? "spin" : event.skill === "heroicStrike" ? "heavy" : "normal";
+      const kind: SwingKind = event.skill === "whirlwind" ? "spin" : event.skill === "heroicStrike" || event.skill === "shieldSlam" ? "heavy" : "normal";
       source.playAttack(kind, target);
     }
     // Our own character turns to face what it hits when standing still.
@@ -971,6 +1058,22 @@ export class WorldScene extends Phaser.Scene {
         break;
       case "shield":
         burst(this, at, 0x74c0fc, 10);
+        break;
+      case "drain":
+        // The soul flows from the victim back to the caster.
+        if (target) projectile(this, target, source, 0x51cf66, 3);
+        break;
+      case "summon":
+        burst(this, source, 0x868e96, 12);
+        break;
+      case "bone":
+        boneBurst(this, source, skill.effect.type === "whirlwind" ? skill.effect.radius : 40);
+        break;
+      case "shout":
+        ringEffect(this, source.x, source.y - 2, 0xe03131, skill.effect.type === "whirlwind" ? skill.effect.radius : 40);
+        break;
+      case "guard":
+        burst(this, source, 0x74c0fc, 12);
         break;
     }
   }
@@ -1018,9 +1121,9 @@ export class WorldScene extends Phaser.Scene {
   }
 
   /** Bubble around players with an active shield. */
-  private updateShieldBubble(sessionId: string, view: EntityView, shield: number) {
+  private updateShieldBubble(sessionId: string, view: EntityView, shield: number, guarded = false) {
     let bubble = this.shieldBubbles.get(sessionId);
-    if (shield <= 0) {
+    if (shield <= 0 && !guarded) {
       bubble?.destroy();
       this.shieldBubbles.delete(sessionId);
       return;
@@ -1083,6 +1186,7 @@ export class WorldScene extends Phaser.Scene {
       const y = local.prev.y + (local.curr.y - local.prev.y) * alpha;
       local.view.setPosition(x, y);
       local.view.setAnimation(local.dir, local.moving);
+      hud.setPosition(x, y);
       // Follow manually on whole pixels; Phaser's lerped follow causes sub-pixel jitter at high zoom.
       const camera = this.cameras.main;
       camera.centerOn(Math.round(x), Math.round(y));
@@ -1107,11 +1211,12 @@ export class WorldScene extends Phaser.Scene {
     if (speaker && local && distance(local.view, speaker) > NPC_RANGE + TILE_SIZE) closeNpcDialog();
 
     this.refreshBossBar();
-    if (local) this.updateShieldBubble(this.room.sessionId, local.view, local.state.shield);
-    for (const [sessionId, remote] of this.players) this.updateShieldBubble(sessionId, remote.view, remote.state.shield);
+    if (local) this.updateShieldBubble(this.room.sessionId, local.view, local.state.shield, local.state.guarded);
+    for (const [sessionId, remote] of this.players) this.updateShieldBubble(sessionId, remote.view, remote.state.shield, remote.state.guarded);
     const renderTime = performance.now() - INTERPOLATION_DELAY_MS;
     for (const remote of this.players.values()) this.renderRemote(remote, renderTime);
     for (const remote of this.mobs.values()) this.renderRemote(remote, renderTime);
+    for (const remote of this.minions.values()) this.renderRemote(remote, renderTime);
 
     const target = this.targetId ? (this.mobs.get(this.targetId) ?? this.players.get(this.targetId)) : undefined;
     this.targetRing.setVisible(!!target);
@@ -1138,7 +1243,7 @@ export class WorldScene extends Phaser.Scene {
     this.room.send(Msg.Input, input);
   }
 
-  private renderRemote(remote: Remote<PlayerView | MobView>, renderTime: number) {
+  private renderRemote(remote: Remote<PlayerView | MobView | MinionView>, renderTime: number) {
     const sample = remote.buffer.sample(renderTime);
     if (!sample) return;
     const moved = Math.abs(sample.x - remote.view.x) > 0.01 || Math.abs(sample.y - remote.view.y) > 0.01;

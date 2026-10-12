@@ -1,4 +1,4 @@
-import type { IconShape } from "../../../shared/src";
+import { itemRarity, RARITY_COLORS, type Affix, type IconShape, type ItemDef } from "../../../shared/src";
 
 // 12x12 pixel-art item icons, drawn once per (shape, colour) into data URLs for the DOM UI.
 // Legend: k outline, m item colour, l lighter, d darker, w highlight, h wood/handle, g gold, n glass,
@@ -143,6 +143,49 @@ const SHAPES: Record<IconShape, string[]> = {
     "..kppppppk..",
     ".kqppppppqk.",
     "..kkkkkkkk..",
+    "............",
+  ],
+  // Passive tree jewels: round. Major = big stone in a gold setting, minor = small bare stone.
+  jewel_major: [
+    "...gggggg...",
+    "..gkkkkkkg..",
+    ".gkwlmmmmkg.",
+    "gkwlmmmmmmkg",
+    "gklmmmmmmdkg",
+    "gkmmmmmmmdkg",
+    "gkmmmmmmddkg",
+    "gkmmmmmdddkg",
+    ".gkmmmdddkg.",
+    "..gkkkkkkg..",
+    "...gggggg...",
+    "............",
+  ],
+  jewel_greater: [
+    "....kggk....",
+    "...kwlmmk...",
+    "..kwlmmmmk..",
+    ".kwlmmmmmmk.",
+    "gklmmmmmmdkg",
+    "ggmmmmmmmdgg",
+    "gkmmmmmmddkg",
+    ".kmmmmmdddk.",
+    "..kmmmdddk..",
+    "...kmdddk...",
+    "....kggk....",
+    ".....gg.....",
+  ],
+  jewel_minor: [
+    "............",
+    "............",
+    "....kkkk....",
+    "...kwlmmk...",
+    "..kwlmmmmk..",
+    "..klmmmmdk..",
+    "..kmmmmmdk..",
+    "..kmmmmddk..",
+    "...kmmddk...",
+    "....kkkk....",
+    "............",
     "............",
   ],
   gem: [
@@ -361,6 +404,13 @@ export function paintIcon(ctx: CanvasRenderingContext2D, shape: IconShape, color
 }
 
 const cache = new Map<string, string>();
+
+/** An item instance's icon: jewels take their rarity's colour, everything else its own. */
+export function itemIconUrl(def: ItemDef, affixes?: Affix[]): string {
+  if (!def.jewel) return iconUrl(def.icon.shape, def.icon.color);
+  const color = Number.parseInt(RARITY_COLORS[itemRarity(def, affixes)].slice(1), 16);
+  return iconUrl(def.icon.shape, color);
+}
 
 export function iconUrl(shape: IconShape, color: number): string {
   const key = `${shape}:${color}`;

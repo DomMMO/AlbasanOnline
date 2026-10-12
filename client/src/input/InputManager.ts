@@ -22,6 +22,8 @@ export enum Action {
   Interact = "interact",
   Leaderboard = "leaderboard",
   QuestLog = "questLog",
+  PassiveTree = "passiveTree",
+  TownPortal = "townPortal",
 }
 
 /** Hotbar slots in order. */
@@ -44,6 +46,8 @@ const DEFAULT_BINDINGS: Record<Action, string[]> = {
   [Action.Interact]: ["E"],
   [Action.Leaderboard]: ["L"],
   [Action.QuestLog]: ["J"],
+  [Action.PassiveTree]: ["P"],
+  [Action.TownPortal]: ["T"],
 };
 
 // On-screen touch controls (ui/touch.ts) drive the same actions through these.

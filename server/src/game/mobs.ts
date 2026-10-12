@@ -3,9 +3,13 @@ import {
   directionToward,
   distance,
   MOB_ATTACK_RANGE,
+  MOB_FEAR_LEVEL_GAP,
   MOB_LEASH_RANGE,
   MOBS,
   moveWithCollision,
+  NIGHT_ONLY_POWER,
+  NIGHT_POWER,
+  type MobDef,
   TICK_MS,
   TILE_SIZE,
   zoneLayout,
@@ -37,6 +41,11 @@ export function spawnInitialMobs(game: Game) {
 }
 
 export function spawnMob(game: Game, zone: SpawnZone) {
+  // Night creatures wait for dark.
+  if (MOBS[zone.mob]?.nightOnly && !game.night) {
+    game.dormantSpawns.push(zone);
+    return;
+  }
   const point = findSpawnPoint(game, zone);
   if (point) spawnMobAt(game, zone.mob, point, zone);
 }
@@ -48,9 +57,11 @@ export function spawnMobAt(game: Game, mobId: string, point: { x: number; y: num
 
   const id = game.newId("m");
   const mob = new Mob();
+  const power = mobPower(game, def);
   mob.kind = def.id;
   mob.level = def.level;
-  mob.maxHp = mob.hp = def.maxHp;
+  mob.maxHp = mob.hp = Math.round(def.maxHp * power);
+  mob.empowered = power > 1;
   mob.x = point.x;
   mob.y = point.y;
   game.state.mobs.set(id, mob);
@@ -66,8 +77,44 @@ export function spawnMobAt(game: Game, mobId: string, point: { x: number; y: num
     nextWanderAt: game.now() + game.random() * 5000,
     rootedUntil: 0,
     boss: def.boss ? newBossState() : undefined,
+    power,
   });
   return id;
+}
+
+function mobPower(game: Game, def: MobDef): number {
+  if (def.nightOnly) return NIGHT_ONLY_POWER;
+  return game.night ? NIGHT_POWER : 1;
+}
+
+/** Dusk or dawn: rescale every mob (keeping its health fraction) and wake or dismiss night creatures. */
+export function nightChanged(game: Game) {
+  for (const [id, runtime] of game.mobRuntime) {
+    const mob = game.state.mobs.get(id);
+    const power = mobPower(game, runtime.def);
+    if (!mob || power === runtime.power) continue;
+    const fraction = mob.hp / mob.maxHp;
+    mob.maxHp = Math.round((mob.maxHp / runtime.power) * power);
+    mob.hp = Math.max(1, Math.round(mob.maxHp * fraction));
+    mob.empowered = power > 1;
+    runtime.power = power;
+  }
+  if (game.night) {
+    for (const zone of game.dormantSpawns.splice(0)) spawnMob(game, zone);
+  }
+}
+
+/** A night creature caught by daylight fades away (only once nobody is fighting it). */
+function fadeAtDawn(game: Game, id: string, runtime: MobRuntime) {
+  game.state.mobs.delete(id);
+  game.mobRuntime.delete(id);
+  for (const playerRuntime of game.playerRuntime.values()) {
+    if (playerRuntime.targetId === id) {
+      playerRuntime.targetId = null;
+      playerRuntime.attacking = false;
+    }
+  }
+  if (runtime.zone) game.dormantSpawns.push(runtime.zone);
 }
 
 function findSpawnPoint(game: Game, zone: SpawnZone) {
@@ -89,6 +136,10 @@ export function updateMobs(game: Game) {
     const mob = game.state.mobs.get(id);
     if (!mob) continue;
     if (mob.rooted && game.now() >= runtime.rootedUntil) mob.rooted = false;
+    if (runtime.def.nightOnly && !game.night && runtime.mode === "idle") {
+      fadeAtDawn(game, id, runtime);
+      continue;
+    }
     switch (runtime.mode) {
       case "idle":
         updateIdle(game, mob, runtime);
@@ -117,12 +168,16 @@ export function addThreat(game: Game, runtime: MobRuntime, sessionId: string, am
 
 function updateIdle(game: Game, mob: Mob, runtime: MobRuntime) {
   if (runtime.def.aggroRange > 0) {
-    const victim = nearestLivingPlayer(game, mob, runtime.def.aggroRange);
+    // Players far above the mob's level are left alone.
+    const victim = nearestLivingPlayer(game, mob, runtime.def.aggroRange, (level) => level < mob.level + MOB_FEAR_LEVEL_GAP);
     if (victim) {
       addThreat(game, runtime, victim, 1);
       return;
     }
   }
+
+  // ...and when one walks close, the mob edges away a little (bosses stand their ground).
+  if (!runtime.boss && !mob.rooted && shyAway(game, mob, runtime)) return;
 
   if (!runtime.wanderTo && game.now() >= runtime.nextWanderAt) {
     const angle = game.random() * Math.PI * 2;
@@ -233,11 +288,37 @@ function highestThreat(game: Game, runtime: MobRuntime): string | null {
   return best;
 }
 
-function nearestLivingPlayer(game: Game, mob: Mob, range: number): string | null {
+/** Shy-away range around a much stronger player, and how far from home a mob will back off. */
+const SHY_RANGE = TILE_SIZE * 3.5;
+const SHY_MAX_FROM_HOME = WANDER_RADIUS * 1.5;
+const SHY_SPEED_MULTIPLIER = 0.35;
+
+/** Steps slowly away from a nearby player MOB_FEAR_LEVEL_GAP+ levels above it. Returns true while doing so. */
+function shyAway(game: Game, mob: Mob, runtime: MobRuntime): boolean {
+  const strongId = nearestLivingPlayer(game, mob, SHY_RANGE, (level) => level >= mob.level + MOB_FEAR_LEVEL_GAP);
+  const strong = strongId ? game.state.players.get(strongId) : undefined;
+  if (!strong) return false;
+  const dx = mob.x - strong.x;
+  const dy = mob.y - strong.y;
+  const dist = Math.hypot(dx, dy) || 1;
+  const away = { x: mob.x + (dx / dist) * TILE_SIZE, y: mob.y + (dy / dist) * TILE_SIZE };
+  runtime.wanderTo = null;
+  runtime.nextWanderAt = game.now() + 2000;
+  if (distance(away, runtime.home) > SHY_MAX_FROM_HOME) {
+    // Backed off as far as it goes: just keep an eye on them.
+    mob.moving = false;
+    mob.dir = directionToward(-dx, -dy, mob.dir);
+    return true;
+  }
+  stepToward(game, mob, away, runtime.def.speed * SHY_SPEED_MULTIPLIER);
+  return true;
+}
+
+function nearestLivingPlayer(game: Game, mob: Mob, range: number, levelOk: (level: number) => boolean = () => true): string | null {
   let best: string | null = null;
   let bestDist = range;
   game.state.players.forEach((player, sessionId) => {
-    if (player.dead) return;
+    if (player.dead || !levelOk(player.level)) return;
     const d = distance(mob, player);
     if (d <= bestDist) {
       best = sessionId;

@@ -4,6 +4,7 @@ import {
   ITEMS,
   MAX_ENHANCE,
   PROTECTION_ITEM,
+  itemRarity,
   RARITY_COLORS,
   SAFE_UPGRADE_LEVEL,
   scrollForLevel,
@@ -131,7 +132,7 @@ export function refreshUpgrade() {
 
   const def = ITEMS[item.defId];
   if (item.enhance >= MAX_ENHANCE) {
-    infoEl.replaceChildren(row(`<b style="color:${RARITY_COLORS[def.rarity]}">${escape(def.name)} +${item.enhance}</b>`), row("Bu item en yüksek seviyede.", "muted"));
+    infoEl.replaceChildren(row(`<b style="color:${RARITY_COLORS[itemRarity(def, item.affixes)]}">${escape(def.name)} +${item.enhance}</b>`), row("Bu item en yüksek seviyede.", "muted"));
     button.disabled = true;
     protectInput.disabled = true;
     return;
@@ -152,7 +153,7 @@ export function refreshUpgrade() {
     .join(" · ");
 
   infoEl.replaceChildren(
-    row(`<b style="color:${RARITY_COLORS[def.rarity]}">${escape(def.name)}</b> +${item.enhance} → <b class="up">+${target}</b>`),
+    row(`<b style="color:${RARITY_COLORS[itemRarity(def, item.affixes)]}">${escape(def.name)}</b> +${item.enhance} → <b class="up">+${target}</b>`),
     row(statLines, "muted"),
     row(`Başarı şansı: <b>%${chance}</b>`),
     row(

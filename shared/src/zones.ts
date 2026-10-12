@@ -1,6 +1,7 @@
 import { TILE_SIZE } from "./constants";
 import { buildGoblinCave, buildJackLair, buildPvpArena, type DungeonLayout, type SpawnZone } from "./dungeons";
 import { buildForest, FOREST_SPOTS } from "./forest";
+import { BIG_DUNGEON_IDS, BIG_DUNGEONS, bigDungeonEntrance, type BigDungeonId } from "./bigDungeons";
 import { CAVE_BRIDGE, CAVE_ENTRANCE_TILE, CAVE_TORCHES, generateWorldMap, type WorldMap } from "./map";
 import { buildTown, TOWN_SPOTS } from "./town";
 
@@ -10,7 +11,7 @@ import { buildTown, TOWN_SPOTS } from "./town";
 // there and you log back in where you left. Every other zone is entered through a portal
 // and leaving it puts you back at the portal you used.
 
-export type ZoneId = "town" | "world" | "forest" | "goblin_cave" | "jack_lair" | "pvp_arena";
+export type ZoneId = "town" | "world" | "forest" | "goblin_cave" | "jack_lair" | "pvp_arena" | BigDungeonId;
 
 /** New characters start here; the zone anyone can join without a portal ticket. */
 export const HOME_ZONE: ZoneId = "town";
@@ -47,6 +48,8 @@ export interface ZoneDef {
   pvp?: boolean;
   /** Players can open market stalls here (on market tiles). */
   market?: boolean;
+  /** Under the sky: gets dark at night, and its mobs grow stronger then. */
+  outdoor?: boolean;
   npcs: string[];
   portals: PortalDef[];
   /** Shown on the death screen. */
@@ -70,11 +73,16 @@ const WORLD_SPAWN_ZONES: SpawnZone[] = [
   { mob: "slime", tx: 41, ty: 31, radius: 6, count: 5 },
   { mob: "wolf", tx: 50, ty: 11, radius: 7, count: 5 },
   { mob: "goblin", tx: 13, ty: 37, radius: 7, count: 5 },
+  // Night only (see MobDef.nightOnly): they come out at dusk and fade at dawn.
+  { mob: "shadow_slime", tx: 24, ty: 17, radius: 6, count: 3 },
+  { mob: "shadow_slime", tx: 41, ty: 31, radius: 6, count: 3 },
+  { mob: "ghost_wolf", tx: 50, ty: 11, radius: 7, count: 3 },
 ];
 
 export const ZONES: Record<ZoneId, ZoneDef> = {
   town: {
     id: "town",
+    outdoor: true,
     name: "Ana Merkez",
     instanced: false,
     persistent: true,
@@ -104,6 +112,7 @@ export const ZONES: Record<ZoneId, ZoneDef> = {
   },
   world: {
     id: "world",
+    outdoor: true,
     name: "Başlangıç Vadisi",
     instanced: false,
     persistent: true,
@@ -134,12 +143,18 @@ export const ZONES: Record<ZoneId, ZoneDef> = {
   },
   forest: {
     id: "forest",
+    outdoor: true,
     name: "Kara Orman",
     instanced: false,
     persistent: true,
     npcs: ["ranger", "peddler"],
     respawnText: "Korucuların kampında yeniden doğacaksın.",
     portals: [
+      ...BIG_DUNGEON_IDS.map((id) => {
+        const dungeon = BIG_DUNGEONS[id];
+        const { portal, returnTo } = bigDungeonEntrance(dungeon);
+        return { id: `${id}_entrance`, ...portal, to: id, label: dungeon.name, style: "cave" as const, minLevel: dungeon.minLevel, returnTo };
+      }),
       {
         id: "forest_valley_gate",
         ...FOREST_SPOTS.valleyGate,
@@ -153,6 +168,7 @@ export const ZONES: Record<ZoneId, ZoneDef> = {
   },
   pvp_arena: {
     id: "pvp_arena",
+    outdoor: true,
     name: "Kan Arenası",
     instanced: false,
     pvp: true,
@@ -184,6 +200,23 @@ export const ZONES: Record<ZoneId, ZoneDef> = {
       { id: "lair_exit_top", x: 17.5 * TILE_SIZE, y: 4 * TILE_SIZE, to: "world", label: "Çıkış", style: "exit", requiresClear: true },
     ],
   },
+  ...(Object.fromEntries(
+    BIG_DUNGEON_IDS.map((id) => {
+      const { name, layout } = BIG_DUNGEONS[id];
+      const zone: ZoneDef = {
+        id,
+        name,
+        instanced: true,
+        npcs: [],
+        respawnText: "Zindanın girişinde yeniden doğacaksın.",
+        portals: [
+          { id: `${id}_exit`, ...layout.entrancePortal, to: "forest", label: "Çıkış", style: "exit" },
+          { id: `${id}_final_exit`, ...layout.exitPortal, to: "forest", label: "Çıkış", style: "exit", requiresClear: true },
+        ],
+      };
+      return [id, zone];
+    }),
+  ) as Record<BigDungeonId, ZoneDef>),
 };
 
 const layouts = new Map<ZoneId, DungeonLayout>();
@@ -200,6 +233,7 @@ const BUILDERS: Record<ZoneId, () => DungeonLayout> = {
   goblin_cave: buildGoblinCave,
   jack_lair: buildJackLair,
   pvp_arena: buildPvpArena,
+  ...(Object.fromEntries(BIG_DUNGEON_IDS.map((id) => [id, (): DungeonLayout => BIG_DUNGEONS[id].layout])) as unknown as Record<BigDungeonId, () => DungeonLayout>),
 };
 
 /** Map, fixed mob placements and spawn points of a zone. Built once and cached. */

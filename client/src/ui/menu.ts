@@ -11,6 +11,7 @@ const checkboxes = {
   damageNumbers: $<HTMLInputElement>("setting-damage"),
   speechBubbles: $<HTMLInputElement>("setting-bubbles"),
   helpText: $<HTMLInputElement>("setting-help"),
+  damageMeter: $<HTMLInputElement>("setting-meter"),
 };
 
 export interface MenuActions {

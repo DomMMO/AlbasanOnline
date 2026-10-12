@@ -6,10 +6,12 @@ export interface Settings {
   damageNumbers: boolean;
   speechBubbles: boolean;
   helpText: boolean;
+  /** Damage / healing meter panel. */
+  damageMeter: boolean;
 }
 
 const KEY = "mmo.settings";
-const DEFAULTS: Settings = { zoom: "auto", damageNumbers: true, speechBubbles: true, helpText: true };
+const DEFAULTS: Settings = { zoom: "auto", damageNumbers: true, speechBubbles: true, helpText: true, damageMeter: true };
 
 function load(): Settings {
   try {
