@@ -33,6 +33,11 @@ export const Msg = {
   QuestAccept: "questAccept",
   QuestTurnIn: "questTurnIn",
   QuestAbandon: "questAbandon",
+  /** Skill page: add (+1) or take back (-1) a rank; or reset all. */
+  SkillRank: "skillRank",
+  SkillReset: "skillReset",
+  /** Ayşe Teyze: read today's fortune. */
+  ReadFortune: "readFortune",
   /** T: open a town portal where you stand. */
   OpenTownPortal: "openTownPortal",
   UseTownPortal: "useTownPortal",
@@ -63,6 +68,10 @@ export const Msg = {
   MyStall: "myStall",
   /** Your quest log (sent on join and whenever it changes). */
   QuestLog: "questLog",
+  /** Your skill ranks and free points (sent on join and whenever they change). */
+  SkillRanks: "skillRanks",
+  /** Today's fortune (after asking, and on join if one was read today). */
+  Fortune: "fortune",
 } as const;
 
 export interface QuestMessage {
@@ -94,6 +103,26 @@ export interface JoinOptions {
 
 export interface UsePortalMessage {
   portalId: string;
+}
+
+export interface SkillRankMessage {
+  /** Skill or passive id. */
+  id: string;
+  delta: 1 | -1;
+}
+
+export interface SkillRanksEvent {
+  ranks: Record<string, number>;
+  /** Points not spent yet. */
+  points: number;
+}
+
+export interface FortuneEvent {
+  good: boolean;
+  /** What Ayşe Teyze says (absent when just restoring today's state on join). */
+  text?: string;
+  /** Added to upgrade success chances today (0 on a bad day). */
+  upgradeBonus: number;
 }
 
 export interface UseTownPortalMessage {
@@ -171,6 +200,9 @@ export interface AttackEvent {
   targetKind?: EntityKind;
   /** Skill id; absent for a plain auto-attack swing. */
   skill?: string;
+  /** Dashes: where the caster set off from (its new position arrives with the state). */
+  fromX?: number;
+  fromY?: number;
 }
 
 /** Someone started a spell with a cast time (everyone sees it; the caster also gets a cast bar). */
@@ -430,6 +462,10 @@ export interface PlayerView {
   rooted: boolean;
   /** Kalkan Duvarı is up (takes less damage). */
   guarded: boolean;
+  /** Can't move or act (stun skills in PvP). */
+  stunned: boolean;
+  /** A buff skill is running (glow). */
+  buffed: boolean;
   /** PvP spawn protection: players can't hurt this player yet. */
   protected: boolean;
   /** PvP stats, shown on the nameplate tooltip and leaderboard. */
@@ -457,6 +493,8 @@ export interface MobView {
   aggroId: string;
   /** Stronger than normal: an outdoor mob at night, or a night-only creature. */
   empowered: boolean;
+  /** Stunned: can't move or attack. */
+  stunned: boolean;
   x: number;
   y: number;
   dir: Direction;

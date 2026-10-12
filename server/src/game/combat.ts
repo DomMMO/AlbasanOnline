@@ -22,6 +22,7 @@ import {
   WARRIOR_THREAT_MULTIPLIER,
   REGEN_PER_SECOND,
   rollDamage,
+  collides,
   CRIT_MULTIPLIER,
   SKILLS,
   skillPower,
@@ -38,7 +39,8 @@ import {
   type XpGainedEvent,
 } from "../../../shared/src";
 import type { Mob, Player } from "../rooms/schema/WorldState";
-import type { Game, MobRuntime, PlayerRuntime } from "./Game";
+import type { ActiveBuff, Game, MobRuntime, PlayerRuntime } from "./Game";
+import { sendSkillRanks } from "./talents";
 import { bossDamaged, bossDefeated } from "./boss";
 import { dropLoot, refreshStats } from "./items";
 import { questKill } from "./quests";
@@ -127,7 +129,7 @@ function lifeSteal(game: Game, sessionId: string, amount: number) {
 }
 
 /** Every enemy within `radius` of the caster. */
-function enemiesAround(game: Game, sessionId: string, center: Player, radius: number): Enemy[] {
+function enemiesAround(game: Game, sessionId: string, center: { x: number; y: number }, radius: number): Enemy[] {
   const enemies: Enemy[] = [];
   game.state.mobs.forEach((mob, id) => {
     if (distance(center, mob) <= radius) enemies.push({ kind: "mob", id, entity: mob });
@@ -182,6 +184,8 @@ export function useSkill(game: Game, sessionId: string, skillId: string) {
   const now = game.now();
 
   if (player.dead) return fail(game, sessionId, "Ölüyken yapamazsın");
+  if ((runtime.skillRanks[skill.id] ?? 0) < 1) return fail(game, sessionId, "Bu yeteneği henüz öğrenmedin (K)");
+  if (now < runtime.stunnedUntil) return fail(game, sessionId, "Sersemlemiş durumdasın");
   // Spamming a key during the GCD is normal; ignore it silently.
   if (skill.triggersGcd && now < runtime.gcdUntil) return;
   if (runtime.casting) return fail(game, sessionId, "Zaten büyü yapıyorsun");
@@ -217,7 +221,7 @@ function performSkill(game: Game, sessionId: string, player: Player, runtime: Pl
   const effect = skill.effect;
   // Passive tree jewels (and Zeka) make skills stronger.
   const power = skillPower(runtime.stats, skill.id);
-  const attack = runtime.stats.attack * power;
+  const attack = runtime.stats.attack * power * (1 + buffTotals(runtime, now).attackPct);
   const self = { sourceId: sessionId, sourceKind: "player" as const, skill: skill.id };
 
   switch (effect.type) {
@@ -244,6 +248,103 @@ function performSkill(game: Game, sessionId: string, player: Player, runtime: Pl
         player.hp += healed;
         broadcastCombat(game, { sourceId: sessionId, targetId: sessionId, targetKind: "player", amount: healed, crit: false, heal: true });
       }
+      break;
+    }
+    case "stun": {
+      const enemy = enemyAt(game, sessionId, targetId);
+      if (!enemy) return fail(game, sessionId, "Hedef yok");
+      dropProtection(game, sessionId);
+      broadcastAttack(game, player, { ...self, targetId: enemy.id, targetKind: enemy.kind }, enemy.entity);
+      runtime.lastCombatAt = now;
+      hitEnemy(game, sessionId, enemy, attack * effect.multiplier + effect.bonus * power);
+      stunEnemy(game, enemy, effect.stunMs);
+      break;
+    }
+    case "blast": {
+      const enemy = enemyAt(game, sessionId, targetId);
+      if (!enemy) return fail(game, sessionId, "Hedef yok");
+      dropProtection(game, sessionId);
+      broadcastAttack(game, player, { ...self, targetId: enemy.id, targetKind: enemy.kind }, enemy.entity);
+      runtime.lastCombatAt = now;
+      for (const victim of enemiesAround(game, sessionId, { x: enemy.entity.x, y: enemy.entity.y }, effect.radius)) {
+        hitEnemy(game, sessionId, victim, attack * effect.multiplier);
+      }
+      break;
+    }
+    case "radiance": {
+      const victims = enemiesAround(game, sessionId, player, effect.radius);
+      if (victims.length > 0) {
+        runtime.lastCombatAt = now;
+        dropProtection(game, sessionId);
+      }
+      broadcastAttack(game, player, self);
+      for (const victim of victims) hitEnemy(game, sessionId, victim, attack * effect.multiplier);
+      for (const [friendId, friend] of friendsAround(game, sessionId, player, effect.radius)) {
+        const healed = Math.min(Math.round(attack * effect.healMultiplier), friend.maxHp - friend.hp);
+        if (healed <= 0) continue;
+        friend.hp += healed;
+        addHealThreat(game, sessionId, friendId, healed);
+        broadcastCombat(game, { sourceId: sessionId, targetId: friendId, targetKind: "player", amount: healed, crit: false, heal: true });
+      }
+      break;
+    }
+    case "dash": {
+      const enemy = effect.mode === "forward" ? undefined : enemyAt(game, sessionId, targetId);
+      if (effect.mode !== "forward" && !enemy) return fail(game, sessionId, "Hedef yok");
+      const from = { x: player.x, y: player.y };
+      dash(game, player, enemy?.entity, effect.mode, effect.distance);
+      game.io.broadcast(Msg.Attack, { ...self, targetId: enemy?.id, targetKind: enemy?.kind, fromX: from.x, fromY: from.y } satisfies AttackEvent);
+      cancelCast(game, sessionId);
+      if (enemy) {
+        dropProtection(game, sessionId);
+        runtime.lastCombatAt = now;
+        player.dir = directionToward(enemy.entity.x - player.x, enemy.entity.y - player.y, player.dir);
+      }
+      const hitMultiplier = effect.multiplier ?? 0;
+      if (effect.landRadius && hitMultiplier > 0) {
+        const victims = enemiesAround(game, sessionId, player, effect.landRadius);
+        if (victims.length > 0) runtime.lastCombatAt = now;
+        for (const victim of victims) hitEnemy(game, sessionId, victim, attack * hitMultiplier);
+      } else if (enemy && hitMultiplier > 0) {
+        hitEnemy(game, sessionId, enemy, attack * hitMultiplier);
+      }
+      if (enemy && effect.stunMs) stunEnemy(game, enemy, effect.stunMs);
+      if (enemy && !classOf(player.cls).autoAttack.ranged) runtime.attacking = true;
+      if (effect.healPercent) {
+        const healed = Math.min(Math.round(player.maxHp * effect.healPercent * power), player.maxHp - player.hp);
+        if (healed > 0) {
+          player.hp += healed;
+          broadcastCombat(game, { sourceId: sessionId, targetId: sessionId, targetKind: "player", amount: healed, crit: false, heal: true });
+        }
+      }
+      if (effect.shieldPercent) {
+        player.shield = Math.max(player.shield, Math.round(player.maxHp * effect.shieldPercent * power));
+        runtime.shieldUntil = Math.max(runtime.shieldUntil, now + 6000);
+      }
+      break;
+    }
+    case "buff": {
+      if (effect.hpCostPercent) {
+        const cost = Math.round(player.maxHp * effect.hpCostPercent);
+        if (player.hp <= cost) return fail(game, sessionId, "Canın yetmiyor");
+        player.hp -= cost;
+      }
+      const buff: ActiveBuff = {
+        skillId: skill.id,
+        until: now + effect.durationMs,
+        attackPct: (effect.attackPct ?? 0) * power,
+        speedPct: (effect.speedPct ?? 0) * power,
+        reductionPct: effect.reductionPct ?? 0,
+      };
+      const targets = effect.partyRadius ? friendsAround(game, sessionId, player, effect.partyRadius) : [[sessionId, player] as const];
+      for (const [friendId, friend] of targets) {
+        const friendRuntime = game.playerRuntime.get(friendId);
+        if (!friendRuntime) continue;
+        // Re-casting refreshes rather than stacking.
+        friendRuntime.buffs = [...friendRuntime.buffs.filter((b) => b.skillId !== skill.id), { ...buff }];
+        friend.buffed = true;
+      }
+      broadcastAttack(game, player, self);
       break;
     }
     case "guard": {
@@ -371,7 +472,12 @@ export function updatePlayerCombat(game: Game) {
 
     if (player.shield > 0 && now >= runtime.shieldUntil) player.shield = 0;
     if (player.guarded && now >= runtime.guardUntil) player.guarded = false;
+    if (player.stunned && now >= runtime.stunnedUntil) player.stunned = false;
     if (player.rooted && now >= runtime.rootedUntil) player.rooted = false;
+    if (runtime.buffs.length > 0) {
+      runtime.buffs = runtime.buffs.filter((b) => b.until > now);
+      player.buffed = runtime.buffs.length > 0;
+    }
     if (player.protected && now >= runtime.protectedUntil) player.protected = false;
 
     if (now >= runtime.nextRegenAt) {
@@ -381,6 +487,8 @@ export function updatePlayerCombat(game: Game) {
       else if (runtime.stats.combatRegen > 0) player.hp = Math.min(player.maxHp, player.hp + Math.ceil(player.maxHp * runtime.stats.combatRegen));
       if (usesRage(player)) {
         if (!inCombat) player.resource = Math.max(0, player.resource - RAGE_DECAY_PER_SECOND);
+      } else if (classOf(player.cls).resource === "energy") {
+        player.resource = Math.min(player.maxResource, player.resource + ENERGY_PER_SECOND);
       } else {
         const rate = inCombat ? MANA_REGEN_IN_COMBAT : MANA_REGEN_OUT_OF_COMBAT;
         player.resource = Math.min(player.maxResource, player.resource + Math.ceil(player.maxResource * rate));
@@ -391,14 +499,98 @@ export function updatePlayerCombat(game: Game) {
 
 function autoAttack(game: Game, sessionId: string, player: Player, runtime: PlayerRuntime, enemy: Enemy) {
   const auto = classOf(player.cls).autoAttack;
+  if (game.now() < runtime.stunnedUntil) return;
   if (distance(player, enemy.entity) > auto.range) return;
   if (auto.ranged && !hasLineOfSight(game.map, player, enemy.entity)) return;
-  runtime.nextSwingAt = game.now() + runtime.stats.attackSpeedMs;
+  const buffs = buffTotals(runtime, game.now());
+  runtime.nextSwingAt = game.now() + runtime.stats.attackSpeedMs / (1 + buffs.speedPct);
   runtime.lastCombatAt = game.now();
   dropProtection(game, sessionId);
   if (usesRage(player)) player.resource = Math.min(RAGE_MAX, player.resource + RAGE_PER_SWING);
   broadcastAttack(game, player, { sourceId: sessionId, sourceKind: "player", targetId: enemy.id, targetKind: enemy.kind }, enemy.entity);
-  hitEnemy(game, sessionId, enemy, runtime.stats.attack * auto.multiplier);
+  hitEnemy(game, sessionId, enemy, runtime.stats.attack * auto.multiplier * (1 + buffs.attackPct));
+}
+
+/** Rogues' energy refills this much per second, in or out of combat. */
+const ENERGY_PER_SECOND = 12;
+
+function buffTotals(runtime: PlayerRuntime, now: number) {
+  const totals = { attackPct: 0, speedPct: 0, reductionPct: 0 };
+  for (const buff of runtime.buffs) {
+    if (buff.until <= now) continue;
+    totals.attackPct += buff.attackPct;
+    totals.speedPct += buff.speedPct;
+    totals.reductionPct += buff.reductionPct;
+  }
+  return totals;
+}
+
+/** The caster and living party members within `radius` (for party heals and buffs). */
+function friendsAround(game: Game, sessionId: string, center: { x: number; y: number }, radius: number): (readonly [string, Player])[] {
+  const friends: (readonly [string, Player])[] = [];
+  game.state.players.forEach((player, id) => {
+    if (player.dead) return;
+    if (id === sessionId || (partyMates(game, sessionId, id) && distance(center, player) <= radius)) friends.push([id, player] as const);
+  });
+  return friends;
+}
+
+/** Can't move or attack for a while. Bosses are immune; players (PvP) get half. */
+function stunEnemy(game: Game, enemy: Enemy, durationMs: number) {
+  const now = game.now();
+  if (enemy.kind === "mob") {
+    const runtime = game.mobRuntime.get(enemy.id);
+    if (!runtime || runtime.boss || runtime.mode === "return") return;
+    runtime.stunnedUntil = Math.max(runtime.stunnedUntil, now + durationMs);
+    enemy.entity.stunned = true;
+    enemy.entity.moving = false;
+    return;
+  }
+  const runtime = game.playerRuntime.get(enemy.id);
+  if (!runtime || enemy.entity.protected) return;
+  const until = now + durationMs * PVP_CC_MULTIPLIER;
+  runtime.stunnedUntil = Math.max(runtime.stunnedUntil, until);
+  runtime.rootedUntil = Math.max(runtime.rootedUntil, until);
+  enemy.entity.stunned = true;
+  enemy.entity.rooted = true;
+  cancelCast(game, enemy.id);
+}
+
+/**
+ * Moves a player at once (dash skills), a few pixels at a time so walls stop it:
+ * along the facing direction, up to an enemy, or just past it.
+ */
+function dash(game: Game, player: Player, target: { x: number; y: number } | undefined, mode: "forward" | "toTarget" | "behindTarget", maxDistance: number) {
+  let dx: number;
+  let dy: number;
+  let length: number;
+  if (!target) {
+    const dirs = [
+      [0, 1],
+      [0, -1],
+      [-1, 0],
+      [1, 0],
+    ];
+    [dx, dy] = dirs[player.dir] ?? [0, 1];
+    length = maxDistance;
+  } else {
+    const tx = target.x - player.x;
+    const ty = target.y - player.y;
+    const dist = Math.hypot(tx, ty) || 1;
+    dx = tx / dist;
+    dy = ty / dist;
+    // Stop just short of the target, or land just past it.
+    length = Math.min(maxDistance, mode === "behindTarget" ? dist + 14 : Math.max(0, dist - MELEE_RANGE * 0.6));
+  }
+  const step = 4;
+  for (let moved = 0; moved + step <= length; moved += step) {
+    const nx = player.x + dx * step;
+    const ny = player.y + dy * step;
+    if (collides(game.map, nx, ny)) break;
+    player.x = nx;
+    player.y = ny;
+  }
+  player.moving = false;
 }
 
 function rootPlayer(game: Game, sessionId: string, player: Player, durationMs: number) {
@@ -431,9 +623,10 @@ export function hitPlayer(game: Game, sourceId: string, sessionId: string, playe
   if (!runtime || player.dead) return;
   runtime.lastCombatAt = game.now();
   if (usesRage(player)) player.resource = Math.min(RAGE_MAX, player.resource + RAGE_PER_HIT_TAKEN);
-  // Tanks shrug off part of every hit; Kalkan Duvarı on top of that.
+  // Tanks shrug off part of every hit; Kalkan Duvarı, the passive tree and buffs on top of that.
   const guard = game.now() < runtime.guardUntil ? 1 - runtime.guardReduction : 1;
-  amount = Math.max(1, Math.round(amount * (classOf(player.cls).damageTaken ?? 1) * guard * (1 - runtime.stats.damageReduction)));
+  const buffed = 1 - Math.min(0.6, buffTotals(runtime, game.now()).reductionPct);
+  amount = Math.max(1, Math.round(amount * (classOf(player.cls).damageTaken ?? 1) * guard * buffed * (1 - runtime.stats.damageReduction)));
   const absorbed = Math.min(player.shield, amount);
   player.shield -= absorbed;
   const taken = amount - absorbed;
@@ -542,6 +735,10 @@ function killPlayer(game: Game, sessionId: string, player: Player, runtime: Play
   player.rooted = false;
   player.guarded = false;
   runtime.guardUntil = 0;
+  player.stunned = false;
+  player.buffed = false;
+  runtime.stunnedUntil = 0;
+  runtime.buffs = [];
   if (usesRage(player)) player.resource = 0;
   runtime.targetId = null;
   runtime.attacking = false;
@@ -560,6 +757,8 @@ export function grantXp(game: Game, sessionId: string, player: Player, amount: n
     refreshStats(game, sessionId);
     player.hp = player.maxHp;
     game.io.broadcast(Msg.LevelUp, { sessionId, level: player.level } satisfies LevelUpEvent);
+    // A new skill point (and maybe a skill or passive that just became learnable).
+    sendSkillRanks(game, sessionId);
   }
   if (player.level >= MAX_LEVEL) player.xp = 0;
 }

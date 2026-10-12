@@ -18,6 +18,12 @@ export enum Action {
   Skill3 = "skill3",
   Skill4 = "skill4",
   Skill5 = "skill5",
+  Skill6 = "skill6",
+  Skill7 = "skill7",
+  Skill8 = "skill8",
+  Skill9 = "skill9",
+  Skill10 = "skill10",
+  Skills = "skills",
   ToggleInventory = "toggleInventory",
   Interact = "interact",
   Leaderboard = "leaderboard",
@@ -27,7 +33,18 @@ export enum Action {
 }
 
 /** Hotbar slots in order. */
-export const HOTBAR_ACTIONS = [Action.Skill1, Action.Skill2, Action.Skill3, Action.Skill4, Action.Skill5];
+export const HOTBAR_ACTIONS = [
+  Action.Skill1,
+  Action.Skill2,
+  Action.Skill3,
+  Action.Skill4,
+  Action.Skill5,
+  Action.Skill6,
+  Action.Skill7,
+  Action.Skill8,
+  Action.Skill9,
+  Action.Skill10,
+];
 
 const DEFAULT_BINDINGS: Record<Action, string[]> = {
   [Action.MoveUp]: ["W", "UP"],
@@ -42,6 +59,12 @@ const DEFAULT_BINDINGS: Record<Action, string[]> = {
   [Action.Skill3]: ["THREE"],
   [Action.Skill4]: ["FOUR"],
   [Action.Skill5]: ["FIVE"],
+  [Action.Skill6]: ["SIX"],
+  [Action.Skill7]: ["SEVEN"],
+  [Action.Skill8]: ["EIGHT"],
+  [Action.Skill9]: ["NINE"],
+  [Action.Skill10]: ["ZERO"],
+  [Action.Skills]: ["K"],
   [Action.ToggleInventory]: ["I", "C"],
   [Action.Interact]: ["E"],
   [Action.Leaderboard]: ["L"],

@@ -41,7 +41,7 @@ export function showHud() {
 /** Leaving the game (character switch / logout): hide the HUD and every in-game window. */
 export function resetGameUi() {
   hud.hidden = true;
-  for (const id of ["inventory-window", "shop-window", "upgrade-window", "leaderboard", "party-frames", "party-invite", "boss-bar", "cast-bar", "target-frame", "pvp-stats", "death", "loading", "tooltip", "stall-button", "stall-setup", "stall-browse", "npc-dialog", "quest-log", "quest-tracker", "passive-window"]) {
+  for (const id of ["inventory-window", "shop-window", "upgrade-window", "leaderboard", "party-frames", "party-invite", "boss-bar", "cast-bar", "target-frame", "pvp-stats", "death", "loading", "tooltip", "stall-button", "stall-setup", "stall-browse", "npc-dialog", "quest-log", "quest-tracker", "passive-window", "skills-window"]) {
     document.getElementById(id)!.hidden = true;
   }
   document.getElementById("killfeed")!.replaceChildren();
@@ -89,7 +89,7 @@ export interface PlayerFrameData {
   /** Rage or mana. */
   resource: number;
   maxResource: number;
-  resourceType: "rage" | "mana";
+  resourceType: "rage" | "mana" | "energy";
   shield: number;
   xp: number;
   xpToNext: number;
@@ -104,6 +104,7 @@ export function updatePlayerFrame(data: PlayerFrameData) {
   playerRageFill.style.width = percent(data.resource, data.maxResource);
   playerRageText.textContent = `${data.resource} / ${data.maxResource}`;
   playerRageFill.parentElement!.classList.toggle("mana", data.resourceType === "mana");
+  playerRageFill.parentElement!.classList.toggle("energy", data.resourceType === "energy");
   xpFill.style.width = percent(data.xp, data.xpToNext);
   xpText.textContent = `XP ${data.xp} / ${data.xpToNext}`;
   currentResource = data.resource;
@@ -164,7 +165,8 @@ export function setTargetFrame(data: TargetFrameData | null) {
 
 // ---- Hotbar ------------------------------------------------------------
 
-export type HotbarEntry = { kind: "skill"; skill: SkillDef } | { kind: "item"; item: ItemDef };
+/** `locked`: a skill with no points in it yet (shown greyed out). */
+export type HotbarEntry = { kind: "skill"; skill: SkillDef; locked?: boolean } | { kind: "item"; item: ItemDef };
 
 interface Slot {
   entry: HotbarEntry;
@@ -196,13 +198,14 @@ export function initHotbar(entries: HotbarEntry[], onUse: (index: number) => voi
     element.tabIndex = -1;
     element.addEventListener("mousedown", (event) => event.preventDefault());
     element.addEventListener("click", () => onUse(index));
-    element.innerHTML = `<span class="slot-key">${index + 1}</span><span class="slot-sweep"></span>`;
+    element.innerHTML = `<span class="slot-key">${(index + 1) % 10}</span><span class="slot-sweep"></span>`;
 
     let count: HTMLElement | undefined;
     if (entry.kind === "skill") {
       const { skill } = entry;
       element.style.setProperty("--skill-color", skill.color);
-      element.title = `${skill.name}${skill.cost ? ` (${skill.cost})` : ""}\n${skill.description}`;
+      element.title = `${skill.name}${skill.cost ? ` (${skill.cost})` : ""}\n${skill.description}${entry.locked ? "\nÖğrenilmedi: Yetenekler (K)" : ""}`;
+      element.classList.toggle("locked", !!entry.locked);
       element.prepend(Object.assign(document.createElement("span"), { className: "slot-label", textContent: skill.short }));
     } else {
       const { item } = entry;
@@ -255,7 +258,7 @@ function renderHotbar() {
 
     let usable: boolean;
     if (slot.entry.kind === "skill") {
-      usable = currentResource >= slot.entry.skill.cost;
+      usable = !slot.entry.locked && currentResource >= slot.entry.skill.cost;
     } else {
       const count = itemCount(slot.entry.item.id);
       slot.count!.textContent = String(count);

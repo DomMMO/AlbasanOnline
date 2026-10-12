@@ -108,7 +108,7 @@ export interface ItemDef {
 export const POTION_COOLDOWN_MS = 10_000;
 
 const def = (item: ItemDef) => item;
-const MELEE: ClassId[] = ["warrior", "guardian"];
+const MELEE: ClassId[] = ["warrior", "guardian", "rogue"];
 const CASTERS: ClassId[] = ["mage", "priest", "necromancer"];
 
 export const ITEMS: Record<string, ItemDef> = Object.fromEntries(

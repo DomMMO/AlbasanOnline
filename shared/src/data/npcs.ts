@@ -15,6 +15,8 @@ export interface NpcDef {
   shop: string[];
   /** First line of the conversation window. */
   greeting: string;
+  /** Reads the player's coffee-cup fortune once a day (see fortune.ts). */
+  fortuneTeller?: boolean;
 }
 
 /** Feet position of an NPC in the hunting grounds (valley map tiles). */
@@ -118,6 +120,7 @@ export const NPCS: Record<string, NpcDef> = {
     role: "quest",
     shop: [],
     greeting: "Gel evladım gel, otur şöyle! Surdaki nöbetçiler aç, ben de bu yaşta tek başıma yetişemiyorum.",
+    fortuneTeller: true,
   },
   hunter: {
     id: "hunter",

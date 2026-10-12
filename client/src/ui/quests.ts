@@ -36,6 +36,8 @@ export interface QuestActions {
   abandon(questId: string): void;
   openShop(npc: NpcDef): void;
   openUpgrade(npc: NpcDef): void;
+  /** Ayşe Teyze: ask for today's fortune. */
+  readFortune(npcId: string): void;
   playerLevel(): number;
   playerClass(): string;
   /** Quest state changed: NPC markers need redrawing. */
@@ -51,6 +53,8 @@ let viewing: string | null = null;
 let completing: string | null = null;
 /** The closing words are on screen; leave them until the player clicks "Devam". */
 let showingCompletion = false;
+/** Today's fortune as told in the open dialog (null = not asked in this conversation). */
+let fortune: { text: string; good: boolean } | null = null;
 let initialised = false;
 
 export function initQuests(questActions: QuestActions) {
@@ -105,8 +109,9 @@ export function npcMarker(npcId: string): { text: string; color: string } | null
 
 /** NPCs with quests open the conversation window first; returns false if this one has none. */
 export function openNpcDialog(target: NpcDef): boolean {
-  if (questsOfNpc(target.id).length === 0) return false;
+  if (questsOfNpc(target.id).length === 0 && !target.fortuneTeller) return false;
   npc = target;
+  fortune = null;
   viewing = null;
   completing = null;
   showingCompletion = false;
@@ -114,6 +119,15 @@ export function openNpcDialog(target: NpcDef): boolean {
   dialogEl.hidden = false;
   renderDialog();
   return true;
+}
+
+/** Ayşe Teyze read the fortune: show it in her dialog. */
+export function showFortune(text: string, good: boolean) {
+  fortune = { text, good };
+  if (npc?.fortuneTeller && !dialogEl.hidden) {
+    viewing = null;
+    renderDialog();
+  }
 }
 
 export function dialogNpc(): NpcDef | null {
@@ -170,6 +184,7 @@ function renderDialog() {
   hideTooltip();
   const target = npc;
   const nodes: HTMLElement[] = [el("p", "npc-greeting", target.greeting)];
+  if (fortune) nodes.push(el("p", `npc-fortune ${fortune.good ? "good" : "bad"}`, fortune.text));
   const rows = questRows(target);
   if (rows.length > 0) {
     const list = el("div", "npc-quests");
@@ -189,6 +204,7 @@ function renderDialog() {
   const buttons = el("div", "npc-buttons");
   if (target.role === "merchant") buttons.append(button("Alışveriş", () => actions.openShop(target)));
   if (target.role === "blacksmith") buttons.append(button("Eşya Yükselt", () => actions.openUpgrade(target)));
+  if (target.fortuneTeller && !fortune) buttons.append(button("Falıma bak", () => actions.readFortune(target.id)));
   buttons.append(button("Hoşça kal", closeNpcDialog, "secondary"));
   nodes.push(buttons);
   dialogBody.replaceChildren(...nodes);

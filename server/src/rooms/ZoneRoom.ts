@@ -11,6 +11,7 @@ import {
   type TransferEvent,
   type UsePortalMessage,
   type UseTownPortalMessage,
+  type SkillRankMessage,
   type ZoneDef,
   isAxis,
   Msg,
@@ -50,6 +51,8 @@ import { claimCharacter } from "../game/presence";
 import { consumeTicket, issueTicket } from "../game/tickets";
 import { onlineCharacters } from "../game/registry";
 import { TownPortal, WorldState } from "./schema/WorldState";
+import { changeRank, resetRanks } from "../game/talents";
+import { readFortune } from "../game/fortune";
 import {
   closeTownPortal,
   isPortalRoom,
@@ -192,6 +195,13 @@ export class ZoneRoom extends Room<WorldState> {
       if (typeof message?.portalId === "string") this.usePortal(client, message.portalId);
     });
     this.onMessage(Msg.OpenTownPortal, (client) => this.openTownPortal(client));
+    this.onMessage(Msg.SkillRank, (client, message: Partial<SkillRankMessage>) => {
+      if (typeof message?.id === "string" && (message.delta === 1 || message.delta === -1)) changeRank(this.game, client.sessionId, message.id, message.delta);
+    });
+    this.onMessage(Msg.SkillReset, (client) => resetRanks(this.game, client.sessionId));
+    this.onMessage(Msg.ReadFortune, (client, message: { npcId?: unknown }) => {
+      if (typeof message?.npcId === "string") readFortune(this.game, client.sessionId, message.npcId);
+    });
     this.onMessage(Msg.UseTownPortal, (client, message: Partial<UseTownPortalMessage>) => {
       if (typeof message?.portalId === "string") this.useTownPortal(client, message.portalId);
     });

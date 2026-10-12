@@ -20,6 +20,7 @@ import type { Game } from "./Game";
 import { broadcastSystem } from "./chat";
 import { indexOfItem, removeAt } from "./inventory";
 import { notice, sendInventory } from "./items";
+import { fortuneBonus } from "./fortune";
 
 // +N upgrading at the blacksmith. One attempt consumes a scroll, gold and (optionally)
 // a protection charm up front, then rolls once on the server.
@@ -56,7 +57,8 @@ export function upgradeItem(game: Game, sessionId: string, npcId: string, uid: s
   inv.gold -= cost;
 
   let outcome: UpgradeOutcome;
-  if (game.random() < UPGRADE_SUCCESS_CHANCE[target]) {
+  // A good fortune from Ayşe Teyze makes today's attempts likelier.
+  if (game.random() < Math.min(1, UPGRADE_SUCCESS_CHANCE[target] + fortuneBonus(runtime))) {
     stack.enhance = target;
     outcome = "success";
   } else if (target <= SAFE_UPGRADE_LEVEL) {

@@ -8,7 +8,7 @@ import type { EquipSlot, IconShape, ItemDef, Rarity } from "./items";
 // hand-written items live in items.ts.
 
 /** Swords, axes and plate: warriors and guardians. */
-const WARRIOR: ClassId[] = ["warrior", "guardian"];
+const WARRIOR: ClassId[] = ["warrior", "guardian", "rogue"];
 const CASTERS: ClassId[] = ["mage", "priest", "necromancer"];
 const PRIEST: ClassId[] = ["priest"];
 /** Staves: mages and necromancers. */

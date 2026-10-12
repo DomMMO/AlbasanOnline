@@ -109,6 +109,23 @@ export function boneBurst(scene: Phaser.Scene, at: Point, radius: number) {
   scene.tweens.add({ targets: ring, scale: 1, alpha: 0, duration: 420, onComplete: () => ring.destroy() });
 }
 
+/** Little stars circling over a stunned head. */
+export function stunStars(scene: Phaser.Scene, at: { x: number; y: number }) {
+  for (let i = 0; i < 3; i++) {
+    const g = scene.add.graphics().setDepth(100000);
+    g.fillStyle(0xffe066, 1).fillRect(-1, -1, 3, 3);
+    const angle = (i / 3) * Math.PI * 2;
+    const state = { a: angle };
+    scene.tweens.add({
+      targets: state,
+      a: angle + Math.PI * 4,
+      duration: 1400,
+      onUpdate: () => g.setPosition(at.x + Math.cos(state.a) * 6, at.y - 20 + Math.sin(state.a) * 2),
+      onComplete: () => g.destroy(),
+    });
+  }
+}
+
 /** Ring that pulses under a caster while a spell is being cast; call the returned function to remove it. */
 export function castingGlow(scene: Phaser.Scene, follow: () => Point, color: number): () => void {
   const g = scene.add.graphics().setDepth(0.6);

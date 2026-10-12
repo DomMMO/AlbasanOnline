@@ -136,6 +136,16 @@ const MIGRATIONS: { version: number; name: string; sql: string }[] = [
       ALTER TABLE items ADD CONSTRAINT items_container_check CHECK (container IN ('inventory', 'equipment', 'passive'));
     `,
   },
+  {
+    version: 9,
+    name: "skill ranks and daily fortune",
+    sql: `
+      -- skill / passive id -> rank (see shared/src/data/talents.ts); {} = default allocation
+      ALTER TABLE characters ADD COLUMN skill_ranks JSONB NOT NULL DEFAULT '{}';
+      -- Ayşe Teyze's fortune for one day: { "day": "2026-10-13", "good": true, "line": 2 }
+      ALTER TABLE characters ADD COLUMN fortune JSONB;
+    `,
+  },
 ];
 
 export async function runMigrations() {

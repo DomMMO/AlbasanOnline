@@ -31,10 +31,12 @@ Karakter oluştururken sınıf seçilir:
 | **Büyücü** (uzaktan hasar) | Mana | Ateş Topu (1,5 sn büyü) | Buz Halkası (çevredekileri 4 sn dondurur) | Yıldırım (anında) |
 | **Şifacı** (iyileştirici) | Mana | Kutsal Işık (1,2 sn büyü) | Şifa (1,5 sn büyü; hedef oyuncu ya da kendin) | Koruyucu Kalkan (hasar emer) |
 | **Muhafız** (tank) | Öfke | Kalkan Darbesi (güçlü tek hedef) | Meydan Okuma (çevreye vurur, hepsinin dikkatini çeker) | Kalkan Duvarı (8 sn %50 az hasar, öfke istemez) |
+| **Suikastçı** (hızlı yakın dövüş) | Enerji (hızla dolar) | Sinsi Darbe | Bıçak Yelpazesi (çevreye) | İç Parçalama (ağır son vuruş) |
 | **Nekromant** (çağırıcı) | Mana | Ruh Emme (1,3 sn büyü; hasarın %40'ı kadar can emer) | İskelet Çağır (25 sn, hedefine saldırır) | Kemik Patlaması (çevreye) |
 
 - Muhafız vurduğu her düşmanın dikkatini (aggro) anında diğer oyunculardan alır ve her hasarı %10 az yer. Savaşçı'nın kılıç, balta ve plaka zırhlarını kuşanır; görevlerde Savaşçı ödüllerini alır.
 - Nekromant asa (Büyücü asaları dahil) ve cübbe kuşanır; görevlerde Büyücü'nün sınıf ödüllerini alır. İskelet sahibinin saldırdığı hedefe, yoksa sahibine saldıran yaratığa vurur; sahibi ölünce ya da bölge değiştirince kaybolur. Yaratıklar iskelete saldırmaz.
+- Tabloda her sınıfın ilk üç skill'i var; tam liste aşağıda **Yetenekler** bölümünde.
 - Büyü süresi olan skill'lerde büyü barı dolar; **yürürsen büyü iptal olur**.
 - Uzak saldırılar ağaç ve duvarların arkasına yapılamaz (görüş hattı).
 - Başka bir oyuncuya tıklamak onu dost hedef yapar (Şifa ve Kalkan için).
@@ -82,10 +84,11 @@ Ana Merkez'deki kırmızı portaldan (seviye 5+) girilen, herkesin herkese sald�
 | Mob'a tıkla | Hedef al ve saldır |
 | Tab | Sıradaki yakın mob'u hedef al |
 | F | Seçili hedefe saldır |
-| 1 / 2 / 3 | Ağır Darbe / Girdap / İkinci Nefes |
-| 4 / 5 | İksirler (sınıfa göre can / mana) |
+| 1 - 9, 0 | Hotbar: sınıfın skill'leri, sonra iksirler |
+| Sol tık | Yaratık: hedef al ve saldır · Sandık / NPC / portal / tezgâh: yürü ve etkileş |
 | Enter | Sohbet |
 | J | Görev günlüğü |
+| K | Yetenekler (puan ver / geri al) |
 | P | Pasif ağaç |
 | T | Şehir portalı (bulunduğun yerde açılır) |
 | L | PvP sıralaması |
@@ -226,6 +229,32 @@ Her ekipman (silah, zırh, takı) **1 ile 5 arası rastgele stat** ile oluşur. 
 - Stat'lar +N basmayla değişmez; item pazarda el değiştirince statları da gider. Bu sistemden önce var olan ekipmanlar ilk yüklendiklerinde bir kez stat atar.
 - GM panelinde item verirken **Stat** alanıyla stat sayısı seçilebilir (0 = normal drop gibi rastgele).
 - Kurallar `shared/src/data/affixes.ts` içindedir; statlar `items.affixes` (JSONB) kolonunda saklanır.
+
+### Yetenekler (K)
+
+Her sınıfın kendine has en az bir **tek hedef**, bir **alan (AoE)**, bir **kitle kontrol (CC)**, bir **atılma (dash)** ve bir **bekleme süreli güçlendirme (buff)** skill'i vardır. Skill'ler seviye geldikçe öğrenilebilir olur (aşağıda Sv).
+
+| Sınıf | Tek hedef | Alan | CC | Atılma | Buff | Diğer |
+| --- | --- | --- | --- | --- | --- | --- |
+| Savaşçı | Ağır Darbe (1) | Girdap (2) | Sarsıcı Darbe, 2 sn sersemletme (4) | **Sıçrayış**: hedefe sıçrar, inişte çevreye vurur (6) | Savaş Çığlığı, +%25 saldırı (8) | İkinci Nefes (3) |
+| Muhafız | Kalkan Darbesi (1) | Meydan Okuma (2) | Sersemletici Vuruş, 3 sn (4) | **Kalkan Hücumu**: hedefe koşar, 1,5 sn sersemletir (6) | Kalkan Duvarı, %50 az hasar (3) | |
+| Büyücü | Ateş Topu (1), Yıldırım (3) | Alev Patlaması (4) | Buz Halkası, dondurma (2) | **Işınlanma**: 6 kare blink (6) | Arkana Gücü, +%30 büyü (8) | |
+| Şifacı | Kutsal Işık (1) | Kutsal Nova: vurur + grubu iyileştirir (4) | Kutsal Zincir, 3 sn (5) | **Işık Adımı**: süzülür + kalkan (6) | Kutsal Ruh: grup +%15 (8) | Şifa (2), Koruyucu Kalkan (3) |
+| Nekromant | Ruh Emme (1) | Kemik Patlaması (2) | Dehşet, 3 sn (4) | **Ruh Göçü**: gölgeden geçer + can (6) | Karanlık Pakt: %10 can → +%35 hasar (8) | İskelet Çağır (3) |
+| Suikastçı | Sinsi Darbe (1), İç Parçalama (3) | Bıçak Yelpazesi (2) | Kör Edici Toz, 3 sn (4) | **Gölge Adımı**: hedefin arkasında belirir (6) | Adrenalin: %40 hızlı saldırı (8) | |
+
+- **Sersemletme:** hedef ne yürüyebilir ne vurabilir (sarı görünür). Boss'lar etkilenmez; oyunculara (PvP) yarı süre.
+- **Yetenek puanı:** her seviye 1 puan (toplam seviye + 1). **K** ile açılan **Yetenekler** sayfasında aktif skill'lere (en çok 5 derece; derece 1 öğretir, sonraki her derece etkisini %12 artırır) ve sınıfın 3 **pasif** yeteneğine (5'er derece) puan verilir; **−** ile tek tek, **Sıfırla** ile hepsi geri alınır. Yeni karakterler ve eski karakterler, açık olan her skill'de 1 dereceyle başlar.
+- **Hotbar 10 slot** (1-9, 0): sınıfın skill'leri sırayla, sonra iksirler. Puan verilmemiş skill gri görünür.
+- Kurallar `shared/src/data/skills.ts` ve `shared/src/data/talents.ts`, sunucu tarafı `server/src/game/talents.ts`; dereceler `characters.skill_ranks` kolonunda saklanır.
+
+### Sol tık ile etkileşim
+
+Sandığa, NPC'ye, portala, şehir portalına ya da tezgâha **sol tıklayınca** karakter oraya yürür ve varınca etkileşir (eşyayı alır, konuşur, portala girer). Yakın dövüş sınıfları tıkladıkları yaratığa da yürür. Bir tuşa basmak yürümeyi iptal eder; duvara takılırsa "Oraya yol yok" der. **E** tuşu da çalışmaya devam eder.
+
+### Ayşe Teyze'nin falı
+
+Ayşe Teyze ile konuşunca görevlerin yanında **Falıma bak** seçeneği çıkar. Fal günde bir kez bakılır (Türkiye saatiyle gün); aynı gün tekrar sorarsan aynı şeyi söyler, oyundan çıkıp girmek falı değiştirmez. **İyi fal** (%45) çıkarsa o gün bütün +N yükseltmelerin başarı şansı **%10 artar** (demirci penceresinde "(+%10 fal)" yazar); **kötü fal** çıkarsa hiçbir şey değişmez. Kod: `shared/src/data/fortune.ts`, `server/src/game/fortune.ts`.
 
 ### Pasif ağaç (P)
 

@@ -76,6 +76,7 @@ export function spawnMobAt(game: Game, mobId: string, point: { x: number; y: num
     wanderTo: null,
     nextWanderAt: game.now() + game.random() * 5000,
     rootedUntil: 0,
+    stunnedUntil: 0,
     boss: def.boss ? newBossState() : undefined,
     power,
   });
@@ -136,6 +137,12 @@ export function updateMobs(game: Game) {
     const mob = game.state.mobs.get(id);
     if (!mob) continue;
     if (mob.rooted && game.now() >= runtime.rootedUntil) mob.rooted = false;
+    // Stunned: stands still, doesn't swing (keeps its threat table).
+    if (game.now() < runtime.stunnedUntil) {
+      mob.moving = false;
+      continue;
+    }
+    if (mob.stunned) mob.stunned = false;
     if (runtime.def.nightOnly && !game.night && runtime.mode === "idle") {
       fadeAtDawn(game, id, runtime);
       continue;
@@ -223,7 +230,9 @@ function updateChase(game: Game, mobId: string, mob: Mob, runtime: MobRuntime) {
 function startReturn(mob: Mob, runtime: MobRuntime) {
   runtime.mode = "return";
   runtime.rootedUntil = 0;
+  runtime.stunnedUntil = 0;
   mob.rooted = false;
+  mob.stunned = false;
   mob.aggroId = "";
   runtime.threat.clear();
   runtime.taggedBy = null;

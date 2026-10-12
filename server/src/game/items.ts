@@ -16,6 +16,7 @@ import {
   itemRarity,
   itemSellPrice,
   JEWEL_DROPS,
+  ranksToAffixes,
   MAX_AFFIXES,
   RARITY_COLORS,
   statsWithEquipment,
@@ -60,7 +61,12 @@ export function refreshStats(game: Game, sessionId: string) {
   const player = game.state.players.get(sessionId);
   const runtime = game.playerRuntime.get(sessionId);
   if (!player || !runtime) return;
-  runtime.stats = statsWithEquipment(player.cls, player.level, [...equippedItems(runtime.inventory), ...socketedJewels(runtime.inventory)]);
+  runtime.stats = statsWithEquipment(
+    player.cls,
+    player.level,
+    [...equippedItems(runtime.inventory), ...socketedJewels(runtime.inventory)],
+    ranksToAffixes(player.cls, runtime.skillRanks),
+  );
   player.maxHp = runtime.stats.maxHp;
   const cls = classOf(player.cls);
   player.maxResource = cls.maxResource(player.level) + (cls.resource === "mana" ? runtime.stats.manaBonus : 0);
