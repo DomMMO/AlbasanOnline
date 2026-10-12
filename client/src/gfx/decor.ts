@@ -61,8 +61,80 @@ export function drawDecor(scene: Phaser.Scene, decor: Decor[]) {
       case "torch":
         torch(scene, piece.tx, piece.ty);
         break;
+      case "signboard":
+        signboard(scene, piece);
+        break;
+      case "groundFrame":
+        groundFrame(scene, piece);
+        break;
+      case "fence":
+        fence(scene, piece.tiles);
+        break;
     }
   }
+}
+
+function signboard(scene: Phaser.Scene, s: Extract<Decor, { kind: "signboard" }>) {
+  const W = s.w * TILE_SIZE;
+  const x0 = s.tx * TILE_SIZE;
+  const bottom = (s.ty + 1) * TILE_SIZE;
+  const g = scene.add.graphics().setPosition(x0, bottom).setDepth(bottom);
+  // Two posts with the board hanging between them.
+  g.fillStyle(0x000000, 0.25).fillEllipse(4, -1, 8, 3).fillEllipse(W - 4, -1, 8, 3);
+  g.fillStyle(0x5b3a1e).fillRect(3, -34, 3, 34).fillRect(W - 6, -34, 3, 34);
+  g.fillStyle(0x2a1a08).fillRect(1, -36, W - 2, 16);
+  g.fillStyle(0xb98a4e).fillRect(2, -35, W - 4, 14);
+  g.fillStyle(0xd6aa66).fillRect(2, -35, W - 4, 2);
+  g.fillStyle(0x8a6233).fillRect(2, -23, W - 4, 2);
+  scene.add
+    .text(x0 + W / 2, bottom - 28, s.text, {
+      fontFamily: '"Cloister Black TR", serif',
+      fontSize: "12px",
+      color: "#2a1a08",
+    })
+    .setOrigin(0.5)
+    .setResolution(4)
+    .setDepth(bottom + 0.1);
+}
+
+/** One post per tile, with rails running to the neighbouring fence tiles. */
+function fence(scene: Phaser.Scene, tiles: { tx: number; ty: number }[]) {
+  const POST = 0x5b3a1e;
+  const RAIL = 0x8a5a2b;
+  const LIGHT = 0xb07b48;
+  const keys = new Set(tiles.map(({ tx, ty }) => `${tx},${ty}`));
+  const has = (tx: number, ty: number) => keys.has(`${tx},${ty}`);
+  for (const { tx, ty } of tiles) {
+    const bottom = (ty + 1) * TILE_SIZE;
+    // Each tile is depth-sorted on its own, so players pass in front of and behind it correctly.
+    const g = scene.add.graphics().setPosition(tx * TILE_SIZE, bottom).setDepth(bottom);
+    g.fillStyle(0x000000, 0.22).fillEllipse(8, -2, 10, 3);
+    // Rails along the row (left/right) at two heights.
+    const left = has(tx - 1, ty) ? 0 : 7;
+    const right = has(tx + 1, ty) ? 16 : 9;
+    for (const y of [-12, -7]) {
+      g.fillStyle(RAIL).fillRect(left, y, right - left, 2);
+      g.fillStyle(LIGHT).fillRect(left, y, right - left, 1);
+    }
+    // Up the column: a rail reaching to the post above.
+    if (has(tx, ty - 1)) {
+      g.fillStyle(RAIL).fillRect(7, -28, 2, 16);
+      g.fillStyle(LIGHT).fillRect(7, -28, 1, 16);
+    }
+    g.fillStyle(POST).fillRect(6, -15, 4, 14);
+    g.fillStyle(LIGHT).fillRect(6, -16, 4, 2);
+  }
+}
+
+function groundFrame(scene: Phaser.Scene, f: Extract<Decor, { kind: "groundFrame" }>) {
+  // Just above the tiles, under everything standing on them.
+  const g = scene.add.graphics().setDepth(-0.5);
+  const x = f.tx * TILE_SIZE;
+  const y = f.ty * TILE_SIZE;
+  const w = f.w * TILE_SIZE;
+  const h = f.h * TILE_SIZE;
+  g.fillStyle(f.color, 0.08).fillRect(x, y, w, h);
+  g.lineStyle(2, f.color, 0.7).strokeRect(x + 1, y + 1, w - 2, h - 2);
 }
 
 function building(scene: Phaser.Scene, b: Extract<Decor, { kind: "building" }>) {

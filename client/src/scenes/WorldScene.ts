@@ -36,6 +36,8 @@ import {
   type PvpKillEvent,
   type PartyInviteEvent,
   type PartyUpdateEvent,
+  type DuelInviteEvent,
+  type DuelStateEvent,
   type SkillDef,
   type BossCastEvent,
   type PortalDef,
@@ -71,6 +73,8 @@ import { setDollLook, updateDoll } from "../ui/doll";
 import { addChatMessage, initChat } from "../ui/chat";
 import { addKillFeed, initLeaderboard, setPvpStats, toggleLeaderboard } from "../ui/pvp";
 import { initParty, renderParty, showInvite } from "../ui/party";
+import { initDuel, showDuelInvite } from "../ui/duel";
+import { drawMinimap, setMinimapZone, toggleMinimap, type MinimapDot } from "../ui/minimap";
 import { isMenuOpen, menuBack, openMenu } from "../ui/menu";
 import { closeTopWindow, registerWindow } from "../ui/windows";
 import { getSettings, onSettingsChange } from "../settings";
@@ -198,6 +202,12 @@ export class WorldScene extends Phaser.Scene {
   private hotbar: hud.HotbarEntry[] = [];
   /** Our party: id (for loot ownership) and members' session ids in this room. */
   private party: { id: string | null; sessions: Set<string> } = { id: null, sessions: new Set() };
+  /** Session id of the player we are duelling (fight started), or null. */
+  private duelOpponent: string | null = null;
+  /** Standing on the market square last frame (to greet the player when they step on it). */
+  private wasInMarket = false;
+  /** Game time of the next minimap redraw (a few times a second is plenty). */
+  private nextMinimapAt = 0;
   /** Re-checks a loot chest's visibility (ownership can change with the party). */
   private lootSyncs = new Map<string, () => void>();
   /** Pulsing rings under players who are casting, by session id. */
@@ -259,6 +269,7 @@ export class WorldScene extends Phaser.Scene {
     tilemap.createLayer(0, tileset, 0, 0)!.setDepth(-1);
     const decor = zoneLayout(this.zone.id).decor;
     if (decor) drawDecor(this, decor);
+    setMinimapZone(this.map, this.zone.name);
 
     const camera = this.cameras.main;
     camera.setBounds(0, 0, this.map.width * TILE_SIZE, this.map.height * TILE_SIZE);
@@ -353,6 +364,7 @@ export class WorldScene extends Phaser.Scene {
     this.controls.onPressed(Action.QuestLog, () => toggleQuestLog());
     this.controls.onPressed(Action.PassiveTree, () => togglePassives());
     this.controls.onPressed(Action.Skills, () => toggleSkills());
+    this.controls.onPressed(Action.Minimap, () => toggleMinimap());
     this.controls.onPressed(Action.TownPortal, () => {
       if (this.local && !this.local.state.dead && !this.leaving) this.room.send(Msg.OpenTownPortal);
     });
@@ -366,6 +378,7 @@ export class WorldScene extends Phaser.Scene {
       respond: (accept) => this.room.send(Msg.PartyRespond, { accept }),
       leave: () => this.room.send(Msg.Chat, { text: "/ayril" }),
     });
+    initDuel((accept) => this.room.send(Msg.DuelRespond, { accept }));
     hud.onRespawnClicked(() => this.room.send(Msg.Respawn));
 
     const playerLevel = () => this.local?.state.level ?? 1;
@@ -643,6 +656,11 @@ export class WorldScene extends Phaser.Scene {
     this.room.onMessage(Msg.PvpKill, (event: PvpKillEvent) => addKillFeed(event, this.local?.state.name ?? ""));
     this.room.onMessage(Msg.PartyInvite, (event: PartyInviteEvent) => showInvite(event.from));
     this.room.onMessage(Msg.PartyUpdate, (event: PartyUpdateEvent) => this.onPartyUpdate(event));
+    this.room.onMessage(Msg.DuelInvite, (event: DuelInviteEvent) => showDuelInvite(event.from));
+    this.room.onMessage(Msg.DuelState, (event: DuelStateEvent) => {
+      this.duelOpponent = event.opponent;
+      this.refreshHostility();
+    });
     // Anything sent while the scene was still loading was dropped; ask for the inventory again.
     this.room.send(Msg.RequestInventory);
     this.room.onMessage(Msg.SkillUsed, (event: SkillUsedEvent) =>
@@ -685,10 +703,15 @@ export class WorldScene extends Phaser.Scene {
     if (notifyServer) this.room.send(Msg.SetTarget, { targetId, attack } satisfies SetTargetMessage);
     if (previous && previous !== targetId) this.refreshMobHealth(previous);
     if (targetId) this.refreshMobHealth(targetId);
+    this.drawTargetRing();
+    this.refreshTargetFrame();
+  }
+
+  private drawTargetRing() {
+    const targetId = this.targetId;
     const isPlayer = targetId !== null && this.players.has(targetId);
     const ringColor = isPlayer ? (this.isEnemyPlayer(targetId!) ? ENEMY_PLAYER_COLOR : FRIENDLY_COLOR) : HOSTILE_COLOR;
     this.targetRing.clear().lineStyle(1, ringColor, 1).strokeEllipse(0, 0, 18, 7);
-    this.refreshTargetFrame();
   }
 
   /** Tab: nearest enemy first (mobs, and players in PvP zones), then cycle outward. */
@@ -726,9 +749,17 @@ export class WorldScene extends Phaser.Scene {
     return loot.owner === "" || loot.owner === this.room.sessionId || (this.party.id !== null && loot.owner === `party:${this.party.id}`);
   }
 
-  /** In PvP zones, everyone outside our party is hostile. */
+  /** In PvP zones, everyone outside our party is hostile; elsewhere only our duel opponent. */
   private isEnemyPlayer(sessionId: string) {
+    if (sessionId === this.duelOpponent) return true;
     return !!this.zone.pvp && sessionId !== this.room.sessionId && !this.party.sessions.has(sessionId);
+  }
+
+  /** Who is hostile changed (party, duel): name colours, target ring and frame. */
+  private refreshHostility() {
+    for (const [sessionId, remote] of this.players) remote.view.setNameColor(this.isEnemyPlayer(sessionId) ? "#ff6b6b" : "#ffffff");
+    this.drawTargetRing();
+    this.refreshTargetFrame();
   }
 
   private onPartyUpdate(event: PartyUpdateEvent) {
@@ -738,9 +769,8 @@ export class WorldScene extends Phaser.Scene {
     renderParty(event, this.local?.state.name ?? "", this.zone.id);
     if (!changed) return;
     // Party changes who is hostile (PvP), which loot we can open and the target frame.
-    for (const [sessionId, remote] of this.players) remote.view.setNameColor(this.isEnemyPlayer(sessionId) ? "#ff6b6b" : "#ffffff");
     for (const sync of this.lootSyncs.values()) sync();
-    this.refreshTargetFrame();
+    this.refreshHostility();
   }
 
   /** Talking to an NPC: quest givers open the conversation first, others their shop or forge. */
@@ -1042,6 +1072,8 @@ export class WorldScene extends Phaser.Scene {
     if (friend) {
       const { name, level, hp, maxHp, cls } = friend.state;
       const canInvite = !this.party.sessions.has(this.targetId!);
+      // Arena fights need no duel; one duel at a time.
+      const canDuel = !this.zone.pvp && this.duelOpponent === null;
       hud.setTargetFrame({
         name,
         level,
@@ -1050,6 +1082,7 @@ export class WorldScene extends Phaser.Scene {
         color: this.isEnemyPlayer(this.targetId!) ? "#ff6b6b" : "#4cd964",
         subtitle: classOf(cls).name,
         onInvite: canInvite ? () => this.room.send(Msg.Chat, { text: `/davet ${name}` }) : undefined,
+        onDuel: canDuel ? () => this.room.send(Msg.Chat, { text: `/duello ${name}` }) : undefined,
       });
       return;
     }
@@ -1295,7 +1328,25 @@ export class WorldScene extends Phaser.Scene {
     local.curr = pos;
   }
 
-  update(_time: number, delta: number) {
+  /** You, your party (green), other players, NPCs and portals. */
+  private refreshMinimap() {
+    const local = this.local;
+    if (!local) return;
+    const dots: MinimapDot[] = [{ x: local.view.x, y: local.view.y, kind: "self" }];
+    for (const [sessionId, remote] of this.players) {
+      const kind = this.party.sessions.has(sessionId) ? "party" : this.isEnemyPlayer(sessionId) ? "enemy" : "player";
+      dots.push({ x: remote.view.x, y: remote.view.y, kind });
+    }
+    for (const id of this.zone.npcs) dots.push({ x: NPCS[id].x, y: NPCS[id].y, kind: "npc" });
+    for (const portal of this.zone.portals) dots.push({ x: portal.x, y: portal.y, kind: "portal" });
+    drawMinimap(dots);
+  }
+
+  update(time: number, delta: number) {
+    if (time >= this.nextMinimapAt) {
+      this.nextMinimapAt = time + 100;
+      this.refreshMinimap();
+    }
     // Fixed-step simulation at the server's tick rate; clamp so a backgrounded tab doesn't burst.
     this.tickAccumulator = Math.min(this.tickAccumulator + delta, TICK_MS * 5);
     while (this.tickAccumulator >= TICK_MS) {
@@ -1320,7 +1371,10 @@ export class WorldScene extends Phaser.Scene {
 
     if (local) {
       this.checkGates(local);
-      setStallButtonVisible(this.onMarketTile(local));
+      const inMarket = this.onMarketTile(local);
+      if (inMarket && !this.wasInMarket) hud.showMessage("Pazar alanı: burada tezgâh açıp eşya satabilirsin", "info", "#e8c33a");
+      this.wasInMarket = inMarket;
+      setStallButtonVisible(inMarket);
       const sellerId = browsingSeller();
       const seller = sellerId ? this.players.get(sellerId) : undefined;
       if (sellerId && (!seller || distance(local.view, seller.view) > STALL_RANGE + TILE_SIZE)) closeBrowse();

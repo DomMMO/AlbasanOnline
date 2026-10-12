@@ -16,6 +16,10 @@ const playerHpFill = $("player-hp-fill");
 const playerHpText = $("player-hp-text");
 const playerRageFill = $("player-rage-fill");
 const playerRageText = $("player-rage-text");
+const dockHpFill = $("dock-hp-fill");
+const dockHpText = $("dock-hp-text");
+const dockRageFill = $("dock-rage-fill");
+const dockRageText = $("dock-rage-text");
 
 const targetFrame = $("target-frame");
 const targetName = $("target-name");
@@ -26,6 +30,10 @@ const targetInvite = $<HTMLButtonElement>("target-invite");
 let inviteCallback: (() => void) | null = null;
 targetInvite.addEventListener("mousedown", (e) => e.preventDefault());
 targetInvite.addEventListener("click", () => inviteCallback?.());
+const targetDuel = $<HTMLButtonElement>("target-duel");
+let duelCallback: (() => void) | null = null;
+targetDuel.addEventListener("mousedown", (e) => e.preventDefault());
+targetDuel.addEventListener("click", () => duelCallback?.());
 
 const hotbar = $("hotbar");
 const xpFill = $("xp-fill");
@@ -41,7 +49,7 @@ export function showHud() {
 /** Leaving the game (character switch / logout): hide the HUD and every in-game window. */
 export function resetGameUi() {
   hud.hidden = true;
-  for (const id of ["inventory-window", "shop-window", "upgrade-window", "leaderboard", "party-frames", "party-invite", "boss-bar", "cast-bar", "target-frame", "pvp-stats", "death", "loading", "tooltip", "stall-button", "stall-setup", "stall-browse", "npc-dialog", "quest-log", "quest-tracker", "passive-window", "skills-window"]) {
+  for (const id of ["inventory-window", "shop-window", "upgrade-window", "leaderboard", "party-frames", "party-invite", "duel-invite", "boss-bar", "cast-bar", "target-frame", "pvp-stats", "death", "loading", "tooltip", "stall-button", "stall-setup", "stall-browse", "npc-dialog", "quest-log", "quest-tracker", "passive-window", "skills-window"]) {
     document.getElementById(id)!.hidden = true;
   }
   document.getElementById("killfeed")!.replaceChildren();
@@ -98,13 +106,25 @@ export interface PlayerFrameData {
 export function updatePlayerFrame(data: PlayerFrameData) {
   playerName.textContent = data.name;
   playerLevel.textContent = `Sv ${data.level}`;
-  playerHpFill.style.width = percent(data.hp, data.maxHp);
-  playerHpText.textContent = data.shield > 0 ? `${data.hp} / ${data.maxHp} (+${data.shield})` : `${data.hp} / ${data.maxHp}`;
-  playerHpFill.parentElement!.classList.toggle("shielded", data.shield > 0);
-  playerRageFill.style.width = percent(data.resource, data.maxResource);
-  playerRageText.textContent = `${data.resource} / ${data.maxResource}`;
-  playerRageFill.parentElement!.classList.toggle("mana", data.resourceType === "mana");
-  playerRageFill.parentElement!.classList.toggle("energy", data.resourceType === "energy");
+  const hpText = data.shield > 0 ? `${data.hp} / ${data.maxHp} (+${data.shield})` : `${data.hp} / ${data.maxHp}`;
+  // The same bars twice: in the player frame and above the hotbar.
+  for (const [fill, text] of [
+    [playerHpFill, playerHpText],
+    [dockHpFill, dockHpText],
+  ]) {
+    fill.style.width = percent(data.hp, data.maxHp);
+    text.textContent = hpText;
+    fill.parentElement!.classList.toggle("shielded", data.shield > 0);
+  }
+  for (const [fill, text] of [
+    [playerRageFill, playerRageText],
+    [dockRageFill, dockRageText],
+  ]) {
+    fill.style.width = percent(data.resource, data.maxResource);
+    text.textContent = `${data.resource} / ${data.maxResource}`;
+    fill.parentElement!.classList.toggle("mana", data.resourceType === "mana");
+    fill.parentElement!.classList.toggle("energy", data.resourceType === "energy");
+  }
   xpFill.style.width = percent(data.xp, data.xpToNext);
   xpText.textContent = `XP ${data.xp} / ${data.xpToNext}`;
   currentResource = data.resource;
@@ -149,6 +169,8 @@ export interface TargetFrameData {
   aggro?: string;
   /** Shows the "Gruba davet et" button when set. */
   onInvite?: () => void;
+  /** Shows the "Düello" button when set. */
+  onDuel?: () => void;
 }
 
 export function setTargetFrame(data: TargetFrameData | null) {
@@ -161,6 +183,8 @@ export function setTargetFrame(data: TargetFrameData | null) {
   targetHpText.textContent = data.aggro ? `${data.hp} / ${data.maxHp}  → ${data.aggro}` : `${data.hp} / ${data.maxHp}`;
   inviteCallback = data.onInvite ?? null;
   targetInvite.hidden = !data.onInvite;
+  duelCallback = data.onDuel ?? null;
+  targetDuel.hidden = !data.onDuel;
 }
 
 // ---- Hotbar ------------------------------------------------------------

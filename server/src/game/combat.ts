@@ -47,6 +47,7 @@ import { questKill } from "./quests";
 import { addThreat, spawnMob } from "./mobs";
 import { sameParty } from "./party";
 import { recordPvpKill } from "./pvp";
+import { isDueling, loseDuel } from "./duel";
 import { dismissMinions, summonMinion } from "./minions";
 
 // All damage, healing, XP and death go through this file. The client never
@@ -71,13 +72,18 @@ function partyMates(game: Game, a: string, b: string): boolean {
   return !!ra && !!rb && sameParty(ra.characterId, rb.characterId);
 }
 
-/** A hostile target: any mob, or (in PvP zones) another living player outside your party. */
+/** In PvP zones everyone outside your party; elsewhere only your duel opponent. */
+function hostilePlayer(game: Game, sessionId: string, otherId: string): boolean {
+  if (otherId === sessionId) return false;
+  return game.zone.pvp ? !partyMates(game, sessionId, otherId) : isDueling(game, sessionId, otherId);
+}
+
+/** A hostile target: any mob, or another living player you may fight (PvP zone, duel). */
 export function enemyAt(game: Game, sessionId: string, targetId: string | null): Enemy | undefined {
   if (!targetId) return undefined;
   const mob = game.state.mobs.get(targetId);
   if (mob) return { kind: "mob", id: targetId, entity: mob };
-  const hostile = game.zone.pvp && targetId !== sessionId && !partyMates(game, sessionId, targetId);
-  const player = hostile ? game.state.players.get(targetId) : undefined;
+  const player = hostilePlayer(game, sessionId, targetId) ? game.state.players.get(targetId) : undefined;
   return player && !player.dead ? { kind: "player", id: targetId, entity: player } : undefined;
 }
 
@@ -134,13 +140,11 @@ function enemiesAround(game: Game, sessionId: string, center: { x: number; y: nu
   game.state.mobs.forEach((mob, id) => {
     if (distance(center, mob) <= radius) enemies.push({ kind: "mob", id, entity: mob });
   });
-  if (game.zone.pvp) {
-    game.state.players.forEach((player, id) => {
-      if (id !== sessionId && !player.dead && !partyMates(game, sessionId, id) && distance(center, player) <= radius) {
-        enemies.push({ kind: "player", id, entity: player });
-      }
-    });
-  }
+  game.state.players.forEach((player, id) => {
+    if (!player.dead && hostilePlayer(game, sessionId, id) && distance(center, player) <= radius) {
+      enemies.push({ kind: "player", id, entity: player });
+    }
+  });
   return enemies;
 }
 
@@ -149,10 +153,10 @@ export function setTarget(game: Game, sessionId: string, targetId: string | null
   const runtime = game.playerRuntime.get(sessionId);
   if (!player || !runtime || player.dead) return;
   const isMob = targetId !== null && game.state.mobs.has(targetId);
-  // Other players: friendly targets (heals, shields), or enemies in PvP zones.
+  // Other players: friendly targets (heals, shields), or enemies in PvP zones and duels.
   const isPlayer = targetId !== null && targetId !== sessionId && game.state.players.has(targetId);
   runtime.targetId = isMob || isPlayer ? targetId : null;
-  runtime.attacking = attack && (isMob || (isPlayer && !!game.zone.pvp && !partyMates(game, sessionId, targetId!)));
+  runtime.attacking = attack && (isMob || (isPlayer && hostilePlayer(game, sessionId, targetId!)));
 }
 
 /** Works out who a skill hits, or returns the reason it can't be used. */
@@ -165,8 +169,8 @@ function resolveTarget(game: Game, sessionId: string, player: Player, runtime: P
     return { targetId: enemy.id };
   }
   if (skill.target === "friendly") {
-    // PvP: only party members are friendly.
-    if (game.zone.pvp && runtime.targetId && !partyMates(game, sessionId, runtime.targetId)) return { targetId: sessionId };
+    // Never heal an enemy (PvP: anyone outside the party; a duel opponent).
+    if (runtime.targetId && hostilePlayer(game, sessionId, runtime.targetId)) return { targetId: sessionId };
     const friend = runtime.targetId ? game.state.players.get(runtime.targetId) : undefined;
     if (!friend || friend.dead) return { targetId: sessionId }; // no friendly target: yourself
     if (distance(player, friend) > skill.range + tolerance) return "Hedef çok uzak";
@@ -630,8 +634,11 @@ export function hitPlayer(game: Game, sourceId: string, sessionId: string, playe
   const absorbed = Math.min(player.shield, amount);
   player.shield -= absorbed;
   const taken = amount - absorbed;
-  player.hp = Math.max(0, player.hp - taken);
+  // Duels never kill: the blow that would have is the winning one and leaves 1 HP.
+  const duelWon = taken >= player.hp && isDueling(game, sessionId, sourceId);
+  player.hp = duelWon ? 1 : Math.max(0, player.hp - taken);
   broadcastCombat(game, { sourceId, targetId: sessionId, targetKind: "player", amount: taken, crit, heal: false });
+  if (duelWon) return loseDuel(game, sessionId, "beaten");
   if (player.hp === 0) {
     killPlayer(game, sessionId, player, runtime);
     // Killed by another player in a PvP zone: score it.
@@ -727,6 +734,7 @@ function killMob(game: Game, mobId: string, mob: Mob, runtime: MobRuntime, kille
 }
 
 function killPlayer(game: Game, sessionId: string, player: Player, runtime: PlayerRuntime) {
+  loseDuel(game, sessionId, "died");
   cancelCast(game, sessionId);
   dismissMinions(game, sessionId);
   player.dead = true;

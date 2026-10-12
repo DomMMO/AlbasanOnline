@@ -61,6 +61,18 @@ export const PVP_CC_MULTIPLIER = 0.5;
 export const PVP_REPEAT_KILL_MS = 120_000;
 export const PVP_START_RATING = 1000;
 
+// ---- Duels ----------------------------------------------------------------------
+
+/** You can only challenge someone standing this close. */
+export const DUEL_RANGE = TILE_SIZE * 6;
+/** Duellists who get this far apart call the duel off. */
+export const DUEL_MAX_DISTANCE = TILE_SIZE * 25;
+export const DUEL_INVITE_MS = 30_000;
+/** "3, 2, 1" before the fight starts. */
+export const DUEL_COUNTDOWN_S = 3;
+/** Nobody won by then: a draw. */
+export const DUEL_TIME_LIMIT_MS = 120_000;
+
 /** Tab targeting only considers targets within this distance. */
 export const TAB_TARGET_RANGE = TILE_SIZE * 10;
 

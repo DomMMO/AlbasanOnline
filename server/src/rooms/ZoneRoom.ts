@@ -45,6 +45,7 @@ import { upgradeItem } from "../game/upgrade";
 import { browseStall, buyFromStall, closeStall, openStall, stallLocked } from "../game/market";
 import { abandonQuest, acceptQuest, turnInQuest } from "../game/quests";
 import { handleChat } from "../game/chat";
+import { respondDuel } from "../game/duel";
 import { notice, sendInventory } from "../game/items";
 import { forgetInstance, instanceFor, refreshFor, registerInstance, respond, sameParty } from "../game/party";
 import { claimCharacter } from "../game/presence";
@@ -169,6 +170,7 @@ export class ZoneRoom extends Room<WorldState> {
       const runtime = this.game.playerRuntime.get(client.sessionId);
       if (runtime) respond(runtime.characterId, message?.accept === true);
     });
+    this.onMessage(Msg.DuelRespond, (client, message: { accept?: unknown }) => respondDuel(this.game, client.sessionId, message?.accept === true));
     this.onMessage(Msg.StallOpen, (client, message: Partial<StallOpenMessage>) =>
       openStall(this.game, client.sessionId, message?.title, message?.items),
     );

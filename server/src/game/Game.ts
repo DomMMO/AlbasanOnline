@@ -36,6 +36,7 @@ import { nightChanged, spawnInitialMobs, updateMobs } from "./mobs";
 import { dismissMinions, updateMinions, type MinionRuntime } from "./minions";
 import { sendSkillRanks } from "./talents";
 import { sendFortuneState } from "./fortune";
+import { loseDuel, updateDuels, type DuelInvite, type DuelState } from "./duel";
 import { worldMinute } from "./worldClock";
 import type { SpawnZone } from "../../../shared/src";
 
@@ -99,6 +100,10 @@ export interface PlayerRuntime {
   buffs: ActiveBuff[];
   /** Ayşe Teyze's fortune (the day it was read on decides whether it still counts). */
   fortune: FortuneState | null;
+  /** The duel we are in (counting down or fighting). */
+  duel: DuelState | null;
+  /** A duel challenge waiting for our answer. */
+  duelInvite: DuelInvite | null;
 }
 
 export interface ActiveBuff {
@@ -186,6 +191,7 @@ export class Game {
     updateMobs(this);
     updateMinions(this);
     updatePlayerCombat(this);
+    updateDuels(this);
   }
 
   /**
@@ -245,6 +251,8 @@ export class Game {
       stunnedUntil: 0,
       buffs: [],
       fortune: character.fortune ?? null,
+      duel: null,
+      duelInvite: null,
     });
 
     refreshStats(this, sessionId);
@@ -291,6 +299,7 @@ export class Game {
   }
 
   removePlayer(sessionId: string) {
+    loseDuel(this, sessionId, "left");
     closeStall(this, sessionId);
     dismissMinions(this, sessionId);
     forgetPlayer(this, sessionId);

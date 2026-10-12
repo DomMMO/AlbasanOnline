@@ -26,7 +26,13 @@ export type Decor =
   | { kind: "tent"; tx: number; ty: number; w: number; h: number; color: number }
   | { kind: "grave"; tx: number; ty: number }
   | { kind: "bridge"; tx: number; ty: number; w: number; h: number }
-  | { kind: "torch"; tx: number; ty: number };
+  | { kind: "torch"; tx: number; ty: number }
+  /** A wooden signboard on two posts with a word on it (walk-through, not solid). */
+  | { kind: "signboard"; tx: number; ty: number; w: number; text: string }
+  /** A wooden fence along these tiles (they are solid); each post joins its neighbours. */
+  | { kind: "fence"; tiles: { tx: number; ty: number }[] }
+  /** A painted line around an area on the ground (the market square). */
+  | { kind: "groundFrame"; tx: number; ty: number; w: number; h: number; color: number };
 
 /** An area where a kind of mob lives and respawns (tile coordinates). */
 export interface SpawnZone {

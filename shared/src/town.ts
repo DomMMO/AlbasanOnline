@@ -14,6 +14,28 @@ export const TOWN_HEIGHT = 44;
 
 /** City wall (inclusive tile bounds). */
 const WALL = { x0: 3, y0: 3, x1: 44, y1: 40 };
+/** The market square, where players may open stalls (tiles). */
+const MARKET_AREA = { tx: 7, ty: 30, w: 34, h: 9 };
+/** The market's north entrance, under its signboard (tiles). */
+const MARKET_GATE = { tx: 22, w: 5 };
+
+/** The market square's edge tiles that get a fence: all but the gates (north, east, west). */
+function marketFence(): { tx: number; ty: number }[] {
+  const { tx, ty, w, h } = MARKET_AREA;
+  const x1 = tx + w - 1;
+  const y1 = ty + h - 1;
+  const midY = ty + Math.floor(h / 2);
+  const isGate = (x: number, y: number) =>
+    (y === ty && x >= MARKET_GATE.tx && x < MARKET_GATE.tx + MARKET_GATE.w) || ((x === tx || x === x1) && Math.abs(y - midY) <= 1);
+  const tiles: { tx: number; ty: number }[] = [];
+  for (let y = ty; y <= y1; y++) {
+    for (let x = tx; x <= x1; x++) {
+      const edge = x === tx || x === x1 || y === ty || y === y1;
+      if (edge && !isGate(x, y)) tiles.push({ tx: x, ty: y });
+    }
+  }
+  return tiles;
+}
 /** Rows of the east road, from the wall gap out to the teleport gate. */
 const ROAD_ROWS = [20, 21, 22];
 
@@ -64,7 +86,7 @@ export function buildTown(): DungeonLayout {
 
   // Fountain square and the market.
   fill(17, 14, 31, 28, Tile.Plaza);
-  fill(7, 30, 40, 38, Tile.Market);
+  fill(MARKET_AREA.tx, MARKET_AREA.ty, MARKET_AREA.tx + MARKET_AREA.w - 1, MARKET_AREA.ty + MARKET_AREA.h - 1, Tile.Market);
 
   // Little gardens on the square's diagonals.
   for (const [gx, gy] of [[18, 15], [29, 15], [18, 26], [29, 26]]) {
@@ -111,6 +133,12 @@ export function buildTown(): DungeonLayout {
     solid(tx, 29, 1, 1);
     decor.push({ kind: "banner", tx, ty: 29, color });
   }
+  // Make the market square unmistakable: a sign over its entrance and a gold line around it.
+  decor.push({ kind: "signboard", tx: MARKET_GATE.tx, ty: 29, w: MARKET_GATE.w, text: "PAZAR" });
+  decor.push({ kind: "groundFrame", ...MARKET_AREA, color: 0xe8c33a });
+  const fence = marketFence();
+  for (const { tx, ty } of fence) solid(tx, ty, 1, 1);
+  decor.push({ kind: "fence", tiles: fence });
 
   return { map: { width, height, tiles, spawn: TOWN_SPOTS.spawn }, mobs: [], decor };
 }

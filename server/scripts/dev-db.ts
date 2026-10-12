@@ -91,15 +91,30 @@ async function initCluster(binDir: string, dataDir: string) {
   }
 }
 
+/** After an unclean shutdown Postgres replays its WAL first and refuses connections meanwhile. */
+async function connectWhenReady(timeoutMs = 120_000) {
+  const deadline = Date.now() + timeoutMs;
+  for (;;) {
+    const client = new pg.Client({
+      host: "127.0.0.1",
+      port: DEV_DB.port,
+      user: DEV_DB.user,
+      password: DEV_DB.password,
+      database: "postgres",
+    });
+    try {
+      await client.connect();
+      return client;
+    } catch (error) {
+      // 57P03 = cannot_connect_now ("the database system is starting up").
+      if ((error as { code?: string }).code !== "57P03" || Date.now() > deadline) throw error;
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    }
+  }
+}
+
 async function ensureDatabase() {
-  const client = new pg.Client({
-    host: "127.0.0.1",
-    port: DEV_DB.port,
-    user: DEV_DB.user,
-    password: DEV_DB.password,
-    database: "postgres",
-  });
-  await client.connect();
+  const client = await connectWhenReady();
   try {
     const { rowCount } = await client.query("SELECT 1 FROM pg_database WHERE datname = $1", [DEV_DB.database]);
     if (!rowCount) {

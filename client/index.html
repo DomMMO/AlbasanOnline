@@ -48,7 +48,10 @@
       <div id="target-frame" class="frame" hidden>
         <div class="frame-title"><span id="target-name"></span><span id="target-level" class="lvl"></span></div>
         <div class="bar hp"><div id="target-hp-fill" class="fill"></div><span id="target-hp-text"></span></div>
-        <button id="target-invite" type="button" tabindex="-1" hidden>Gruba davet et</button>
+        <div class="target-actions">
+          <button id="target-invite" type="button" tabindex="-1" hidden>Gruba davet et</button>
+          <button id="target-duel" type="button" tabindex="-1" hidden>Düello</button>
+        </div>
       </div>
 
       <div id="party-frames" hidden></div>
@@ -58,6 +61,14 @@
         <div class="row">
           <button id="party-accept" type="button" tabindex="-1">Kabul</button>
           <button id="party-decline" type="button" tabindex="-1">Reddet</button>
+        </div>
+      </div>
+
+      <div id="duel-invite" class="window" hidden>
+        <p id="duel-invite-text"></p>
+        <div class="row">
+          <button id="duel-accept" type="button" tabindex="-1">Kabul</button>
+          <button id="duel-decline" type="button" tabindex="-1">Reddet</button>
         </div>
       </div>
 
@@ -80,6 +91,12 @@
 
       <div id="clock"></div>
       <div id="netinfo"><span id="hud-online"></span><span id="hud-pos"></span><span id="hud-ping"></span></div>
+
+      <div id="minimap" class="frame">
+        <div id="minimap-zone"></div>
+        <canvas id="minimap-canvas"></canvas>
+        <div id="minimap-legend"><i class="self"></i>Sen <i class="party"></i>Grup <i class="player"></i>Oyuncu</div>
+      </div>
       <div id="damage-meter" hidden>
         <div class="dm-title" title="Drag to move · double-click: default position">
           <span id="dm-title-text">Damage Done</span>
@@ -107,11 +124,15 @@
       </div>
 
       <div id="bottom">
-        <div id="hotbar"></div>
+        <div id="action-dock">
+          <div class="bar hp"><div id="dock-hp-fill" class="fill"></div><span id="dock-hp-text"></span></div>
+          <div class="bar rage"><div id="dock-rage-fill" class="fill"></div><span id="dock-rage-text"></span></div>
+          <div id="hotbar"></div>
+        </div>
         <div id="xp-bar" class="bar"><div id="xp-fill" class="fill"></div><span id="xp-text"></span></div>
       </div>
 
-      <div id="help">Tab: hedef · Sol tık: saldır / al / konuş / portal · 1-0: skill ve iksir · I: envanter · K: yetenekler · P: pasif ağaç · T: şehir portalı · J: görevler · E: al/konuş/portal · Enter: sohbet · L: PvP sıralaması · Esc: menü</div>
+      <div id="help">Tab: hedef · Sol tık: saldır / al / konuş / portal · 1-0: skill ve iksir · I: envanter · K: yetenekler · P: pasif ağaç · T: şehir portalı · J: görevler · M: harita · E: al/konuş/portal · Enter: sohbet · L: PvP sıralaması · Esc: menü</div>
 
       <div id="inventory-window" class="window" hidden>
         <div class="window-title"><span>Karakter</span><button id="inventory-close" class="close" tabindex="-1">×</button></div>
@@ -169,7 +190,7 @@
 
       <div id="npc-dialog" class="window" hidden>
         <div class="window-title"><span id="npc-dialog-name"></span><button id="npc-dialog-close" class="close" tabindex="-1">×</button></div>
-        <div id="npc-dialog-body"></div>
+        <div id="npc-dialog-body" class="window-scroll"></div>
       </div>
 
       <div id="skills-window" class="window" hidden>
@@ -183,13 +204,15 @@
 
       <div id="passive-window" class="window" hidden>
         <div class="window-title"><span>Pasif Ağaç</span><button id="passive-close" class="close" tabindex="-1">×</button></div>
-        <div id="passive-summary"></div>
-        <div id="passive-ring"></div>
+        <div class="window-scroll">
+          <div id="passive-summary"></div>
+          <div id="passive-ring"></div>
+        </div>
       </div>
 
       <div id="quest-log" class="window" hidden>
         <div class="window-title"><span>Görev Günlüğü</span><button id="quest-log-close" class="close" tabindex="-1">×</button></div>
-        <div id="quest-log-body"></div>
+        <div id="quest-log-body" class="window-scroll"></div>
       </div>
 
       <div id="stall-setup" class="window" hidden>
@@ -255,12 +278,14 @@
           <tr><td>I / C</td><td>Karakter ve envanter</td></tr>
           <tr><td>J</td><td>Görev günlüğü</td></tr>
           <tr><td>L</td><td>PvP sıralaması</td></tr>
+          <tr><td>M</td><td>Mini harita aç/kapat</td></tr>
           <tr><td>Enter</td><td>Sohbet</td></tr>
           <tr><td>Esc</td><td>Pencereyi kapat / hedefi bırak / menü</td></tr>
           <tr><td>/f İsim mesaj</td><td>Fısıltı</td></tr>
           <tr><td>/p mesaj</td><td>Grup sohbeti</td></tr>
           <tr><td>/davet İsim</td><td>Gruba davet et</td></tr>
           <tr><td>/ayril · /at İsim</td><td>Gruptan ayrıl · at (lider)</td></tr>
+          <tr><td>/duello İsim</td><td>Yanındaki oyuncuyu düelloya davet et</td></tr>
         </table>
         <button type="button" class="secondary menu-back">Geri</button>
       </div>
