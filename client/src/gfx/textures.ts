@@ -30,6 +30,8 @@ export function renderTiles(tiles: Tile[][]): number[][] {
 }
 
 function groundAround(tiles: Tile[][], x: number, y: number): Tile {
+  // The market fence stands on the market's bricks, corners included.
+  for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (tiles[y + dy]?.[x + dx] === Tile.Market) return Tile.Market;
   for (let r = 1; r < 6; r++) {
     for (const [dx, dy] of [[0, r], [-r, 0], [r, 0], [0, -r]]) {
       const t = tiles[y + dy]?.[x + dx];
