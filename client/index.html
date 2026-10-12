@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <title>MMO Creation</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div id="game"></div>
+
+    <form id="auth" class="panel" hidden>
+      <h1>MMO Creation</h1>
+      <p class="game-subtitle">Kırık Mühür</p>
+      <label for="username">Kullanıcı adı</label>
+      <input id="username" maxlength="16" autocomplete="username" />
+      <label for="password">Şifre</label>
+      <input id="password" type="password" maxlength="72" autocomplete="current-password" />
+      <div class="row">
+        <button type="submit">Giriş yap</button>
+        <button type="button" id="register-btn" class="secondary">Kayıt ol</button>
+      </div>
+      <p id="auth-error" class="error"></p>
+    </form>
+
+    <div id="characters" class="panel" hidden>
+      <h1>Karakterler</h1>
+      <p id="account-name" class="muted"></p>
+      <div id="character-list"></div>
+      <div id="class-picker"></div>
+      <form id="create-character" class="row" autocomplete="off">
+        <input id="character-name" maxlength="16" placeholder="Yeni karakter adı" />
+        <button type="submit">Oluştur</button>
+      </form>
+      <p id="characters-error" class="error"></p>
+      <a id="gm-link" href="/admin.html" class="gm-link" hidden>GM Paneli</a>
+      <button type="button" id="logout" class="link">Çıkış yap</button>
+    </div>
+
+    <div id="hud" hidden>
+      <div id="player-frame" class="frame">
+        <div class="frame-title"><span id="player-name"></span><span id="player-level" class="lvl"></span></div>
+        <div class="bar hp"><div id="player-hp-fill" class="fill"></div><span id="player-hp-text"></span></div>
+        <div class="bar rage"><div id="player-rage-fill" class="fill"></div><span id="player-rage-text"></span></div>
+      </div>
+
+      <div id="target-frame" class="frame" hidden>
+        <div class="frame-title"><span id="target-name"></span><span id="target-level" class="lvl"></span></div>
+        <div class="bar hp"><div id="target-hp-fill" class="fill"></div><span id="target-hp-text"></span></div>
+        <button id="target-invite" type="button" tabindex="-1" hidden>Gruba davet et</button>
+      </div>
+
+      <div id="party-frames" hidden></div>
+
+      <div id="party-invite" class="window" hidden>
+        <p id="party-invite-text"></p>
+        <div class="row">
+          <button id="party-accept" type="button" tabindex="-1">Kabul</button>
+          <button id="party-decline" type="button" tabindex="-1">Reddet</button>
+        </div>
+      </div>
+
+      <div id="boss-bar" hidden>
+        <div id="boss-name"></div>
+        <div class="bar hp"><div id="boss-hp-fill" class="fill"></div><span id="boss-hp-text"></span></div>
+      </div>
+
+      <div id="killfeed"></div>
+      <div id="pvp-stats" hidden></div>
+
+      <div id="leaderboard" class="window" hidden>
+        <div class="window-title"><span>PvP Sıralaması</span><button id="leaderboard-close" class="close" tabindex="-1">×</button></div>
+        <table>
+          <thead><tr><th>#</th><th>Karakter</th><th>Sınıf</th><th>Puan</th><th>Ö</th><th>Ö'n</th></tr></thead>
+          <tbody id="leaderboard-body"></tbody>
+        </table>
+        <p class="window-hint">Ö: öldürme · Ö'n: ölüm. Kan Arenası'nda oyuncu yenerek puan kazanılır.</p>
+      </div>
+
+      <div id="netinfo"><span id="hud-online"></span><span id="hud-ping"></span></div>
+
+      <div id="messages"></div>
+
+      <div id="cast-bar" hidden>
+        <div id="cast-fill"></div>
+        <span id="cast-name"></span>
+      </div>
+
+      <div id="chat">
+        <div id="chat-log"></div>
+        <input id="chat-input" maxlength="150" placeholder="Mesaj yaz… (/f İsim mesaj: fısıltı)" autocomplete="off" hidden />
+      </div>
+
+      <div id="bottom">
+        <div id="hotbar"></div>
+        <div id="xp-bar" class="bar"><div id="xp-fill" class="fill"></div><span id="xp-text"></span></div>
+      </div>
+
+      <div id="help">Tab: hedef · Tık: saldır · 1-3: skill · 4-5: iksir · I: envanter · J: görevler · E: al/konuş/portal · Enter: sohbet · L: PvP sıralaması · Esc: menü</div>
+
+      <div id="inventory-window" class="window" hidden>
+        <div class="window-title"><span>Karakter</span><button id="inventory-close" class="close" tabindex="-1">×</button></div>
+        <div class="char-panel">
+          <div id="doll" title="Döndürmek için tıkla">
+            <canvas id="doll-weapon" width="28" height="28"></canvas>
+            <canvas id="doll-body" width="28" height="28"></canvas>
+            <button id="doll-rotate" type="button" tabindex="-1" title="Döndür">⟳</button>
+          </div>
+          <div id="equipment"></div>
+        </div>
+        <div id="stats"></div>
+        <div id="inventory-grid"></div>
+        <div class="gold-row"><span class="coin"></span><span id="gold">0</span></div>
+      </div>
+
+      <div id="upgrade-window" class="window" hidden>
+        <div class="window-title"><span id="upgrade-title"></span><button id="upgrade-close" class="close" tabindex="-1">×</button></div>
+        <div class="upgrade-body">
+          <div id="upgrade-slot" class="item-slot"></div>
+          <div id="upgrade-info"></div>
+        </div>
+        <label class="upgrade-protect"><input id="upgrade-protect" type="checkbox" tabindex="-1" /> <span id="upgrade-protect-label"></span></label>
+        <button id="upgrade-button" type="button" tabindex="-1">Yükselt</button>
+        <div id="upgrade-result"></div>
+      </div>
+
+      <div id="shop-window" class="window" hidden>
+        <div class="window-title"><span id="shop-title"></span><button id="shop-close" class="close" tabindex="-1">×</button></div>
+        <div id="shop-list"></div>
+        <p class="window-hint">Satmak için envanterde sağ tıkla ya da item'ı buraya sürükle.</p>
+      </div>
+
+      <button id="stall-button" type="button" tabindex="-1" hidden>Pazar Kur</button>
+
+      <div id="quest-tracker" hidden></div>
+
+      <div id="touch-controls" hidden>
+        <div id="joystick"><div id="joystick-knob"></div></div>
+        <div id="touch-actions">
+          <button type="button" data-action="attack" class="big">Saldır</button>
+          <button type="button" data-action="targetNext">Hedef</button>
+          <button type="button" data-action="interact">E</button>
+        </div>
+        <div id="touch-menu">
+          <button type="button" data-action="toggleInventory">Çanta</button>
+          <button type="button" data-action="questLog">Görev</button>
+          <button type="button" id="touch-chat">Sohbet</button>
+          <button type="button" data-action="clearTarget">Menü</button>
+        </div>
+      </div>
+
+      <div id="npc-dialog" class="window" hidden>
+        <div class="window-title"><span id="npc-dialog-name"></span><button id="npc-dialog-close" class="close" tabindex="-1">×</button></div>
+        <div id="npc-dialog-body"></div>
+      </div>
+
+      <div id="quest-log" class="window" hidden>
+        <div class="window-title"><span>Görev Günlüğü</span><button id="quest-log-close" class="close" tabindex="-1">×</button></div>
+        <div id="quest-log-body"></div>
+      </div>
+
+      <div id="stall-setup" class="window" hidden>
+        <div class="window-title"><span>Pazar Tezgâhı</span><button id="stall-setup-close" class="close" tabindex="-1">×</button></div>
+        <input id="stall-title-input" placeholder="Tezgâh adı (ör. Ucuz iksir!)" autocomplete="off" />
+        <div id="stall-setup-list" class="stall-list"></div>
+        <div id="stall-setup-total" class="stall-total"></div>
+        <p id="stall-setup-hint" class="window-hint"></p>
+        <button id="stall-setup-action" class="stall-action" type="button" tabindex="-1">Pazarı Aç</button>
+      </div>
+
+      <div id="stall-browse" class="window" hidden>
+        <div class="window-title"><span id="stall-browse-title"></span><button id="stall-browse-close" class="close" tabindex="-1">×</button></div>
+        <div id="stall-browse-seller" class="window-hint"></div>
+        <div id="stall-browse-list" class="stall-list"></div>
+        <p class="window-hint">Fiyatlar birim başınadır. Adet yazıp Al'a bas.</p>
+      </div>
+    </div>
+
+    <div id="tooltip" hidden></div>
+
+    <div id="loading" hidden><span id="loading-text"></span></div>
+
+    <div id="game-menu" class="panel" hidden>
+      <div id="menu-main">
+        <h1>Menü</h1>
+        <button id="menu-resume" type="button">Devam et</button>
+        <button id="menu-open-settings" type="button" class="secondary">Ayarlar</button>
+        <button id="menu-open-controls" type="button" class="secondary">Kontroller</button>
+        <a id="menu-gm" href="/admin.html" target="_blank" class="gm-link" hidden>GM Paneli</a>
+        <button id="menu-switch" type="button" class="secondary">Karakter değiştir</button>
+        <button id="menu-logout" type="button" class="secondary">Çıkış yap</button>
+      </div>
+
+      <div id="menu-settings" hidden>
+        <h1>Ayarlar</h1>
+        <label class="setting">Kamera yakınlığı
+          <select id="setting-zoom">
+            <option value="auto">Otomatik</option>
+            <option value="2">Uzak (2x)</option>
+            <option value="3">Orta (3x)</option>
+            <option value="4">Yakın (4x)</option>
+          </select>
+        </label>
+        <label class="setting"><input id="setting-damage" type="checkbox" /> Hasar sayılarını göster</label>
+        <label class="setting"><input id="setting-bubbles" type="checkbox" /> Konuşma balonlarını göster</label>
+        <label class="setting"><input id="setting-help" type="checkbox" /> Alttaki kısayol satırını göster</label>
+        <p class="muted">Ayarlar bu tarayıcıda saklanır.</p>
+        <button type="button" class="secondary menu-back">Geri</button>
+      </div>
+
+      <div id="menu-controls" hidden>
+        <h1>Kontroller</h1>
+        <table class="controls">
+          <tr><td>WASD / oklar</td><td>Yürü</td></tr>
+          <tr><td>Tık</td><td>Hedef al ve saldır</td></tr>
+          <tr><td>Tab</td><td>Sıradaki düşman</td></tr>
+          <tr><td>1 2 3</td><td>Skill'ler</td></tr>
+          <tr><td>4 5</td><td>İksirler</td></tr>
+          <tr><td>F</td><td>Hedefe saldır</td></tr>
+          <tr><td>E</td><td>Sandık al, NPC ile konuş, portal, tezgâha bak</td></tr>
+          <tr><td>I / C</td><td>Karakter ve envanter</td></tr>
+          <tr><td>J</td><td>Görev günlüğü</td></tr>
+          <tr><td>L</td><td>PvP sıralaması</td></tr>
+          <tr><td>Enter</td><td>Sohbet</td></tr>
+          <tr><td>Esc</td><td>Pencereyi kapat / hedefi bırak / menü</td></tr>
+          <tr><td>/f İsim mesaj</td><td>Fısıltı</td></tr>
+          <tr><td>/p mesaj</td><td>Grup sohbeti</td></tr>
+          <tr><td>/davet İsim</td><td>Gruba davet et</td></tr>
+          <tr><td>/ayril · /at İsim</td><td>Gruptan ayrıl · at (lider)</td></tr>
+        </table>
+        <button type="button" class="secondary menu-back">Geri</button>
+      </div>
+    </div>
+
+    <div id="death" class="panel" hidden>
+      <h1>Öldün</h1>
+      <p id="death-text">Şehir meydanında yeniden doğacaksın.</p>
+      <button id="respawn">Yeniden doğ</button>
+    </div>
+
+    <div id="disconnected" class="panel" hidden>
+      <p id="disconnected-text">Sunucuyla bağlantı koptu.</p>
+      <button onclick="location.reload()">Yeniden bağlan</button>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

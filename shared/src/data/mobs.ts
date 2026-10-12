@@ -1,0 +1,493 @@
+import type { Appearance } from "./appearance";
+
+export interface LootTable {
+  gold: [min: number, max: number];
+  /** Each entry rolls independently. */
+  /** `enhance` = the item drops already upgraded (+N). */
+  drops: { item: string; chance: number; min?: number; max?: number; enhance?: number }[];
+}
+
+/**
+ * Telegraphed boss abilities, used in rotation (see server/src/game/boss.ts):
+ *   slam   - circle around the boss fills up, then everyone inside is hit
+ *   leap   - circle under the target; the boss jumps there and lands on everyone inside
+ *   charge - a lane towards the target; the boss slides along it hitting everyone in the way
+ */
+export type BossAbility =
+  | { type: "slam"; intervalMs: number; castMs: number; radius: number; damage: number }
+  | { type: "leap"; intervalMs: number; castMs: number; radius: number; damage: number }
+  | { type: "charge"; intervalMs: number; castMs: number; length: number; width: number; damage: number };
+
+/** Boss-only mechanics (see server/src/game/boss.ts). */
+export interface BossDef {
+  abilities: BossAbility[];
+  /** Below this health fraction the boss attacks faster. */
+  enrageAt: number;
+  enrageSwingMultiplier: number;
+  /** Health fractions at which reinforcements are called. */
+  addsAt: number[];
+  addMob?: string;
+  addCount: number;
+}
+
+export interface MobDef {
+  id: string;
+  name: string;
+  level: number;
+  maxHp: number;
+  attack: number;
+  defense: number;
+  attackSpeedMs: number;
+  /** Pixels per second. Keep below PLAYER_SPEED so players can escape. */
+  speed: number;
+  xp: number;
+  /** 0 = passive (only fights back when attacked). */
+  aggroRange: number;
+  respawnMs: number;
+  appearance: Appearance;
+  loot: LootTable;
+  /** Drawn this many times bigger (integer keeps pixels crisp). */
+  scale?: number;
+  boss?: BossDef;
+}
+
+type Drop = LootTable["drops"][number];
+
+/** Every weapon and armour piece of one gear tier (see gear.ts), each with the same chance. */
+function gearDrops(tier: number, chance: number): Drop[] {
+  const ids = [
+    ...["sword", "axe", "staff", "mace"].map((line) => `${line}_${tier}`),
+    ...["plate", "robe"].flatMap((set) => ["head", "chest", "legs", "feet"].map((piece) => `${set}_${piece}_${tier}`)),
+  ];
+  return ids.map((item) => ({ item, chance }));
+}
+
+export const MOBS: Record<string, MobDef> = {
+  slime: {
+    id: "slime",
+    name: "Balçık",
+    level: 1,
+    maxHp: 30,
+    attack: 5,
+    defense: 0,
+    attackSpeedMs: 2000,
+    speed: 30,
+    xp: 12,
+    aggroRange: 0,
+    respawnMs: 10_000,
+    appearance: { type: "slime", color: 0x6fcf5a },
+    loot: {
+      gold: [1, 3],
+      drops: [
+        { item: "slime_gel", chance: 0.6, min: 1, max: 2 },
+        { item: "minor_hp_potion", chance: 0.08 },
+        { item: "minor_mana_potion", chance: 0.08 },
+        { item: "leather_cap", chance: 0.03 },
+        { item: "worn_boots", chance: 0.03 },
+        { item: "upgrade_scroll_low", chance: 0.05 },
+        { item: "copper_ring", chance: 0.01 },
+      ],
+    },
+  },
+  wolf: {
+    id: "wolf",
+    name: "Gri Kurt",
+    level: 3,
+    maxHp: 75,
+    attack: 11,
+    defense: 2,
+    attackSpeedMs: 1800,
+    speed: 68,
+    xp: 30,
+    aggroRange: 56,
+    respawnMs: 15_000,
+    appearance: { type: "wolf", fur: 0x8a8f99 },
+    loot: {
+      gold: [3, 7],
+      drops: [
+        { item: "wolf_pelt", chance: 0.55 },
+        { item: "wolf_meat", chance: 0.45 },
+        { item: "minor_hp_potion", chance: 0.1 },
+        { item: "minor_mana_potion", chance: 0.1 },
+        { item: "wolf_hide_leggings", chance: 0.04 },
+        { item: "wolf_fang_blade", chance: 0.02 },
+        { item: "upgrade_scroll_low", chance: 0.08 },
+        { item: "upgrade_scroll_mid", chance: 0.015 },
+        { item: "copper_necklace", chance: 0.012 },
+        { item: "copper_earring", chance: 0.008 },
+      ],
+    },
+  },
+  goblin: {
+    id: "goblin",
+    name: "Goblin Yağmacı",
+    level: 5,
+    maxHp: 130,
+    attack: 17,
+    defense: 4,
+    attackSpeedMs: 2200,
+    speed: 60,
+    xp: 55,
+    aggroRange: 72,
+    respawnMs: 20_000,
+    appearance: { type: "humanoid", tunic: 0x7a5a2e, skin: 0x7cb342, hair: 0x2d2d2d },
+    loot: {
+      gold: [6, 14],
+      drops: [
+        { item: "goblin_ear", chance: 0.5 },
+        { item: "hp_potion", chance: 0.08 },
+        { item: "mana_potion", chance: 0.08 },
+        { item: "seer_staff", chance: 0.015 },
+        { item: "iron_helm", chance: 0.04 },
+        { item: "chainmail", chance: 0.02 },
+        { item: "goblin_cleaver", chance: 0.015 },
+        { item: "upgrade_scroll_low", chance: 0.1 },
+        { item: "upgrade_scroll_mid", chance: 0.04 },
+        { item: "upgrade_scroll_high", chance: 0.008 },
+        { item: "protection_charm", chance: 0.005 },
+        { item: "copper_earring", chance: 0.015 },
+        { item: "silver_ring", chance: 0.006 },
+        { item: "return_scroll", chance: 0.04 },
+      ],
+    },
+  },
+
+  // ---- Goblin Cave ----
+  cave_slime: {
+    id: "cave_slime",
+    name: "Mağara Balçığı",
+    level: 5,
+    maxHp: 110,
+    attack: 15,
+    defense: 3,
+    attackSpeedMs: 2000,
+    speed: 34,
+    xp: 45,
+    aggroRange: 48,
+    respawnMs: 0,
+    appearance: { type: "slime", color: 0x9b5bd9 },
+    loot: {
+      gold: [4, 9],
+      drops: [
+        { item: "slime_gel", chance: 0.7, min: 1, max: 3 },
+        { item: "hp_potion", chance: 0.1 },
+        { item: "upgrade_scroll_low", chance: 0.12 },
+      ],
+    },
+  },
+  goblin_guard: {
+    id: "goblin_guard",
+    name: "Goblin Muhafız",
+    level: 6,
+    maxHp: 190,
+    attack: 19,
+    defense: 6,
+    attackSpeedMs: 2200,
+    speed: 56,
+    xp: 75,
+    aggroRange: 72,
+    respawnMs: 0,
+    appearance: { type: "humanoid", tunic: 0x8b2a2a, skin: 0x7cb342, hair: 0x2d2d2d, gear: { head: "iron_helm", chest: "chainmail" } },
+    loot: {
+      gold: [10, 20],
+      drops: [
+        { item: "goblin_ear", chance: 0.6 },
+        { item: "hp_potion", chance: 0.15 },
+        { item: "upgrade_scroll_mid", chance: 0.08 },
+        { item: "seer_staff", chance: 0.04 },
+        { item: "mana_potion", chance: 0.12 },
+        { item: "iron_helm", chance: 0.05 },
+        { item: "chainmail", chance: 0.04 },
+      ],
+    },
+  },
+  goblin_chief: {
+    id: "goblin_chief",
+    name: "Goblin Şefi Grukk",
+    level: 8,
+    maxHp: 1000,
+    attack: 22,
+    defense: 8,
+    attackSpeedMs: 2400,
+    speed: 55,
+    xp: 400,
+    aggroRange: 96,
+    respawnMs: 0,
+    scale: 2,
+    appearance: { type: "humanoid", tunic: 0x6b1a1a, skin: 0x6fa33a, hair: 0x1a1a1a, gear: { head: "chieftain_helm", legs: "wolf_hide_leggings" } },
+    loot: {
+      gold: [80, 150],
+      drops: [
+        { item: "upgrade_scroll_mid", chance: 1, min: 1, max: 2 },
+        { item: "upgrade_scroll_high", chance: 0.3 },
+        { item: "protection_charm", chance: 0.15 },
+        { item: "grukk_axe", chance: 0.25 },
+        { item: "chieftain_helm", chance: 0.25 },
+        { item: "chainmail", chance: 0.2 },
+        { item: "silver_necklace", chance: 0.2 },
+        { item: "hp_potion", chance: 1, min: 2, max: 4 },
+      ],
+    },
+    boss: {
+      abilities: [{ type: "slam", intervalMs: 11_000, castMs: 1600, radius: 48, damage: 70 }],
+      enrageAt: 0.5,
+      enrageSwingMultiplier: 0.7,
+      addsAt: [0.75, 0.35],
+      addMob: "goblin",
+      addCount: 2,
+    },
+  },
+
+  // ---- Jack's Cellar ----
+  pumpkin_jack: {
+    id: "pumpkin_jack",
+    name: "Kabak Jack",
+    level: 10,
+    maxHp: 1600,
+    attack: 26,
+    defense: 9,
+    attackSpeedMs: 2200,
+    speed: 64,
+    xp: 800,
+    aggroRange: 110,
+    respawnMs: 0,
+    appearance: { type: "image", key: "jack" },
+    loot: {
+      gold: [150, 300],
+      drops: [
+        { item: "pumpkin_scythe", chance: 1, enhance: 1 },
+        { item: "seal_fragment", chance: 1 },
+        { item: "upgrade_scroll_mid", chance: 1, min: 2, max: 3 },
+        { item: "upgrade_scroll_high", chance: 0.5 },
+        { item: "protection_charm", chance: 0.25 },
+        { item: "silver_ring", chance: 0.3 },
+        { item: "pearl_earring", chance: 0.2 },
+        { item: "hp_potion", chance: 1, min: 3, max: 5 },
+      ],
+    },
+    boss: {
+      abilities: [
+        { type: "leap", intervalMs: 8000, castMs: 1300, radius: 40, damage: 85 },
+        { type: "charge", intervalMs: 9000, castMs: 1000, length: 144, width: 22, damage: 70 },
+      ],
+      enrageAt: 0.3,
+      enrageSwingMultiplier: 0.7,
+      addsAt: [],
+      addCount: 0,
+    },
+  },
+
+  // ---- Dark Forest (Kara Orman), levels 10-20 ----
+  dark_wolf: {
+    id: "dark_wolf",
+    name: "Kara Kurt",
+    level: 10,
+    maxHp: 300,
+    attack: 30,
+    defense: 9,
+    attackSpeedMs: 1700,
+    speed: 70,
+    xp: 120,
+    aggroRange: 64,
+    respawnMs: 15_000,
+    appearance: { type: "wolf", fur: 0x34343e },
+    loot: {
+      gold: [10, 20],
+      drops: [
+        { item: "dark_wolf_pelt", chance: 0.55 },
+        { item: "large_hp_potion", chance: 0.06 },
+        { item: "large_mana_potion", chance: 0.06 },
+        { item: "upgrade_scroll_low", chance: 0.1 },
+        { item: "upgrade_scroll_mid", chance: 0.03 },
+        { item: "silver_ring", chance: 0.012 },
+        { item: "spirit_stone", chance: 0.004 },
+        ...gearDrops(1, 0.006),
+      ],
+    },
+  },
+  poison_slime: {
+    id: "poison_slime",
+    name: "Zehir Balçığı",
+    level: 11,
+    maxHp: 340,
+    attack: 32,
+    defense: 8,
+    attackSpeedMs: 2000,
+    speed: 36,
+    xp: 135,
+    aggroRange: 48,
+    respawnMs: 15_000,
+    appearance: { type: "slime", color: 0x9bd13a },
+    loot: {
+      gold: [10, 22],
+      drops: [
+        { item: "poison_sac", chance: 0.5 },
+        { item: "slime_gel", chance: 0.4, min: 1, max: 3 },
+        { item: "large_mana_potion", chance: 0.08 },
+        { item: "upgrade_scroll_low", chance: 0.1 },
+        { item: "upgrade_scroll_mid", chance: 0.03 },
+        { item: "silver_necklace", chance: 0.012 },
+        { item: "spirit_stone", chance: 0.004 },
+        ...gearDrops(1, 0.006),
+      ],
+    },
+  },
+  bandit: {
+    id: "bandit",
+    name: "Haydut",
+    level: 12,
+    maxHp: 420,
+    attack: 36,
+    defense: 12,
+    attackSpeedMs: 2100,
+    speed: 62,
+    xp: 160,
+    aggroRange: 72,
+    respawnMs: 18_000,
+    appearance: { type: "humanoid", tunic: 0x5a1e1e, hair: 0x1a1a1a, gear: { head: "leather_cap", chest: "leather_vest" } },
+    loot: {
+      gold: [15, 30],
+      drops: [
+        { item: "bandit_badge", chance: 0.5 },
+        { item: "large_hp_potion", chance: 0.08 },
+        { item: "return_scroll", chance: 0.05 },
+        { item: "upgrade_scroll_low", chance: 0.12 },
+        { item: "upgrade_scroll_mid", chance: 0.04 },
+        { item: "pearl_earring", chance: 0.012 },
+        { item: "gold_ring", chance: 0.006 },
+        { item: "spirit_stone", chance: 0.005 },
+        ...gearDrops(1, 0.005),
+        ...gearDrops(2, 0.004),
+      ],
+    },
+  },
+  skeleton: {
+    id: "skeleton",
+    name: "İskelet Savaşçı",
+    level: 14,
+    maxHp: 500,
+    attack: 42,
+    defense: 15,
+    attackSpeedMs: 2200,
+    speed: 52,
+    xp: 200,
+    aggroRange: 72,
+    respawnMs: 18_000,
+    appearance: { type: "humanoid", tunic: 0x4a4a4a, skin: 0xe8e4d8, hair: 0xe8e4d8, gear: { chest: "chainmail" } },
+    loot: {
+      gold: [18, 35],
+      drops: [
+        { item: "bone_dust", chance: 0.55 },
+        { item: "large_hp_potion", chance: 0.08 },
+        { item: "large_mana_potion", chance: 0.08 },
+        { item: "upgrade_scroll_mid", chance: 0.05 },
+        { item: "upgrade_scroll_high", chance: 0.006 },
+        { item: "ruby_necklace", chance: 0.01 },
+        { item: "spirit_stone", chance: 0.006 },
+        ...gearDrops(2, 0.005),
+        ...gearDrops(3, 0.003),
+      ],
+    },
+  },
+  orc: {
+    id: "orc",
+    name: "Ork Yağmacı",
+    level: 16,
+    maxHp: 640,
+    attack: 50,
+    defense: 18,
+    attackSpeedMs: 2300,
+    speed: 58,
+    xp: 250,
+    aggroRange: 80,
+    respawnMs: 20_000,
+    appearance: { type: "humanoid", tunic: 0x4a3a2a, skin: 0x5a7a3a, hair: 0x1a1a1a, gear: { head: "iron_helm", legs: "wolf_hide_leggings" } },
+    loot: {
+      gold: [22, 42],
+      drops: [
+        { item: "orc_tusk", chance: 0.5 },
+        { item: "super_hp_potion", chance: 0.05 },
+        { item: "large_mana_potion", chance: 0.08 },
+        { item: "upgrade_scroll_mid", chance: 0.06 },
+        { item: "upgrade_scroll_high", chance: 0.008 },
+        { item: "protection_charm", chance: 0.004 },
+        { item: "emerald_earring", chance: 0.01 },
+        { item: "sapphire_ring", chance: 0.005 },
+        { item: "spirit_stone", chance: 0.007 },
+        ...gearDrops(3, 0.005),
+      ],
+    },
+  },
+  dire_bear: {
+    id: "dire_bear",
+    name: "Boz Ayı",
+    level: 18,
+    maxHp: 1500,
+    attack: 62,
+    defense: 22,
+    attackSpeedMs: 2400,
+    speed: 62,
+    xp: 600,
+    aggroRange: 64,
+    respawnMs: 60_000,
+    scale: 2,
+    appearance: { type: "wolf", fur: 0x6b4a2b },
+    loot: {
+      gold: [50, 90],
+      drops: [
+        { item: "bear_claw", chance: 0.8, min: 1, max: 2 },
+        { item: "super_hp_potion", chance: 0.15 },
+        { item: "upgrade_scroll_mid", chance: 0.15 },
+        { item: "upgrade_scroll_high", chance: 0.03 },
+        { item: "protection_charm", chance: 0.015 },
+        { item: "dragon_eye_necklace", chance: 0.02 },
+        { item: "moonstone_earring", chance: 0.015 },
+        { item: "spirit_stone", chance: 0.03 },
+        ...gearDrops(3, 0.01),
+        ...gearDrops(4, 0.006),
+      ],
+    },
+  },
+  bandit_chief: {
+    id: "bandit_chief",
+    name: "Haydut Reisi Kara Murat",
+    level: 20,
+    maxHp: 6000,
+    attack: 70,
+    defense: 24,
+    attackSpeedMs: 2300,
+    speed: 60,
+    xp: 2500,
+    aggroRange: 96,
+    respawnMs: 300_000,
+    scale: 2,
+    appearance: { type: "humanoid", tunic: 0x2a0a0a, hair: 0x1a1a1a, skin: 0xc68a5a, gear: { head: "chieftain_helm", chest: "chainmail", legs: "wolf_hide_leggings" } },
+    loot: {
+      gold: [300, 600],
+      drops: [
+        { item: "seal_fragment", chance: 1 },
+        { item: "upgrade_scroll_mid", chance: 1, min: 2, max: 4 },
+        { item: "upgrade_scroll_high", chance: 0.5 },
+        { item: "protection_charm", chance: 0.25 },
+        { item: "spirit_stone", chance: 0.5, min: 1, max: 2 },
+        { item: "super_hp_potion", chance: 1, min: 2, max: 4 },
+        { item: "seal_necklace", chance: 0.08 },
+        { item: "might_ring", chance: 0.06 },
+        { item: "red_dragon_earring", chance: 0.05 },
+        ...gearDrops(4, 0.04),
+        ...gearDrops(5, 0.025),
+      ],
+    },
+    boss: {
+      abilities: [
+        { type: "slam", intervalMs: 12_000, castMs: 1500, radius: 52, damage: 160 },
+        { type: "charge", intervalMs: 10_000, castMs: 1000, length: 150, width: 24, damage: 140 },
+      ],
+      enrageAt: 0.3,
+      enrageSwingMultiplier: 0.7,
+      addsAt: [0.6, 0.3],
+      addMob: "bandit",
+      addCount: 2,
+    },
+  },
+};

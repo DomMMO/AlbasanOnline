@@ -1,0 +1,19 @@
+import { Client, type Room } from "colyseus.js";
+import { SERVER_PORT, ZONES, type JoinOptions, type ZoneId } from "../../../shared/src";
+
+// VITE_SERVER_URL overrides this in production; in dev we assume the game server
+// runs on the same host as the page, which also makes LAN/phone testing work.
+const SERVER_URL =
+  import.meta.env.VITE_SERVER_URL ??
+  `${location.protocol === "https:" ? "wss" : "ws"}://${location.hostname}:${SERVER_PORT}`;
+
+const client = new Client(SERVER_URL);
+
+/**
+ * Joins a zone's room. Shared zones are joined; instanced zones get a new room, unless
+ * `roomId` names the instance your party is already in.
+ */
+export async function joinZone(zone: ZoneId, options: JoinOptions, roomId?: string): Promise<Room> {
+  if (roomId) return client.joinById(roomId, options);
+  return ZONES[zone].instanced ? client.create(zone, options) : client.joinOrCreate(zone, options);
+}

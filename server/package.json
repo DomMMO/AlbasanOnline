@@ -1,0 +1,27 @@
+{
+  "name": "server",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "db": "tsx scripts/dev-db.ts",
+    "start": "tsx src/index.ts",
+    "make-admin": "tsx scripts/make-admin.ts",
+    "stop": "tsx scripts/stop.ts"
+  },
+  "dependencies": {
+    "@colyseus/core": "0.16.26",
+    "@colyseus/schema": "3.0.76",
+    "@colyseus/ws-transport": "0.16.5",
+    "bcryptjs": "^3.0.3",
+    "express": "^5.3.0",
+    "pg": "^8.23.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^22.15.0",
+    "@types/pg": "^8.23.1",
+    "embedded-postgres": "^17.10.0-beta.17",
+    "tsx": "^4.19.4"
+  }
+}

@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GM Paneli · MMO Creation</title>
+    <link rel="stylesheet" href="/src/style.css" />
+    <link rel="stylesheet" href="/src/admin/admin.css" />
+  </head>
+  <body class="admin">
+    <header class="admin-header">
+      <h1>GM Paneli</h1>
+      <span id="admin-user" class="muted"></span>
+      <a href="/" class="admin-link">Oyuna dön</a>
+    </header>
+
+    <p id="admin-error" class="admin-error" hidden></p>
+
+    <main id="admin-main" class="admin-main" hidden>
+      <section class="admin-card" id="search-card">
+        <h2>Oyuncular</h2>
+        <input id="search" placeholder="Karakter veya hesap adı ara…" autocomplete="off" />
+        <div id="results"></div>
+      </section>
+
+      <section class="admin-card" id="character-card" hidden>
+        <div class="character-head">
+          <div>
+            <h2 id="char-name"></h2>
+            <span id="char-meta" class="muted"></span>
+          </div>
+          <span id="char-online" class="badge"></span>
+        </div>
+        <div id="char-stats" class="char-stats"></div>
+
+        <div class="admin-actions">
+          <form id="gold-form" class="inline-form">
+            <label>Altın <input id="gold-amount" type="number" placeholder="+100 / -50" /></label>
+            <button type="submit">Uygula</button>
+          </form>
+          <form id="level-form" class="inline-form">
+            <label>Seviye <input id="level-value" type="number" min="1" max="60" /></label>
+            <button type="submit">Ayarla</button>
+          </form>
+        </div>
+
+        <h3>Item ver</h3>
+        <div class="give">
+          <input id="item-filter" placeholder="Item ara…" autocomplete="off" />
+          <div id="item-catalog"></div>
+          <form id="give-form" class="inline-form">
+            <span id="give-selected" class="muted">Yukarıdan bir item seç</span>
+            <label>Adet <input id="give-qty" type="number" value="1" min="1" max="999" /></label>
+            <label>+N <input id="give-enhance" type="number" value="0" min="0" max="10" /></label>
+            <button type="submit" id="give-button" disabled>Ver</button>
+          </form>
+        </div>
+
+        <h3>Ekipman</h3>
+        <div id="gm-equipment" class="gm-equipment"></div>
+        <h3>Envanter <span class="muted small">(item'ı silmek için üstündeki × düğmesine bas)</span></h3>
+        <div id="gm-inventory" class="gm-inventory"></div>
+
+        <h3>Son GM işlemleri</h3>
+        <ul id="gm-log" class="gm-log"></ul>
+      </section>
+    </main>
+
+    <div id="admin-toast" class="admin-toast" hidden></div>
+    <div id="tooltip" hidden></div>
+    <script type="module" src="/src/admin/main.ts"></script>
+  </body>
+</html>

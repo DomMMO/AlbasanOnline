@@ -1,0 +1,302 @@
+/* GM panel. Reuses the game's colour tokens and item-slot styles from style.css. */
+
+body.admin {
+  overflow: auto;
+  user-select: text;
+  padding: 0 16px 32px;
+}
+
+.admin-header {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  padding: 16px 0;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 16px;
+}
+
+.admin-header h1 {
+  margin: 0;
+  font-size: 22px;
+  color: var(--accent);
+}
+
+.admin-link {
+  margin-left: auto;
+  color: var(--accent);
+}
+
+.admin-error {
+  padding: 12px;
+  color: var(--error);
+  border: 1px solid var(--error);
+  background: #e05a5a14;
+}
+
+.admin-error a {
+  color: var(--accent);
+}
+
+.admin-main {
+  display: grid;
+  grid-template-columns: minmax(240px, 300px) 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+@media (max-width: 800px) {
+  .admin-main {
+    grid-template-columns: 1fr;
+  }
+}
+
+.admin-card {
+  padding: 12px;
+  background: var(--panel);
+  border: 2px solid var(--border);
+  box-shadow: 4px 4px 0 #000;
+}
+
+.admin-card h2 {
+  margin: 0 0 8px;
+  font-size: 18px;
+}
+
+.admin-card h3 {
+  margin: 18px 0 8px;
+  font-size: 14px;
+  color: var(--accent);
+}
+
+.admin input {
+  font: inherit;
+  padding: 6px 8px;
+  color: var(--text);
+  background: #0e0f15;
+  border: 2px solid var(--border);
+}
+
+.admin button {
+  font: inherit;
+  cursor: pointer;
+}
+
+.admin form button,
+.inline-form button {
+  padding: 6px 12px;
+  font-weight: bold;
+  color: #1a1408;
+  background: var(--accent);
+  border: 2px solid #000;
+}
+
+.admin form button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+#search,
+#item-filter {
+  width: 100%;
+}
+
+#results {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.result {
+  display: grid;
+  grid-template-columns: 10px 1fr auto auto;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 8px;
+  text-align: left;
+  color: var(--text);
+  background: #0e0f15;
+  border: 1px solid #000;
+}
+
+.result.active,
+.result:hover {
+  border-color: var(--accent);
+}
+
+.result .lvl {
+  color: var(--accent);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #555;
+}
+
+.dot.on {
+  background: #4cd964;
+  box-shadow: 0 0 4px #4cd964;
+}
+
+.muted {
+  color: #fff9;
+}
+
+.small {
+  font-size: 11px;
+  font-weight: normal;
+}
+
+.character-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.badge {
+  padding: 2px 8px;
+  font-size: 12px;
+  border: 1px solid #555;
+  color: #aaa;
+}
+
+.badge.on {
+  color: #4cd964;
+  border-color: #4cd964;
+}
+
+.char-stats {
+  display: flex;
+  gap: 18px;
+  margin: 8px 0;
+}
+
+.char-stats .gold {
+  color: #ffd34d;
+}
+
+.admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.inline-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.inline-form label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.inline-form input[type="number"] {
+  width: 90px;
+}
+
+#item-catalog {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 260px;
+  overflow-y: auto;
+  margin: 8px 0;
+  padding-right: 4px;
+}
+
+.catalog-group h4 {
+  margin: 0 0 4px;
+  font-size: 12px;
+  color: #fff9;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 4px 4px 0;
+  padding: 3px 8px 3px 3px;
+  font-size: 12px;
+  background: #0e0f15;
+  border: 1px solid #000;
+}
+
+.chip:hover,
+.chip.active {
+  border-color: var(--accent);
+  background: #e0a83f1f;
+}
+
+.chip img {
+  width: 24px;
+  height: 24px;
+  image-rendering: pixelated;
+}
+
+#give-selected {
+  min-width: 160px;
+  font-weight: bold;
+}
+
+.gm-equipment,
+.gm-inventory {
+  display: grid;
+  grid-template-columns: repeat(8, 40px);
+  gap: 3px;
+}
+
+.gm-equipment {
+  grid-template-columns: repeat(5, 40px);
+  gap: 6px;
+}
+
+.item-slot .remove {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  z-index: 2;
+  display: none;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  font-size: 12px;
+  line-height: 14px;
+  color: #fff;
+  background: var(--error);
+  border: 1px solid #000;
+}
+
+.item-slot:hover .remove {
+  display: block;
+}
+
+.gm-log {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 12px;
+  color: #fffc;
+}
+
+.admin-toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 16px;
+  font-weight: bold;
+  color: #1a1408;
+  background: #4cd964;
+  border: 2px solid #000;
+  box-shadow: 3px 3px 0 #000;
+}
+
+.admin-toast.error {
+  color: #fff;
+  background: var(--error);
+}

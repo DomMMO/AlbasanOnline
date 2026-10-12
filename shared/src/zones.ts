@@ -1,0 +1,222 @@
+import { TILE_SIZE } from "./constants";
+import { buildGoblinCave, buildJackLair, buildPvpArena, type DungeonLayout, type SpawnZone } from "./dungeons";
+import { buildForest, FOREST_SPOTS } from "./forest";
+import { CAVE_BRIDGE, CAVE_ENTRANCE_TILE, CAVE_TORCHES, generateWorldMap, type WorldMap } from "./map";
+import { buildTown, TOWN_SPOTS } from "./town";
+
+// A zone is one map with its own room on the server: the main town, the open hunting
+// grounds, a shared PvP arena, or an instanced dungeon that every party gets a private copy of.
+// Town and hunting grounds are "persistent": the character's zone and position are saved
+// there and you log back in where you left. Every other zone is entered through a portal
+// and leaving it puts you back at the portal you used.
+
+export type ZoneId = "town" | "world" | "forest" | "goblin_cave" | "jack_lair" | "pvp_arena";
+
+/** New characters start here; the zone anyone can join without a portal ticket. */
+export const HOME_ZONE: ZoneId = "town";
+
+export type PortalStyle = "cave" | "exit" | "cursed" | "pvp" | "gate";
+
+export interface PortalDef {
+  id: string;
+  /** Feet position in pixels. */
+  x: number;
+  y: number;
+  to: ZoneId;
+  label: string;
+  style: PortalStyle;
+  minLevel?: number;
+  /** Only usable after the zone's boss is dead. */
+  requiresClear?: boolean;
+  /** Where the player stands in this zone after coming back through the portal. */
+  returnTo?: { x: number; y: number };
+  /** Where the player appears in the destination zone (otherwise its saved spot or spawn). */
+  arriveAt?: { x: number; y: number };
+  /** Teleport gate: walking into it is enough, no need to press E. */
+  auto?: boolean;
+}
+
+export interface ZoneDef {
+  id: ZoneId;
+  name: string;
+  /** Instanced zones get a fresh copy per entry. */
+  instanced: boolean;
+  /** The character's zone and position are saved here (log back in where you left). */
+  persistent?: boolean;
+  /** Players can fight each other here (free-for-all). */
+  pvp?: boolean;
+  /** Players can open market stalls here (on market tiles). */
+  market?: boolean;
+  npcs: string[];
+  portals: PortalDef[];
+  /** Shown on the death screen. */
+  respawnText: string;
+}
+
+export const PORTAL_RANGE = TILE_SIZE * 2;
+/** Walking this close to a teleport gate (feet to centre) sends you through. */
+export const AUTO_GATE_RANGE = 10;
+
+const caveEntrance = { x: (CAVE_ENTRANCE_TILE.tx + 1) * TILE_SIZE, y: (CAVE_ENTRANCE_TILE.ty + 1) * TILE_SIZE };
+
+/** The hunting grounds' teleport gate back to town, on the old crossroads plaza. */
+const worldTownGate = { x: 29.5 * TILE_SIZE, y: 22 * TILE_SIZE };
+/** At the north end of the valley's main road: the way into the Dark Forest. */
+const worldForestGate = { x: 33 * TILE_SIZE, y: 5 * TILE_SIZE };
+
+/** Where the valley's mobs live (tiles on the 64x48 valley map, crossroads at 32,24). */
+const WORLD_SPAWN_ZONES: SpawnZone[] = [
+  { mob: "slime", tx: 24, ty: 17, radius: 6, count: 6 },
+  { mob: "slime", tx: 41, ty: 31, radius: 6, count: 5 },
+  { mob: "wolf", tx: 50, ty: 11, radius: 7, count: 5 },
+  { mob: "goblin", tx: 13, ty: 37, radius: 7, count: 5 },
+];
+
+export const ZONES: Record<ZoneId, ZoneDef> = {
+  town: {
+    id: "town",
+    name: "Ana Merkez",
+    instanced: false,
+    persistent: true,
+    market: true,
+    npcs: ["weaponsmith", "armorer", "scribe", "alchemist", "blacksmith", "jeweler", "commander", "sage", "cook"],
+    respawnText: "Şehir meydanında yeniden doğacaksın.",
+    portals: [
+      {
+        id: "town_field_gate",
+        ...TOWN_SPOTS.fieldGate,
+        to: "world",
+        label: "Başlangıç Vadisi",
+        style: "gate",
+        auto: true,
+        arriveAt: { x: worldTownGate.x + TILE_SIZE * 3, y: worldTownGate.y + TILE_SIZE * 2 },
+      },
+      {
+        id: "pvp_arena_entrance",
+        ...TOWN_SPOTS.pvpPortal,
+        to: "pvp_arena",
+        label: "Kan Arenası (PvP)",
+        style: "pvp",
+        minLevel: 5,
+        returnTo: TOWN_SPOTS.pvpReturn,
+      },
+    ],
+  },
+  world: {
+    id: "world",
+    name: "Başlangıç Vadisi",
+    instanced: false,
+    persistent: true,
+    npcs: ["hunter"],
+    respawnText: "Vadideki şehir kapısının yanında yeniden doğacaksın.",
+    portals: [
+      { id: "world_town_gate", ...worldTownGate, to: "town", label: "Ana Merkez", style: "gate", auto: true, arriveAt: TOWN_SPOTS.fromField },
+      {
+        id: "world_forest_gate",
+        ...worldForestGate,
+        to: "forest",
+        label: "Kara Orman",
+        style: "gate",
+        auto: true,
+        minLevel: 8,
+        arriveAt: FOREST_SPOTS.fromValley,
+      },
+      {
+        id: "goblin_cave_entrance",
+        ...caveEntrance,
+        to: "goblin_cave",
+        label: "Goblin Mağarası",
+        style: "cave",
+        minLevel: 5,
+        returnTo: { x: caveEntrance.x, y: caveEntrance.y - TILE_SIZE * 2 },
+      },
+    ],
+  },
+  forest: {
+    id: "forest",
+    name: "Kara Orman",
+    instanced: false,
+    persistent: true,
+    npcs: ["ranger", "peddler"],
+    respawnText: "Korucuların kampında yeniden doğacaksın.",
+    portals: [
+      {
+        id: "forest_valley_gate",
+        ...FOREST_SPOTS.valleyGate,
+        to: "world",
+        label: "Başlangıç Vadisi",
+        style: "gate",
+        auto: true,
+        arriveAt: { x: worldForestGate.x, y: worldForestGate.y + TILE_SIZE * 3 },
+      },
+    ],
+  },
+  pvp_arena: {
+    id: "pvp_arena",
+    name: "Kan Arenası",
+    instanced: false,
+    pvp: true,
+    npcs: [],
+    respawnText: "Arenada yeniden doğacaksın.",
+    portals: [{ id: "pvp_exit", x: 22.5 * TILE_SIZE, y: 31 * TILE_SIZE, to: "town", label: "Çıkış", style: "exit" }],
+  },
+  goblin_cave: {
+    id: "goblin_cave",
+    name: "Goblin Mağarası",
+    instanced: true,
+    npcs: [],
+    respawnText: "Mağaranın girişinde yeniden doğacaksın.",
+    portals: [
+      { id: "cave_exit", x: 4.5 * TILE_SIZE, y: 4 * TILE_SIZE, to: "world", label: "Çıkış", style: "exit" },
+      { id: "arena_exit", x: 41.5 * TILE_SIZE, y: 15 * TILE_SIZE, to: "world", label: "Çıkış", style: "exit", requiresClear: true },
+      // Beating Grukk earns the way down to the second boss.
+      { id: "jack_portal", x: 47.5 * TILE_SIZE, y: 15 * TILE_SIZE, to: "jack_lair", label: "Jack'in Mahzeni", style: "cursed", requiresClear: true },
+    ],
+  },
+  jack_lair: {
+    id: "jack_lair",
+    name: "Jack'in Mahzeni",
+    instanced: true,
+    npcs: [],
+    respawnText: "Mahzenin girişinde yeniden doğacaksın.",
+    portals: [
+      { id: "lair_exit", x: 13.5 * TILE_SIZE, y: 25 * TILE_SIZE, to: "world", label: "Çıkış", style: "exit" },
+      { id: "lair_exit_top", x: 17.5 * TILE_SIZE, y: 4 * TILE_SIZE, to: "world", label: "Çıkış", style: "exit", requiresClear: true },
+    ],
+  },
+};
+
+const layouts = new Map<ZoneId, DungeonLayout>();
+
+const BUILDERS: Record<ZoneId, () => DungeonLayout> = {
+  town: buildTown,
+  world: () => ({
+    map: generateWorldMap(),
+    mobs: [],
+    spawnZones: WORLD_SPAWN_ZONES,
+    decor: [{ kind: "bridge", ...CAVE_BRIDGE }, ...CAVE_TORCHES.map((t) => ({ kind: "torch" as const, ...t }))],
+  }),
+  forest: buildForest,
+  goblin_cave: buildGoblinCave,
+  jack_lair: buildJackLair,
+  pvp_arena: buildPvpArena,
+};
+
+/** Map, fixed mob placements and spawn points of a zone. Built once and cached. */
+export function zoneLayout(zone: ZoneId): DungeonLayout & { map: WorldMap } {
+  let layout = layouts.get(zone);
+  if (!layout) {
+    layout = BUILDERS[zone]();
+    layouts.set(zone, layout);
+  }
+  return layout;
+}
+
+export function isZoneId(value: unknown): value is ZoneId {
+  return typeof value === "string" && value in ZONES;
+}
+
+/** Zone to log a character into: its saved zone if that is a persistent one, else town. */
+export function loginZone(saved: unknown): ZoneId {
+  return isZoneId(saved) && ZONES[saved].persistent ? saved : HOME_ZONE;
+}

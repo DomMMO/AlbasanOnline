@@ -1,0 +1,352 @@
+import Phaser from "phaser";
+import { Direction, directionToward, glowTier, ITEMS, type Appearance, type HumanoidGear } from "../../../shared/src";
+import { ringEffect, slashEffect } from "../fx/slash";
+import { ensureSpriteSet, HumanoidFrame, type SpriteSet } from "../gfx/textures";
+import { BODY_PART_Y, ensureItemTexture } from "../gfx/weapons";
+import { IMAGE_SPRITES } from "../gfx/imageSprites";
+import { WeaponView } from "./WeaponView";
+
+const HP_BAR_WIDTH = 16;
+
+export type SwingKind = "normal" | "heavy" | "spin";
+
+const SLASH_COLORS: Record<SwingKind, number> = { normal: 0xe8e8f0, heavy: 0xff7a3d, spin: 0xffc04d };
+
+/**
+ * Draws one player or mob: sprite, optional name, health bar, held weapon.
+ * Holds no game logic; it only shows what it is told.
+ */
+export class EntityView {
+  readonly sprite: Phaser.GameObjects.Sprite;
+  private set: SpriteSet;
+  private label?: Phaser.GameObjects.Text;
+  private hpBar: Phaser.GameObjects.Graphics;
+  private hpBarVisible = false;
+  /** Unrounded position; the sprite itself is drawn snapped to whole pixels. */
+  private rawX: number;
+  private rawY: number;
+  private facing = Direction.Down;
+  /** Temporary visual displacement (attack lunge); not part of the real position. */
+  private offset = { x: 0, y: 0 };
+  private weapon?: WeaponView;
+  private weaponKey = "";
+
+  /** Integer draw scale (bosses are bigger). */
+  private scale: number;
+
+  constructor(scene: Phaser.Scene, x: number, y: number, appearance: Appearance, name?: string, nameColor = "#ffffff", scale = 1) {
+    this.set = ensureSpriteSet(scene, appearance);
+    this.rawX = x;
+    this.rawY = y;
+    this.scale = scale;
+    this.sprite = scene.add.sprite(x, y, this.set.key, 0).setOrigin(0.5, 1).setScale(scale);
+    if (appearance.type === "portal" && appearance.style !== "cave") this.sprite.anims.play(`${this.set.key}-idle`);
+    if (appearance.type === "image") {
+      const meta = IMAGE_SPRITES[appearance.key].meta;
+      this.sprite.setOrigin(meta.originX, meta.originY);
+      this.sprite.anims.play(`${this.set.key}-idle`);
+    }
+    if (appearance.type === "slime") this.sprite.anims.play(`${this.set.key}-idle`);
+
+    if (name) {
+      this.label = scene.add
+        .text(x, y, name, {
+          fontFamily: '"Cloister Black TR", serif',
+          fontSize: "10px",
+          color: nameColor,
+          stroke: "#000000",
+          strokeThickness: 2,
+        })
+        .setOrigin(0.5, 1)
+        .setResolution(4);
+    }
+    this.hpBar = scene.add.graphics().setVisible(false);
+    this.setPosition(x, y);
+  }
+
+  get x() {
+    return this.rawX;
+  }
+
+  get y() {
+    return this.rawY;
+  }
+
+  setNameColor(color: string) {
+    this.label?.setColor(color);
+  }
+
+  /** Top of the sprite, for floating text. */
+  get headY() {
+    return this.rawY - this.set.height * this.scale;
+  }
+
+  setPosition(x: number, y: number) {
+    this.rawX = x;
+    this.rawY = y;
+    // Snap to whole world pixels; at 3-4x zoom, fractional positions show up as jitter.
+    const px = Math.round(x + this.offset.x);
+    const py = Math.round(y + this.offset.y);
+    this.sprite.setPosition(px, py);
+    // Y-sort: things lower on screen draw in front.
+    this.sprite.setDepth(py);
+    const top = py - this.set.height * this.scale;
+    this.hpBar.setPosition(px - HP_BAR_WIDTH / 2, top - 4).setDepth(100000 + py);
+    this.label?.setPosition(px, this.hpBarVisible ? top - 5 : top - 1).setDepth(100000 + py);
+    this.weapon?.layout(px, py, this.facing);
+  }
+
+  /**
+   * Switches to a new look (e.g. armour put on or taken off). Pieces that were
+   * removed visibly drop off the body; putting something on flashes the character.
+   */
+  setLook(appearance: Appearance) {
+    const next = ensureSpriteSet(this.sprite.scene, appearance);
+    if (next.key === this.set.key) return;
+    const before: HumanoidGear | undefined = this.set.appearance.type === "humanoid" ? this.set.appearance.gear : undefined;
+    const after: HumanoidGear | undefined = appearance.type === "humanoid" ? appearance.gear : undefined;
+    this.set = next;
+    this.sprite.anims.stop();
+    this.sprite.setTexture(next.key, 0);
+
+    if (!before || !after) return;
+    let putOn = false;
+    for (const part of ["head", "chest", "legs", "feet"] as const) {
+      if (before[part] && before[part] !== after[part]) this.dropPiece(before[part]!, part);
+      if (after[part] && before[part] !== after[part]) putOn = true;
+    }
+    if (putOn) this.flash();
+  }
+
+  /** An equipment icon pops off the body and tumbles to the ground. */
+  private dropPiece(defId: string, part: keyof typeof BODY_PART_Y) {
+    const def = ITEMS[defId];
+    if (!def) return;
+    const scene = this.sprite.scene;
+    const piece = scene.add
+      .sprite(Math.round(this.rawX), Math.round(this.rawY + BODY_PART_Y[part]), ensureItemTexture(scene, def), 0)
+      .setScale(0.75)
+      .setDepth(this.rawY + 30);
+    const side = Math.random() < 0.5 ? -1 : 1;
+    scene.tweens.chain({
+      targets: piece,
+      tweens: [
+        { y: piece.y - 6, x: piece.x + side * 3, duration: 120, ease: "Quad.easeOut" },
+        { y: piece.y + 10, x: piece.x + side * 8, angle: side * 140, alpha: 0, duration: 420, ease: "Quad.easeIn" },
+      ],
+      onComplete: () => piece.destroy(),
+    });
+  }
+
+  /** Shows the equipped weapon (humanoids only). Rebuilt only when the item or glow tier changes. */
+  setWeapon(defId: string, enhance: number) {
+    const key = defId ? `${defId}:${glowTier(enhance)}` : "";
+    if (key === this.weaponKey) return;
+    const previous = this.weaponKey.split(":")[0];
+    if (previous && previous !== defId) this.dropPiece(previous, "weapon");
+    this.weaponKey = key;
+    this.weapon?.destroy();
+    this.weapon = defId ? new WeaponView(this.sprite.scene, defId, enhance) : undefined;
+    this.weapon?.setAlpha(this.sprite.alpha);
+    this.setPosition(this.rawX, this.rawY);
+  }
+
+  /** Attack animation; with a target it also turns to face it and draws a slash towards it. */
+  playAttack(kind: SwingKind, target?: { x: number; y: number }) {
+    const scene = this.sprite.scene;
+    const color = SLASH_COLORS[kind];
+    if (kind === "spin") {
+      this.weapon?.spin();
+      ringEffect(scene, this.rawX, this.rawY - 3, color, 30);
+      return;
+    }
+    if (!target) return;
+    const dx = target.x - this.rawX;
+    const dy = target.y - this.rawY;
+    const angle = Math.atan2(dy, dx);
+    if (this.set.appearance.type === "humanoid") this.facing = directionToward(dx, dy, this.facing);
+
+    if (this.weapon) {
+      this.weapon.swingOnce(kind === "heavy");
+    } else {
+      this.lunge(dx, dy);
+    }
+    // Slash appears a little in front of the attacker, at chest height.
+    const reach = 7;
+    const len = Math.hypot(dx, dy) || 1;
+    const heavy = kind === "heavy";
+    slashEffect(scene, this.rawX + (dx / len) * reach, this.rawY - 6 + (dy / len) * reach, angle, color, heavy ? 16 : 12, heavy);
+  }
+
+  /** Quick hop towards the target and back (mobs and unarmed attackers). */
+  lunge(dx: number, dy: number) {
+    const len = Math.hypot(dx, dy) || 1;
+    this.sprite.scene.tweens.add({
+      targets: this.offset,
+      x: (dx / len) * 4,
+      y: (dy / len) * 4,
+      duration: 70,
+      yoyo: true,
+      ease: "Quad.easeOut",
+      onUpdate: () => this.setPosition(this.rawX, this.rawY),
+    });
+  }
+
+  /** Image sprites: an action animation (jump, slide…) that overrides walk/idle until it ends. */
+  private actionUntil = 0;
+
+  playAction(name: string, durationMs: number) {
+    if (this.set.appearance.type !== "image") return;
+    this.sprite.anims.play(`${this.set.key}-${name}`);
+    this.actionUntil = this.sprite.scene.time.now + durationMs;
+  }
+
+  /** Vertical hop (art-asset bosses jumping): rise and hang until land() is called. */
+  rise(height: number, durationMs: number) {
+    this.sprite.scene.tweens.add({
+      targets: this.offset,
+      y: -height,
+      duration: durationMs,
+      ease: "Quad.easeOut",
+      onUpdate: () => this.setPosition(this.rawX, this.rawY),
+    });
+  }
+
+  land() {
+    this.sprite.scene.tweens.killTweensOf(this.offset);
+    this.sprite.scene.tweens.add({
+      targets: this.offset,
+      y: 0,
+      duration: 130,
+      ease: "Quad.easeIn",
+      onUpdate: () => this.setPosition(this.rawX, this.rawY),
+    });
+  }
+
+  setAnimation(dir: Direction, moving: boolean) {
+    const { appearance, key } = this.set;
+    this.facing = dir;
+    if (appearance.type === "image") {
+      // Sheets face right; flipping also mirrors the feet anchor.
+      const meta = IMAGE_SPRITES[appearance.key].meta;
+      if (dir === Direction.Left) this.sprite.setFlipX(true);
+      else if (dir === Direction.Right) this.sprite.setFlipX(false);
+      this.sprite.setOrigin(this.sprite.flipX ? 1 - meta.originX : meta.originX, meta.originY);
+      if (this.sprite.scene.time.now < this.actionUntil) return;
+      this.sprite.anims.play(`${key}-${moving ? "walk" : "idle"}`, true);
+      return;
+    }
+    if (appearance.type === "chest" || appearance.type === "portal") return;
+    if (appearance.type === "slime") {
+      this.sprite.anims.timeScale = moving ? 2.5 : 1;
+      return;
+    }
+    if (dir === Direction.Left) this.sprite.setFlipX(true);
+    else if (dir === Direction.Right) this.sprite.setFlipX(false);
+
+    if (appearance.type === "wolf") {
+      if (moving) this.sprite.anims.play(`${key}-side`, true);
+      else this.sprite.anims.stop();
+      if (!moving) this.sprite.setFrame(0);
+      return;
+    }
+
+    const name = dir === Direction.Up ? "up" : dir === Direction.Down ? "down" : "side";
+    if (dir === Direction.Up || dir === Direction.Down) this.sprite.setFlipX(false);
+    if (moving) {
+      this.sprite.anims.play(`${key}-${name}`, true);
+    } else {
+      this.sprite.anims.stop();
+      this.sprite.setFrame(name === "up" ? HumanoidFrame.Up : name === "down" ? HumanoidFrame.Down : HumanoidFrame.Side);
+    }
+    this.setPosition(this.rawX, this.rawY);
+  }
+
+  setHealth(hp: number, maxHp: number, visible: boolean) {
+    this.hpBarVisible = visible;
+    this.hpBar.setVisible(visible);
+    if (visible) {
+      const ratio = maxHp > 0 ? Math.max(0, Math.min(1, hp / maxHp)) : 0;
+      this.hpBar.clear();
+      this.hpBar.fillStyle(0x000000, 0.8).fillRect(-1, -1, HP_BAR_WIDTH + 2, 4);
+      this.hpBar.fillStyle(0x5a1a1a).fillRect(0, 0, HP_BAR_WIDTH, 2);
+      this.hpBar.fillStyle(ratio > 0.3 ? 0x4cd964 : 0xe74c3c).fillRect(0, 0, Math.ceil(HP_BAR_WIDTH * ratio), 2);
+    }
+    this.setPosition(this.rawX, this.rawY);
+  }
+
+  private baseTint: number | null = null;
+
+  /** Persistent colour tint (e.g. an enraged boss), restored after hit flashes. */
+  setBaseTint(tint: number | null) {
+    this.baseTint = tint;
+    this.restoreTint();
+  }
+
+  private restoreTint() {
+    if (!this.sprite.active) return;
+    if (this.baseTint === null) this.sprite.clearTint();
+    else this.sprite.setTint(this.baseTint);
+  }
+
+  /** Brief white flash when hit. */
+  flash() {
+    this.sprite.setTintFill(0xffffff);
+    this.sprite.scene.time.delayedCall(70, () => this.restoreTint());
+  }
+
+  setVisible(visible: boolean) {
+    this.sprite.setVisible(visible);
+    this.label?.setVisible(visible);
+    this.hpBar.setVisible(visible && this.hpBarVisible);
+    this.weapon?.setVisible(visible);
+  }
+
+  private dimmed = false;
+  private ghost = false;
+
+  setDimmed(dimmed: boolean) {
+    this.dimmed = dimmed;
+    this.applyAlpha();
+  }
+
+  /** Half-transparent while protected (PvP spawn protection). */
+  setGhost(ghost: boolean) {
+    this.ghost = ghost;
+    this.applyAlpha();
+  }
+
+  private applyAlpha() {
+    const alpha = this.dimmed ? 0.4 : this.ghost ? 0.55 : 1;
+    this.sprite.setAlpha(alpha);
+    this.weapon?.setAlpha(alpha);
+  }
+
+  destroy(fade = false) {
+    this.label?.destroy();
+    this.hpBar.destroy();
+    this.weapon?.destroy();
+    if (fade && this.set.appearance.type === "image") {
+      // Art-asset sprites play their death animation before fading out.
+      const scene = this.sprite.scene;
+      this.sprite.disableInteractive();
+      this.actionUntil = Infinity;
+      this.sprite.anims.play(`${this.set.key}-dead`);
+      this.sprite.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () =>
+        scene.tweens.add({ targets: this.sprite, alpha: 0, delay: 1500, duration: 800, onComplete: () => this.sprite.destroy() }),
+      );
+      return;
+    }
+    if (!fade) {
+      this.sprite.destroy();
+      return;
+    }
+    this.sprite.disableInteractive();
+    this.sprite.scene.tweens.add({
+      targets: this.sprite,
+      alpha: 0,
+      duration: 400,
+      onComplete: () => this.sprite.destroy(),
+    });
+  }
+}

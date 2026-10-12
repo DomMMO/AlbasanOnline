@@ -1,0 +1,17 @@
+{
+  "name": "mmo-creation",
+  "private": true,
+  "workspaces": [
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "dev": "concurrently -k -n db,server,client -c magenta,blue,green \"npm run db -w server\" \"npm run dev -w server\" \"npm run dev -w client\"",
+    "typecheck": "tsc -p server --noEmit && tsc -p client --noEmit",
+    "stop": "npm run stop -w server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "typescript": "^5.8.3"
+  }
+}
