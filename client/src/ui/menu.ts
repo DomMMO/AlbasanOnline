@@ -1,11 +1,12 @@
 import { api } from "../net/api";
 import { getSettings, onSettingsChange, updateSettings, type Settings } from "../settings";
+import { cancelKeyCapture, initKeybindMenu } from "./keybindMenu";
 
 // Game menu (Esc): resume, settings, controls, switch character, log out.
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
 const menu = $("game-menu");
-const views = { main: $("menu-main"), settings: $("menu-settings"), controls: $("menu-controls") };
+const views = { main: $("menu-main"), settings: $("menu-settings"), controls: $("menu-controls"), keys: $("menu-keys") };
 const zoomSelect = $<HTMLSelectElement>("setting-zoom");
 const checkboxes = {
   damageNumbers: $<HTMLInputElement>("setting-damage"),
@@ -23,6 +24,7 @@ let actions: MenuActions;
 let initialised = false;
 
 function show(view: keyof typeof views) {
+  if (view !== "keys") cancelKeyCapture();
   for (const [name, el] of Object.entries(views)) el.hidden = name !== view;
 }
 
@@ -41,6 +43,8 @@ export function initMenu(menuActions: MenuActions) {
   $("menu-resume").addEventListener("click", closeMenu);
   $("menu-open-settings").addEventListener("click", () => show("settings"));
   $("menu-open-controls").addEventListener("click", () => show("controls"));
+  $("menu-open-keys").addEventListener("click", () => show("keys"));
+  initKeybindMenu();
   $("menu-switch").addEventListener("click", () => actions.switchCharacter());
   $("menu-logout").addEventListener("click", () => actions.logout());
   for (const back of menu.querySelectorAll(".menu-back")) back.addEventListener("click", () => show("main"));
@@ -68,6 +72,7 @@ export function openMenu() {
 }
 
 export function closeMenu() {
+  cancelKeyCapture();
   menu.hidden = true;
 }
 

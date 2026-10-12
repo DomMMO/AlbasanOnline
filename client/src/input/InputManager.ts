@@ -24,6 +24,8 @@ export enum Action {
   Skill9 = "skill9",
   Skill10 = "skill10",
   Skills = "skills",
+  Potion1 = "potion1",
+  Potion2 = "potion2",
   ToggleInventory = "toggleInventory",
   Interact = "interact",
   Leaderboard = "leaderboard",
@@ -47,7 +49,7 @@ export const HOTBAR_ACTIONS = [
   Action.Skill10,
 ];
 
-const DEFAULT_BINDINGS: Record<Action, string[]> = {
+export const DEFAULT_BINDINGS: Record<Action, string[]> = {
   [Action.MoveUp]: ["W", "UP"],
   [Action.MoveDown]: ["S", "DOWN"],
   [Action.MoveLeft]: ["A", "LEFT"],
@@ -66,6 +68,8 @@ const DEFAULT_BINDINGS: Record<Action, string[]> = {
   [Action.Skill9]: ["NINE"],
   [Action.Skill10]: ["ZERO"],
   [Action.Skills]: ["K"],
+  [Action.Potion1]: ["Q"],
+  [Action.Potion2]: ["R"],
   [Action.ToggleInventory]: ["I", "C"],
   [Action.Interact]: ["E"],
   [Action.Leaderboard]: ["L"],
@@ -102,17 +106,46 @@ export function pressVirtual(action: Action) {
 
 export class InputManager {
   private keys = new Map<Action, Phaser.Input.Keyboard.Key[]>();
+  private readonly keyboard: Phaser.Input.Keyboard.KeyboardPlugin;
+  /** Every onPressed callback, so a rebind can hook them up to the new keys. */
+  private readonly callbacks = new Map<Action, (() => void)[]>();
 
   constructor(scene: Phaser.Scene, bindings = DEFAULT_BINDINGS) {
     // One manager per scene; the previous zone's handlers go away with it.
     virtualHandlers = new Map();
-    const keyboard = scene.input.keyboard!;
+    this.keyboard = scene.input.keyboard!;
+    this.addKeys(bindings);
+  }
+
+  private addKeys(bindings: Record<Action, string[]>) {
     for (const [action, keyNames] of Object.entries(bindings) as [Action, string[]][]) {
       // addKey(..., enableCapture=true) stops arrows from scrolling and Tab from leaving the page.
       this.keys.set(
         action,
-        keyNames.map((name) => keyboard.addKey(name, true)),
+        keyNames.map((name) => this.keyboard.addKey(name, true)),
       );
+    }
+  }
+
+  private listen(action: Action, key: Phaser.Input.Keyboard.Key, callback: () => void) {
+    key.on("down", (_key: Phaser.Input.Keyboard.Key, event: KeyboardEvent) => {
+      if (event.repeat || (inputBlocked() && !ALWAYS_ALLOWED.has(action))) return;
+      callback();
+    });
+  }
+
+  /** New key bindings (from the settings page): swap the keys, keep every callback. */
+  rebind(bindings: Record<Action, string[]>) {
+    for (const keys of this.keys.values()) {
+      for (const key of keys) {
+        key.removeAllListeners();
+        this.keyboard.removeKey(key, true);
+      }
+    }
+    this.keys.clear();
+    this.addKeys(bindings);
+    for (const [action, callbacks] of this.callbacks) {
+      for (const key of this.keys.get(action) ?? []) for (const callback of callbacks) this.listen(action, key, callback);
     }
   }
 
@@ -123,12 +156,8 @@ export class InputManager {
   /** Fires once per key press (no auto-repeat). */
   onPressed(action: Action, callback: () => void) {
     virtualHandlers.set(action, [...(virtualHandlers.get(action) ?? []), callback]);
-    for (const key of this.keys.get(action) ?? []) {
-      key.on("down", (_key: Phaser.Input.Keyboard.Key, event: KeyboardEvent) => {
-        if (event.repeat || (inputBlocked() && !ALWAYS_ALLOWED.has(action))) return;
-        callback();
-      });
-    }
+    this.callbacks.set(action, [...(this.callbacks.get(action) ?? []), callback]);
+    for (const key of this.keys.get(action) ?? []) this.listen(action, key, callback);
   }
 
   moveAxis(): { dx: Axis; dy: Axis } {

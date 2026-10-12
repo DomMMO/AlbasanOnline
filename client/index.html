@@ -123,16 +123,33 @@
         <input id="chat-input" maxlength="150" placeholder="Mesaj yaz… (/f İsim mesaj: fısıltı)" autocomplete="off" hidden />
       </div>
 
+      <!-- Health (left) and rage / mana / energy (right) globes: liquid that rises and falls. -->
+      <div id="hp-globe" class="globe hp">
+        <div class="globe-orb">
+          <div class="globe-liquid"><span class="globe-wave a"></span><span class="globe-wave b"></span></div>
+          <span class="globe-glass"></span>
+        </div>
+        <span class="globe-text" id="hp-globe-text"></span>
+      </div>
+      <div id="potion-slots"></div>
+      <div id="resource-globe" class="globe rage">
+        <div class="globe-orb">
+          <div class="globe-liquid"><span class="globe-wave a"></span><span class="globe-wave b"></span></div>
+          <span class="globe-glass"></span>
+        </div>
+        <span class="globe-text" id="resource-globe-text"></span>
+      </div>
+
       <div id="bottom">
         <div id="action-dock">
-          <div class="bar hp"><div id="dock-hp-fill" class="fill"></div><span id="dock-hp-text"></span></div>
-          <div class="bar rage"><div id="dock-rage-fill" class="fill"></div><span id="dock-rage-text"></span></div>
+          <!-- Buffs (left) and debuffs (right) on you. -->
+          <div id="auras"><div id="buffs"></div><div id="debuffs"></div></div>
           <div id="hotbar"></div>
         </div>
         <div id="xp-bar" class="bar"><div id="xp-fill" class="fill"></div><span id="xp-text"></span></div>
       </div>
 
-      <div id="help">Tab: hedef · Sol tık: saldır / al / konuş / portal · 1-0: skill ve iksir · I: envanter · K: yetenekler · P: pasif ağaç · T: şehir portalı · J: görevler · M: harita · E: al/konuş/portal · Enter: sohbet · L: PvP sıralaması · Esc: menü</div>
+      <div id="help">Tab: hedef · Sol tık: saldır / al / konuş / portal · 1-0: skill (K'dan sürükle) · Q / R: iksir · I: envanter · K: yetenekler · P: pasif ağaç · T: şehir portalı · J: görevler · M: harita · E: al/konuş/portal · Enter: sohbet · L: PvP sıralaması · Esc: menü</div>
 
       <div id="inventory-window" class="window" hidden>
         <div class="window-title"><span>Karakter</span><button id="inventory-close" class="close" tabindex="-1">×</button></div>
@@ -242,6 +259,7 @@
         <button id="menu-resume" type="button">Devam et</button>
         <button id="menu-open-settings" type="button" class="secondary">Ayarlar</button>
         <button id="menu-open-controls" type="button" class="secondary">Kontroller</button>
+        <button id="menu-open-keys" type="button" class="secondary">Tuş Atamaları</button>
         <a id="menu-gm" href="/admin.html" target="_blank" class="gm-link" hidden>GM Paneli</a>
         <button id="menu-switch" type="button" class="secondary">Karakter değiştir</button>
         <button id="menu-logout" type="button" class="secondary">Çıkış yap</button>
@@ -265,14 +283,23 @@
         <button type="button" class="secondary menu-back">Geri</button>
       </div>
 
+      <div id="menu-keys" hidden>
+        <h1>Tuş Atamaları</h1>
+        <p class="muted">Bir eyleme tıkla, sonra istediğin tuşa bas (Esc: vazgeç). Tuş başka bir eylemdeyse oradan alınır.</p>
+        <div id="keybind-list"></div>
+        <button type="button" id="keybind-reset" class="secondary">Varsayılana dön</button>
+        <button type="button" class="secondary menu-back">Geri</button>
+      </div>
+
       <div id="menu-controls" hidden>
         <h1>Kontroller</h1>
         <table class="controls">
           <tr><td>WASD / oklar</td><td>Yürü</td></tr>
           <tr><td>Tık</td><td>Hedef al ve saldır</td></tr>
           <tr><td>Tab</td><td>Sıradaki düşman</td></tr>
-          <tr><td>1 2 3</td><td>Skill'ler</td></tr>
-          <tr><td>4 5</td><td>İksirler</td></tr>
+          <tr><td>1 - 9, 0</td><td>Skill barı (Tuş Atamaları'ndan değiştirilebilir)</td></tr>
+          <tr><td>Q R</td><td>İksirler</td></tr>
+          <tr><td>K · P · T</td><td>Yetenekler · Pasif ağaç · Şehir portalı</td></tr>
           <tr><td>F</td><td>Hedefe saldır</td></tr>
           <tr><td>E</td><td>Sandık al, NPC ile konuş, portal, tezgâha bak</td></tr>
           <tr><td>I / C</td><td>Karakter ve envanter</td></tr>

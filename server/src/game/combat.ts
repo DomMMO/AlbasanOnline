@@ -22,7 +22,7 @@ import {
   WARRIOR_THREAT_MULTIPLIER,
   REGEN_PER_SECOND,
   rollDamage,
-  collides,
+  moveWithCollision,
   CRIT_MULTIPLIER,
   SKILLS,
   skillPower,
@@ -41,6 +41,7 @@ import {
 import type { Mob, Player } from "../rooms/schema/WorldState";
 import type { ActiveBuff, Game, MobRuntime, PlayerRuntime } from "./Game";
 import { sendSkillRanks } from "./talents";
+import { syncAuras } from "./auras";
 import { bossDamaged, bossDefeated } from "./boss";
 import { dropLoot, refreshStats } from "./items";
 import { questKill } from "./quests";
@@ -180,7 +181,7 @@ function resolveTarget(game: Game, sessionId: string, player: Player, runtime: P
   return { targetId: null };
 }
 
-export function useSkill(game: Game, sessionId: string, skillId: string) {
+export function useSkill(game: Game, sessionId: string, skillId: string, aim?: { x: number; y: number }) {
   const player = game.state.players.get(sessionId);
   const runtime = game.playerRuntime.get(sessionId);
   const skill = SKILLS[skillId];
@@ -211,7 +212,7 @@ export function useSkill(game: Game, sessionId: string, skillId: string) {
   }
 
   if (skill.triggersGcd) runtime.gcdUntil = now + GLOBAL_COOLDOWN_MS;
-  performSkill(game, sessionId, player, runtime, skill, resolved.targetId);
+  performSkill(game, sessionId, player, runtime, skill, resolved.targetId, aim);
 }
 
 /** Rage / mana a skill costs this player (passive tree jewels can lower it). */
@@ -220,7 +221,15 @@ function skillCost(runtime: PlayerRuntime, skill: SkillDef): number {
 }
 
 /** Applies a skill's effect, pays its cost and starts its cooldown. */
-function performSkill(game: Game, sessionId: string, player: Player, runtime: PlayerRuntime, skill: SkillDef, targetId: string | null) {
+function performSkill(
+  game: Game,
+  sessionId: string,
+  player: Player,
+  runtime: PlayerRuntime,
+  skill: SkillDef,
+  targetId: string | null,
+  aim?: { x: number; y: number },
+) {
   const now = game.now();
   const effect = skill.effect;
   // Passive tree jewels (and Zeka) make skills stronger.
@@ -296,7 +305,7 @@ function performSkill(game: Game, sessionId: string, player: Player, runtime: Pl
       const enemy = effect.mode === "forward" ? undefined : enemyAt(game, sessionId, targetId);
       if (effect.mode !== "forward" && !enemy) return fail(game, sessionId, "Hedef yok");
       const from = { x: player.x, y: player.y };
-      dash(game, player, enemy?.entity, effect.mode, effect.distance);
+      dash(game, player, enemy?.entity, effect.mode, effect.distance, aim);
       game.io.broadcast(Msg.Attack, { ...self, targetId: enemy?.id, targetKind: enemy?.kind, fromX: from.x, fromY: from.y } satisfies AttackEvent);
       cancelCast(game, sessionId);
       if (enemy) {
@@ -482,6 +491,7 @@ export function updatePlayerCombat(game: Game) {
       runtime.buffs = runtime.buffs.filter((b) => b.until > now);
       player.buffed = runtime.buffs.length > 0;
     }
+    syncAuras(game, sessionId, player, runtime);
     if (player.protected && now >= runtime.protectedUntil) player.protected = false;
 
     if (now >= runtime.nextRegenAt) {
@@ -564,11 +574,25 @@ function stunEnemy(game: Game, enemy: Enemy, durationMs: number) {
  * Moves a player at once (dash skills), a few pixels at a time so walls stop it:
  * along the facing direction, up to an enemy, or just past it.
  */
-function dash(game: Game, player: Player, target: { x: number; y: number } | undefined, mode: "forward" | "toTarget" | "behindTarget", maxDistance: number) {
+function dash(
+  game: Game,
+  player: Player,
+  target: { x: number; y: number } | undefined,
+  mode: "forward" | "toTarget" | "behindTarget",
+  maxDistance: number,
+  aim?: { x: number; y: number },
+) {
   let dx: number;
   let dy: number;
   let length: number;
-  if (!target) {
+  const aimDistance = aim ? Math.hypot(aim.x - player.x, aim.y - player.y) : 0;
+  if (!target && aim && aimDistance > 2) {
+    // Free dash towards the mouse: up to the cursor, at most the skill's distance.
+    dx = (aim.x - player.x) / aimDistance;
+    dy = (aim.y - player.y) / aimDistance;
+    length = Math.min(maxDistance, aimDistance);
+    player.dir = directionToward(dx, dy, player.dir);
+  } else if (!target) {
     const dirs = [
       [0, 1],
       [0, -1],
@@ -586,13 +610,13 @@ function dash(game: Game, player: Player, target: { x: number; y: number } | und
     // Stop just short of the target, or land just past it.
     length = Math.min(maxDistance, mode === "behindTarget" ? dist + 14 : Math.max(0, dist - MELEE_RANGE * 0.6));
   }
+  // A few pixels at a time, sliding along walls instead of stopping dead at the first corner.
   const step = 4;
-  for (let moved = 0; moved + step <= length; moved += step) {
-    const nx = player.x + dx * step;
-    const ny = player.y + dy * step;
-    if (collides(game.map, nx, ny)) break;
-    player.x = nx;
-    player.y = ny;
+  for (let moved = 0; moved < length; moved += step) {
+    const next = moveWithCollision(game.map, player.x, player.y, dx, dy, Math.min(step, length - moved));
+    if (next.x === player.x && next.y === player.y) break;
+    player.x = next.x;
+    player.y = next.y;
   }
   player.moving = false;
 }
@@ -747,6 +771,7 @@ function killPlayer(game: Game, sessionId: string, player: Player, runtime: Play
   player.buffed = false;
   runtime.stunnedUntil = 0;
   runtime.buffs = [];
+  syncAuras(game, sessionId, player, runtime);
   if (usesRage(player)) player.resource = 0;
   runtime.targetId = null;
   runtime.attacking = false;

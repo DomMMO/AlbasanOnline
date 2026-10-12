@@ -76,6 +76,8 @@ export const Msg = {
   SkillRanks: "skillRanks",
   /** Today's fortune (after asking, and on join if one was read today). */
   Fortune: "fortune",
+  /** Your buffs and debuffs (sent when they change). */
+  Auras: "auras",
 } as const;
 
 export interface QuestMessage {
@@ -119,6 +121,19 @@ export interface SkillRanksEvent {
   ranks: Record<string, number>;
   /** Points not spent yet. */
   points: number;
+}
+
+/** A buff or debuff on you. `icon` is a skill id, or an "aura_*" icon for effects that aren't skills. */
+export interface AuraView {
+  id: string;
+  icon: string;
+  kind: "buff" | "debuff";
+  /** null = lasts until something ends it (today's fortune). */
+  remainingMs: number | null;
+}
+
+export interface AurasEvent {
+  auras: AuraView[];
 }
 
 export interface FortuneEvent {
@@ -180,6 +195,8 @@ export interface SetTargetMessage {
 
 export interface UseSkillMessage {
   skillId: string;
+  /** World position under the mouse: free dashes (blink and the like) go towards it. */
+  aim?: { x: number; y: number };
 }
 
 export type EntityKind = "player" | "mob";
