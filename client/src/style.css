@@ -596,7 +596,17 @@ table.controls td:first-child {
   background: #4cd964;
 }
 
-#target-invite {
+.target-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.target-actions button {
+  flex: 1;
+}
+
+#target-invite,
+#target-duel {
   font: inherit;
   font-size: 11px;
   padding: 3px;
@@ -664,7 +674,8 @@ table.controls td:first-child {
   cursor: pointer;
 }
 
-#party-invite {
+#party-invite,
+#duel-invite {
   top: 22%;
   left: 50%;
   transform: translateX(-50%);
@@ -673,16 +684,19 @@ table.controls td:first-child {
   text-align: center;
 }
 
-#party-invite p {
+#party-invite p,
+#duel-invite p {
   margin: 0;
 }
 
-#party-invite .row {
+#party-invite .row,
+#duel-invite .row {
   display: flex;
   gap: 8px;
 }
 
-#party-invite button {
+#party-invite button,
+#duel-invite button {
   flex: 1;
   font: inherit;
   font-weight: bold;
@@ -691,11 +705,14 @@ table.controls td:first-child {
   cursor: pointer;
 }
 
-#party-accept {
+#party-accept,
+#duel-accept {
   background: #4cd964;
 }
 
-#party-decline {
+#party-decline,
+#duel-decline,
+#target-duel {
   background: #e05a5a;
   color: #fff;
 }
@@ -2154,7 +2171,9 @@ body.touch .window-title {
 .stall-row button,
 #stall-button,
 #party-invite button,
+#duel-invite button,
 #target-invite,
+#target-duel,
 .party-leave,
 #touch-menu button {
   font-family: var(--font-body);
@@ -2206,7 +2225,9 @@ body.touch .window-title {
   font-size: 14px;
 }
 
-#party-decline {
+#party-decline,
+#duel-decline,
+#target-duel {
   color: #fff;
   background: linear-gradient(180deg, #d9534f, #8a1f1a);
   text-shadow: 0 1px 0 #000;
@@ -2329,7 +2350,8 @@ table.controls td:first-child {
   background: linear-gradient(180deg, #c49bff, #8e5bd9 60%, #5a2f9a);
 }
 
-#target-invite {
+#target-invite,
+#target-duel {
   font-size: 12px;
   padding: 3px 6px;
 }
