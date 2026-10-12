@@ -1,5 +1,5 @@
 import type pg from "pg";
-import { CLASSES, type CharacterSummary, type ClassId, type QuestProgress } from "../../../shared/src";
+import { CLASSES, type CharacterSummary, type ClassId, type FortuneState, type QuestProgress, type SkillRanks } from "../../../shared/src";
 import { newStack, type StoredItem } from "../game/inventory";
 import { pool } from "./pool";
 
@@ -20,6 +20,9 @@ export interface CharacterRecord {
   pvpRating: number;
   pvpKills: number;
   pvpDeaths: number;
+  /** Raw stored ranks; sanitized against class and level on load. */
+  skillRanks: unknown;
+  fortune: FortuneState | null;
   items: StoredItem[];
   quests: QuestProgress[];
 }
@@ -36,6 +39,8 @@ export interface CharacterProgress {
   pvpRating: number;
   pvpKills: number;
   pvpDeaths: number;
+  skillRanks: SkillRanks;
+  fortune: FortuneState | null;
 }
 
 async function transaction<T>(fn: (client: pg.PoolClient) => Promise<T>): Promise<T> {
@@ -122,7 +127,8 @@ export async function createCharacter(accountId: number, name: string, color: nu
 export async function loadCharacter(characterId: number, accountId: number): Promise<CharacterRecord | null> {
   const { rows } = await pool.query<Omit<CharacterRecord, "items" | "quests">>(
     `SELECT id, account_id AS "accountId", name, class, color, level, xp, gold, hp, zone, x, y,
-            pvp_rating AS "pvpRating", pvp_kills AS "pvpKills", pvp_deaths AS "pvpDeaths"
+            pvp_rating AS "pvpRating", pvp_kills AS "pvpKills", pvp_deaths AS "pvpDeaths",
+            skill_ranks AS "skillRanks", fortune
      FROM characters WHERE id = $1 AND account_id = $2`,
     [characterId, accountId],
   );
@@ -183,9 +189,24 @@ export async function saveCharacters(saves: CharacterSave[]) {
     for (const { characterId, progress, gold } of saves) {
       await client.query(
         `UPDATE characters SET level = $2, xp = $3, hp = $4, zone = COALESCE($5, zone), x = CASE WHEN $5::text IS NULL THEN x ELSE $6 END,
-           y = CASE WHEN $5::text IS NULL THEN y ELSE $7 END, gold = $8, pvp_rating = $9, pvp_kills = $10, pvp_deaths = $11, updated_at = now()
+           y = CASE WHEN $5::text IS NULL THEN y ELSE $7 END, gold = $8, pvp_rating = $9, pvp_kills = $10, pvp_deaths = $11,
+           skill_ranks = $12, fortune = $13, updated_at = now()
          WHERE id = $1`,
-        [characterId, progress.level, progress.xp, progress.hp, progress.zone, progress.x, progress.y, gold, progress.pvpRating, progress.pvpKills, progress.pvpDeaths],
+        [
+          characterId,
+          progress.level,
+          progress.xp,
+          progress.hp,
+          progress.zone,
+          progress.x,
+          progress.y,
+          gold,
+          progress.pvpRating,
+          progress.pvpKills,
+          progress.pvpDeaths,
+          JSON.stringify(progress.skillRanks),
+          progress.fortune ? JSON.stringify(progress.fortune) : null,
+        ],
       );
     }
     // All deletes before any insert: a traded item keeps its uid and moves between characters.

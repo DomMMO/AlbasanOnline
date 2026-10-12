@@ -3131,3 +3131,177 @@ body.touch .dm-title {
 #dm-menu button.active {
   color: var(--gold-light);
 }
+
+/* ---- Skills window (K) ---- */
+
+#skills-window {
+  top: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(520px, calc(100vw - 16px));
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
+}
+
+.skills-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 2px 0 6px;
+  font-family: var(--font-body);
+  color: var(--gold-light);
+}
+
+.skills-head button {
+  padding: 2px 10px;
+  font-size: 12px;
+}
+
+.skills-section {
+  margin: 8px 0 4px;
+  font-family: var(--font-title);
+  font-weight: normal;
+  font-size: 17px;
+  color: var(--gold-light);
+}
+
+.skill-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 6px;
+  margin-bottom: 4px;
+  background: #0006;
+  border: 1px solid #6e532055;
+  border-radius: 3px;
+}
+
+.skill-row.learned {
+  border-color: #c9a24a88;
+}
+
+.skill-row.locked {
+  opacity: 0.5;
+}
+
+.skill-badge {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  font-family: var(--font-body);
+  font-weight: bold;
+  font-size: 13px;
+  color: #fff;
+  background: var(--skill-color, #444);
+  border: 1px solid var(--gold-dark);
+  border-radius: 3px;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.skill-badge.passive {
+  font-size: 18px;
+  color: var(--gold-light);
+  background: radial-gradient(circle, #3a2a1a, #120c06);
+  border-radius: 50%;
+}
+
+.skill-text {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-body);
+  font-size: 12px;
+}
+
+.skill-title b {
+  font-size: 13px;
+  color: var(--text);
+}
+
+.skill-tag {
+  font-size: 11px;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.skill-desc {
+  color: #d8cba8;
+}
+
+.skill-detail {
+  color: #8f9cff;
+  font-size: 11px;
+}
+
+.skill-controls {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.skill-controls button {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  font-size: 15px;
+  line-height: 20px;
+}
+
+.skill-rank {
+  min-width: 30px;
+  text-align: center;
+  font-family: var(--font-body);
+  color: var(--gold-light);
+}
+
+/* ---- Hotbar: 10 slots, unlearned skills greyed out ---- */
+
+.slot.locked {
+  filter: grayscale(1) brightness(0.55);
+}
+
+@media (max-width: 560px) {
+  #hotbar {
+    gap: 3px;
+    padding: 4px;
+  }
+
+  #hotbar .slot {
+    width: calc((100vw - 60px) / 10);
+    height: calc((100vw - 60px) / 10);
+  }
+
+  #hotbar .slot-label {
+    font-size: 11px;
+  }
+}
+
+/* ---- Energy (rogues) ---- */
+
+.bar.rage.energy .fill {
+  background: linear-gradient(180deg, #ffe066, #c9a400);
+}
+
+/* ---- Ayşe Teyze's fortune ---- */
+
+.npc-fortune {
+  font-style: italic;
+  padding: 6px 8px;
+  border-left: 2px solid var(--gold);
+  background: #0005;
+}
+
+.npc-fortune.good {
+  color: #b2f2bb;
+}
+
+.npc-fortune.bad {
+  color: #ced4da;
+}
+
+.fortune-bonus {
+  color: #b2f2bb;
+}

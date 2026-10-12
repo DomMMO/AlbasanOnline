@@ -58,6 +58,8 @@ export function statsWithEquipment(
   classId: string,
   level: number,
   equipped: { defId: string; enhance: number; affixes?: Affix[] }[],
+  /** Modifiers that don't come from an item (skill and passive ranks). */
+  extra: Affix[] = [],
 ): CombatStats {
   const stats: CombatStats = {
     ...classOf(classId).baseStats(level),
@@ -85,7 +87,7 @@ export function statsWithEquipment(
     stats.maxHp += bonus.maxHp ?? 0;
     if (def.attackSpeedMs) stats.attackSpeedMs = def.attackSpeedMs;
   }
-  const mods = sumAffixes(items.map((item) => item.affixes));
+  const mods = sumAffixes([...items.map((item) => item.affixes), extra]);
   const { str, dex, int, vit } = mods;
   stats.attributes = { str, dex, int, vit };
   // Attributes (see ATTRIBUTE_HELP) count as flat bonuses, before the % modifiers.

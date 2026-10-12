@@ -132,7 +132,7 @@
         <div id="xp-bar" class="bar"><div id="xp-fill" class="fill"></div><span id="xp-text"></span></div>
       </div>
 
-      <div id="help">Tab: hedef · Tık: saldır · 1-3: skill · 4-5: iksir · I: envanter · P: pasif ağaç · T: şehir portalı · J: görevler · M: harita · E: al/konuş/portal · Enter: sohbet · L: PvP sıralaması · Esc: menü</div>
+      <div id="help">Tab: hedef · Sol tık: saldır / al / konuş / portal · 1-0: skill ve iksir · I: envanter · K: yetenekler · P: pasif ağaç · T: şehir portalı · J: görevler · M: harita · E: al/konuş/portal · Enter: sohbet · L: PvP sıralaması · Esc: menü</div>
 
       <div id="inventory-window" class="window" hidden>
         <div class="window-title"><span>Karakter</span><button id="inventory-close" class="close" tabindex="-1">×</button></div>
@@ -182,6 +182,7 @@
           <button type="button" data-action="questLog">Görev</button>
           <button type="button" data-action="passiveTree">Pasif</button>
           <button type="button" data-action="townPortal">Portal</button>
+          <button type="button" data-action="skills">Yetenek</button>
           <button type="button" id="touch-chat">Sohbet</button>
           <button type="button" data-action="clearTarget">Menü</button>
         </div>
@@ -190,6 +191,15 @@
       <div id="npc-dialog" class="window" hidden>
         <div class="window-title"><span id="npc-dialog-name"></span><button id="npc-dialog-close" class="close" tabindex="-1">×</button></div>
         <div id="npc-dialog-body" class="window-scroll"></div>
+      </div>
+
+      <div id="skills-window" class="window" hidden>
+        <div class="window-title"><span>Yetenekler</span><button id="skills-close" class="close" tabindex="-1">×</button></div>
+        <div class="skills-head">
+          <span id="skills-points"></span>
+          <button type="button" id="skills-reset" class="secondary" tabindex="-1">Sıfırla</button>
+        </div>
+        <div id="skills-body"></div>
       </div>
 
       <div id="passive-window" class="window" hidden>

@@ -29,6 +29,10 @@ export class Player extends Schema {
   @type("boolean") rooted = false;
   /** Kalkan Duvarı is up. */
   @type("boolean") guarded = false;
+  /** Stunned (PvP): can't move or act. */
+  @type("boolean") stunned = false;
+  /** A buff skill is running. */
+  @type("boolean") buffed = false;
   /** PvP spawn protection. */
   @type("boolean") protected = false;
   @type("uint16") pvpRating = 1000;
@@ -63,6 +67,8 @@ export class Mob extends Schema {
   @type("string") aggroId = "";
   /** Night-strengthened (or a night-only creature). */
   @type("boolean") empowered = false;
+  /** Stunned: can't move or attack. */
+  @type("boolean") stunned = false;
 }
 
 /** A player's summon (necromancer skeleton). Its look comes from the skill that summoned it. */

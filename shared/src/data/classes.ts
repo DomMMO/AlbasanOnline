@@ -6,8 +6,9 @@ import type { CombatStats } from "./progression";
 // Playable classes. Warrior = tank (rage), Mage = ranged damage (mana),
 // Priest = healer (mana): the trio party content will be built around.
 
-export type ClassId = "warrior" | "mage" | "priest" | "necromancer" | "guardian";
-export type ResourceType = "rage" | "mana";
+export type ClassId = "warrior" | "mage" | "priest" | "necromancer" | "guardian" | "rogue";
+/** Rage fills from fighting, mana regenerates slowly, energy regenerates quickly. */
+export type ResourceType = "rage" | "mana" | "energy";
 
 export interface ClassDef {
   id: ClassId;
@@ -20,9 +21,9 @@ export interface ClassDef {
   maxResource(level: number): number;
   /** Plain attacks with the equipped weapon. Ranged ones need line of sight. */
   autoAttack: { range: number; multiplier: number; ranged: boolean };
-  /** Hotbar slots 1-3. */
+  /** Active skills in hotbar order (see SkillDef.level for when each can be learned). */
   skills: string[];
-  /** Hotbar slots 4-5. */
+  /** Hotbar slots after the skills. */
   potions: string[];
   starterEquipment: Partial<Record<EquipSlot, string>>;
   starterInventory: { defId: string; qty: number }[];
@@ -47,7 +48,7 @@ export const CLASSES: Record<ClassId, ClassDef> = {
     baseStats: (level) => ({ maxHp: 80 + (level - 1) * 20, attack: 8 + (level - 1) * 3, defense: 2 + (level - 1), attackSpeedMs: 2000 }),
     maxResource: () => 100,
     autoAttack: { range: MELEE_RANGE, multiplier: 1, ranged: false },
-    skills: ["heroicStrike", "whirlwind", "secondWind"],
+    skills: ["heroicStrike", "whirlwind", "secondWind", "hamstring", "leapSlam", "battleShout"],
     potions: ["minor_hp_potion", "hp_potion"],
     starterEquipment: { weapon: "rusty_sword", chest: "cloth_shirt" },
     starterInventory: [{ defId: "minor_hp_potion", qty: 5 }],
@@ -61,7 +62,7 @@ export const CLASSES: Record<ClassId, ClassDef> = {
     baseStats: (level) => ({ maxHp: 60 + (level - 1) * 14, attack: 10 + Math.round((level - 1) * 3.4), defense: 1 + Math.floor((level - 1) * 0.6), attackSpeedMs: 1800 }),
     maxResource: (level) => 120 + (level - 1) * 12,
     autoAttack: { range: TILE_SIZE * 7, multiplier: 0.5, ranged: true },
-    skills: ["fireball", "frostNova", "lightning"],
+    skills: ["fireball", "frostNova", "lightning", "flameBurst", "blink", "arcanePower"],
     potions: ["minor_hp_potion", "minor_mana_potion"],
     starterEquipment: { weapon: "apprentice_staff", chest: "cloth_shirt" },
     starterInventory: [
@@ -79,7 +80,7 @@ export const CLASSES: Record<ClassId, ClassDef> = {
     baseStats: (level) => ({ maxHp: 70 + (level - 1) * 16, attack: 9 + (level - 1) * 3, defense: 1 + Math.floor((level - 1) * 0.8), attackSpeedMs: 1800 }),
     maxResource: (level) => 130 + (level - 1) * 12,
     autoAttack: { range: TILE_SIZE * 7, multiplier: 0.45, ranged: true },
-    skills: ["smite", "heal", "shield"],
+    skills: ["smite", "heal", "shield", "holyNova", "holyChains", "lightStep", "divineSpirit"],
     potions: ["minor_hp_potion", "minor_mana_potion"],
     starterEquipment: { weapon: "apprentice_staff", chest: "cloth_shirt" },
     starterInventory: [
@@ -97,7 +98,7 @@ export const CLASSES: Record<ClassId, ClassDef> = {
     baseStats: (level) => ({ maxHp: 100 + (level - 1) * 25, attack: 7 + Math.round((level - 1) * 2.6), defense: 4 + Math.round((level - 1) * 1.5), attackSpeedMs: 2000 }),
     maxResource: () => 100,
     autoAttack: { range: MELEE_RANGE, multiplier: 1, ranged: false },
-    skills: ["shieldSlam", "challengingShout", "shieldWall"],
+    skills: ["shieldSlam", "challengingShout", "shieldWall", "concussiveBlow", "shieldCharge"],
     potions: ["minor_hp_potion", "hp_potion"],
     starterEquipment: { weapon: "rusty_sword", chest: "cloth_shirt" },
     starterInventory: [{ defId: "minor_hp_potion", qty: 5 }],
@@ -107,6 +108,22 @@ export const CLASSES: Record<ClassId, ClassDef> = {
     tauntOnHit: true,
     damageTaken: 0.9,
   },
+  rogue: {
+    id: "rogue",
+    name: "Suikastçı",
+    description: "Gölgelerin ustası. Hızlı vurur, kritikleri ölümcüldür, düşmanını sersemletip arkasında belirir. Hızla dolan enerji kullanır.",
+    resource: "energy",
+    baseStats: (level) => ({ maxHp: 72 + (level - 1) * 17, attack: 9 + Math.round((level - 1) * 3.1), defense: 2 + Math.floor((level - 1) * 0.8), attackSpeedMs: 1600 }),
+    maxResource: () => 100,
+    autoAttack: { range: MELEE_RANGE, multiplier: 0.9, ranged: false },
+    skills: ["sinisterStrike", "fanOfKnives", "eviscerate", "blind", "shadowStep", "adrenaline"],
+    potions: ["minor_hp_potion", "hp_potion"],
+    starterEquipment: { weapon: "rusty_sword", chest: "cloth_shirt" },
+    starterInventory: [{ defId: "minor_hp_potion", qty: 5 }],
+    headwear: { color: 0x343a40, style: "hood" },
+    color: "#ffe066",
+    rewardsLike: "warrior",
+  },
   necromancer: {
     id: "necromancer",
     name: "Nekromant",
@@ -115,7 +132,7 @@ export const CLASSES: Record<ClassId, ClassDef> = {
     baseStats: (level) => ({ maxHp: 66 + (level - 1) * 15, attack: 9 + Math.round((level - 1) * 3.2), defense: 1 + Math.floor((level - 1) * 0.7), attackSpeedMs: 1800 }),
     maxResource: (level) => 125 + (level - 1) * 12,
     autoAttack: { range: TILE_SIZE * 7, multiplier: 0.45, ranged: true },
-    skills: ["drainLife", "summonSkeleton", "boneNova"],
+    skills: ["drainLife", "boneNova", "summonSkeleton", "terror", "soulStep", "darkPact"],
     potions: ["minor_hp_potion", "minor_mana_potion"],
     starterEquipment: { weapon: "apprentice_staff", chest: "cloth_shirt" },
     starterInventory: [

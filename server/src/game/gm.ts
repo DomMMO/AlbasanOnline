@@ -12,6 +12,7 @@ import { pool } from "../db/pool";
 import { addItem, fromStored, toStored, toView, type InventoryData } from "./inventory";
 import { notice, refreshStats, sendInventory } from "./items";
 import { onlineCharacters } from "./registry";
+import { revalidateRanks } from "./talents";
 
 // GM operations on a character. Online characters are changed in the running game
 // (and see it immediately); offline ones are changed in the database.
@@ -184,6 +185,7 @@ export async function setLevel(characterId: number, level: number) {
   if (online) {
     online.player.level = target;
     online.player.xp = 0;
+    revalidateRanks(online.game, online.sessionId);
     refreshStats(online.game, online.sessionId);
     online.player.hp = online.player.maxHp;
     sendInventory(online.game, online.sessionId);

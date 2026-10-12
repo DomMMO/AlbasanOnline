@@ -36,6 +36,12 @@ export interface UpgradeActions {
 
 let actions: UpgradeActions;
 let openNpc: NpcDef | null = null;
+/** Today's good-fortune bonus to every success chance (0 = none). */
+let fortuneBonus = 0;
+
+export function setUpgradeFortune(bonus: number) {
+  fortuneBonus = bonus;
+}
 let selectedUid: string | null = null;
 let cooldownUntil = 0;
 
@@ -142,7 +148,7 @@ export function refreshUpgrade() {
   const scroll = ITEMS[scrollForLevel(target)];
   const scrolls = countItem(scroll.id);
   const cost = upgradeGoldCost(target);
-  const chance = Math.round(UPGRADE_SUCCESS_CHANCE[target] * 100);
+  const chance = Math.round(Math.min(1, UPGRADE_SUCCESS_CHANCE[target] + fortuneBonus) * 100);
   const risky = target > SAFE_UPGRADE_LEVEL;
 
   const now = enhancedStats(def, item.enhance);
@@ -155,7 +161,7 @@ export function refreshUpgrade() {
   infoEl.replaceChildren(
     row(`<b style="color:${RARITY_COLORS[itemRarity(def, item.affixes)]}">${escape(def.name)}</b> +${item.enhance} → <b class="up">+${target}</b>`),
     row(statLines, "muted"),
-    row(`Başarı şansı: <b>%${chance}</b>`),
+    row(`Başarı şansı: <b>%${chance}</b>${fortuneBonus > 0 ? ` <span class="fortune-bonus">(+%${Math.round(fortuneBonus * 100)} fal)</span>` : ""}`),
     row(
       `<img src="${iconUrl(scroll.icon.shape, scroll.icon.color)}" alt="" /> ${escape(scroll.name)} <b class="${scrolls ? "" : "bad"}">(${scrolls})</b>`,
       "requirement",

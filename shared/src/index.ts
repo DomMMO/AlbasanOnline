@@ -12,6 +12,8 @@ export * from "./data/npcs";
 export * from "./data/upgrade";
 export * from "./data/affixes";
 export * from "./data/passives";
+export * from "./data/talents";
+export * from "./data/fortune";
 export * from "./daynight";
 export * from "./data/quests";
 export * from "./dungeons";

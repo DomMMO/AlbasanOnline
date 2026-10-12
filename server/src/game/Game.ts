@@ -9,6 +9,9 @@ import {
   stepMovement,
   TICK_MS,
   statsWithEquipment,
+  sanitizeRanks,
+  type FortuneState,
+  type SkillRanks,
   type CombatStats,
   type InputMessage,
   type MobDef,
@@ -31,6 +34,8 @@ import { closeStall, type StallState } from "./market";
 import { questsFromStored, sendQuestLog } from "./quests";
 import { nightChanged, spawnInitialMobs, updateMobs } from "./mobs";
 import { dismissMinions, updateMinions, type MinionRuntime } from "./minions";
+import { sendSkillRanks } from "./talents";
+import { sendFortuneState } from "./fortune";
 import { loseDuel, updateDuels, type DuelInvite, type DuelState } from "./duel";
 import { worldMinute } from "./worldClock";
 import type { SpawnZone } from "../../../shared/src";
@@ -87,10 +92,26 @@ export interface PlayerRuntime {
   browsing: string | null;
   /** Quest log: active quests with kill counts, and completed ones. */
   quests: Map<string, QuestProgress>;
+  /** Skill / passive ranks bought with skill points. */
+  skillRanks: SkillRanks;
+  /** Stun skills (PvP): can't move or act until then. */
+  stunnedUntil: number;
+  /** Active buff skills. */
+  buffs: ActiveBuff[];
+  /** Ayşe Teyze's fortune (the day it was read on decides whether it still counts). */
+  fortune: FortuneState | null;
   /** The duel we are in (counting down or fighting). */
   duel: DuelState | null;
   /** A duel challenge waiting for our answer. */
   duelInvite: DuelInvite | null;
+}
+
+export interface ActiveBuff {
+  skillId: string;
+  until: number;
+  attackPct: number;
+  speedPct: number;
+  reductionPct: number;
 }
 
 export type MobMode = "idle" | "chase" | "return";
@@ -110,6 +131,8 @@ export interface MobRuntime {
   nextWanderAt: number;
   /** Frost Nova: can't move until then. */
   rootedUntil: number;
+  /** Stun skills: can't move or attack until then. */
+  stunnedUntil: number;
   boss?: BossState;
   /** Stat and reward multiplier: 1, NIGHT_POWER at night outdoors, NIGHT_ONLY_POWER for night creatures. */
   power: number;
@@ -224,6 +247,10 @@ export class Game {
       stall: null,
       browsing: null,
       quests: questsFromStored(character.quests),
+      skillRanks: sanitizeRanks(character.class, player.level, character.skillRanks),
+      stunnedUntil: 0,
+      buffs: [],
+      fortune: character.fortune ?? null,
       duel: null,
       duelInvite: null,
     });
@@ -237,6 +264,8 @@ export class Game {
     if (this.zone.instanced) this.scaleBossesForGroup(this.state.players.size);
     sendInventory(this, sessionId);
     sendQuestLog(this, sessionId);
+    sendSkillRanks(this, sessionId);
+    sendFortuneState(this, sessionId);
     return player;
   }
 
@@ -260,6 +289,8 @@ export class Game {
         pvpRating: player.pvpRating,
         pvpKills: player.pvpKills,
         pvpDeaths: player.pvpDeaths,
+        skillRanks: runtime.skillRanks,
+        fortune: runtime.fortune,
       },
       gold: runtime.inventory.gold,
       items: toStored(runtime.inventory),
