@@ -86,13 +86,16 @@ Ana Merkez'deki kırmızı portaldan (seviye 5+) girilen, herkesin herkese sald�
 
 ### Kontroller
 
+Tuşlar **Esc → Menü → Tuş Atamaları** sayfasından değiştirilebilir: 10 skill slotu, 2 iksir slotu, hareket, saldırı, etkileşim, şehir portalı ve pencereler. Bir eyleme tıkla, istediğin tuşa bas (ör. dash'in olduğu slota **Space**). Tuş başka bir eylemdeyse oradan alınır; Esc (menü) ve Enter (sohbet) değiştirilemez. Atamalar hemen geçerli olur, hotbar'daki tuş etiketleri de değişir; bu tarayıcıda saklanır, "Varsayılana dön" ile sıfırlanır. Aşağıdaki tablo varsayılan tuşlardır.
+
 | Tuş | Eylem |
 | --- | --- |
 | WASD / oklar | Yürü |
 | Mob'a tıkla | Hedef al ve saldır |
 | Tab | Sıradaki yakın mob'u hedef al |
 | F | Seçili hedefe saldır |
-| 1 - 9, 0 | Hotbar: sınıfın skill'leri, sonra iksirler |
+| 1 - 9, 0 | Hotbar (10 skill slotu) |
+| Q / R | İksir slotları |
 | Sol tık | Yaratık: hedef al ve saldır · Sandık / NPC / portal / tezgâh: yürü ve etkileş |
 | Enter | Sohbet |
 | J | Görev günlüğü |
@@ -255,12 +258,23 @@ Her sınıfın kendine has en az bir **tek hedef**, bir **alan (AoE)**, bir **ki
 
 - **Sersemletme:** hedef ne yürüyebilir ne vurabilir (sarı görünür). Boss'lar etkilenmez; oyunculara (PvP) yarı süre.
 - **Yetenek puanı:** her seviye 1 puan (toplam seviye + 1). **K** ile açılan **Yetenekler** sayfasında aktif skill'lere (en çok 5 derece; derece 1 öğretir, sonraki her derece etkisini %12 artırır) ve sınıfın 3 **pasif** yeteneğine (5'er derece) puan verilir; **−** ile tek tek, **Sıfırla** ile hepsi geri alınır. Yeni karakterler ve eski karakterler, açık olan her skill'de 1 dereceyle başlar.
-- **Hotbar 10 slot** (1-9, 0): sınıfın skill'leri sırayla, sonra iksirler. Puan verilmemiş skill gri görünür.
+- **Hotbar 10 slot** (1-9, 0), sadece skill'ler: başta sınıfın skill'leri sırayla. Yetenekler sayfasından bir skill ikonunu istediğin slota **sürükle**, slotlar arasında sürükleyerek yer değiştir, **sağ tıkla** slotu boşalt. Düzen her karakter için bu tarayıcıda saklanır. İksirler envanterden (sağ tık) içilir. Puan verilmemiş skill gri görünür.
+- **Serbest atılmalar** (Işınlanma, Ruh Göçü, Işık Adımı) **farenin olduğu yere doğru** gider (en çok skill'in mesafesi kadar; fare daha yakındaysa orada durur), karakter oraya kısa bir süzülmeyle geçer. Telefonda baktığın yöne gider.
+- Her skill'in ne yaptığını anlatan kodla çizilmiş bir **ikonu** var (`client/src/gfx/skillIcons.ts`). Hotbar'da ya da Yetenekler sayfasında üzerine gelince ayrıntılı bir panel açılır: bedel, büyü süresi, bekleme, menzil, karakterin şu anki gücüyle hesaplanmış hasar / iyileştirme / süre değerleri, derece ve sonraki derecenin getirisi.
 - Kurallar `shared/src/data/skills.ts` ve `shared/src/data/talents.ts`, sunucu tarafı `server/src/game/talents.ts`; dereceler `characters.skill_ranks` kolonunda saklanır.
 
 ### Sol tık ile etkileşim
 
 Sandığa, NPC'ye, portala, şehir portalına ya da tezgâha **sol tıklayınca** karakter oraya yürür ve varınca etkileşir (eşyayı alır, konuşur, portala girer). Yakın dövüş sınıfları tıkladıkları yaratığa da yürür. Bir tuşa basmak yürümeyi iptal eder; duvara takılırsa "Oraya yol yok" der. **E** tuşu da çalışmaya devam eder.
+
+İmleç oyunun kendi orta çağ çizimidir (`client/src/gfx/cursors.ts`): normalde demir ve altın işlemeli bir ok, tıklanabilir arayüzde işaret eden zırhlı eldiven; üzerine gelinen şeye göre şekil değiştirir: düşman (yaratık, PvP/düello rakibi) üzerinde **kılıç**, ganimet üzerinde **altın paraları kavrayan eldiven**, NPC üzerinde **mühürlü parşömen**, portal üzerinde **rünlü taş halka**, pazar tezgâhı üzerinde **terazi**.
+
+### Can ve kaynak küreleri
+
+Ekranın sol altında **can**, sağ altında **öfke / mana / enerji** küresi durur: pencerelerle aynı ahşap ve altından süslü çerçeveli cam küreler (arkada ahşap plaka ve kıvrık altın kanat, önde perçinli altın halka, tepede taş, altta değerin yazdığı kaide; `client/src/ui/globeFrame.ts`); içlerindeki sıvı yeni değere yumuşakça iner-çıkar ve yüzeyi sürekli dalgalanır. Can %35'in altındayken kırmızı sıvı kararıp atar; o sırada bir boss yeteneği ekranı sallarsa sıvı çalkalanır. Rahip kalkanı can küresinin etrafında mavi bir parıltı olarak görünür.
+
+- **İksir slotları:** can küresinin sağında 2 slot (**Q** ve **R**, ya da tıkla). Varsayılan olarak sınıfın iksirleri; envanterden bir iksiri ya da yemeği slota sürükleyerek değiştirilir, sağ tık boşaltır. Adet ve bekleme süresi slotta görünür.
+- **Buff / debuff çubuğu:** hotbar'ın hemen üstünde, solda üzerindeki güçlendirmeler (buff skill'leri, Kalkan Duvarı, Koruyucu Kalkan, doğuş koruması, iyi fal), sağda zayıflatmalar (sersemleme, donma). Kalan süre ikonun üstünde geri sayar; üzerine gelince ne olduğu yazar.
 
 ### Ayşe Teyze'nin falı
 
@@ -270,7 +284,7 @@ Ayşe Teyze ile konuşunca görevlerin yanında **Falıma bak** seçeneği çık
 
 Sabit düğümleri yok: **20 büyük boş slot** var, seviye 2'den 21'e kadar her seviyede bir tanesi açılır. Her büyük slotun altında **5 küçük slot** vardır.
 
-Ekran bir çemberdir: 20 büyük yuva çemberin etrafında durur. Bir yuvaya tıklayınca çember döner, yuva en üste gelir ve sarı bir çizgiyle ortadaki küçük çembere bağlanır; 5 küçük yuva orada (dördü çemberin üstünde, biri ortasında) görünür. **1, 6, 11 ve 16. yuvalar Kadim Yuva'dır** (kırmızı halka ve dört elmas işareti; seçili yuva sadece büyür ve sarı halkayla belirtilir, Kadim Yuva seçiliyken küçük yuvalara inen çizgi kırmızıdır): Büyük Mücevher'in yanı sıra **Kadim Mücevher** de alır.
+Ekran bir çemberdir (dolum animasyonsuzdur; seçim değişince altın renk yumuşakça yeni yuvaya geçer): 20 büyük yuva çemberin etrafında durur ve her birinden merkeze boş bir çubuk uzanır; seçili olmayanlar sönük durur. Seçilen yuva en üste gelir; içine yukarıdan sıvı altın dökülür (dalgalı yüzeyle, kesik kesik), altın çubuktan aşağı akar ve ortadaki küçük yuvaları sırayla yukarıdan doldurur (Kadim Yuvalarda kırmızı elmaslar da altına döner). Bir yuvaya tıklayınca çember döner, yuva en üste gelir ve sarı bir çizgiyle ortadaki küçük çembere bağlanır; 5 küçük yuva orada (dördü çemberin üstünde, biri ortasında) görünür. **1, 6, 11 ve 16. yuvalar Kadim Yuva'dır** (kırmızı halka ve dört elmas işareti; seçili yuva sadece büyür ve sarı halkayla belirtilir, Kadim Yuva seçiliyken küçük yuvalara inen çizgi kırmızıdır): Büyük Mücevher'in yanı sıra **Kadim Mücevher** de alır.
 
 - **Kadim Mücevher** (çok nadir; boss'larda %8): güçlü ve özel bir etki. +1 İskelet (aynı anda bir iskelet daha, en çok +2), skill bekleme süresi kısalması, öfke/mana bedeli azalması, alınan hasar azalması, kritik hasarı, öldürünce can yenileme, savaşta can yenilenmesi, XP bonusu, iskelet hasarı.
 

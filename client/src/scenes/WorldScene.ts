@@ -55,6 +55,7 @@ import {
   type TownPortalView,
   type SkillRanksEvent,
   type FortuneEvent,
+  type AurasEvent,
   type NoticeEvent,
   type NpcDef,
   type UpgradeResultEvent,
@@ -80,7 +81,14 @@ import { closeTopWindow, registerWindow } from "../ui/windows";
 import { getSettings, onSettingsChange } from "../settings";
 import { boneBurst, burst, castingGlow, frostRing, healSparkles, holyBeam, lightning, projectile, stunStars } from "../fx/spells";
 import { initPassives, togglePassives, updatePassives } from "../ui/passives";
+import { cursor } from "../gfx/cursors";
+import { getBindings, onBindingsChange } from "../input/keybindings";
+import { setAuras } from "../ui/auras";
+import { initPotions, refreshPotionKeys, render as renderPotions, startPotionCooldown, usePotion } from "../ui/potions";
+import { isTouchDevice } from "../ui/touch";
 import { initSkills, setSkillRanks, skillRank, toggleSkills } from "../ui/skills";
+import { hideSkillTooltip, showSkillTooltip } from "../ui/skillTooltip";
+import { hideTooltip, showItemTooltip } from "../ui/tooltip";
 import { initDamageMeter, recordCombat } from "../ui/damageMeter";
 import { INTERPOLATION_DELAY_MS, SnapshotBuffer } from "../entities/SnapshotBuffer";
 import { floatingText } from "../fx/floatingText";
@@ -121,13 +129,36 @@ import { closeUpgrade, initUpgrade, openUpgrade, openUpgradeNpc, refreshUpgrade,
 
 const PING_INTERVAL_MS = 2000;
 
-/** Hotbar for a class (up to 10 slots): its skills in order, unlearned ones greyed out, then its potions. */
-function hotbarFor(cls: string): hud.HotbarEntry[] {
-  const def = classOf(cls);
-  return [
-    ...def.skills.map((id) => ({ kind: "skill" as const, skill: SKILLS[id], locked: skillRank(id) === 0 })),
-    ...def.potions.map((id) => ({ kind: "item" as const, item: ITEMS[id] })),
-  ].slice(0, 10);
+const HOTBAR_SLOTS = 10;
+
+/**
+ * The player's hotbar layout: 10 skill slots (no potions; those are used from the bags).
+ * Arranged by dragging; saved per character in this browser. Default: the class's skills in order.
+ */
+function loadHotbarLayout(name: string, cls: string): string[] {
+  const skills = classOf(cls).skills;
+  let layout: string[] = [...skills];
+  try {
+    const saved = JSON.parse(localStorage.getItem(`mmo-hotbar:${name}`) ?? "null");
+    if (Array.isArray(saved)) layout = saved.map((id) => (typeof id === "string" && skills.includes(id) ? id : ""));
+  } catch {
+    // no saved layout
+  }
+  return Array.from({ length: HOTBAR_SLOTS }, (_, i) => layout[i] ?? "");
+}
+
+function saveHotbarLayout(name: string, layout: string[]) {
+  try {
+    localStorage.setItem(`mmo-hotbar:${name}`, JSON.stringify(layout));
+  } catch {
+    // storage blocked: the layout lasts until the page is closed
+  }
+}
+
+function hotbarFor(layout: string[]): hud.HotbarEntry[] {
+  return layout.map((id) =>
+    id && SKILLS[id] ? { kind: "skill" as const, skill: SKILLS[id], locked: skillRank(id) === 0 } : { kind: "empty" as const },
+  );
 }
 
 const FRIENDLY_COLOR = 0x4cd964;
@@ -200,6 +231,7 @@ export class WorldScene extends Phaser.Scene {
   private portals: { def: PortalDef; view: EntityView }[] = [];
   private bossId: string | null = null;
   private hotbar: hud.HotbarEntry[] = [];
+  private hotbarLayout: string[] = [];
   /** Our party: id (for loot ownership) and members' session ids in this room. */
   private party: { id: string | null; sessions: Set<string> } = { id: null, sessions: new Set() };
   /** Session id of the player we are duelling (fight started), or null. */
@@ -221,6 +253,8 @@ export class WorldScene extends Phaser.Scene {
   private arrived = false;
   /** Teleporting out: no more input, the scene is about to be replaced. */
   private leaving = false;
+  /** Our own dash in progress: the view glides from the take-off point to the landing spot. */
+  private dashGlide: { from: Point; start: number; ms: number } | null = null;
   /**
    * Left click on something out of reach: walk straight at it (like holding the keys), then
    * run `act` once close enough. Any key press, or getting stuck on a wall, cancels it.
@@ -287,9 +321,12 @@ export class WorldScene extends Phaser.Scene {
     this.targetRing = this.add.graphics().setDepth(0).setVisible(false);
     this.targetRing.lineStyle(1, 0xffe14d, 1).strokeEllipse(0, 0, 18, 7);
 
+    // The canvas's own cursor; hovering something clickable swaps in that thing's cursor.
+    this.input.setDefaultCursor(cursor("default"));
+
     for (const npc of this.zone.npcs.map((id) => NPCS[id])) {
       const view = new EntityView(this, npc.x, npc.y, npc.appearance, npc.name, "#7fe3ff");
-      view.sprite.setInteractive({ useHandCursor: true });
+      view.sprite.setInteractive({ cursor: cursor("talk") });
       view.sprite.on("pointerdown", () => this.walkTo(() => npc, NPC_RANGE - 4, () => this.talkTo(npc)));
       const marker = this.add
         .text(Math.round(npc.x), Math.round(view.headY) - 10, "", {
@@ -309,7 +346,7 @@ export class WorldScene extends Phaser.Scene {
     for (const def of this.zone.portals) {
       const label = def.minLevel ? `${def.label} (Sv ${def.minLevel}+)` : def.label;
       const view = new EntityView(this, def.x, def.y, { type: "portal", style: def.style }, label, "#ffb347");
-      view.sprite.setInteractive({ useHandCursor: true });
+      view.sprite.setInteractive({ cursor: cursor("portal") });
       view.sprite.on("pointerdown", () => this.walkTo(() => def, PORTAL_RANGE - 4, () => this.usePortal(def)));
       if (def.style === "gate") gateAura(this, def);
       this.portals.push({ def, view });
@@ -335,7 +372,14 @@ export class WorldScene extends Phaser.Scene {
   // ---- Wiring ---------------------------------------------------------------
 
   private bindControls() {
-    this.controls = new InputManager(this);
+    this.controls = new InputManager(this, getBindings());
+    // Key bindings changed in the menu: take effect at once, hotbar labels included.
+    const stopBindings = onBindingsChange(() => {
+      this.controls.rebind(getBindings());
+      hud.refreshKeyLabels();
+      refreshPotionKeys();
+    });
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, stopBindings);
     this.controls.onPressed(Action.TargetNext, () => this.cycleTarget());
     document.getElementById("death-text")!.textContent = this.zone.respawnText;
     this.controls.onPressed(Action.Leaderboard, () => toggleLeaderboard());
@@ -364,6 +408,8 @@ export class WorldScene extends Phaser.Scene {
     this.controls.onPressed(Action.QuestLog, () => toggleQuestLog());
     this.controls.onPressed(Action.PassiveTree, () => togglePassives());
     this.controls.onPressed(Action.Skills, () => toggleSkills());
+    this.controls.onPressed(Action.Potion1, () => usePotion(0));
+    this.controls.onPressed(Action.Potion2, () => usePotion(1));
     this.controls.onPressed(Action.Minimap, () => toggleMinimap());
     this.controls.onPressed(Action.TownPortal, () => {
       if (this.local && !this.local.state.dead && !this.leaving) this.room.send(Msg.OpenTownPortal);
@@ -471,6 +517,10 @@ export class WorldScene extends Phaser.Scene {
         view.setWeapon(player.weapon, player.weaponPlus);
         setDollLook(player.color, player.cls);
         this.rebuildHotbar(player.cls);
+        initPotions(player.name, player.cls, {
+          use: (defId) => this.room.send(Msg.UseItem, { defId }),
+          playerLevel: () => this.local?.state.level ?? 1,
+        });
         if (this.arrived) teleportIn(this, start);
         this.syncStall(sessionId, player);
         $(player).listen("stall", () => this.syncStall(sessionId, player));
@@ -479,7 +529,11 @@ export class WorldScene extends Phaser.Scene {
         this.players.set(sessionId, remote);
         // Clicking another player: their market stall if they have one, else friendly
         // target (heals, shields), or attack in PvP zones.
-        view.sprite.setInteractive({ useHandCursor: true });
+        view.sprite.setInteractive({ cursor: this.playerCursor(sessionId, player) });
+        view.sprite.on("pointerover", () => {
+          // Hostility and stalls change; pick the cursor fresh each time.
+          if (view.sprite.input) view.sprite.input.cursor = this.playerCursor(sessionId, player);
+        });
         view.sprite.on("pointerdown", () => {
           if (player.stall) return this.browseStall(sessionId);
           this.selectTarget(sessionId, this.isEnemyPlayer(sessionId));
@@ -520,7 +574,7 @@ export class WorldScene extends Phaser.Scene {
         ? new EntityView(this, mob.x, mob.y, def.appearance, def.name, "#ff8c1a", def.scale ?? 1)
         : new EntityView(this, mob.x, mob.y, def.appearance, undefined, undefined, def.scale ?? 1);
       if (def.boss) this.bossId = mobId;
-      view.sprite.setInteractive({ useHandCursor: true });
+      view.sprite.setInteractive({ cursor: cursor("attack") });
       view.sprite.on("pointerdown", () => {
         this.selectTarget(mobId, true);
         // Melee classes close the distance; the server starts swinging once in range.
@@ -558,7 +612,7 @@ export class WorldScene extends Phaser.Scene {
       const sync = () => {
         const visible = this.canLoot(loot);
         view.setVisible(visible);
-        if (visible) view.sprite.setInteractive({ useHandCursor: true });
+        if (visible) view.sprite.setInteractive({ cursor: cursor("loot") });
         else view.sprite.disableInteractive();
       };
       sync();
@@ -576,7 +630,7 @@ export class WorldScene extends Phaser.Scene {
       this.townPortals.get(portalId)?.view.destroy(true);
       const label = `${portal.owner} → ${ZONES[portal.to as ZoneId]?.name ?? portal.to}`;
       const view = new EntityView(this, portal.x, portal.y, { type: "portal", style: portal.back ? "exit" : "gate" }, label, "#74c0fc");
-      view.sprite.setInteractive({ useHandCursor: true });
+      view.sprite.setInteractive({ cursor: cursor("portal") });
       view.sprite.on("pointerdown", () => {
         const portal = this.townPortals.get(portalId);
         if (portal) this.walkTo(() => portal.state, PORTAL_RANGE - 4, () => this.useTownPortal(portalId));
@@ -639,6 +693,7 @@ export class WorldScene extends Phaser.Scene {
     this.room.onMessage(Msg.Transfer, (event: TransferEvent) => this.teleport(event));
     this.room.onMessage(Msg.MyStall, (event: MyStallEvent) => onMyStall(event));
     this.room.onMessage(Msg.QuestLog, (event: QuestLogEvent) => setQuestLog(event));
+    this.room.onMessage(Msg.Auras, (event: AurasEvent) => setAuras(event));
     this.room.onMessage(Msg.SkillRanks, (event: SkillRanksEvent) => {
       setSkillRanks(event);
       if (this.local) this.rebuildHotbar(this.local.state.cls);
@@ -664,12 +719,13 @@ export class WorldScene extends Phaser.Scene {
     // Anything sent while the scene was still loading was dropped; ask for the inventory again.
     this.room.send(Msg.RequestInventory);
     this.room.onMessage(Msg.SkillUsed, (event: SkillUsedEvent) =>
-      hud.startCooldown(event.skillId, event.cooldownMs, event.gcdMs),
+      (hud.startCooldown(event.skillId, event.cooldownMs, event.gcdMs), startPotionCooldown(event.skillId, event.cooldownMs)),
     );
     this.room.onMessage(Msg.SkillError, (event: SkillErrorEvent) => hud.showMessage(event.message));
     this.room.onMessage(Msg.Notice, (event: NoticeEvent) => hud.showMessage(event.message, "info", event.color));
     this.room.onMessage(Msg.Inventory, (event: InventoryEvent) => {
       updateInventory(event);
+      renderPotions();
       updatePassives(event);
       updateDoll(event.equipment);
       refreshShop();
@@ -730,16 +786,67 @@ export class WorldScene extends Phaser.Scene {
   }
 
   private rebuildHotbar(cls: string) {
-    this.hotbar = hotbarFor(cls);
-    hud.initHotbar(this.hotbar, (index) => this.useHotbar(index), countItem);
+    const name = this.local?.state.name ?? "";
+    if (this.hotbarLayout.length === 0) this.hotbarLayout = loadHotbarLayout(name, cls);
+    this.hotbar = hotbarFor(this.hotbarLayout);
+    hud.initHotbar(this.hotbar, (index) => this.useHotbar(index), countItem, (index, slot) => this.hotbarTooltip(index, slot), {
+      drop: (index, drag) => {
+        if (!classOf(cls).skills.includes(drag.skillId)) return;
+        const layout = [...this.hotbarLayout];
+        if (drag.from !== undefined) {
+          // Slot to slot: swap.
+          [layout[index], layout[drag.from]] = [layout[drag.from], layout[index]];
+        } else {
+          // From the skills page: one copy on the bar, moved to where it was dropped.
+          const old = layout.indexOf(drag.skillId);
+          if (old !== -1) layout[old] = "";
+          layout[index] = drag.skillId;
+        }
+        this.setHotbarLayout(cls, layout);
+      },
+      clear: (index) => {
+        const layout = [...this.hotbarLayout];
+        layout[index] = "";
+        this.setHotbarLayout(cls, layout);
+      },
+    });
+  }
+
+  private setHotbarLayout(cls: string, layout: string[]) {
+    this.hotbarLayout = layout;
+    saveHotbarLayout(this.local?.state.name ?? "", layout);
+    this.rebuildHotbar(cls);
+  }
+
+  /** Hovering a hotbar slot: the detailed skill panel, or the item tooltip for potions. */
+  private hotbarTooltip(index: number | null, slot: HTMLElement) {
+    const entry = index === null ? undefined : this.hotbar[index];
+    if (!entry || entry.kind === "empty" || !this.local) {
+      hideSkillTooltip();
+      hideTooltip();
+      return;
+    }
+    const p = this.local.state;
+    if (entry.kind === "skill") {
+      showSkillTooltip(entry.skill, { rank: skillRank(entry.skill.id), playerLevel: p.level, playerClass: p.cls, stats: inventoryState()?.stats }, slot);
+    } else {
+      showItemTooltip(entry.item, { qty: countItem(entry.item.id), playerLevel: p.level }, slot);
+    }
   }
 
   private useHotbar(slotIndex: number) {
     const entry = this.hotbar[slotIndex];
-    if (!entry) return;
+    if (!entry || entry.kind === "empty") return;
     if (entry.kind === "skill" && entry.locked) return hud.showMessage(`${entry.skill.name} öğrenilmedi: Yetenekler (K)`);
     hud.flashSlot(slotIndex);
-    if (entry.kind === "skill") this.room.send(Msg.UseSkill, { skillId: entry.skill.id });
+    if (entry.kind === "skill") {
+      // Free dashes (blink, soul step, light step) go towards the mouse; on touch screens, where you face.
+      const effect = entry.skill.effect;
+      const aimed = effect.type === "dash" && effect.mode === "forward" && !isTouchDevice;
+      const pointer = this.input.activePointer;
+      const aim = aimed ? this.cameras.main.getWorldPoint(pointer.x, pointer.y) : undefined;
+      this.room.send(Msg.UseSkill, { skillId: entry.skill.id, aim: aim ? { x: aim.x, y: aim.y } : undefined });
+    }
     else this.room.send(Msg.UseItem, { defId: entry.item.id });
   }
 
@@ -846,6 +953,12 @@ export class WorldScene extends Phaser.Scene {
     return { dx: axis(at.x - local.curr.x), dy: axis(at.y - local.curr.y) };
   }
 
+  /** Cursor over another player: coin for a stall, sword for an enemy (PvP, duel), else the pointer. */
+  private playerCursor(sessionId: string, player: PlayerView): string {
+    if (player.stall) return cursor("trade");
+    return cursor(this.isEnemyPlayer(sessionId) ? "attack" : "pointer");
+  }
+
   /** Our own town portal (others' are just scenery to us). */
   private ownTownPortal(portalId: string) {
     const portal = this.townPortals.get(portalId);
@@ -929,7 +1042,7 @@ export class WorldScene extends Phaser.Scene {
       .setResolution(4)
       .setDepth(200000 + y);
     if (sessionId !== this.room.sessionId) {
-      sign.setInteractive({ useHandCursor: true });
+      sign.setInteractive({ cursor: cursor("trade") });
       sign.on("pointerdown", () => this.walkTo(() => this.players.get(sessionId)?.view, STALL_RANGE - 4, () => this.browseStall(sessionId)));
     }
     this.stalls.set(sessionId, { title: player.stall, back, sign });
@@ -1120,7 +1233,11 @@ export class WorldScene extends Phaser.Scene {
       const radius = cast?.radius ?? 48;
       if (event.skill === "leap") source.land();
       ringEffect(this, at.x, at.y - 2, 0xff3b3b, radius);
-      if (this.local && distance(this.local.view, at) < radius * 2) this.cameras.main.shake(180, 0.006);
+      if (this.local && distance(this.local.view, at) < radius * 2) {
+        this.cameras.main.shake(180, 0.006);
+        // Low on health: the health globe's liquid sloshes with the blow.
+        hud.sloshGlobes();
+      }
       return;
     }
     if (event.skill === "charge") {
@@ -1130,6 +1247,7 @@ export class WorldScene extends Phaser.Scene {
     // Dashes: a flash where the caster set off, another where it lands once its new position arrives.
     const dashSkill = event.skill ? SKILLS[event.skill] : undefined;
     if (dashSkill?.effect.type === "dash" && event.fromX !== undefined && event.fromY !== undefined) {
+      if (event.sourceId === this.room.sessionId) this.dashGlide = { from: { x: event.fromX, y: event.fromY }, start: performance.now(), ms: 160 };
       this.showDash(dashSkill, { x: event.fromX, y: event.fromY }, source);
       return;
     }
@@ -1357,8 +1475,17 @@ export class WorldScene extends Phaser.Scene {
     const local = this.local;
     if (local) {
       const alpha = this.tickAccumulator / TICK_MS;
-      const x = local.prev.x + (local.curr.x - local.prev.x) * alpha;
-      const y = local.prev.y + (local.curr.y - local.prev.y) * alpha;
+      let x = local.prev.x + (local.curr.x - local.prev.x) * alpha;
+      let y = local.prev.y + (local.curr.y - local.prev.y) * alpha;
+      // Our own dash: glide from where we set off instead of popping to the landing spot.
+      const glide = this.dashGlide;
+      if (glide) {
+        const t = Math.min(1, (performance.now() - glide.start) / glide.ms);
+        const ease = 1 - (1 - t) * (1 - t);
+        x = glide.from.x + (x - glide.from.x) * ease;
+        y = glide.from.y + (y - glide.from.y) * ease;
+        if (t >= 1) this.dashGlide = null;
+      }
       local.view.setPosition(x, y);
       local.view.setAnimation(local.dir, local.moving);
       hud.setPosition(x, y);

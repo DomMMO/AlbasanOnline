@@ -9,6 +9,7 @@ import { runLobby } from "./ui/lobby";
 import { closeMenu, initMenu } from "./ui/menu";
 import { initTouchControls } from "./ui/touch";
 import { initWindows } from "./ui/windows";
+import { installCursorStyles } from "./gfx/cursors";
 
 const disconnected = document.getElementById("disconnected")!;
 const disconnectedText = document.getElementById("disconnected-text")!;
@@ -67,6 +68,7 @@ async function leaveGame(logout: boolean) {
 
 initTouchControls();
 initWindows();
+installCursorStyles();
 initMenu({ switchCharacter: () => void leaveGame(false), logout: () => void leaveGame(true) });
 
 function enterZone(room: Room, zone: ZoneId, arrived = false) {

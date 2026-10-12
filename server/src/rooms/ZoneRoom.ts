@@ -121,7 +121,10 @@ export class ZoneRoom extends Room<WorldState> {
       setTarget(this.game, client.sessionId, targetId, message?.attack === true);
     });
     this.onMessage(Msg.UseSkill, (client, message: Partial<UseSkillMessage>) => {
-      if (typeof message?.skillId === "string") useSkill(this.game, client.sessionId, message.skillId);
+      if (typeof message?.skillId !== "string") return;
+      const aim = message.aim;
+      const validAim = aim && Number.isFinite(aim.x) && Number.isFinite(aim.y) ? { x: Number(aim.x), y: Number(aim.y) } : undefined;
+      useSkill(this.game, client.sessionId, message.skillId, validAim);
     });
     this.onMessage(Msg.Respawn, (client) => respawn(this.game, client.sessionId));
 

@@ -73,6 +73,7 @@ export function showItemTooltip(def: ItemDef, ctx: TooltipContext, anchor: HTMLE
   for (const extra of ctx.footer ?? []) lines.push(line(extra.text, "tt-muted", extra.color));
 
   tooltip.replaceChildren(...lines);
+  tooltip.classList.remove("skill");
   tooltip.hidden = false;
 
   const rect = anchor.getBoundingClientRect();

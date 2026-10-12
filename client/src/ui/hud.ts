@@ -1,5 +1,10 @@
 import { darkness, formatClock, isNight, POTION_COOLDOWN_MS, type ItemDef, type SkillDef } from "../../../shared/src";
 import { iconUrl } from "../gfx/icons";
+import { skillIconUrl } from "../gfx/skillIcons";
+import { installGlobeFrame } from "./globeFrame";
+import { actionKeyLabel } from "../input/keybindings";
+import { HOTBAR_ACTIONS } from "../input/InputManager";
+import { clearAuras } from "./auras";
 
 // Game UI lives in the DOM: easier to build, style and make responsive than
 // drawing it inside the canvas. The scene pushes state in; clicks call back out.
@@ -16,10 +21,14 @@ const playerHpFill = $("player-hp-fill");
 const playerHpText = $("player-hp-text");
 const playerRageFill = $("player-rage-fill");
 const playerRageText = $("player-rage-text");
-const dockHpFill = $("dock-hp-fill");
-const dockHpText = $("dock-hp-text");
-const dockRageFill = $("dock-rage-fill");
-const dockRageText = $("dock-rage-text");
+const hpGlobe = $("hp-globe");
+installGlobeFrame(hpGlobe, "left", ["#ff8787", "#7a0f0f"]);
+installGlobeFrame($("resource-globe"), "right", ["#a5d8ff", "#0b2f6b"]);
+const hpGlobeText = $("hp-globe-text");
+const resourceGlobe = $("resource-globe");
+const resourceGlobeText = $("resource-globe-text");
+/** Health fraction last shown (the globe only sloshes when it is low). */
+let hpFraction = 1;
 
 const targetFrame = $("target-frame");
 const targetName = $("target-name");
@@ -53,6 +62,7 @@ export function resetGameUi() {
     document.getElementById(id)!.hidden = true;
   }
   document.getElementById("killfeed")!.replaceChildren();
+  clearAuras();
   nightOverlay.style.opacity = "0";
 }
 
@@ -83,6 +93,14 @@ export function setPosition(x: number, y: number) {
   position.textContent = text;
 }
 
+/** A boss blow shook the screen: when health is low, the health globe's liquid sloshes. */
+export function sloshGlobes() {
+  if (hpFraction >= 0.35) return;
+  hpGlobe.classList.remove("slosh");
+  void hpGlobe.offsetWidth; // restart the animation
+  hpGlobe.classList.add("slosh");
+}
+
 export function setPing(ms: number) {
   ping.textContent = `Ping: ${Math.round(ms)} ms`;
 }
@@ -107,24 +125,23 @@ export function updatePlayerFrame(data: PlayerFrameData) {
   playerName.textContent = data.name;
   playerLevel.textContent = `Sv ${data.level}`;
   const hpText = data.shield > 0 ? `${data.hp} / ${data.maxHp} (+${data.shield})` : `${data.hp} / ${data.maxHp}`;
-  // The same bars twice: in the player frame and above the hotbar.
-  for (const [fill, text] of [
-    [playerHpFill, playerHpText],
-    [dockHpFill, dockHpText],
-  ]) {
-    fill.style.width = percent(data.hp, data.maxHp);
-    text.textContent = hpText;
-    fill.parentElement!.classList.toggle("shielded", data.shield > 0);
-  }
-  for (const [fill, text] of [
-    [playerRageFill, playerRageText],
-    [dockRageFill, dockRageText],
-  ]) {
-    fill.style.width = percent(data.resource, data.maxResource);
-    text.textContent = `${data.resource} / ${data.maxResource}`;
-    fill.parentElement!.classList.toggle("mana", data.resourceType === "mana");
-    fill.parentElement!.classList.toggle("energy", data.resourceType === "energy");
-  }
+  playerHpFill.style.width = percent(data.hp, data.maxHp);
+  playerHpText.textContent = hpText;
+  playerHpFill.parentElement!.classList.toggle("shielded", data.shield > 0);
+  playerRageFill.style.width = percent(data.resource, data.maxResource);
+  playerRageText.textContent = `${data.resource} / ${data.maxResource}`;
+  playerRageFill.parentElement!.classList.toggle("mana", data.resourceType === "mana");
+  playerRageFill.parentElement!.classList.toggle("energy", data.resourceType === "energy");
+
+  // The globes: the liquid level eases to the new value (CSS transition on --level).
+  hpFraction = data.maxHp > 0 ? data.hp / data.maxHp : 0;
+  hpGlobe.style.setProperty("--level", percent(data.hp, data.maxHp));
+  hpGlobe.classList.toggle("shielded", data.shield > 0);
+  hpGlobe.classList.toggle("low", hpFraction < 0.35);
+  hpGlobeText.textContent = hpText;
+  resourceGlobe.style.setProperty("--level", percent(data.resource, data.maxResource));
+  for (const type of ["rage", "mana", "energy"] as const) resourceGlobe.classList.toggle(type, data.resourceType === type);
+  resourceGlobeText.textContent = `${data.resource} / ${data.maxResource}`;
   xpFill.style.width = percent(data.xp, data.xpToNext);
   xpText.textContent = `XP ${data.xp} / ${data.xpToNext}`;
   currentResource = data.resource;
@@ -189,8 +206,22 @@ export function setTargetFrame(data: TargetFrameData | null) {
 
 // ---- Hotbar ------------------------------------------------------------
 
-/** `locked`: a skill with no points in it yet (shown greyed out). */
-export type HotbarEntry = { kind: "skill"; skill: SkillDef; locked?: boolean } | { kind: "item"; item: ItemDef };
+/** `locked`: a skill with no points in it yet (shown greyed out). `empty`: a free slot to drop a skill on. */
+export type HotbarEntry = { kind: "skill"; skill: SkillDef; locked?: boolean } | { kind: "item"; item: ItemDef } | { kind: "empty" };
+
+/** Drag data for a skill dragged from the Yetenekler page (`from` absent) or from another slot. */
+export const SKILL_DRAG_TYPE = "application/x-mmo-skill";
+export interface SkillDrag {
+  skillId: string;
+  from?: number;
+}
+
+export interface HotbarCallbacks {
+  /** A skill was dropped on slot `index`. */
+  drop(index: number, drag: SkillDrag): void;
+  /** Right-click: empty the slot. */
+  clear(index: number): void;
+}
 
 interface Slot {
   entry: HotbarEntry;
@@ -211,10 +242,21 @@ let currentResource = 0;
 let itemCount: (defId: string) => number = () => 0;
 let renderLoopStarted = false;
 
-/** Safe to call again after a zone change: rebuilds the slots, keeps one render loop. */
-export function initHotbar(entries: HotbarEntry[], onUse: (index: number) => void, countItem: (defId: string) => number) {
+/**
+ * Safe to call again after a zone change: rebuilds the slots, keeps one render loop.
+ * `onHover(index, slot)` shows a slot's tooltip (null = hide).
+ */
+export function initHotbar(
+  entries: HotbarEntry[],
+  onUse: (index: number) => void,
+  countItem: (defId: string) => number,
+  onHover: (index: number | null, slot: HTMLElement) => void = () => {},
+  callbacks?: HotbarCallbacks,
+) {
   itemCount = countItem;
   hotbar.replaceChildren();
+  // Rearranging rebuilds the bar: keep cooldowns that are still running.
+  const running = new Map(slots.map((slot) => [slot.cooldownId, { until: slot.cooldownUntil, length: slot.cooldownLength }]));
   slots = entries.map((entry, index) => {
     const element = document.createElement("button");
     element.className = "slot";
@@ -222,15 +264,47 @@ export function initHotbar(entries: HotbarEntry[], onUse: (index: number) => voi
     element.tabIndex = -1;
     element.addEventListener("mousedown", (event) => event.preventDefault());
     element.addEventListener("click", () => onUse(index));
-    element.innerHTML = `<span class="slot-key">${(index + 1) % 10}</span><span class="slot-sweep"></span>`;
+    element.addEventListener("mouseenter", () => onHover(index, element));
+    element.addEventListener("mouseleave", () => onHover(null, element));
+    element.innerHTML = `<span class="slot-key">${actionKeyLabel(HOTBAR_ACTIONS[index])}</span><span class="slot-sweep"></span>`;
+    if (callbacks) {
+      element.addEventListener("dragover", (event) => {
+        if (event.dataTransfer?.types.includes(SKILL_DRAG_TYPE)) {
+          event.preventDefault();
+          element.classList.add("drop-target");
+        }
+      });
+      element.addEventListener("dragleave", () => element.classList.remove("drop-target"));
+      element.addEventListener("drop", (event) => {
+        event.preventDefault();
+        element.classList.remove("drop-target");
+        const raw = event.dataTransfer?.getData(SKILL_DRAG_TYPE);
+        if (raw) callbacks.drop(index, JSON.parse(raw) as SkillDrag);
+      });
+      element.addEventListener("contextmenu", (event) => {
+        event.preventDefault();
+        if (entry.kind !== "empty") callbacks.clear(index);
+      });
+      if (entry.kind === "skill") {
+        element.draggable = true;
+        element.addEventListener("dragstart", (event) => {
+          event.dataTransfer!.setData(SKILL_DRAG_TYPE, JSON.stringify({ skillId: entry.skill.id, from: index } satisfies SkillDrag));
+          event.dataTransfer!.effectAllowed = "move";
+          onHover(null, element);
+        });
+      }
+    }
 
     let count: HTMLElement | undefined;
     if (entry.kind === "skill") {
       const { skill } = entry;
       element.style.setProperty("--skill-color", skill.color);
-      element.title = `${skill.name}${skill.cost ? ` (${skill.cost})` : ""}\n${skill.description}${entry.locked ? "\nÖğrenilmedi: Yetenekler (K)" : ""}`;
+      element.classList.add("skill");
       element.classList.toggle("locked", !!entry.locked);
-      element.prepend(Object.assign(document.createElement("span"), { className: "slot-label", textContent: skill.short }));
+      element.prepend(Object.assign(document.createElement("img"), { className: "slot-icon", src: skillIconUrl(skill), draggable: false, alt: skill.name }));
+    } else if (entry.kind === "empty") {
+      element.classList.add("empty");
+      element.title = "Boş slot: Yetenekler (K) sayfasından bir skill sürükle";
     } else {
       const { item } = entry;
       element.classList.add("item");
@@ -241,19 +315,29 @@ export function initHotbar(entries: HotbarEntry[], onUse: (index: number) => voi
       element.append(count);
     }
     hotbar.append(element);
+    const cooldownId = entry.kind === "skill" ? entry.skill.id : entry.kind === "item" ? (entry.item.cooldownGroup ?? entry.item.id) : "";
+    const still = cooldownId ? running.get(cooldownId) : undefined;
     return {
       entry,
-      cooldownId: entry.kind === "skill" ? entry.skill.id : (entry.item.cooldownGroup ?? entry.item.id),
-      cooldownLength: entry.kind === "skill" ? entry.skill.cooldownMs : POTION_COOLDOWN_MS,
+      cooldownId,
+      cooldownLength: still?.length ?? (entry.kind === "skill" ? entry.skill.cooldownMs : POTION_COOLDOWN_MS),
       triggersGcd: entry.kind === "skill" && entry.skill.triggersGcd,
       element,
       sweep: element.querySelector(".slot-sweep")!,
       count,
-      cooldownUntil: 0,
+      cooldownUntil: still?.until ?? 0,
     };
   });
   if (!renderLoopStarted) requestAnimationFrame(renderHotbar);
   renderLoopStarted = true;
+}
+
+/** Key bindings changed: relabel the hotbar slots. */
+export function refreshKeyLabels() {
+  slots.forEach((slot, index) => {
+    const label = slot.element.querySelector(".slot-key");
+    if (label) label.textContent = actionKeyLabel(HOTBAR_ACTIONS[index]);
+  });
 }
 
 export function startCooldown(cooldownId: string, cooldownMs: number, gcdMs: number) {
@@ -283,6 +367,8 @@ function renderHotbar() {
     let usable: boolean;
     if (slot.entry.kind === "skill") {
       usable = !slot.entry.locked && currentResource >= slot.entry.skill.cost;
+    } else if (slot.entry.kind === "empty") {
+      usable = true;
     } else {
       const count = itemCount(slot.entry.item.id);
       slot.count!.textContent = String(count);

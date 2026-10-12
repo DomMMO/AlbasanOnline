@@ -53,8 +53,11 @@ let selected = 0;
 let rotation = 0;
 let spinEl: HTMLElement;
 let infoEl: HTMLElement;
-/** Line from the selected big socket down to its small ones (red for a greater socket). */
-let linkEl: HTMLElement;
+/** The small circle holding the selected socket's small sockets (lights up when the spoke's fill arrives). */
+let innerEl: HTMLElement;
+let minorLayerEl: HTMLElement;
+/** One spoke per big socket, from the socket to the middle; the selected one fills with gold. */
+const spokes: HTMLElement[] = [];
 /** Positioned wrappers (ring + diamonds) around each big socket. */
 const nodes: HTMLElement[] = [];
 const majors: HTMLElement[] = [];
@@ -134,11 +137,21 @@ export function initPassives(passiveActions: PassiveActions) {
   spinEl = document.createElement("div");
   spinEl.className = "passive-spin";
   for (let s = 0; s < PASSIVE_SOCKETS; s++) {
+    // The spoke turns with the ring, so the selected one always ends up pointing straight down from the top.
+    const spoke = document.createElement("div");
+    spoke.className = `passive-spoke${isGreaterSocket(s) ? " greater" : ""}`;
+    spoke.style.setProperty("--angle", `${baseAngle(s)}deg`);
+    spoke.append(Object.assign(document.createElement("span"), { className: "spoke-fill" }));
+    spokes.push(spoke);
+    spinEl.append(spoke);
+
     const node = document.createElement("div");
     node.className = `passive-node${isGreaterSocket(s) ? " greater" : ""}`;
     const angle = (baseAngle(s) * Math.PI) / 180;
     node.style.left = `calc(50% + var(--ring-radius) * ${Math.cos(angle).toFixed(4)})`;
     node.style.top = `calc(50% + var(--ring-radius) * ${Math.sin(angle).toFixed(4)})`;
+    // Behind the jewel: the gold that rises inside the selected socket.
+    node.append(Object.assign(document.createElement("span"), { className: "node-fill" }));
     for (const side of ["n", "e", "s", "w"]) node.append(Object.assign(document.createElement("span"), { className: `passive-gem ${side}` }));
     const el = makeSocket(() => s, null, () => select(s));
     node.append(el);
@@ -147,17 +160,17 @@ export function initPassives(passiveActions: PassiveActions) {
     spinEl.append(node);
   }
 
-  // The selected socket's small sockets: a small circle in the middle, linked to the top of the ring.
+  // The selected socket's small sockets: a small circle in the middle, where its spoke arrives.
   const minorLayer = document.createElement("div");
   minorLayer.className = "passive-minor-layer";
-  const link = document.createElement("div");
-  link.className = "passive-link";
-  linkEl = link;
+  minorLayerEl = minorLayer;
   const inner = document.createElement("div");
   inner.className = "passive-inner";
-  minorLayer.append(link, inner);
+  innerEl = inner;
+  minorLayer.append(inner);
   MINOR_OFFSETS.forEach(([dx, dy], m) => {
     const el = makeSocket(() => selected, m);
+    el.style.setProperty("--i", String(m));
     el.style.left = `calc(50% + var(--inner-radius) * ${dx})`;
     el.style.top = `calc(50% + var(--inner-radius) * ${dy})`;
     minors.push(el);
@@ -192,7 +205,14 @@ function applyRotation() {
     node.style.transform = `translate(-50%, -50%) rotate(${-rotation}deg)${s === selected ? " scale(1.3)" : ""}`;
     node.classList.toggle("selected", s === selected);
   });
-  linkEl.classList.toggle("greater", isGreaterSocket(selected));
+  spokes.forEach((spoke, s) => spoke.classList.toggle("selected", s === selected));
+  replayFill();
+}
+
+/** The small circle and its small sockets are lit for whichever socket is selected (the gold fades in via CSS). */
+function replayFill() {
+  innerEl.classList.add("filling");
+  minorLayerEl.classList.add("filling");
 }
 
 export function updatePassives(event: InventoryEvent) {
@@ -261,5 +281,6 @@ function renderSummary(event: InventoryEvent) {
 export function togglePassives(open = windowEl.hidden) {
   windowEl.hidden = !open;
   if (open && state) updatePassives(state);
+  if (open && nodes.length > 0) replayFill();
   if (!open) hideTooltip();
 }

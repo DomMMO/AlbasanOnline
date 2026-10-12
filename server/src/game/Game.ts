@@ -100,6 +100,8 @@ export interface PlayerRuntime {
   buffs: ActiveBuff[];
   /** Ayşe Teyze's fortune (the day it was read on decides whether it still counts). */
   fortune: FortuneState | null;
+  /** Last aura list sent to the client (see auras.ts). */
+  auraSignature: string;
   /** The duel we are in (counting down or fighting). */
   duel: DuelState | null;
   /** A duel challenge waiting for our answer. */
@@ -251,6 +253,7 @@ export class Game {
       stunnedUntil: 0,
       buffs: [],
       fortune: character.fortune ?? null,
+      auraSignature: "",
       duel: null,
       duelInvite: null,
     });

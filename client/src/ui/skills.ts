@@ -1,3 +1,7 @@
+import { skillIconUrl } from "../gfx/skillIcons";
+import { inventoryState } from "./inventory";
+import { hideSkillTooltip, showSkillTooltip } from "./skillTooltip";
+import { SKILL_DRAG_TYPE } from "./hud";
 import {
   classOf,
   classPassives,
@@ -6,6 +10,7 @@ import {
   SKILL_MAX_RANK,
   SKILL_RANK_BONUS,
   SKILLS,
+  type SkillDef,
   type SkillRanksEvent,
 } from "../../../shared/src";
 
@@ -49,7 +54,7 @@ export function skillRank(id: string): number {
 
 function row(opts: {
   id: string;
-  badge?: { text: string; color: string };
+  badge?: { icon: string; color: string; skill: SkillDef };
   name: string;
   tag: string;
   description: string;
@@ -66,8 +71,22 @@ function row(opts: {
   const badge = document.createElement("span");
   badge.className = "skill-badge";
   if (opts.badge) {
-    badge.textContent = opts.badge.text;
+    const skill = opts.badge.skill;
+    badge.append(Object.assign(document.createElement("img"), { src: opts.badge.icon, alt: skill.name, draggable: false }));
     badge.style.setProperty("--skill-color", opts.badge.color);
+    // Drag the icon onto a hotbar slot.
+    badge.draggable = true;
+    badge.title = "Hotbar'a sürükle";
+    badge.addEventListener("dragstart", (event) => {
+      event.dataTransfer!.setData(SKILL_DRAG_TYPE, JSON.stringify({ skillId: skill.id }));
+      event.dataTransfer!.effectAllowed = "copy";
+      hideSkillTooltip();
+    });
+    // The whole row shows the detailed panel.
+    el.addEventListener("mouseenter", () =>
+      showSkillTooltip(skill, { rank: opts.rank, playerLevel: level, playerClass: actions.playerClass(), stats: inventoryState()?.stats }, badge),
+    );
+    el.addEventListener("mouseleave", hideSkillTooltip);
   } else {
     badge.classList.add("passive");
     badge.textContent = "✦";
@@ -124,7 +143,7 @@ function render() {
     const cooldown = skill.cooldownMs ? ` · ${skill.cooldownMs / 1000} sn bekleme` : "";
     return row({
       id,
-      badge: { text: skill.short, color: skill.color },
+      badge: { icon: skillIconUrl(skill), color: skill.color, skill },
       name: skill.name,
       tag: SKILL_CATEGORY_NAMES[skill.category],
       description: skill.description,
@@ -153,4 +172,5 @@ function render() {
 export function toggleSkills(open = windowEl.hidden) {
   windowEl.hidden = !open;
   if (open) render();
+  else hideSkillTooltip();
 }
