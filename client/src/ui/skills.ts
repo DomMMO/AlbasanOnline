@@ -18,11 +18,11 @@ import {
 } from "../../../shared/src";
 
 // Skills window (K): the class's active skills and passives with their ranks. + spends a
-// skill point, − takes one back; "Sıfırla" returns them all. The server checks everything.
+// skill point, − takes one back. The server checks everything. Two columns so the whole
+// page fits without scrolling; the long descriptions live in the hover tooltip.
 
 export interface SkillsActions {
   change(id: string, delta: 1 | -1): void;
-  reset(): void;
   playerLevel(): number;
   playerClass(): string;
 }
@@ -41,9 +41,6 @@ export function initSkills(skillActions: SkillsActions) {
   if (initialised) return;
   initialised = true;
   $("skills-close").addEventListener("click", () => toggleSkills(false));
-  $("skills-reset").addEventListener("click", () => {
-    if (confirm("Bütün yetenek puanların geri alınsın mı?")) actions.reset();
-  });
 }
 
 /** Madencilik and Botanik levels (Meslekler section). */
@@ -119,6 +116,9 @@ function row(opts: {
   } else {
     badge.classList.add("passive");
     badge.textContent = "✦";
+    el.title = `${opts.name}
+${opts.description}
+${opts.detail}`;
   }
 
   const text = document.createElement("div");
@@ -199,7 +199,13 @@ function render() {
     className: "muted life-hint",
     textContent: "Maden damarlarına ve bitkilere tıklayarak toplanır. Kazma ve orak Zanaatkâr Murat'tan (şehir) alınır.",
   });
-  bodyEl.replaceChildren(section("Aktif Yetenekler"), ...active, section("Pasif Yetenekler"), ...passives, section("Meslekler"), ...lifeSkillRows(), lifeHint);
+  const wrap = (rows: HTMLElement[]) => {
+    const el = document.createElement("div");
+    el.className = "skills-grid";
+    el.append(...rows);
+    return el;
+  };
+  bodyEl.replaceChildren(section("Aktif Yetenekler"), wrap(active), section("Pasif Yetenekler"), wrap(passives), section("Meslekler"), wrap(lifeSkillRows()), lifeHint);
 }
 
 export function toggleSkills(open = windowEl.hidden) {

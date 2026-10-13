@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import { getStateCallbacks, type Room } from "colyseus.js";
 import {
   castSpot,
+  darkness,
   sanitizeLook,
   Direction,
   RARITY_COLORS,
@@ -122,6 +123,7 @@ import { ringEffect } from "../fx/slash";
 import { preloadImageSprites } from "../gfx/imageSprites";
 import { createTileset, renderTiles, TILESET_KEY } from "../gfx/textures";
 import { drawDecor } from "../gfx/decor";
+import { NightLayer, resetLights } from "../fx/nightLights";
 import {
   closeNpcDialog,
   dialogNpc,
@@ -285,6 +287,7 @@ export class WorldScene extends Phaser.Scene {
   private npcMarkers: { npc: NpcDef; text: Phaser.GameObjects.Text }[] = [];
   private npcViews = new Map<string, EntityView>();
   private fishingLines!: FishingLines;
+  private nightLayer!: NightLayer;
   private arrived = false;
   /** Teleporting out: no more input, the scene is about to be replaced. */
   private leaving = false;
@@ -341,7 +344,9 @@ export class WorldScene extends Phaser.Scene {
     const tileset = tilemap.addTilesetImage(TILESET_KEY, TILESET_KEY, TILE_SIZE, TILE_SIZE, 0, 0)!;
     tilemap.createLayer(0, tileset, 0, 0)!.setDepth(-1);
     const decor = zoneLayout(this.zone.id).decor;
+    resetLights(this);
     if (decor) drawDecor(this, decor);
+    this.nightLayer = new NightLayer(this);
     this.fishingLines = new FishingLines(this);
     setMinimapZone(this.map, this.zone.name);
 
@@ -520,7 +525,6 @@ export class WorldScene extends Phaser.Scene {
     initPassives({ move: (from, to) => this.room.send(Msg.MoveItem, { from, to }), playerLevel });
     initSkills({
       change: (id, delta) => this.room.send(Msg.SkillRank, { id, delta }),
-      reset: () => this.room.send(Msg.SkillReset),
       playerLevel,
       playerClass: () => this.local?.state.cls ?? "warrior",
     });
@@ -616,6 +620,7 @@ export class WorldScene extends Phaser.Scene {
           view.setWeapon(player.weapon, player.weaponPlus);
           view.setLook(playerAppearance(player));
           this.syncMount(view, player.mounted);
+          view.setGallop(player.galloping && player.moving);
           view.setGmTag(player.gm);
           this.syncStall(sessionId, player);
           if (sessionId === this.targetId) this.refreshTargetFrame();
@@ -674,7 +679,10 @@ export class WorldScene extends Phaser.Scene {
     };
     syncPortals();
     $(this.room.state).listen("cleared", syncPortals);
-    $(this.room.state).listen("clock", (minute: number) => hud.setClock(minute, !!this.zone.outdoor));
+    $(this.room.state).listen("clock", (minute: number) => {
+      hud.setClock(minute);
+      this.nightLayer.setDarkness(this.zone.outdoor ? darkness(minute) : 0);
+    });
 
     $(this.room.state).loot.onAdd((loot: LootView, lootId: string) => {
       const view = new EntityView(this, loot.x, loot.y, { type: "chest" });
@@ -1673,7 +1681,7 @@ export class WorldScene extends Phaser.Scene {
     this.pendingInputs = this.pendingInputs.filter((input) => input.seq > server.lastSeq);
     let pos: Point = { x: server.x, y: server.y };
     for (const input of this.pendingInputs) {
-      pos = stepMovement(this.map, pos.x, pos.y, input.dx, input.dy, TICK_MS / 1000, server.mounted);
+      pos = stepMovement(this.map, pos.x, pos.y, input.dx, input.dy, TICK_MS / 1000, server.mounted, input.sprint === true);
     }
     if (distance(pos, local.curr) > TELEPORT_DISTANCE) local.prev = { ...pos };
     local.curr = pos;
@@ -1697,6 +1705,7 @@ export class WorldScene extends Phaser.Scene {
   }
 
   update(time: number, delta: number) {
+    this.nightLayer.update(time);
     if (time >= this.nextMinimapAt) {
       this.nextMinimapAt = time + 100;
       this.refreshMinimap();
@@ -1780,11 +1789,14 @@ export class WorldScene extends Phaser.Scene {
     // Rooted (Frost Nova in PvP) or keeping a stall: the server ignores movement, so don't predict any.
     if (local.state.dead || local.state.rooted || local.state.stall || this.leaving || (dx === 0 && dy === 0)) {
       local.moving = false;
+      local.view.setGallop(false);
       return;
     }
 
-    const input: InputMessage = { seq: this.nextSeq++, dx, dy };
-    local.curr = stepMovement(this.map, local.curr.x, local.curr.y, dx, dy, TICK_MS / 1000, local.state.mounted);
+    const sprint = local.state.mounted && this.controls.isDown(Action.Sprint);
+    const input: InputMessage = sprint ? { seq: this.nextSeq++, dx, dy, sprint } : { seq: this.nextSeq++, dx, dy };
+    local.curr = stepMovement(this.map, local.curr.x, local.curr.y, dx, dy, TICK_MS / 1000, local.state.mounted, sprint);
+    local.view.setGallop(sprint);
     local.dir = directionFrom(dx, dy, local.dir);
     local.moving = true;
     this.pendingInputs.push(input);

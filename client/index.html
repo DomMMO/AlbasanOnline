@@ -8,7 +8,6 @@
   </head>
   <body>
     <div id="game"></div>
-    <div id="night-overlay"></div>
 
     <form id="auth" class="panel" hidden>
       <h1>MMO Creation</h1>
@@ -234,7 +233,7 @@
         <div id="inventory-grid"></div>
         <div class="gold-row">
           <span class="coin"></span><span id="gold">0</span>
-          <button type="button" id="inventory-sort" class="secondary" tabindex="-1" title="Eşyaları türüne göre sıralar, yarım yığınları birleştirir">Düzenle</button>
+          <button type="button" id="inventory-sort" class="secondary" tabindex="-1" title="Düzenle: eşyaları türüne göre sıralar, yarım yığınları birleştirir" aria-label="Düzenle"><svg viewBox="0 0 16 16" width="16" height="16" shape-rendering="crispEdges" aria-hidden="true"><path fill="currentColor" d="M2 2h12v2H2zM2 7h8v2H2zM2 12h4v2H2zM12 6h2v6h2l-3 3-3-3h2z"/></svg></button>
         </div>
       </div>
 
@@ -288,7 +287,6 @@
         <div class="window-title"><span>Yetenekler</span><button id="skills-close" class="close" tabindex="-1">×</button></div>
         <div class="skills-head">
           <span id="skills-points"></span>
-          <button type="button" id="skills-reset" class="secondary" tabindex="-1">Sıfırla</button>
         </div>
         <div id="skills-body"></div>
       </div>

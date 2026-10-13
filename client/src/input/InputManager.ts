@@ -34,6 +34,7 @@ export enum Action {
   TownPortal = "townPortal",
   Minimap = "minimap",
   Mount = "mount",
+  Sprint = "sprint",
 }
 
 /** Hotbar slots in order. */
@@ -79,6 +80,7 @@ export const DEFAULT_BINDINGS: Record<Action, string[]> = {
   [Action.TownPortal]: ["T"],
   [Action.Minimap]: ["M"],
   [Action.Mount]: ["H"],
+  [Action.Sprint]: ["SHIFT"],
 };
 
 // On-screen touch controls (ui/touch.ts) drive the same actions through these.

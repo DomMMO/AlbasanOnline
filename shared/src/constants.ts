@@ -10,6 +10,8 @@ export const TICK_MS = 1000 / TICK_RATE;
 export const PLAYER_SPEED = 80;
 /** Riding a horse: this much faster than on foot. */
 export const MOUNT_SPEED_MULTIPLIER = 1.6;
+/** Holding Shift on horseback: a gallop on top of the mount speed. */
+export const GALLOP_SPEED_MULTIPLIER = 1.4;
 /** Time between two mount / dismount toggles. */
 export const MOUNT_COOLDOWN_MS = 1500;
 

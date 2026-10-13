@@ -2723,16 +2723,6 @@ table.controls td:first-child {
 
 /* ---- Day / night ---- */
 
-#night-overlay {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  background: radial-gradient(ellipse at 50% 50%, #2a3470 0%, #070a24 75%);
-  mix-blend-mode: multiply;
-  opacity: 0;
-  transition: opacity 2s linear;
-}
-
 /* Under the online / ping box (alone at the top on phones, where that box is hidden). */
 #clock {
   top: 38px;
@@ -3300,9 +3290,25 @@ body.touch .dm-title {
   top: 50px;
   left: 50%;
   transform: translateX(-50%);
-  width: min(520px, calc(100vw - 16px));
-  max-height: calc(100vh - 80px);
-  overflow-y: auto;
+  width: min(820px, calc(100vw - 16px));
+}
+
+/* Two columns so the page fits without a scrollbar; short screens and phones still scroll. */
+.skills-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 6px;
+}
+
+@media (max-width: 700px), (max-height: 640px) {
+  #skills-window {
+    max-height: calc(100vh - 80px);
+    overflow-y: auto;
+  }
+
+  .skills-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .skills-head {
@@ -3314,13 +3320,8 @@ body.touch .dm-title {
   color: var(--gold-light);
 }
 
-.skills-head button {
-  padding: 2px 10px;
-  font-size: 12px;
-}
-
 .skills-section {
-  margin: 8px 0 4px;
+  margin: 4px 0 4px;
   font-family: var(--font-title);
   font-weight: normal;
   font-size: 17px;
@@ -3390,11 +3391,17 @@ body.touch .dm-title {
 
 .skill-desc {
   color: #d8cba8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .skill-detail {
   color: #8f9cff;
   font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .skill-controls {
@@ -3957,8 +3964,17 @@ body.touch #chat {
 
 #inventory-sort {
   margin-left: auto;
-  padding: 2px 10px;
-  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 24px;
+  padding: 0;
+  color: var(--gold-light);
+}
+
+#inventory-sort svg {
+  display: block;
 }
 
 /* ---- Skills page: Meslekler ---- */

@@ -42,7 +42,6 @@ export const Msg = {
   MapPing: "mapPing",
   /** Skill page: add (+1) or take back (-1) a rank; or reset all. */
   SkillRank: "skillRank",
-  SkillReset: "skillReset",
   /** Ayşe Teyze: read today's fortune. */
   ReadFortune: "readFortune",
   /** T: open a town portal where you stand. */
@@ -134,6 +133,8 @@ export interface InputMessage {
   seq: number;
   dx: Axis;
   dy: Axis;
+  /** Shift held: gallop if mounted. */
+  sprint?: boolean;
 }
 
 export interface JoinOptions {
@@ -665,6 +666,8 @@ export interface PlayerView {
   gm: boolean;
   /** Riding a horse. */
   mounted: boolean;
+  /** Galloping (Shift on horseback) this tick. */
+  galloping: boolean;
   /** Fishing: the float lies on the water at (fishX, fishY). */
   fishing: boolean;
   fishX: number;

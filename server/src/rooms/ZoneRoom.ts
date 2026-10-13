@@ -62,7 +62,7 @@ import { claimCharacter } from "../game/presence";
 import { consumeTicket, issueTicket } from "../game/tickets";
 import { onlineCharacters } from "../game/registry";
 import { TownPortal, WorldState } from "./schema/WorldState";
-import { changeRank, resetRanks } from "../game/talents";
+import { changeRank } from "../game/talents";
 import { startGather } from "../game/gathering";
 import { isPingKind, sendPing } from "../game/pings";
 import { sortBags } from "../game/items";
@@ -238,7 +238,6 @@ export class ZoneRoom extends Room<WorldState> {
     this.onMessage(Msg.SkillRank, (client, message: Partial<SkillRankMessage>) => {
       if (typeof message?.id === "string" && (message.delta === 1 || message.delta === -1)) changeRank(this.game, client.sessionId, message.id, message.delta);
     });
-    this.onMessage(Msg.SkillReset, (client) => resetRanks(this.game, client.sessionId));
     this.onMessage(Msg.Gather, (client, message: Partial<GatherMessage>) => {
       if (stallLocked(this.game, client.sessionId)) return;
       if (typeof message?.nodeId === "string") startGather(this.game, client.sessionId, message.nodeId);
@@ -542,6 +541,7 @@ function isValidInput(message: unknown): message is InputMessage {
     (m.seq as number) > 0 &&
     isAxis(m.dx) &&
     isAxis(m.dy) &&
-    (m.dx !== 0 || m.dy !== 0)
+    (m.dx !== 0 || m.dy !== 0) &&
+    (m.sprint === undefined || typeof m.sprint === "boolean")
   );
 }

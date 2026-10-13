@@ -414,11 +414,14 @@ export class Game {
     runtime.inputBudget = Math.min(runtime.inputBudget + 1, MAX_INPUT_BURST);
     const dt = TICK_MS / 1000;
     let processed = 0;
+    let galloped = false;
     while (runtime.inputQueue.length > 0 && runtime.inputBudget >= 1) {
       const input = runtime.inputQueue.shift()!;
       // Dead, rooted or stall-keeping players' inputs are still acknowledged so the client's pending list drains.
       if (!player.dead && !player.rooted && !player.stall) {
-        const next = stepMovement(this.map, player.x, player.y, input.dx, input.dy, dt, player.mounted);
+        const gallop = player.mounted && input.sprint === true;
+        const next = stepMovement(this.map, player.x, player.y, input.dx, input.dy, dt, player.mounted, gallop);
+        galloped ||= gallop;
         player.x = next.x;
         player.y = next.y;
         player.dir = directionFrom(input.dx, input.dy, player.dir);
@@ -428,6 +431,7 @@ export class Game {
       runtime.inputBudget--;
     }
     player.moving = processed > 0;
+    player.galloping = galloped;
     // Moving interrupts spells with a cast time, gathering, and reels the fishing line in.
     if (processed > 0 && runtime.casting) cancelCast(this, sessionId, "Büyü iptal edildi");
     if (processed > 0 && runtime.gathering) cancelGather(this, sessionId, "Toplama yarıda kaldı");
