@@ -63,7 +63,11 @@ export type IconShape =
   | "bowl"
   | "jewel_major"
   | "jewel_minor"
-  | "jewel_greater";
+  | "jewel_greater"
+  | "ore"
+  | "herb"
+  | "pickaxe"
+  | "sickle";
 
 export interface ItemStats {
   attack?: number;
@@ -165,6 +169,17 @@ export const ITEMS: Record<string, ItemDef> = Object.fromEntries(
     def({ id: "major_jewel", jewel: "major", name: "Büyük Mücevher", rarity: "epic", level: 1, maxStack: 1, sellPrice: 40, icon: { shape: "jewel_major", color: 0xb65cff }, description: "Pasif ağaçta büyük bir slota takılır; altındaki 5 küçük slotu açar. Nadirliği arttıkça etkisi güçlenir." }),
     def({ id: "greater_jewel", jewel: "greater", name: "Kadim Mücevher", rarity: "legendary", level: 1, maxStack: 1, sellPrice: 150, icon: { shape: "jewel_greater", color: 0xff8000 }, description: "Sadece pasif ağacın Kadim Yuvalarına (1, 6, 11 ve 16. yuvalar) takılır. Güçlü ve özel bir etkisi vardır; nadirliği arttıkça güçlenir." }),
     def({ id: "minor_jewel", jewel: "minor", name: "Küçük Mücevher", rarity: "uncommon", level: 1, maxStack: 1, sellPrice: 12, icon: { shape: "jewel_minor", color: 0x1eff00 }, description: "Pasif ağaçta, büyük mücevher takılı bir slotun küçük slotlarına takılır. Nadirliği arttıkça etkisi güçlenir." }),
+    // ---- Life skills (see gathering.ts): tools and what veins and herbs give
+    def({ id: "miners_pickaxe", name: "Madenci Kazması", rarity: "common", level: 1, maxStack: 1, buyPrice: 50, sellPrice: 10, icon: { shape: "pickaxe", color: 0xa8adb6 }, description: "Envanterinde dururken maden damarlarını kazabilirsin (Madencilik)." }),
+    def({ id: "herb_sickle", name: "Bitki Orağı", rarity: "common", level: 1, maxStack: 1, buyPrice: 50, sellPrice: 10, icon: { shape: "sickle", color: 0xced4da }, description: "Envanterinde dururken şifalı bitkileri toplayabilirsin (Botanik)." }),
+    def({ id: "copper_ore", name: "Bakır Cevheri", rarity: "common", level: 1, maxStack: 50, sellPrice: 3, icon: { shape: "ore", color: 0xd9822b } }),
+    def({ id: "iron_ore", name: "Demir Cevheri", rarity: "common", level: 1, maxStack: 50, sellPrice: 7, icon: { shape: "ore", color: 0xa8adb6 } }),
+    def({ id: "silver_ore", name: "Gümüş Cevheri", rarity: "uncommon", level: 1, maxStack: 50, sellPrice: 16, icon: { shape: "ore", color: 0xe9ecef } }),
+    def({ id: "mithril_ore", name: "Mithril Cevheri", rarity: "rare", level: 1, maxStack: 50, sellPrice: 35, icon: { shape: "ore", color: 0x63e6be } }),
+    def({ id: "healing_herb", name: "Şifalı Ot", rarity: "common", level: 1, maxStack: 50, sellPrice: 3, icon: { shape: "herb", color: 0xff8787 } }),
+    def({ id: "lavender", name: "Lavanta", rarity: "common", level: 1, maxStack: 50, sellPrice: 7, icon: { shape: "herb", color: 0xb197fc } }),
+    def({ id: "night_bloom", name: "Gece Sefası", rarity: "uncommon", level: 1, maxStack: 50, sellPrice: 16, icon: { shape: "herb", color: 0x4dabf7 }, description: "Sadece gece açan mavi bir çiçek." }),
+    def({ id: "dragon_thorn", name: "Ejder Dikeni", rarity: "rare", level: 1, maxStack: 50, sellPrice: 35, icon: { shape: "herb", color: 0xff6b00 }, description: "Dokununca hâlâ sıcak." }),
     def({ id: "night_essence", name: "Gece Özü", rarity: "rare", level: 1, maxStack: 50, sellPrice: 15, icon: { shape: "gem", color: 0x7a5cff }, description: "Sadece gece doğan yaratıklardan düşer. Tüccarlar iyi para verir." }),
     def({ id: "goblin_ear", name: "Goblin Kulağı", rarity: "common", level: 1, maxStack: 50, sellPrice: 5, icon: { shape: "ear", color: 0x7cb342 } }),
     ...GEAR,

@@ -56,6 +56,15 @@ import {
   type SkillRanksEvent,
   type FortuneEvent,
   type AurasEvent,
+  type GatherNodeView,
+  type GatherStartEvent,
+  type GatherEndEvent,
+  type LifeSkillsEvent,
+  type MapPingMessage,
+  type PingEvent,
+  GATHER_RANGE,
+  LIFE_SKILLS,
+  NODES,
   type NoticeEvent,
   type NpcDef,
   type UpgradeResultEvent,
@@ -82,6 +91,9 @@ import { getSettings, onSettingsChange } from "../settings";
 import { boneBurst, burst, castingGlow, frostRing, healSparkles, holyBeam, lightning, projectile, stunStars } from "../fx/spells";
 import { initPassives, togglePassives, updatePassives } from "../ui/passives";
 import { cursor } from "../gfx/cursors";
+import { nodeTexture } from "../gfx/nodeTextures";
+import { openPingWheel, PING_STYLES } from "../ui/pingWheel";
+import { setLifeSkills } from "../ui/skills";
 import { getBindings, onBindingsChange } from "../input/keybindings";
 import { setAuras } from "../ui/auras";
 import { initPotions, refreshPotionKeys, render as renderPotions, startPotionCooldown, usePotion } from "../ui/potions";
@@ -253,6 +265,10 @@ export class WorldScene extends Phaser.Scene {
   private arrived = false;
   /** Teleporting out: no more input, the scene is about to be replaced. */
   private leaving = false;
+  /** Mining veins and herbs in this zone. */
+  private nodes = new Map<string, Phaser.GameObjects.Image>();
+  /** Recent pings, for the minimap. */
+  private pings: { x: number; y: number; until: number }[] = [];
   /** Our own dash in progress: the view glides from the take-off point to the landing spot. */
   private dashGlide: { from: Point; start: number; ms: number } | null = null;
   /**
@@ -327,7 +343,7 @@ export class WorldScene extends Phaser.Scene {
     for (const npc of this.zone.npcs.map((id) => NPCS[id])) {
       const view = new EntityView(this, npc.x, npc.y, npc.appearance, npc.name, "#7fe3ff");
       view.sprite.setInteractive({ cursor: cursor("talk") });
-      view.sprite.on("pointerdown", () => this.walkTo(() => npc, NPC_RANGE - 4, () => this.talkTo(npc)));
+      view.sprite.on("pointerdown", (pointer: Phaser.Input.Pointer) => !pointer.event.altKey && this.walkTo(() => npc, NPC_RANGE - 4, () => this.talkTo(npc)));
       const marker = this.add
         .text(Math.round(npc.x), Math.round(view.headY) - 10, "", {
           fontFamily: "Courier New, monospace",
@@ -347,7 +363,7 @@ export class WorldScene extends Phaser.Scene {
       const label = def.minLevel ? `${def.label} (Sv ${def.minLevel}+)` : def.label;
       const view = new EntityView(this, def.x, def.y, { type: "portal", style: def.style }, label, "#ffb347");
       view.sprite.setInteractive({ cursor: cursor("portal") });
-      view.sprite.on("pointerdown", () => this.walkTo(() => def, PORTAL_RANGE - 4, () => this.usePortal(def)));
+      view.sprite.on("pointerdown", (pointer: Phaser.Input.Pointer) => !pointer.event.altKey && this.walkTo(() => def, PORTAL_RANGE - 4, () => this.usePortal(def)));
       if (def.style === "gate") gateAura(this, def);
       this.portals.push({ def, view });
     }
@@ -429,6 +445,7 @@ export class WorldScene extends Phaser.Scene {
 
     const playerLevel = () => this.local?.state.level ?? 1;
     initInventory({
+      sort: () => this.room.send(Msg.SortInventory),
       move: (from, to) => this.room.send(Msg.MoveItem, { from, to }),
       activate: (index) => {
         if (openUpgradeNpc()) {
@@ -534,7 +551,8 @@ export class WorldScene extends Phaser.Scene {
           // Hostility and stalls change; pick the cursor fresh each time.
           if (view.sprite.input) view.sprite.input.cursor = this.playerCursor(sessionId, player);
         });
-        view.sprite.on("pointerdown", () => {
+        view.sprite.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
+        if (pointer.event.altKey) return; // Alt+click is a ping
           if (player.stall) return this.browseStall(sessionId);
           this.selectTarget(sessionId, this.isEnemyPlayer(sessionId));
         });
@@ -575,7 +593,8 @@ export class WorldScene extends Phaser.Scene {
         : new EntityView(this, mob.x, mob.y, def.appearance, undefined, undefined, def.scale ?? 1);
       if (def.boss) this.bossId = mobId;
       view.sprite.setInteractive({ cursor: cursor("attack") });
-      view.sprite.on("pointerdown", () => {
+      view.sprite.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
+        if (pointer.event.altKey) return; // Alt+click is a ping
         this.selectTarget(mobId, true);
         // Melee classes close the distance; the server starts swinging once in range.
         const local = this.local;
@@ -606,7 +625,7 @@ export class WorldScene extends Phaser.Scene {
 
     $(this.room.state).loot.onAdd((loot: LootView, lootId: string) => {
       const view = new EntityView(this, loot.x, loot.y, { type: "chest" });
-      view.sprite.on("pointerdown", () => this.walkTo(() => this.loot.get(lootId)?.state, LOOT_RANGE - 4, () => this.room.send(Msg.PickupLoot, { lootId })));
+      view.sprite.on("pointerdown", (pointer: Phaser.Input.Pointer) => !pointer.event.altKey && this.walkTo(() => this.loot.get(lootId)?.state, LOOT_RANGE - 4, () => this.room.send(Msg.PickupLoot, { lootId })));
       this.loot.set(lootId, { state: loot, view });
       // Loot is private to the killer at first; others only see it once it becomes free.
       const sync = () => {
@@ -620,6 +639,24 @@ export class WorldScene extends Phaser.Scene {
       this.lootSyncs.set(lootId, sync);
     });
 
+    // Life skills: veins and herbs. Click to walk there and gather.
+    $(this.room.state).nodes.onAdd((node: GatherNodeView, nodeId: string) => {
+      const def = NODES[node.kind];
+      if (!def) return;
+      const sprite = this.add.image(Math.round(node.x), Math.round(node.y), nodeTexture(this, def)).setOrigin(0.5, 1).setDepth(node.y);
+      sprite.setInteractive({ cursor: cursor(def.skill === "mining" ? "mine" : "gather") });
+      sprite.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
+        if (pointer.event.altKey) return;
+        this.walkTo(() => (this.nodes.has(nodeId) ? node : undefined), GATHER_RANGE - 4, () => this.room.send(Msg.Gather, { nodeId }));
+      });
+      sprite.on("pointerover", () => hud.showMessage(`${def.name} · ${LIFE_SKILLS[def.skill].name} ${def.level}${def.nightOnly ? " · sadece gece" : ""}`, "info", "#d8cba8"));
+      this.nodes.set(nodeId, sprite);
+    });
+    $(this.room.state).nodes.onRemove((_node: GatherNodeView, nodeId: string) => {
+      this.nodes.get(nodeId)?.destroy();
+      this.nodes.delete(nodeId);
+    });
+
     $(this.room.state).loot.onRemove((_loot: LootView, lootId: string) => {
       this.loot.get(lootId)?.view.destroy(true);
       this.loot.delete(lootId);
@@ -631,7 +668,8 @@ export class WorldScene extends Phaser.Scene {
       const label = `${portal.owner} → ${ZONES[portal.to as ZoneId]?.name ?? portal.to}`;
       const view = new EntityView(this, portal.x, portal.y, { type: "portal", style: portal.back ? "exit" : "gate" }, label, "#74c0fc");
       view.sprite.setInteractive({ cursor: cursor("portal") });
-      view.sprite.on("pointerdown", () => {
+      view.sprite.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
+        if (pointer.event.altKey) return; // Alt+click is a ping
         const portal = this.townPortals.get(portalId);
         if (portal) this.walkTo(() => portal.state, PORTAL_RANGE - 4, () => this.useTownPortal(portalId));
       });
@@ -694,6 +732,25 @@ export class WorldScene extends Phaser.Scene {
     this.room.onMessage(Msg.MyStall, (event: MyStallEvent) => onMyStall(event));
     this.room.onMessage(Msg.QuestLog, (event: QuestLogEvent) => setQuestLog(event));
     this.room.onMessage(Msg.Auras, (event: AurasEvent) => setAuras(event));
+    this.room.onMessage(Msg.LifeSkills, (event: LifeSkillsEvent) => setLifeSkills(event));
+    this.room.onMessage(Msg.GatherStart, (event: GatherStartEvent) => {
+      const skill = LIFE_SKILLS[event.skill as keyof typeof LIFE_SKILLS];
+      hud.startCastBar(`${skill?.verb ?? "Toplanıyor"}: ${event.name}`, event.ms, skill?.color ?? "#8ce99a");
+    });
+    this.room.onMessage(Msg.GatherEnd, (event: GatherEndEvent) => hud.stopCastBar(event.interrupted));
+    this.room.onMessage(Msg.PingEvent, (event: PingEvent) => this.showPing(event));
+    // Alt+click: a ping. On an enemy it marks it for attack at once; elsewhere a wheel offers the kinds.
+    this.input.on("pointerdown", (pointer: Phaser.Input.Pointer, over: Phaser.GameObjects.GameObject[]) => {
+      if (!pointer.event.altKey) return;
+      const world = this.cameras.main.getWorldPoint(pointer.x, pointer.y);
+      const mobId = [...this.mobs].find(([, mob]) => over.includes(mob.view.sprite))?.[0];
+      if (mobId) {
+        const mob = this.mobs.get(mobId)!;
+        this.room.send(Msg.MapPing, { kind: "attack", x: mob.view.x, y: mob.view.y, targetId: mobId } satisfies MapPingMessage);
+        return;
+      }
+      openPingWheel(pointer.event as MouseEvent, (kind) => this.room.send(Msg.MapPing, { kind, x: world.x, y: world.y } satisfies MapPingMessage));
+    });
     this.room.onMessage(Msg.SkillRanks, (event: SkillRanksEvent) => {
       setSkillRanks(event);
       if (this.local) this.rebuildHotbar(this.local.state.cls);
@@ -953,6 +1010,45 @@ export class WorldScene extends Phaser.Scene {
     return { dx: axis(at.x - local.curr.x), dy: axis(at.y - local.curr.y) };
   }
 
+  /** A party ping in this zone: a marker on the spot, a dot on the minimap, a line in party chat. */
+  private showPing(event: PingEvent) {
+    const style = PING_STYLES[event.kind];
+    this.pings.push({ x: event.x, y: event.y, until: performance.now() + 4000 });
+    const ring = this.add.graphics().setDepth(event.y + 0.5).setPosition(event.x, event.y - 2);
+    const marker = this.add.container(event.x, event.y - 22).setDepth(100000);
+    const diamond = this.add.graphics();
+    diamond.fillStyle(0x140c06, 0.85).fillPoints([{ x: 0, y: -10 }, { x: 10, y: 0 }, { x: 0, y: 10 }, { x: -10, y: 0 }], true);
+    diamond.lineStyle(1.5, style.color, 1).strokePoints([{ x: 0, y: -10 }, { x: 10, y: 0 }, { x: 0, y: 10 }, { x: -10, y: 0 }], true);
+    const icon = this.add.text(0, 0, style.icon, { fontFamily: "serif", fontSize: "11px", color: style.css, fontStyle: "bold" }).setOrigin(0.5).setResolution(4);
+    const label = this.add
+      .text(0, 14, `${event.from}: ${style.label}${event.target ? ` (${event.target})` : ""}`, {
+        fontFamily: "serif",
+        fontSize: "7px",
+        color: style.css,
+        stroke: "#000",
+        strokeThickness: 2,
+      })
+      .setOrigin(0.5, 0)
+      .setResolution(4);
+    marker.add([diamond, icon, label]);
+    const pulse = { r: 0 };
+    this.tweens.add({
+      targets: pulse,
+      r: 1,
+      duration: 700,
+      repeat: 3,
+      onUpdate: () => {
+        ring.clear();
+        ring.lineStyle(2, style.color, 1 - pulse.r).strokeEllipse(0, 0, 8 + pulse.r * 36, 4 + pulse.r * 18);
+      },
+    });
+    this.tweens.add({ targets: marker, y: marker.y - 3, yoyo: true, repeat: 5, duration: 300 });
+    this.time.delayedCall(3600, () => {
+      this.tweens.add({ targets: [marker, ring], alpha: 0, duration: 400, onComplete: () => (marker.destroy(), ring.destroy()) });
+    });
+    addChatMessage({ channel: "party", text: `${style.label}${event.target ? ` (${event.target})` : ""}`, from: event.from });
+  }
+
   /** Cursor over another player: coin for a stall, sword for an enemy (PvP, duel), else the pointer. */
   private playerCursor(sessionId: string, player: PlayerView): string {
     if (player.stall) return cursor("trade");
@@ -1043,7 +1139,7 @@ export class WorldScene extends Phaser.Scene {
       .setDepth(200000 + y);
     if (sessionId !== this.room.sessionId) {
       sign.setInteractive({ cursor: cursor("trade") });
-      sign.on("pointerdown", () => this.walkTo(() => this.players.get(sessionId)?.view, STALL_RANGE - 4, () => this.browseStall(sessionId)));
+      sign.on("pointerdown", (pointer: Phaser.Input.Pointer) => !pointer.event.altKey && this.walkTo(() => this.players.get(sessionId)?.view, STALL_RANGE - 4, () => this.browseStall(sessionId)));
     }
     this.stalls.set(sessionId, { title: player.stall, back, sign });
     if (sessionId === this.targetId) this.selectTarget(null, false);
@@ -1457,6 +1553,9 @@ export class WorldScene extends Phaser.Scene {
     }
     for (const id of this.zone.npcs) dots.push({ x: NPCS[id].x, y: NPCS[id].y, kind: "npc" });
     for (const portal of this.zone.portals) dots.push({ x: portal.x, y: portal.y, kind: "portal" });
+    const now = performance.now();
+    this.pings = this.pings.filter((p) => p.until > now);
+    for (const ping of this.pings) dots.push({ x: ping.x, y: ping.y, kind: "ping" });
     drawMinimap(dots);
   }
 

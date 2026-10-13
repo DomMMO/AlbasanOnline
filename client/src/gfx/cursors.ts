@@ -5,7 +5,7 @@
 // Each is a CSS cursor value (data URL + hotspot) for Phaser's interactive sprites and the DOM.
 
 type Ctx = CanvasRenderingContext2D;
-export type CursorKind = "default" | "pointer" | "attack" | "loot" | "talk" | "portal" | "trade";
+export type CursorKind = "default" | "pointer" | "attack" | "loot" | "talk" | "portal" | "trade" | "mine" | "gather";
 
 const SIZE = 32;
 const OUTLINE = "#140c06";
@@ -351,6 +351,47 @@ function scale(ctx: Ctx) {
   tip(ctx);
 }
 
+/** Pickaxe (mining veins): iron head, wooden haft. */
+function pickaxe(ctx: Ctx) {
+  ctx.save();
+  ctx.translate(16, 16);
+  ctx.rotate(-Math.PI / 4);
+  ctx.beginPath();
+  ctx.rect(-1.8, -4, 3.6, 19);
+  fillStroke(ctx, "#8b5a2b", 1.3);
+  ctx.beginPath();
+  ctx.moveTo(-13, -5);
+  ctx.quadraticCurveTo(0, -12, 13, -5);
+  ctx.lineTo(12, -2.5);
+  ctx.quadraticCurveTo(0, -8, -12, -2.5);
+  ctx.closePath();
+  fillStroke(ctx, iron(ctx, -13, -10, 13, -2), 1.4);
+  ctx.beginPath();
+  ctx.rect(-3, -7, 6, 5);
+  fillStroke(ctx, goldGrad(ctx, -3, -7, 3, -2), 1.1);
+  ctx.restore();
+  tip(ctx);
+}
+
+/** Sickle (herbs): curved steel blade, wooden handle. */
+function sickle(ctx: Ctx) {
+  ctx.beginPath();
+  ctx.moveTo(22, 4);
+  ctx.bezierCurveTo(32, 12, 26, 26, 14, 24);
+  ctx.bezierCurveTo(22, 22, 26, 13, 20, 7);
+  ctx.closePath();
+  fillStroke(ctx, iron(ctx, 18, 4, 28, 24), 1.3);
+  ctx.beginPath();
+  ctx.moveTo(14, 23);
+  ctx.lineTo(8, 30);
+  ctx.lineTo(10.5, 31.5);
+  ctx.lineTo(16, 25);
+  ctx.closePath();
+  fillStroke(ctx, "#8b5a2b", 1.2);
+  rivet(ctx, 14.5, 24, 1.2);
+  tip(ctx);
+}
+
 /** A tiny forged arrow tip at the top-left hotspot, so shaped cursors still point precisely. */
 function tip(ctx: Ctx) {
   ctx.beginPath();
@@ -369,6 +410,8 @@ const PAINTERS: Record<CursorKind, { paint: (ctx: Ctx) => void; hotspot: [number
   talk: { paint: scroll, hotspot: [1, 1], fallback: "pointer" },
   portal: { paint: runeCircle, hotspot: [16, 16], fallback: "pointer" },
   trade: { paint: scale, hotspot: [1, 1], fallback: "pointer" },
+  mine: { paint: pickaxe, hotspot: [1, 1], fallback: "pointer" },
+  gather: { paint: sickle, hotspot: [1, 1], fallback: "pointer" },
 };
 
 const cache = new Map<CursorKind, string>();

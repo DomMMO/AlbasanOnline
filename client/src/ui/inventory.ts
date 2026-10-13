@@ -31,6 +31,8 @@ export interface InventoryActions {
   /** Hint shown at the bottom of tooltips for inventory items. */
   activateHint(index: number): string;
   playerLevel(): number;
+  /** "Düzenle": stack and sort the bags. */
+  sort(): void;
 }
 
 const $ = (id: string) => document.getElementById(id)!;
@@ -139,6 +141,8 @@ export function initInventory(inventoryActions: InventoryActions) {
     gridEl.append(el);
   }
   $("inventory-close").addEventListener("click", () => toggleInventory(false));
+  $("inventory-sort").addEventListener("mousedown", (event) => event.preventDefault());
+  $("inventory-sort").addEventListener("click", () => actions.sort());
 }
 
 export function updateInventory(event: InventoryEvent) {

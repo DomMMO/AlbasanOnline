@@ -122,6 +122,15 @@ export const NPCS: Record<string, NpcDef> = {
     greeting: "Gel evladım gel, otur şöyle! Surdaki nöbetçiler aç, ben de bu yaşta tek başıma yetişemiyorum.",
     fortuneTeller: true,
   },
+  craftsman: {
+    id: "craftsman",
+    name: "Zanaatkâr Murat",
+    ...TOWN_SPOTS.craftsman,
+    appearance: { type: "humanoid", tunic: 0x6b4a2b, hair: 0x3a2a1a, skin: 0xd9a07a, gear: { chest: "leather_vest" } },
+    role: "merchant",
+    shop: ["miners_pickaxe", "herb_sickle"],
+    greeting: "Toprak altında cevher, toprak üstünde şifa var evlat. Kılıçla değil, kazma ve orakla da ekmek kazanılır. Madencilik mi, Botanik mi? İkisini de öğretirim.",
+  },
   hunter: {
     id: "hunter",
     name: "Avcı Ayla",

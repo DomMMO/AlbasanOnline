@@ -92,6 +92,13 @@ export class TownPortal extends Schema {
   @type("boolean") back = false;
 }
 
+/** A mining vein or herb (life skills). */
+export class GatherNode extends Schema {
+  @type("string") kind = "";
+  @type("number") x = 0;
+  @type("number") y = 0;
+}
+
 export class Loot extends Schema {
   @type("number") x = 0;
   @type("number") y = 0;
@@ -111,4 +118,5 @@ export class WorldState extends Schema {
   @type({ map: Loot }) loot = new MapSchema<Loot>();
   @type({ map: Minion }) minions = new MapSchema<Minion>();
   @type({ map: TownPortal }) townPortals = new MapSchema<TownPortal>();
+  @type({ map: GatherNode }) nodes = new MapSchema<GatherNode>();
 }

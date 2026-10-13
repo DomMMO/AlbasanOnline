@@ -57,6 +57,7 @@ export const TOWN_SPOTS = {
   commander: px(41, 19),
   sage: px(20, 21),
   cook: px(34, 26),
+  craftsman: px(15, 26),
 };
 
 export function buildTown(): DungeonLayout {

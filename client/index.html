@@ -132,6 +132,7 @@
         <span class="globe-text" id="hp-globe-text"></span>
       </div>
       <div id="potion-slots"></div>
+      <div id="ping-wheel" hidden></div>
       <div id="resource-globe" class="globe rage">
         <div class="globe-orb">
           <div class="globe-liquid"><span class="globe-wave a"></span><span class="globe-wave b"></span></div>
@@ -163,7 +164,10 @@
         </div>
         <div id="stats"></div>
         <div id="inventory-grid"></div>
-        <div class="gold-row"><span class="coin"></span><span id="gold">0</span></div>
+        <div class="gold-row">
+          <span class="coin"></span><span id="gold">0</span>
+          <button type="button" id="inventory-sort" class="secondary" tabindex="-1" title="Eşyaları türüne göre sıralar, yarım yığınları birleştirir">Düzenle</button>
+        </div>
       </div>
 
       <div id="upgrade-window" class="window" hidden>

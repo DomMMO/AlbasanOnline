@@ -87,7 +87,7 @@ export const ZONES: Record<ZoneId, ZoneDef> = {
     instanced: false,
     persistent: true,
     market: true,
-    npcs: ["weaponsmith", "armorer", "scribe", "alchemist", "blacksmith", "jeweler", "commander", "sage", "cook"],
+    npcs: ["weaponsmith", "armorer", "scribe", "alchemist", "blacksmith", "jeweler", "commander", "sage", "cook", "craftsman"],
     respawnText: "Şehir meydanında yeniden doğacaksın.",
     portals: [
       {

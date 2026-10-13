@@ -12,6 +12,9 @@ import {
   SKILLS,
   type SkillDef,
   type SkillRanksEvent,
+  type LifeSkillsEvent,
+  LIFE_SKILL_IDS,
+  LIFE_SKILLS,
 } from "../../../shared/src";
 
 // Skills window (K): the class's active skills and passives with their ranks. + spends a
@@ -40,6 +43,32 @@ export function initSkills(skillActions: SkillsActions) {
   $("skills-close").addEventListener("click", () => toggleSkills(false));
   $("skills-reset").addEventListener("click", () => {
     if (confirm("Bütün yetenek puanların geri alınsın mı?")) actions.reset();
+  });
+}
+
+/** Madencilik and Botanik levels (Meslekler section). */
+let lifeSkills: LifeSkillsEvent["skills"] = {};
+
+export function setLifeSkills(event: LifeSkillsEvent) {
+  lifeSkills = event.skills;
+  if (!windowEl.hidden) render();
+}
+
+function lifeSkillRows(): HTMLElement[] {
+  return LIFE_SKILL_IDS.map((id) => {
+    const info = LIFE_SKILLS[id];
+    const progress = lifeSkills[id] ?? { level: 1, xp: 0, next: 1 };
+    const row = document.createElement("div");
+    row.className = "life-row";
+    const name = Object.assign(document.createElement("span"), { className: "life-name", textContent: `${info.name}` });
+    const level = Object.assign(document.createElement("span"), { className: "life-level", textContent: `Sv ${progress.level}` });
+    const bar = document.createElement("div");
+    bar.className = "life-bar";
+    bar.style.setProperty("--fill", progress.next > 0 ? `${(progress.xp / progress.next) * 100}%` : "100%");
+    bar.style.setProperty("--color", info.color);
+    bar.title = progress.next > 0 ? `${progress.xp} / ${progress.next}` : "Ustalık";
+    row.append(name, level, bar);
+    return row;
   });
 }
 
@@ -166,7 +195,11 @@ function render() {
       level: p.level,
     });
   });
-  bodyEl.replaceChildren(section("Aktif Yetenekler"), ...active, section("Pasif Yetenekler"), ...passives);
+  const lifeHint = Object.assign(document.createElement("p"), {
+    className: "muted life-hint",
+    textContent: "Maden damarlarına ve bitkilere tıklayarak toplanır. Kazma ve orak Zanaatkâr Murat'tan (şehir) alınır.",
+  });
+  bodyEl.replaceChildren(section("Aktif Yetenekler"), ...active, section("Pasif Yetenekler"), ...passives, section("Meslekler"), ...lifeSkillRows(), lifeHint);
 }
 
 export function toggleSkills(open = windowEl.hidden) {
