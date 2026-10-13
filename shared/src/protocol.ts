@@ -39,6 +39,8 @@ export const Msg = {
   StallBuy: "stallBuy",
   QuestAccept: "questAccept",
   QuestTurnIn: "questTurnIn",
+  /** Ask an NPC the question a "talk" quest objective needs. */
+  QuestTalk: "questTalk",
   QuestAbandon: "questAbandon",
   /** Life skills: start gathering a vein or herb. */
   Gather: "gather",
@@ -140,6 +142,8 @@ export interface QuestMessage {
   questId: string;
   /** NPC you are talking to (accept / turn in). */
   npcId?: string;
+  /** Turn-in of a quest with a quiz: the option chosen. */
+  answer?: string;
 }
 
 export interface QuestLogEvent {

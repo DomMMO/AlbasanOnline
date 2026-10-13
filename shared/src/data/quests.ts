@@ -10,7 +10,21 @@ export type QuestObjective =
   | { type: "kill"; mobs: string[]; count: number; label: string }
   | { type: "collect"; item: string; count: number }
   /** Choose a class from one of the masters in the keep (done once you are no longer a novice). */
-  | { type: "path" };
+  | { type: "path" }
+  /**
+   * Go and ask an NPC something: the question is a button in their dialog (`ask`), they
+   * answer with `reply`. Done once asked; a wrong quiz answer at turn-in undoes it.
+   */
+  | { type: "talk"; npc: string; label: string; ask: string; reply: string };
+
+/** A multiple-choice question at turn-in: the right answer and a pool of wrong ones (3 are shown, in a new order every time). */
+export interface QuestQuiz {
+  question: string;
+  correct: string;
+  wrong: string[];
+  /** What the turn-in NPC says to a wrong answer (the player has to go and ask again). */
+  wrongText: string;
+}
 
 export interface QuestRewardItem {
   item: string;
@@ -43,6 +57,8 @@ export interface QuestDef {
   /** What the turn-in NPC says when you complete it. */
   completeText: string;
   objectives: QuestObjective[];
+  /** Answer this at the turn-in NPC to complete the quest. */
+  quiz?: QuestQuiz;
   reward: QuestReward;
 }
 
@@ -59,7 +75,8 @@ const collect = (item: string, count: number): QuestObjective => ({ type: "colle
 const MAIN = "Kırık Mühür";
 const FOREST = "Kara Orman";
 const DAILY = "Tekrarlanabilir";
-const DINNER = "Akşam Yemeği";
+const DINNER = "Ayşe Teyze'nin Mutfağı";
+const SIDE = "Yan Görevler";
 const CRAFTS = "Meslekler";
 
 const QUEST_LIST: QuestDef[] = [
@@ -412,7 +429,7 @@ const QUEST_LIST: QuestDef[] = [
   {
     id: "d1_dinner",
     chain: DINNER,
-    title: "Akşam Yemeği",
+    title: "Boş Kazan",
     giver: "cook",
     turnIn: "cook",
     minLevel: 3,
@@ -463,6 +480,47 @@ const QUEST_LIST: QuestDef[] = [
     completeText: "Sağ ol evladım, bereket versin. Payın burada, sıcak sıcak ye.",
     objectives: [collect("wolf_meat", 5)],
     reward: { xp: 120, gold: 15, items: [{ item: "ayse_stew", qty: 3 }] },
+  },
+
+  // ---- Metin2's famous dinner quest: ask what's for dinner, then remember it right ----
+  {
+    id: "y3_dinner",
+    chain: SIDE,
+    title: "Akşam Yemeği",
+    giver: "armorer",
+    turnIn: "armorer",
+    minLevel: 2,
+    requires: "m0_path",
+    text:
+      "Bu akşam İksirci Zehra'yı yemeğe çağırdım ama ne seveceğini bilmiyorum... Kendim sormaya utanıyorum, çaktırmadan sen öğrenir misin? Akşam yemeğinde ne istediğini sor, sonra bana gelip aynen söyle. Sakın yanlış hatırlama!",
+    progressText: "Hâlâ öğrenemedin mi? Zehra'nın dükkânı kuzeybatı arka sokağında, yeşil çatılı olan.",
+    completeText: "Acılı av eti, ayı, lahana ve iki yumurta... Hiç tahmin etmezdim! Hemen pazara koşuyorum. Al bakalım, emeğinin karşılığı.",
+    objectives: [
+      {
+        type: "talk",
+        npc: "alchemist",
+        label: "İksirci Zehra'ya akşam yemeğinde ne istediğini sor",
+        ask: "Akşam yemeğinde ne yemek istersin?",
+        reply: "Akşam yemeği mi? Hmm... Acılı av eti, ayı, lahana ve iki yumurta istiyorum! Kim soruyor ki? ...Neyse, söyleme, anladım ben.",
+      },
+    ],
+    quiz: {
+      question: "Ee? Zehra akşam yemeğinde ne istiyormuş?",
+      correct: "Acılı av eti, ayı, lahana ve iki yumurta",
+      wrong: [
+        "Acılı kurt eti, ayı, lahana ve iki yumurta",
+        "Acılı av eti, domuz, lahana ve iki yumurta",
+        "Acılı av eti, ayı, ıspanak ve iki yumurta",
+        "Acılı av eti, ayı, lahana ve üç yumurta",
+        "Tatlı av eti, ayı, lahana ve iki yumurta",
+        "Acılı balık, ayı, lahana ve iki yumurta",
+        "Acılı av eti, geyik, lahana ve iki yumurta",
+        "Acılı av eti, ayı, pırasa ve iki yumurta",
+        "Acılı av eti, ayı, lahana ve iki zeytin",
+      ],
+      wrongText: "Ne? Emin misin? Bu hiç Zehra'ya benzemiyor... Sen yanlış hatırladın galiba. Git bir daha sor, bu sefer iyi dinle!",
+    },
+    reward: { xp: 1000, gold: 1500 },
   },
 
   // ---- Life skills: Zanaatkâr Murat (see gathering.ts) ---------------------------------
@@ -694,6 +752,7 @@ export function questReady(quest: QuestDef, entry: QuestProgress, countItem: (de
   return quest.objectives.every((objective, i) => {
     if (objective.type === "kill") return (entry.kills[i] ?? 0) >= objective.count;
     if (objective.type === "path") return cls !== "" && cls !== "novice";
+    if (objective.type === "talk") return (entry.kills[i] ?? 0) >= 1;
     return countItem(objective.item) >= objective.count;
   });
 }

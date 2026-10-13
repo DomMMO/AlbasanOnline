@@ -608,7 +608,8 @@ export class WorldScene extends Phaser.Scene {
     });
     initQuests({
       accept: (npcId, questId) => this.room.send(Msg.QuestAccept, { questId, npcId }),
-      turnIn: (npcId, questId) => this.room.send(Msg.QuestTurnIn, { questId, npcId }),
+      turnIn: (npcId, questId, answer) => this.room.send(Msg.QuestTurnIn, { questId, npcId, answer }),
+      talk: (npcId, questId) => this.room.send(Msg.QuestTalk, { questId, npcId }),
       abandon: (questId) => this.room.send(Msg.QuestAbandon, { questId }),
       openShop: (npc) => this.openNpcWindow(npc),
       openUpgrade: (npc) => this.openNpcWindow(npc),

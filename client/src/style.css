@@ -4812,3 +4812,38 @@ body.touch #chat {
 .stable-swatches .swatch {
   cursor: pointer;
 }
+
+/* ---- Quest quiz (Akşam Yemeği): a), b), c), d) ---- */
+
+.quest-quiz {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 6px 0;
+}
+
+.quest-quiz .quiz-option {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  padding: 6px 10px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  text-align: left;
+  color: var(--text);
+  background: #0007;
+  border: 1px solid #6e532077;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.quest-quiz .quiz-option:hover {
+  color: var(--gold-light);
+  border-color: var(--gold-dark);
+  background: #2a1d0f;
+}
+
+.quiz-letter {
+  font-weight: bold;
+  color: var(--gold-light);
+}

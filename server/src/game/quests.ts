@@ -87,7 +87,26 @@ function rewardsFit(inv: InventoryData, quest: QuestDef, cls: string): boolean {
   return rewardItems(quest, cls).every((reward) => addItem(copy, reward.item, reward.qty ?? 1) === 0);
 }
 
-export function turnInQuest(game: Game, sessionId: string, questId: string, npcId: unknown) {
+/** Asked the NPC a "talk" objective sends you to: that objective is done. */
+export function talkForQuest(game: Game, sessionId: string, questId: string, npcId: unknown) {
+  const runtime = game.playerRuntime.get(sessionId);
+  const quest = QUESTS[questId];
+  const entry = runtime?.quests.get(questId);
+  if (!runtime || !quest || entry?.status !== "active" || !nearNpc(game, sessionId, npcId)) return;
+  let changed = false;
+  quest.objectives.forEach((objective, i) => {
+    if (objective.type !== "talk" || objective.npc !== npcId || (entry.kills[i] ?? 0) >= 1) return;
+    entry.kills[i] = 1;
+    changed = true;
+  });
+  if (!changed) return;
+  if (questReady(quest, entry, (defId) => countOf(runtime.inventory, defId))) {
+    notice(game, sessionId, `${quest.title} hazır: ${NPCS[quest.turnIn]?.name ?? ""} ile konuş`, QUEST_COLOR);
+  }
+  sendQuestLog(game, sessionId);
+}
+
+export function turnInQuest(game: Game, sessionId: string, questId: string, npcId: unknown, answer?: unknown) {
   const player = game.state.players.get(sessionId);
   const runtime = game.playerRuntime.get(sessionId);
   const quest = QUESTS[questId];
@@ -97,6 +116,16 @@ export function turnInQuest(game: Game, sessionId: string, questId: string, npcI
   const inv = runtime.inventory;
   if (!questReady(quest, entry, (defId) => countOf(inv, defId), player.cls)) return notice(game, sessionId, "Görev henüz tamamlanmadı");
   if (!rewardsFit(inv, quest, player.cls)) return notice(game, sessionId, "Ödüller için envanterinde yer aç");
+  // A quiz answered wrong: the NPC sends you back to ask again.
+  if (quest.quiz && answer !== quest.quiz.correct) {
+    quest.objectives.forEach((objective, i) => {
+      if (objective.type === "talk") entry.kills[i] = 0;
+    });
+    questLine(game, sessionId, `${NPCS[quest.turnIn]?.name}: ${quest.quiz.wrongText}`);
+    notice(game, sessionId, "Yanlış cevap: git bir daha sor");
+    sendQuestLog(game, sessionId);
+    return;
+  }
 
   for (const objective of quest.objectives) if (objective.type === "collect") takeItems(inv, objective.item, objective.count);
   const items = rewardItems(quest, player.cls);

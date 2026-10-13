@@ -620,6 +620,7 @@ client/
 | 7.20 | Telifli varlıklar (şarkı, CraftPix ve Kabak Jack çizimleri, Cloister Black) depodan çıktı; `client/src/assets/licensed/` yalnızca yerelde, yoksa oyun kodla çizilen benzerlerini kullanır | ✅ |
 | 7.21 | At çiftliği ve Seyis Yusuf (doğu kapısının dışında): Bozkır Atı 25.000, Arap Atı 75.000, Ahal-Teke 200.000, Kara Yel 500.000 altın (%10-40 daha hızlı); bindiğin atın donu, yelesi, örtüsü ve eyeri 1.000.000 altına düzenlenir | ✅ |
 | 7.22 | Çeşmenin etrafında 4 bank (8 koltuk): banka tıkla, karakter yürüyüp çeşmeye dönük oturur; yürüyünce ya da ata binince kalkar, herkes oturduğunu görür | ✅ |
+| 7.23 | Metin2'nin ünlü **Akşam Yemeği** görevi: Zırhçı Leyla, İksirci Zehra'nın akşam yemeğinde ne istediğini öğrenmeni ister; Leyla'ya dönünce her seferinde karışan a/b/c/d şıklarından doğrusunu seçersin, yanlışsa gidip tekrar sorarsın (1000 XP, 1500 altın). Ayşe Teyze'nin zinciri artık "Ayşe Teyze'nin Mutfağı" | ✅ |
 | 8 | Optimizasyon, anti-cheat, yedekleme, alfa testi | ⏳ |
 
 Faz 2 bitince oyun oynanabilir hale gelir. Sonraki fazlar bunun üzerine eklenir.

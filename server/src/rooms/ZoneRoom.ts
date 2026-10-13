@@ -56,7 +56,7 @@ import { Game } from "../game/Game";
 import { buy, moveItem, pickupLoot, sell, unequip, useItem } from "../game/items";
 import { upgradeItem } from "../game/upgrade";
 import { browseStall, buyFromStall, closeStall, openStall, stallLocked } from "../game/market";
-import { abandonQuest, acceptQuest, turnInQuest } from "../game/quests";
+import { abandonQuest, acceptQuest, talkForQuest, turnInQuest } from "../game/quests";
 import { handleChat } from "../game/chat";
 import { respondDuel } from "../game/duel";
 import { notice, sendInventory } from "../game/items";
@@ -245,7 +245,10 @@ export class ZoneRoom extends Room<WorldState> {
     });
     this.onMessage(Msg.QuestTurnIn, (client, message: Partial<QuestMessage>) => {
       if (this.itemsLocked(client.sessionId)) return;
-      if (typeof message?.questId === "string") turnInQuest(this.game, client.sessionId, message.questId, message.npcId);
+      if (typeof message?.questId === "string") turnInQuest(this.game, client.sessionId, message.questId, message.npcId, message.answer);
+    });
+    this.onMessage(Msg.QuestTalk, (client, message: Partial<QuestMessage>) => {
+      if (typeof message?.questId === "string") talkForQuest(this.game, client.sessionId, message.questId, message.npcId);
     });
     this.onMessage(Msg.QuestAbandon, (client, message: Partial<QuestMessage>) => {
       if (typeof message?.questId === "string") abandonQuest(this.game, client.sessionId, message.questId);
