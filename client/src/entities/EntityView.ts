@@ -19,6 +19,10 @@ const SLASH_COLORS: Record<SwingKind, number> = { normal: 0xe8e8f0, heavy: 0xff7
  * Draws one player or mob: sprite, optional name, health bar, held weapon.
  * Holds no game logic; it only shows what it is told.
  */
+/** Sitting: rows of the legs hidden under the seat, and how far the body drops. */
+const SEAT_CROP = 3;
+const SEAT_DROP = 1;
+
 export class EntityView {
   readonly sprite: Phaser.GameObjects.Sprite;
   private set: SpriteSet;
@@ -90,9 +94,20 @@ export class EntityView {
   private horse?: Phaser.GameObjects.Sprite;
   private moving = false;
 
-  /** Rider's feet above the ground while on horseback. */
+  /** Rider's feet above the ground while on horseback; sitting drops a little. */
   private lift() {
-    return this.horse ? HORSE_RIDER_LIFT : 0;
+    return this.horse ? HORSE_RIDER_LIFT : this.seated ? -SEAT_DROP : 0;
+  }
+
+  private seated = false;
+
+  /** Sits on a stool: the lower legs are cut off and the body drops onto the seat. */
+  setSeated(on: boolean) {
+    if (on === this.seated) return;
+    this.seated = on;
+    if (on) this.sprite.setCrop(0, 0, this.sprite.frame.width, this.sprite.frame.height - SEAT_CROP);
+    else this.sprite.setCrop();
+    this.setPosition(this.rawX, this.rawY);
   }
 
   /** Puts the character on a horse (or takes them off). */

@@ -3,6 +3,7 @@ import { getStateCallbacks, type Room } from "colyseus.js";
 import {
   castSpot,
   darkness,
+  type TownPlace,
   sanitizeLook,
   Direction,
   RARITY_COLORS,
@@ -200,6 +201,8 @@ const HOSTILE_COLOR = 0xffe14d;
 const ENEMY_PLAYER_COLOR = 0xff5a5a;
 /** A correction bigger than this is a teleport (respawn), not a prediction error: don't blend. */
 const TELEPORT_DISTANCE = 32;
+/** NpcDef.facing to a sprite direction. */
+const FACING = { up: Direction.Up, down: Direction.Down, left: Direction.Left, right: Direction.Right } as const;
 
 interface Point {
   x: number;
@@ -321,6 +324,8 @@ export class WorldScene extends Phaser.Scene {
 
   private targetId: string | null = null;
   private targetRing!: Phaser.GameObjects.Graphics;
+  /** A guard's directions: an arrow by our feet pointing there, and a mark on the minimap. */
+  private guide: { place: TownPlace; until: number; arrow: Phaser.GameObjects.Graphics } | null = null;
 
   /** Inputs sent to the server but not yet acknowledged via `lastSeq`. */
   private pendingInputs: InputMessage[] = [];
@@ -352,6 +357,7 @@ export class WorldScene extends Phaser.Scene {
     resetLights(this);
     if (decor) drawDecor(this, decor);
     this.nightLayer = new NightLayer(this);
+    this.nightLayer.setDarkness(this.zone.dim ?? 0);
     this.fishingLines = new FishingLines(this);
     setMinimapZone(this.map, this.zone.name);
 
@@ -377,6 +383,8 @@ export class WorldScene extends Phaser.Scene {
     for (const npc of this.zone.npcs.map((id) => NPCS[id])) {
       const view = new EntityView(this, npc.x, npc.y, npc.appearance, npc.name, "#7fe3ff");
       this.npcViews.set(npc.id, view);
+      if (npc.facing) view.setAnimation(FACING[npc.facing], false);
+      if (npc.seated) view.setSeated(true);
       view.sprite.setInteractive({ cursor: cursor("talk") });
       view.sprite.on("pointerdown", (pointer: Phaser.Input.Pointer) => !pointer.event.altKey && this.walkTo(() => npc, NPC_RANGE - 4, () => this.talkTo(npc)));
       const marker = this.add
@@ -400,6 +408,8 @@ export class WorldScene extends Phaser.Scene {
       view.sprite.setInteractive({ cursor: cursor("portal") });
       view.sprite.on("pointerdown", (pointer: Phaser.Input.Pointer) => !pointer.event.altKey && this.walkTo(() => def, PORTAL_RANGE - 4, () => this.usePortal(def)));
       if (def.style === "gate") gateAura(this, def);
+      // A doorway is drawn by the building itself; only its name shows.
+      if (def.style === "door") view.sprite.setAlpha(0);
       this.portals.push({ def, view });
     }
 
@@ -560,6 +570,7 @@ export class WorldScene extends Phaser.Scene {
       openShop: (npc) => this.openNpcWindow(npc),
       openUpgrade: (npc) => this.openNpcWindow(npc),
       readFortune: (npcId) => this.room.send(Msg.ReadFortune, { npcId }),
+      showWay: (place) => this.showWay(place),
       playerLevel,
       playerClass: () => this.local?.state.cls ?? "warrior",
       changed: () => this.refreshNpcMarkers(),
@@ -697,7 +708,7 @@ export class WorldScene extends Phaser.Scene {
     $(this.room.state).listen("cleared", syncPortals);
     $(this.room.state).listen("clock", (minute: number) => {
       hud.setClock(minute);
-      this.nightLayer.setDarkness(this.zone.outdoor ? darkness(minute) : 0);
+      this.nightLayer.setDarkness(Math.max(this.zone.outdoor ? darkness(minute) : 0, this.zone.dim ?? 0));
     });
 
     $(this.room.state).loot.onAdd((loot: LootView, lootId: string) => {
@@ -1029,11 +1040,6 @@ export class WorldScene extends Phaser.Scene {
     closeUpgrade();
     closeStorage();
     closeNpcDialog();
-    if (npc.role === "guard") {
-      const view = this.npcViews.get(npc.id);
-      if (view) this.speechBubble(view, npc.greeting);
-      return;
-    }
     if (openNpcDialog(npc)) return;
     this.openNpcWindow(npc);
   }
@@ -1719,11 +1725,43 @@ export class WorldScene extends Phaser.Scene {
     const now = performance.now();
     this.pings = this.pings.filter((p) => p.until > now);
     for (const ping of this.pings) dots.push({ x: ping.x, y: ping.y, kind: "ping" });
+    if (this.guide) dots.push({ x: this.guide.place.x, y: this.guide.place.y, kind: "guide" });
     drawMinimap(dots);
+  }
+
+  /** A guard pointed the way: an arrow at our feet and a mark on the minimap until we get there. */
+  private showWay(place: TownPlace) {
+    this.guide?.arrow.destroy();
+    this.guide = null;
+    // Guards in the keep describe the way from its door; the arrow only makes sense in town.
+    if (this.zone.id !== "town") return;
+    const arrow = this.add.graphics().setDepth(1e7 + 1);
+    arrow.fillStyle(0x000000, 0.6).fillTriangle(9, 0, -4, -6, -4, 6);
+    arrow.fillStyle(0xffd43b).fillTriangle(7, 0, -3, -4, -3, 4);
+    this.guide = { place, until: performance.now() + 90_000, arrow };
+    this.tweens.add({ targets: arrow, alpha: 0.55, duration: 500, yoyo: true, repeat: -1, ease: "Sine.easeInOut" });
+  }
+
+  private updateGuide() {
+    const guide = this.guide;
+    const local = this.local;
+    if (!guide || !local) return;
+    const dx = guide.place.x - local.view.x;
+    const dy = guide.place.y - local.view.y;
+    const arrived = Math.hypot(dx, dy) < TILE_SIZE * 3;
+    if (arrived || performance.now() > guide.until) {
+      if (arrived) hud.showMessage(`${guide.place.name} burada`, "info", "#ffd43b");
+      guide.arrow.destroy();
+      this.guide = null;
+      return;
+    }
+    const angle = Math.atan2(dy, dx);
+    guide.arrow.setPosition(Math.round(local.view.x + Math.cos(angle) * 18), Math.round(local.view.y - 6 + Math.sin(angle) * 14)).setRotation(angle);
   }
 
   update(time: number, delta: number) {
     this.nightLayer.update(time);
+    this.updateGuide();
     if (time >= this.nextMinimapAt) {
       this.nextMinimapAt = time + 100;
       this.refreshMinimap();

@@ -4536,3 +4536,48 @@ body.touch #chat {
     right: 8px;
   }
 }
+
+/* ---- Guards: asking the way; masters: advice ---- */
+
+.npc-answer {
+  margin: 4px 0 8px;
+  padding: 6px 8px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-style: italic;
+  color: #f2e6c4;
+  background: #0007;
+  border-left: 2px solid var(--gold-dark);
+}
+
+.npc-ways-title {
+  margin: 6px 0 4px;
+  font-family: var(--font-title);
+  font-size: 15px;
+  color: var(--gold-light);
+}
+
+.npc-ways {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 3px;
+  margin-bottom: 8px;
+}
+
+.npc-ways button {
+  padding: 3px 6px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  text-align: left;
+  color: var(--text);
+  background: #0006;
+  border: 1px solid #6e532077;
+  border-radius: 3px;
+  box-shadow: none;
+}
+
+.npc-ways button:hover {
+  color: var(--gold-light);
+  border-color: var(--gold-dark);
+  background: #2a1d0f;
+}

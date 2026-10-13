@@ -5,6 +5,7 @@ import { BIG_DUNGEON_IDS, BIG_DUNGEONS, bigDungeonEntrance, type BigDungeonId } 
 import { CAVE_BRIDGE, CAVE_ENTRANCE_TILE, CAVE_TORCHES, generateWorldMap, type WorldMap } from "./map";
 import { buildTown, TOWN_SPOTS } from "./town";
 import { buildHarbor, HARBOR_SPOTS } from "./harbor";
+import { buildKeepHall, KEEP_HALL_SPOTS } from "./keepHall";
 
 // A zone is one map with its own room on the server: the main town, the open hunting
 // grounds, a shared PvP arena, or an instanced dungeon that every party gets a private copy of.
@@ -12,12 +13,13 @@ import { buildHarbor, HARBOR_SPOTS } from "./harbor";
 // there and you log back in where you left. Every other zone is entered through a portal
 // and leaving it puts you back at the portal you used.
 
-export type ZoneId = "town" | "world" | "forest" | "harbor" | "goblin_cave" | "jack_lair" | "pvp_arena" | BigDungeonId;
+export type ZoneId = "town" | "world" | "forest" | "harbor" | "keep_hall" | "goblin_cave" | "jack_lair" | "pvp_arena" | BigDungeonId;
 
 /** New characters start here; the zone anyone can join without a portal ticket. */
 export const HOME_ZONE: ZoneId = "town";
 
-export type PortalStyle = "cave" | "exit" | "cursed" | "pvp" | "gate";
+/** "door": a doorway in a building; nothing is drawn, only the name above it. */
+export type PortalStyle = "cave" | "exit" | "cursed" | "pvp" | "gate" | "door";
 
 export interface PortalDef {
   id: string;
@@ -53,6 +55,8 @@ export interface ZoneDef {
   fishing?: boolean;
   /** Under the sky: gets dark at night, and its mobs grow stronger then. */
   outdoor?: boolean;
+  /** Indoors: always this dark (0..1), so fires and torches glow. */
+  dim?: number;
   npcs: string[];
   portals: PortalDef[];
   /** Shown on the death screen. */
@@ -126,6 +130,15 @@ export const ZONES: Record<ZoneId, ZoneDef> = {
         style: "gate",
         auto: true,
         arriveAt: HARBOR_SPOTS.fromTown,
+      },
+      {
+        id: "town_keep_door",
+        ...TOWN_SPOTS.keepDoor,
+        to: "keep_hall",
+        label: "İç Kale",
+        style: "door",
+        auto: true,
+        arriveAt: KEEP_HALL_SPOTS.fromTown,
       },
       {
         id: "pvp_arena_entrance",
@@ -207,6 +220,25 @@ export const ZONES: Record<ZoneId, ZoneDef> = {
       { id: "harbor_town_gate", ...HARBOR_SPOTS.townGate, to: "town", label: "Ana Merkez", style: "gate", auto: true, arriveAt: TOWN_SPOTS.fromHarbor },
     ],
   },
+  keep_hall: {
+    id: "keep_hall",
+    name: "İç Kale",
+    instanced: false,
+    persistent: true,
+    dim: 0.45,
+    npcs: [
+      "master_warrior",
+      "master_mage",
+      "master_guardian",
+      "master_priest",
+      "master_rogue",
+      "master_necromancer",
+      "guard_hall_west",
+      "guard_hall_east",
+    ],
+    respawnText: "Kalenin büyük salonunda yeniden doğacaksın.",
+    portals: [{ id: "keep_hall_door", ...KEEP_HALL_SPOTS.door, to: "town", label: "Ana Merkez", style: "door", auto: true, arriveAt: TOWN_SPOTS.fromKeep }],
+  },
   pvp_arena: {
     id: "pvp_arena",
     outdoor: true,
@@ -272,6 +304,7 @@ const BUILDERS: Record<ZoneId, () => DungeonLayout> = {
   }),
   forest: buildForest,
   harbor: buildHarbor,
+  keep_hall: buildKeepHall,
   goblin_cave: buildGoblinCave,
   jack_lair: buildJackLair,
   pvp_arena: buildPvpArena,

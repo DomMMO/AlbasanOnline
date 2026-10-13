@@ -55,7 +55,21 @@ export type Decor =
   /** A sailing ship moored in the water, bow to the east. */
   | { kind: "ship"; tx: number; ty: number; w: number; h: number }
   /** A striped lighthouse on rocks, its lamp sweeping at night. */
-  | { kind: "lighthouse"; tx: number; ty: number; w: number; h: number };
+  | { kind: "lighthouse"; tx: number; ty: number; w: number; h: number }
+  /** Indoors: a 2x2 stone-ringed fire pit with a big fire. */
+  | { kind: "firepit"; tx: number; ty: number }
+  /** Indoors: a woven rug lying on the floor (walk-through). */
+  | { kind: "rug"; tx: number; ty: number; w: number; h: number; color: number }
+  /** Indoors: a long wooden table with mugs and candles, or with a campaign map. */
+  | { kind: "table"; tx: number; ty: number; w: number; h: number; map?: boolean }
+  /** Indoors: a bookshelf against the back wall. */
+  | { kind: "shelf"; tx: number; ty: number; w: number }
+  /** Indoors: a weapon rack with swords, axes and spears against the back wall. */
+  | { kind: "rack"; tx: number; ty: number; w: number }
+  /** Indoors: a three-legged stool someone sits on. */
+  | { kind: "stool"; tx: number; ty: number }
+  /** Indoors: a plank bench along a table. */
+  | { kind: "bench"; tx: number; ty: number; w: number };
 
 /** An area where a kind of mob lives and respawns (tile coordinates). */
 export interface SpawnZone {

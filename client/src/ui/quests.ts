@@ -1,6 +1,7 @@
 import {
   classOf,
   classQuestItems,
+  directionTo,
   ITEMS,
   NPCS,
   QUESTS,
@@ -8,7 +9,11 @@ import {
   questReady,
   questsOfNpc,
   RARITY_COLORS,
+  TOWN_PLACES,
+  TOWN_SPOTS,
+  ZONES,
   type NpcDef,
+  type TownPlace,
   type QuestDef,
   type QuestLogEvent,
   type QuestProgress,
@@ -38,6 +43,8 @@ export interface QuestActions {
   openUpgrade(npc: NpcDef): void;
   /** Ayşe Teyze: ask for today's fortune. */
   readFortune(npcId: string): void;
+  /** A guard told us the way: point there (arrow and minimap mark, when in town). */
+  showWay(place: TownPlace): void;
   playerLevel(): number;
   playerClass(): string;
   /** Quest state changed: NPC markers need redrawing. */
@@ -55,6 +62,8 @@ let completing: string | null = null;
 let showingCompletion = false;
 /** Today's fortune as told in the open dialog (null = not asked in this conversation). */
 let fortune: { text: string; good: boolean } | null = null;
+/** A guard's directions or a master's advice, shown under the greeting. */
+let answer: string | null = null;
 let initialised = false;
 
 export function initQuests(questActions: QuestActions) {
@@ -109,9 +118,11 @@ export function npcMarker(npcId: string): { text: string; color: string } | null
 
 /** NPCs with quests open the conversation window first; returns false if this one has none. */
 export function openNpcDialog(target: NpcDef): boolean {
-  if (questsOfNpc(target.id).length === 0 && !target.fortuneTeller) return false;
+  const talks = target.role === "guard" || target.role === "master";
+  if (questsOfNpc(target.id).length === 0 && !target.fortuneTeller && !talks) return false;
   npc = target;
   fortune = null;
+  answer = null;
   viewing = null;
   completing = null;
   showingCompletion = false;
@@ -185,6 +196,8 @@ function renderDialog() {
   const target = npc;
   const nodes: HTMLElement[] = [el("p", "npc-greeting", target.greeting)];
   if (fortune) nodes.push(el("p", `npc-fortune ${fortune.good ? "good" : "bad"}`, fortune.text));
+  if (answer) nodes.push(el("p", "npc-answer", answer));
+  if (target.role === "guard") nodes.push(el("div", "npc-ways-title", "Yol sor"), wayButtons(target));
   const rows = questRows(target);
   if (rows.length > 0) {
     const list = el("div", "npc-quests");
@@ -205,9 +218,37 @@ function renderDialog() {
   if (target.role === "merchant") buttons.append(button("Alışveriş", () => actions.openShop(target)));
   if (target.role === "blacksmith") buttons.append(button("Eşya Yükselt", () => actions.openUpgrade(target)));
   if (target.fortuneTeller && !fortune) buttons.append(button("Falıma bak", () => actions.readFortune(target.id)));
+  if (target.advice?.length) buttons.append(button(answer ? "Bir öğüt daha" : "Öğüt iste", () => giveAdvice(target)));
   buttons.append(button("Hoşça kal", closeNpcDialog, "secondary"));
   nodes.push(buttons);
   dialogBody.replaceChildren(...nodes);
+}
+
+/** "Silahçı nerede?" buttons; the answer is worked out from where the guard stands. */
+function wayButtons(guard: NpcDef): HTMLElement {
+  const grid = el("div", "npc-ways");
+  // Guards inside the keep give the way from its front door.
+  const inTown = ZONES.town.npcs.includes(guard.id);
+  const from = inTown ? guard : TOWN_SPOTS.fromKeep;
+  for (const place of TOWN_PLACES) {
+    if (!inTown && place.id === "keep") continue;
+    grid.append(
+      button(`${place.name} nerede?`, () => {
+        const { compass, steps } = directionTo(from, place);
+        const where = steps <= 3 ? "Hemen şurada, birkaç adım ötede." : `${inTown ? "Buradan" : "Kaleden çıkınca"} ${compass}, aşağı yukarı ${steps} adım.`;
+        answer = `${place.name}: ${where} ${place.hint}`;
+        renderDialog();
+        actions.showWay(place);
+      }),
+    );
+  }
+  return grid;
+}
+
+function giveAdvice(master: NpcDef) {
+  const lines = master.advice!.filter((line) => line !== answer);
+  answer = lines[Math.floor(Math.random() * lines.length)] ?? master.advice![0];
+  renderDialog();
 }
 
 function objectiveLines(quest: QuestDef, entry: QuestProgress | undefined): HTMLElement[] {
