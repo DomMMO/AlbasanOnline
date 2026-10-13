@@ -25,6 +25,13 @@ export function openChat() {
   setActive(true);
 }
 
+/** Opens the chat input with text already typed in (e.g. "/f Name " to whisper). */
+export function openChatWith(text: string) {
+  setActive(true);
+  input.value = text;
+  input.setSelectionRange(text.length, text.length);
+}
+
 export function isChatActive() {
   return !input.hidden;
 }

@@ -172,6 +172,23 @@ const MIGRATIONS: { version: number; name: string; sql: string }[] = [
       ALTER TABLE characters ADD COLUMN life_skills JSONB NOT NULL DEFAULT '{}';
     `,
   },
+  {
+    version: 13,
+    name: "friends",
+    sql: `
+      -- One row per direction. A request is a single 'pending' row from the sender; accepting
+      -- it turns that row 'accepted' and adds the 'accepted' row the other way.
+      CREATE TABLE friendships (
+        character_id INT NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
+        friend_id    INT NOT NULL REFERENCES characters(id) ON DELETE CASCADE,
+        status       TEXT NOT NULL CHECK (status IN ('pending', 'accepted')),
+        created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+        PRIMARY KEY (character_id, friend_id),
+        CHECK (character_id <> friend_id)
+      );
+      CREATE INDEX friendships_friend ON friendships (friend_id);
+    `,
+  },
 ];
 
 export async function runMigrations() {

@@ -4418,3 +4418,121 @@ body.touch #chat {
     height: 46px;
   }
 }
+
+/* ---- Friends (O) ---- */
+
+#friends-window {
+  top: 70px;
+  right: 230px;
+  width: min(300px, calc(100vw - 16px));
+  max-height: calc(100vh - 160px);
+  display: flex;
+  flex-direction: column;
+}
+
+#friends-add {
+  display: flex;
+  gap: 4px;
+  margin: 2px 0 6px;
+}
+
+#friends-name {
+  flex: 1;
+  min-width: 0;
+  padding: 3px 6px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text);
+  background: #0c0805;
+  border: 1px solid var(--gold-dark);
+  border-radius: 2px;
+  box-shadow: inset 0 1px 3px #000;
+}
+
+#friends-add button {
+  padding: 2px 12px;
+  font-size: 13px;
+}
+
+#friends-body {
+  min-height: 60px;
+}
+
+.friends-section {
+  margin: 6px 0 3px;
+  font-family: var(--font-title);
+  font-weight: normal;
+  font-size: 15px;
+  color: var(--gold-light);
+}
+
+.friend-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 5px;
+  margin-bottom: 3px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  background: #0006;
+  border: 1px solid #6e532055;
+  border-radius: 3px;
+}
+
+.friend-row.offline {
+  opacity: 0.55;
+}
+
+.friend-dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #555;
+  box-shadow: inset 0 0 0 1px #000;
+}
+
+.friend-row.online .friend-dot {
+  background: #4cd964;
+  box-shadow: 0 0 4px #4cd964;
+}
+
+.friend-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.friend-info {
+  color: var(--muted);
+  font-size: 11px;
+  margin-left: 4px;
+}
+
+.friend-row button {
+  flex: none;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 5px;
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.friend-row button.remove {
+  color: var(--gold-light);
+  background: linear-gradient(180deg, #3a2a18, #1f150c);
+  border-color: var(--gold-dark);
+}
+
+.friends-empty {
+  margin: 8px 2px;
+  font-size: 12px;
+}
+
+@media (max-width: 760px) {
+  #friends-window {
+    right: 8px;
+  }
+}

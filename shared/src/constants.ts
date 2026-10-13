@@ -44,6 +44,8 @@ export const COMBAT_TIMEOUT_MS = 5000;
 // ---- Party -------------------------------------------------------------------
 
 export const MAX_PARTY_SIZE = 5;
+/** Friends plus requests sent, per character. */
+export const MAX_FRIENDS = 50;
 /** Party members this close to a kill share its XP. */
 export const PARTY_XP_RANGE = TILE_SIZE * 40;
 /** XP bonus per extra member who shares a kill (grouping is rewarded). */

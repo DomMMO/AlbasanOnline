@@ -48,6 +48,7 @@ export const BINDABLE: { group: string; actions: [Action, string][] }[] = [
       [Action.Skills, "Yetenekler"],
       [Action.PassiveTree, "Pasif ağaç"],
       [Action.QuestLog, "Görev günlüğü"],
+      [Action.Friends, "Arkadaşlar"],
       [Action.Leaderboard, "PvP sıralaması"],
       [Action.Minimap, "Mini harita"],
     ],

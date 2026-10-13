@@ -39,6 +39,10 @@ import {
   type ChatEvent,
   type PvpKillEvent,
   type PartyInviteEvent,
+  type FriendListEvent,
+  type FriendRemoveMessage,
+  type FriendRequestMessage,
+  type FriendRespondMessage,
   type PartyUpdateEvent,
   type DuelInviteEvent,
   type DuelStateEvent,
@@ -88,7 +92,7 @@ import {
 } from "../../../shared/src";
 import { EntityView, type SwingKind } from "../entities/EntityView";
 import { setDollLook, updateDoll } from "../ui/doll";
-import { addChatMessage, initChat } from "../ui/chat";
+import { addChatMessage, initChat, openChatWith } from "../ui/chat";
 import { addKillFeed, initLeaderboard, setPvpStats, toggleLeaderboard } from "../ui/pvp";
 import { initParty, renderParty, showInvite } from "../ui/party";
 import { initDuel, showDuelInvite } from "../ui/duel";
@@ -114,6 +118,7 @@ import { setAuras } from "../ui/auras";
 import { initPotions, refreshPotionKeys, render as renderPotions, startPotionCooldown, usePotion } from "../ui/potions";
 import { isTouchDevice } from "../ui/touch";
 import { initSkills, setSkillRanks, skillRank, toggleSkills } from "../ui/skills";
+import { initFriends, isFriendOrPending, onFriendsChange, setFriendList, toggleFriends } from "../ui/friends";
 import { hideSkillTooltip, showSkillTooltip } from "../ui/skillTooltip";
 import { hideTooltip, showItemTooltip } from "../ui/tooltip";
 import { initDamageMeter, recordCombat } from "../ui/damageMeter";
@@ -440,6 +445,7 @@ export class WorldScene extends Phaser.Scene {
     registerWindow("quest-log", () => toggleQuestLog(false));
     registerWindow("passive-window", () => togglePassives(false));
     registerWindow("skills-window", () => toggleSkills(false));
+    registerWindow("friends-window", () => toggleFriends(false));
     registerWindow("leaderboard", () => void toggleLeaderboard(false));
     registerWindow("stall-browse", closeBrowse);
     registerWindow("storage-window", closeStorage);
@@ -456,6 +462,7 @@ export class WorldScene extends Phaser.Scene {
     this.controls.onPressed(Action.QuestLog, () => toggleQuestLog());
     this.controls.onPressed(Action.PassiveTree, () => togglePassives());
     this.controls.onPressed(Action.Skills, () => toggleSkills());
+    this.controls.onPressed(Action.Friends, () => toggleFriends());
     this.controls.onPressed(Action.Potion1, () => usePotion(0));
     this.controls.onPressed(Action.Potion2, () => usePotion(1));
     this.controls.onPressed(Action.Minimap, () => toggleMinimap());
@@ -465,6 +472,15 @@ export class WorldScene extends Phaser.Scene {
     HOTBAR_ACTIONS.forEach((action, index) => this.controls.onPressed(action, () => this.useHotbar(index)));
 
     initChat((text) => this.room.send(Msg.Chat, { text }));
+    initFriends({
+      request: (name) => this.room.send(Msg.FriendRequest, { name } satisfies FriendRequestMessage),
+      respond: (characterId, accept) => this.room.send(Msg.FriendRespond, { characterId, accept } satisfies FriendRespondMessage),
+      remove: (characterId) => this.room.send(Msg.FriendRemove, { characterId } satisfies FriendRemoveMessage),
+      whisper: (name) => openChatWith(`/f ${name} `),
+      invite: (name) => this.room.send(Msg.Chat, { text: `/davet ${name}` }),
+    });
+    const stopFriends = onFriendsChange(() => this.refreshTargetFrame());
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, stopFriends);
     initParty({
       select: (member) => {
         if (member.sessionId && this.players.has(member.sessionId)) this.selectTarget(member.sessionId, false);
@@ -828,6 +844,7 @@ export class WorldScene extends Phaser.Scene {
     this.room.onMessage(Msg.ChatMessage, (event: ChatEvent) => this.showChat(event));
     this.room.onMessage(Msg.PvpKill, (event: PvpKillEvent) => addKillFeed(event, this.local?.state.name ?? ""));
     this.room.onMessage(Msg.PartyInvite, (event: PartyInviteEvent) => showInvite(event.from));
+    this.room.onMessage(Msg.FriendList, (event: FriendListEvent) => setFriendList(event));
     this.room.onMessage(Msg.PartyUpdate, (event: PartyUpdateEvent) => this.onPartyUpdate(event));
     this.room.onMessage(Msg.DuelInvite, (event: DuelInviteEvent) => showDuelInvite(event.from));
     this.room.onMessage(Msg.DungeonInvite, (event: DungeonInviteEvent) => showDungeonInvite(event.from, event.dungeon));
@@ -1370,6 +1387,7 @@ export class WorldScene extends Phaser.Scene {
         onInvite: canInvite ? () => this.room.send(Msg.Chat, { text: `/davet ${name}` }) : undefined,
         onDuel: canDuel ? () => this.room.send(Msg.Chat, { text: `/duello ${name}` }) : undefined,
         onTrade: !this.isEnemyPlayer(this.targetId!) && !isTradeOpen() ? () => this.room.send(Msg.Chat, { text: `/takas ${name}` }) : undefined,
+        onFriend: isFriendOrPending(name) ? undefined : () => this.room.send(Msg.FriendRequest, { name } satisfies FriendRequestMessage),
       });
       return;
     }

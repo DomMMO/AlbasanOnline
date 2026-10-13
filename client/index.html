@@ -100,6 +100,7 @@
         <div class="target-actions">
           <button id="target-invite" type="button" tabindex="-1" hidden>Gruba davet et</button>
           <button id="target-trade" type="button" tabindex="-1" hidden>Takas</button>
+          <button id="target-friend" type="button" tabindex="-1" hidden>Arkadaş ekle</button>
           <button id="target-duel" type="button" tabindex="-1" hidden>Düello</button>
         </div>
       </div>
@@ -217,7 +218,7 @@
         <div id="xp-bar" class="bar"><div id="xp-fill" class="fill"></div><span id="xp-text"></span></div>
       </div>
 
-      <div id="help">Tab: hedef · Sol tık: saldır / al / konuş / portal · 1-0: skill (K'dan sürükle) · Q / R: iksir · I: envanter · K: yetenekler · P: pasif ağaç · T: şehir portalı · J: görevler · M: harita · E: al/konuş/portal · Enter: sohbet · L: PvP sıralaması · /takas İsim: takas · Esc: menü</div>
+      <div id="help">Tab: hedef · Sol tık: saldır / al / konuş / portal · 1-0: skill (K'dan sürükle) · Q / R: iksir · I: envanter · K: yetenekler · P: pasif ağaç · T: şehir portalı · J: görevler · O: arkadaşlar · H: ata bin (Shift: dörtnala) · M: harita · E: al/konuş/portal · Enter: sohbet · L: PvP sıralaması · /takas İsim: takas · Esc: menü</div>
 
       <div id="inventory-window" class="window" hidden>
         <div class="window-title"><span>Karakter</span><button id="inventory-close" class="close" tabindex="-1">×</button></div>
@@ -332,6 +333,15 @@
         <p class="window-hint">Sağ tık ya da sürükle: envanter ↔ depo. Depo bu karaktere aittir, eşyaların burada güvende.</p>
       </div>
 
+      <div id="friends-window" class="window" hidden>
+        <div class="window-title"><span>Arkadaşlar</span><button id="friends-close" class="close" tabindex="-1">×</button></div>
+        <form id="friends-add" autocomplete="off">
+          <input id="friends-name" maxlength="16" placeholder="Karakter adı" />
+          <button type="submit" tabindex="-1">Ekle</button>
+        </form>
+        <div id="friends-body" class="window-scroll"></div>
+      </div>
+
       <div id="trade-window" class="window" hidden>
         <div class="window-title"><span id="trade-title">Takas</span><button id="trade-close" class="close" tabindex="-1">×</button></div>
         <div class="trade-sides">
@@ -409,6 +419,8 @@
           <tr><td>E</td><td>Sandık al, NPC ile konuş, portal, tezgâha bak</td></tr>
           <tr><td>I / C</td><td>Karakter ve envanter</td></tr>
           <tr><td>J</td><td>Görev günlüğü</td></tr>
+          <tr><td>O</td><td>Arkadaşlar</td></tr>
+          <tr><td>H · Shift</td><td>Ata bin / in · atta basılı tut: dörtnala</td></tr>
           <tr><td>L</td><td>PvP sıralaması</td></tr>
           <tr><td>M</td><td>Mini harita aç/kapat</td></tr>
           <tr><td>Enter</td><td>Sohbet</td></tr>
@@ -418,6 +430,7 @@
           <tr><td>/davet İsim</td><td>Gruba davet et</td></tr>
           <tr><td>/ayril · /at İsim</td><td>Gruptan ayrıl · at (lider)</td></tr>
           <tr><td>/duello İsim</td><td>Yanındaki oyuncuyu düelloya davet et</td></tr>
+          <tr><td>/arkadas İsim</td><td>Arkadaşlık isteği gönder</td></tr>
         </table>
         <button type="button" class="secondary menu-back">Geri</button>
       </div>
