@@ -139,6 +139,8 @@ export class EntityView {
   }
 
   /** Shows the equipped weapon (humanoids only). Rebuilt only when the item or glow tier changes. */
+  private weaponHidden = false;
+
   setWeapon(defId: string, enhance: number) {
     const key = defId ? `${defId}:${glowTier(enhance)}` : "";
     if (key === this.weaponKey) return;
@@ -148,7 +150,15 @@ export class EntityView {
     this.weapon?.destroy();
     this.weapon = defId ? new WeaponView(this.sprite.scene, defId, enhance) : undefined;
     this.weapon?.setAlpha(this.sprite.alpha);
+    this.weapon?.setVisible(!this.weaponHidden);
     this.setPosition(this.rawX, this.rawY);
+  }
+
+  /** Puts the weapon away for a while (fishing: the hands hold the rod). */
+  setWeaponHidden(hidden: boolean) {
+    if (hidden === this.weaponHidden) return;
+    this.weaponHidden = hidden;
+    this.weapon?.setVisible(!hidden);
   }
 
   /** Attack animation; with a target it also turns to face it and draws a slash towards it. */
@@ -299,7 +309,7 @@ export class EntityView {
     this.sprite.setVisible(visible);
     this.label?.setVisible(visible);
     this.hpBar.setVisible(visible && this.hpBarVisible);
-    this.weapon?.setVisible(visible);
+    this.weapon?.setVisible(visible && !this.weaponHidden);
   }
 
   private dimmed = false;

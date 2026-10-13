@@ -32,7 +32,28 @@ export type Decor =
   /** A wooden fence along these tiles (they are solid); each post joins its neighbours. */
   | { kind: "fence"; tiles: { tx: number; ty: number }[] }
   /** A painted line around an area on the ground (the market square). */
-  | { kind: "groundFrame"; tx: number; ty: number; w: number; h: number; color: number };
+  | { kind: "groundFrame"; tx: number; ty: number; w: number; h: number; color: number }
+  /**
+   * Castle curtain wall on these (Tile.Wall) tiles: a raised wall walk with battlements
+   * on the side facing away from `inner` (the courtyard, tile bounds inclusive).
+   */
+  | { kind: "castleWall"; tiles: { tx: number; ty: number }[]; inner: { x0: number; y0: number; x1: number; y1: number } }
+  /** A square wall tower with a crenellated top and a flag. */
+  | { kind: "tower"; tx: number; ty: number; w: number; h: number; flag: number }
+  /** The wall walk spanning a gate passage (players walk under it), portcullis raised. */
+  | { kind: "gateArch"; tx: number; ty: number; w: number; h: number }
+  /** The inner keep: a tall stone hall with turrets and hanging banners. */
+  | { kind: "keep"; tx: number; ty: number; w: number; h: number; banner: number }
+  /** A drawbridge running east-west over the moat (deck tiles are Tile.Bridge). */
+  | { kind: "drawbridge"; tx: number; ty: number; w: number; h: number }
+  /** Small street clutter on a solid tile (well is 2x2). */
+  | { kind: "prop"; tx: number; ty: number; prop: "barrel" | "crate" | "hay" | "well" | "cart" }
+  /** A wooden pier over the water (deck tiles are Tile.Bridge): posts and shadow, no rails. */
+  | { kind: "pier"; tx: number; ty: number; w: number; h: number }
+  /** A sailing ship moored in the water, bow to the east. */
+  | { kind: "ship"; tx: number; ty: number; w: number; h: number }
+  /** A striped lighthouse on rocks, its lamp sweeping at night. */
+  | { kind: "lighthouse"; tx: number; ty: number; w: number; h: number };
 
 /** An area where a kind of mob lives and respawns (tile coordinates). */
 export interface SpawnZone {

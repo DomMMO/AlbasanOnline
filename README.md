@@ -52,7 +52,9 @@ En fazla 5 kişi. Bir oyuncuya tıklayıp hedef çerçevesindeki **Gruba davet e
 - **XP:** kesilen mob'un XP'si yakındaki grup üyeleri arasında bölüşülür, kişi başı %20 grup bonusuyla.
 - **Ganimet:** grubun kestiği mob'un sandığını tüm grup açabilir.
 - **Roller:** Savaşçı 2 kat tehdit üretir (tank), iyileştirme de tehdit üretir. Mob hedef alınınca can barında kime saldırdığı görünür ("→ İsim").
-- **Grup zindanı:** gruptan biri zindana girdiyse diğerleri aynı kapıdan girince aynı kopyaya düşer; gruba ait olmayan biri o kopyaya giremez. Her ek oyuncu için boss'ların canı %60 artar.
+- **Grup zindanı:** gruptan biri bir zindan kapısından girince, aynı bölgede kapıya 15 kareden yakın duran grup arkadaşlarına **"… zindanına girdi. Sen de grubunla girmek ister misin?"** kutusu çıkar (30 sn). **Katıl**'a basan kapıya yürümeden aynı kopyaya ışınlanır. Seviyesi yetmeyene sadece haber verilir. Kutuyu kaçıran ya da uzakta olan, aynı kapıdan girince yine aynı kopyaya düşer. Zindanın içinde (ör. Grukk'tan sonra Jack'in Mahzeni'ne geçerken) de aynısı olur.
+- Zindanın içindeyken grup kurulursa o kopya grubun olur; arkadaşların da girebilir. Gruba ait olmayan biri o kopyaya giremez. Her ek oyuncu için boss'ların canı %60 artar.
+- **Gruptan çıkan zindandan atılır:** grubun zindan kopyasındayken gruptan ayrılan ya da lider tarafından atılan oyuncu zindan çıkışından dışarı, girişin önüne gönderilir. Gitmezse 8 saniye sonra bağlantısı kesilir. Kalanlar zindanda devam eder (iki kişilik grupta biri ayrılıp grup dağılırsa, kalan oyuncu zindanda kalır).
 - **Arenada** grup arkadaşları düşman değildir; birbirinizi iyileştirebilirsiniz.
 
 Gruplar sunucu belleğinde tutulur: sunucu yeniden başlarsa dağılır.
@@ -106,6 +108,7 @@ Tuşlar **Esc → Menü → Tuş Atamaları** sayfasından değiştirilebilir: 1
 | M | Mini harita aç/kapat (sağ üst: sarı sen, yeşil grup arkadaşların, beyaz diğer oyuncular, mavi NPC, mor portal) |
 | /davet İsim, /p, /ayril | Grup |
 | /duello İsim | Yanındaki oyuncuyu düelloya davet et |
+| /takas İsim | Yanındaki oyuncuya takas teklif et (ya da hedef çerçevesindeki **Takas**) |
 | I veya C | Karakter ve envanter penceresi |
 | E | Yakındaki sandığı aç / NPC ile konuş / portal / tezgâha bak |
 | Sağ tık (envanterde) | Kuşan, kullan; dükkân açıkken sat |
@@ -178,7 +181,7 @@ Başında sarı **!** olan NPC'nin verecek görevi var; sarı **?** teslim edile
 | Kırık Mühür (vadi) | 1-9 | Komutan Baran → Bilge Ozan → Avcı Ayla: balçık, jöle (İksirci'ye), kurt, post (Zırhçı'ya), goblin, kulak (Komutan'a), Grukk, Kabak Jack, Kara Orman'a yolculuk |
 | Kara Orman | 10-18 | Orman Bekçisi Tarık: kara kurt, zehirli bataklık, haydut, nişanlar (Komutan'a), iskelet, ork, boz ayı, Kara Murat |
 | Kırık Mühür (final) | 18 | İki mühür parçasını Bilge Ozan'a götür |
-| Akşam Yemeği | 3+ | **Ayşe Teyze** (meydanın doğusu): 5 Kurt Eti + 3 Balçık Jölesi topla, güveci Komutan Baran'a ve Bilge Ozan'a götür; sonra her akşam tekrarlanabilir. Ödül: Ayşe Teyze'nin Güveci (150 can, iksirlerden ayrı bekleme süresi). Metin2'nin meşhur akşam yemeği görevine selam. |
+| Akşam Yemeği | 3+ | **Ayşe Teyze** (meydanın güneydoğusundaki evinin önü): 5 Kurt Eti + 3 Balçık Jölesi topla, güveci Komutan Baran'a ve Bilge Ozan'a götür; sonra her akşam tekrarlanabilir. Ödül: Ayşe Teyze'nin Güveci (150 can, iksirlerden ayrı bekleme süresi). Metin2'nin meşhur akşam yemeği görevine selam. |
 
 Görevler ve hikaye metinleri `shared/src/data/quests.ts` içindedir; sunucu tarafı `server/src/game/quests.ts`. İlerleme `character_quests` tablosunda saklanır.
 
@@ -330,7 +333,7 @@ Kendinden **5 ya da daha çok seviye yüksek** bir oyuncuya yaratıklar saldırm
 
 ### Ana Merkez (şehir)
 
-Surlarla çevrili şehir; mob yok, PvP yok. Ortada çeşmeli meydan, kuzey caddesinde dükkânlar, güneyde pazar meydanı var.
+Hendekle ve iki kat kalın, mazgallı surla çevrili bir kale şehri; mob yok, PvP yok. Köşelerde ve surların ortasında bayraklı burçlar var. Tek giriş doğudaki **kale kapısı**: iki burcun arasındaki geçitten ve hendeğin üstündeki asma köprüden geçilir (geçitte surun altından yürürsün). Kuzeyde taret ve bayraklarıyla **İç Kale** var; kapısında iki muhafız bekler. Ortada oval, çeşmeli bir meydan, güneyde pazar meydanı var. Dükkânlar sıraya dizilmez, kıvrılan sokaklara dağılmıştır: silahçı kapı caddesinde, iksirci arka sokakta, parşömenci İç Kale'nin yanında, demirci batıdaki demirci sokağında, kuyumcu pazara inen yolda, depo pazarın doğusunda. Aralarda evler, kışla, kuyu, fıçılar, sandıklar, saman balyaları ve fenerler var; kuzeydoğudaki kumlu meydanda Kan Arenası portalı durur.
 
 | NPC | Satar / yapar |
 | --- | --- |
@@ -340,13 +343,39 @@ Surlarla çevrili şehir; mob yok, PvP yok. Ortada çeşmeli meydan, kuzey cadde
 | **İksirci Zehra** | Can ve mana iksirleri |
 | **Demirci Hasan** | Ekipman yükseltme (aşağıya bakın) |
 | **Kuyumcu Selin** | Bakır ve gümüş yüzük, kolye, küpe |
-| **Komutan Baran** (doğu kapısı) | Görevler |
+| **Depocu Hatice** (pazarın doğusundaki ambar) | Depo: eşya ve altın saklama (aşağıya bakın) |
+| **Komutan Baran** (kale kapısının içi) | Görevler |
 | **Bilge Ozan** (çeşmenin batısı) | Görevler, hikaye |
 
 - Her NPC'ye satış yapılabilir (dükkân açıkken envanterde sağ tık).
-- Doğu kapısından çıkan yolun sonunda **ışınlanma kapısı** var: içine yürüyünce Başlangıç Vadisi'ne ışınlanırsın (E'ye basmana gerek yok). Vadideki kavşakta da şehre dönüş kapısı var.
-- Kan Arenası portalı şehrin doğusunda, meydanın sağında.
+- Kapı ve İç Kale nöbetçileriyle konuşabilirsin (sadece laf atarlar).
+- Kale kapısından çıkan yolun sonunda **ışınlanma kapısı** var: içine yürüyünce Başlangıç Vadisi'ne ışınlanırsın (E'ye basmana gerek yok). Vadideki kavşakta da şehre dönüş kapısı var.
+- Kan Arenası portalı şehrin kuzeydoğusunda, kumlu arena meydanında.
 - Şehirde ölünemez; vadide ölürsen şehir kapısının yanında doğarsın.
+
+### Liman ve balık tutma
+
+Kale kapısından çıkan yolda, hendeğin hemen doğusunda **LİMAN** tabelalı bir patika güneye iner; sonundaki ışınlanma kapısı **Liman**'a götürür (içine yürümek yeter). Liman'da taş rıhtım, kumsal, üç ahşap iskele, demirli bir gemi, meyhane, ambar ve kayalıkların üstünde dönen ışıklı bir deniz feneri var. Mob ve PvP yok; Liman'da çıkış yaparsan Liman'da girersin.
+
+- **Balıkçı Rıfat** (orta iskelenin başı) **Olta** satar (250 altın). Balıklar her tüccara satılabilir.
+- Olta çantandayken suyun kenarına ya da bir iskeleye git: ekranda **Balık Tut** düğmesi belirir (ya da oltaya sağ tıkla). Şamandıra suya düşer ve her **6-12 saniyede** bir av gelir. **Yürüyene kadar devam eder**, yani AFK bırakılabilir. Yürümek, saldırmak ya da skill kullanmak, takas, pazar, ölüm, çantanın dolması oltayı toplar. **Oltayı Topla** ile de bırakırsın.
+- Av tablosu (`shared/src/data/fishing.ts`):
+
+| Av | Şans | Satış |
+| --- | --- | --- |
+| Hamsi | %37,19 | 2 |
+| İstavrit | %25 | 3 |
+| Levrek | %14 | 7 |
+| Çipura | %9 | 10 |
+| Deniz Kabuğu | %8,65 | 1 |
+| Lüfer | %4,5 | 18 |
+| Düşük Sınıf Yükseltme Parşömeni | %1 | |
+| **Altın Balık** | %0,5 | 300 |
+| **Orta Sınıf Yükseltme Parşömeni** | %0,1 | |
+| **Koruma Tılsımı** | %0,04 | |
+| **Yüksek Sınıf Yükseltme Parşömeni** | %0,02 | |
+
+Kalın olanlar çıkınca tüm sunucuya duyurulur. Başkalarının oltasını, şamandırasını ve av sıçramalarını da görürsün. Kod: `server/src/game/fishing.ts`, harita `shared/src/harbor.ts`.
 
 ### Pazar (oyuncudan oyuncuya satış)
 
@@ -360,6 +389,28 @@ Knight Online tarzı tezgâh. Şehrin güneyindeki **tuğla döşeli pazar meyda
 - Başkasının tezgâhına bakmak için oyuncuya/tabelaya tıkla ya da yanındayken **E**'ye bas. Yığılan item'larda adet seçilir.
 - Satışlar sunucuda kontrol edilir (mesafe, altın, yer, fiyat değişmiş mi) ve iki karakter **tek veritabanı işleminde** hemen kaydedilir; item kopyalanamaz ya da kaybolmaz. Tek parça item'lar (+N dahil) aynı kimlikle el değiştirir.
 - Tezgâhlar birbirine çok yakın kurulamaz. Pazar ayarları `shared/src/constants.ts` içindedir, pazar kodu `server/src/game/market.ts`.
+
+### Depo (Depocu Hatice)
+
+Knight Online tarzı depo. Pazarın doğusundaki ambarın önünde **Depocu Hatice**'ye tıkla ya da yanındayken **E**'ye bas; depo penceresi envanterle birlikte açılır.
+
+- 48 kutu ve ayrı bir **altın kasası** vardır. Depo bu karaktere aittir; içindekiler sadece Depocu'nun yanındayken alınıp konabilir.
+- Envanterde sağ tık: depoya koy. Depoda sağ tık: envantere al. İki pencere arasında sürükle-bırak da çalışır (yığılan item'lar birleşir).
+- Altın: miktarı yaz, **Koy** ya da **Al**'a bas.
+- Kuşanılmış item doğrudan depolanamaz, önce çıkarılır. Pazar tezgâhı ya da takas açıkken depo kullanılamaz.
+- Depo, karakterin geri kalanıyla aynı kayıtta saklanır (`items.container = 'storage'`, `characters.storage_gold`); bir item'ın yarısı depoda yarısı çantada kalamaz. Kod: `server/src/game/storage.ts`, `client/src/ui/storage.ts`.
+
+### Takas (oyuncudan oyuncuya)
+
+Yanındaki bir oyuncuya tıklayıp hedef çerçevesindeki **Takas**'a bas ya da sohbete `/takas İsim` yaz (en fazla 5 kare uzaktaki oyuncuya). Karşı tarafa Kabul/Reddet kutusu çıkar; kabul edince ikinize de takas penceresi açılır.
+
+1. Envanterde sağ tıkla ya da item'ı takas penceresine sürükle (en fazla 8 item, yığınlar bütün olarak gider); istersen altın yaz. Kendi teklifindeki bir item'a tıklarsan geri alırsın.
+2. **Teklifi Kilitle**: teklifin artık değişmez.
+3. İki taraf da kilitleyince **Takası Tamamla** belirir; ikiniz de onaylayınca takas olur.
+
+- Takas açıkken iki tarafın da envanteri kilitlidir (item kullanamaz, taşıyamaz, satamazsın). Böylece karşı tarafın gördüğü teklif değiştirilemez.
+- Takas sunucuda tekrar kontrol edilir (item'lar hâlâ orada mı, altın yetiyor mu, iki tarafta da yer var mı) ve iki karakter **tek veritabanı işleminde** kaydedilir. Yer yoksa hiçbir şey değişmez ve takas iptal olur. +N ve statlar korunur: item aynı kimlikle el değiştirir.
+- 8 kareden fazla uzaklaşırsanız, biriniz ölürse ya da bölgeden çıkarsa takas iptal olur. Görev eşyaları takas edilemez. Kod: `server/src/game/trade.ts`, `client/src/ui/trade.ts`.
 
 ### Başlangıç Vadisi (av sahası)
 
@@ -465,6 +516,8 @@ client/
 | 7.6 | Hikaye, görev zincirleri, Kara Orman (Sv 10-20) ve saha boss'u, takı slotları, 88 yeni item | ✅ |
 | 7.7 | Gece/gündüz döngüsü, gece yaratıkları, PoE tarzı rastgele item statları | ✅ |
 | 7.8 | Nekromant sınıfı, mücevherli pasif ağaç, Güç/Çeviklik/Zeka/Dayanıklılık, seviye farkında yaratıkların çekinmesi | ✅ |
+| 7.9 | Depo (Depocu), oyuncular arası takas, kale şehri: hendek, mazgallı surlar, burçlar, kale kapısı, İç Kale, dağınık sokaklar | ✅ |
+| 7.10 | Grupça zindana giriş daveti, gruptan çıkanın zindandan atılması, Liman bölgesi ve AFK balık tutma | ✅ |
 | 8 | Optimizasyon, anti-cheat, yedekleme, alfa testi | ⏳ |
 
 Faz 2 bitince oyun oynanabilir hale gelir. Sonraki fazlar bunun üzerine eklenir.

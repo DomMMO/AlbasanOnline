@@ -60,7 +60,7 @@ async function withInventory<T>(characterId: number, change: (inv: InventoryData
   }
   const record = await loadCharacterById(characterId);
   if (!record) throw new GmError("Karakter bulunamadı", 404);
-  const inv = fromStored(record.gold, record.items);
+  const inv = fromStored(record.gold, record.items, record.storageGold);
   const result = change(inv);
   await saveInventory(characterId, inv.gold, toStored(inv));
   return result;
@@ -107,7 +107,7 @@ export async function getCharacter(characterId: number): Promise<CharacterSnapsh
     level: record.level,
     xp: record.xp,
     online: false,
-    ...toView(fromStored(record.gold, record.items)),
+    ...toView(fromStored(record.gold, record.items, record.storageGold)),
   };
 }
 

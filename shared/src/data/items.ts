@@ -63,7 +63,10 @@ export type IconShape =
   | "bowl"
   | "jewel_major"
   | "jewel_minor"
-  | "jewel_greater";
+  | "jewel_greater"
+  | "fish"
+  | "rod"
+  | "shell";
 
 export interface ItemStats {
   attack?: number;
@@ -96,6 +99,8 @@ export interface ItemDef {
   icon: { shape: IconShape; color: number };
   /** Returns the player to the main town when used (Geri Dönüş Parşömeni). */
   recall?: boolean;
+  /** A fishing rod: carried in the bags, lets you fish at the harbour (see data/fishing.ts). */
+  fishingRod?: boolean;
   /** Quest items can't be sold to merchants. */
   questItem?: boolean;
   /** How worn armour looks on the character: plain cloth/leather, chain "mail", or shiny "plate". */
@@ -153,6 +158,16 @@ export const ITEMS: Record<string, ItemDef> = Object.fromEntries(
     def({ id: "upgrade_scroll_mid", name: "Orta Sınıf Yükseltme Parşömeni", rarity: "uncommon", level: 1, maxStack: 50, buyPrice: 450, sellPrice: 25, icon: { shape: "scroll", color: 0x3fae5a }, description: "Ekipmanı +5'ten +7'ye kadar yükseltir. Demirciye götür." }),
     def({ id: "upgrade_scroll_high", name: "Yüksek Sınıf Yükseltme Parşömeni", rarity: "rare", level: 1, maxStack: 50, sellPrice: 80, icon: { shape: "scroll", color: 0xb65cff }, description: "Ekipmanı +8'den +10'a kadar yükseltir. Demirciye götür." }),
     def({ id: "protection_charm", name: "Koruma Tılsımı", rarity: "epic", level: 1, maxStack: 20, sellPrice: 100, icon: { shape: "gem", color: 0xe0a83f }, description: "Yükseltme başarısız olursa item yanmaz." }),
+
+    // ---- Fishing (Liman, see data/fishing.ts)
+    def({ id: "fishing_rod", name: "Olta", rarity: "common", level: 1, fishingRod: true, maxStack: 1, buyPrice: 250, sellPrice: 50, icon: { shape: "rod", color: 0x8a5a2b }, description: "Limanda suyun kenarında balık tutmak için. Sağ tık ya da Balık Tut düğmesi." }),
+    def({ id: "fish_anchovy", name: "Hamsi", rarity: "common", level: 1, maxStack: 50, sellPrice: 2, icon: { shape: "fish", color: 0x8fa8c0 } }),
+    def({ id: "fish_horse_mackerel", name: "İstavrit", rarity: "common", level: 1, maxStack: 50, sellPrice: 3, icon: { shape: "fish", color: 0x9cb87a } }),
+    def({ id: "fish_seabass", name: "Levrek", rarity: "uncommon", level: 1, maxStack: 50, sellPrice: 7, icon: { shape: "fish", color: 0xb0b4bc } }),
+    def({ id: "fish_bream", name: "Çipura", rarity: "uncommon", level: 1, maxStack: 50, sellPrice: 10, icon: { shape: "fish", color: 0xd9c27a } }),
+    def({ id: "fish_bluefish", name: "Lüfer", rarity: "rare", level: 1, maxStack: 50, sellPrice: 18, icon: { shape: "fish", color: 0x3f7fd9 } }),
+    def({ id: "fish_golden", name: "Altın Balık", rarity: "epic", level: 1, maxStack: 50, sellPrice: 300, icon: { shape: "fish", color: 0xffd43b }, description: "Balıkçıların efsanesi. Tüccarlar iyi para verir." }),
+    def({ id: "sea_shell", name: "Deniz Kabuğu", rarity: "common", level: 1, maxStack: 50, sellPrice: 1, icon: { shape: "shell", color: 0xe8b4a0 } }),
 
     // ---- Food (Ayşe Teyze's dinner quests)
     def({ id: "ayse_stew", name: "Ayşe Teyze'nin Güveci", rarity: "uncommon", level: 1, heal: 150, cooldownGroup: "food", maxStack: 20, sellPrice: 4, icon: { shape: "bowl", color: 0xb5651d }, description: "Dumanı üstünde. 150 can yeniler; iksirlerle ayrı bekleme süresi var." }),

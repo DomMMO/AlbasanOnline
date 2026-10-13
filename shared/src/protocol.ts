@@ -42,6 +42,21 @@ export const Msg = {
   /** T: open a town portal where you stand. */
   OpenTownPortal: "openTownPortal",
   UseTownPortal: "useTownPortal",
+  /** Storage: move gold between purse and storage (+ deposit, - withdraw). */
+  StorageGold: "storageGold",
+  /** Storage: right-click an item to send it to the other side (bag <-> storage). */
+  StorageQuick: "storageQuick",
+  TradeRespond: "tradeRespond",
+  /** Replace your whole offer (only while not locked). */
+  TradeOffer: "tradeOffer",
+  /** Freeze your offer; once both sides have, each confirms. */
+  TradeLock: "tradeLock",
+  TradeConfirm: "tradeConfirm",
+  TradeCancel: "tradeCancel",
+  /** Answer to "your party member entered a dungeon: come along?". */
+  DungeonRespond: "dungeonRespond",
+  /** Cast the fishing rod, or reel it in. */
+  Fish: "fish",
   // server -> client
   Pong: "pong",
   Combat: "combat",
@@ -78,6 +93,13 @@ export const Msg = {
   Fortune: "fortune",
   /** Your buffs and debuffs (sent when they change). */
   Auras: "auras",
+  TradeInvite: "tradeInvite",
+  /** A party member nearby just went into a dungeon: join them? */
+  DungeonInvite: "dungeonInvite",
+  /** Someone in the zone caught something (splash on their float). */
+  FishCatch: "fishCatch",
+  /** Your trade window: both offers (null = the trade is over). */
+  TradeState: "tradeState",
 } as const;
 
 export interface QuestMessage {
@@ -350,9 +372,10 @@ export interface ItemView {
   affixes?: Affix[];
 }
 
-/** passive: big socket `socket`; `minor` = one of its small sockets (null = the big one). */
+/** passive: big socket `socket`; `minor` = one of its small sockets (null = the big one). storage: the Depocu's slots. */
 export type SlotRef =
   | { area: "inv"; index: number }
+  | { area: "storage"; index: number }
   | { area: "equip"; slot: EquipSlot }
   | { area: "passive"; socket: number; minor: number | null };
 
@@ -363,6 +386,8 @@ export interface InventoryEvent {
   equipment: Partial<Record<EquipSlot, ItemView>>;
   /** Passive tree: 20 big sockets, each with 5 small ones. */
   passives: PassiveSocketView[];
+  /** What is kept at the Depocu (the window only opens next to it). */
+  storage: { gold: number; slots: (ItemView | null)[] };
   stats: CombatStats;
 }
 
@@ -459,6 +484,67 @@ export interface MyStallEvent {
   stall: { title: string; items: StallListingView[] } | null;
 }
 
+// ---- Storage ----
+
+export interface StorageGoldMessage {
+  /** Positive: put gold in storage. Negative: take it out. */
+  amount: number;
+  npcId: string;
+}
+
+export interface StorageQuickMessage {
+  from: { area: "inv" | "storage"; index: number };
+  npcId: string;
+}
+
+// ---- Fishing ----
+
+export interface FishCatchEvent {
+  sessionId: string;
+  /** Item id of the catch. */
+  item: string;
+}
+
+// ---- Party dungeons ----
+
+export interface DungeonInviteEvent {
+  from: string;
+  /** Dungeon name. */
+  dungeon: string;
+}
+
+export interface DungeonRespondMessage {
+  accept: boolean;
+}
+
+// ---- Player trade ----
+
+export interface TradeInviteEvent {
+  from: string;
+}
+
+export interface TradeRespondMessage {
+  accept: boolean;
+}
+
+export interface TradeOfferMessage {
+  /** Inventory item uids (whole stacks). */
+  items: string[];
+  gold: number;
+}
+
+export interface TradeSideView {
+  items: ItemView[];
+  gold: number;
+  locked: boolean;
+  confirmed: boolean;
+}
+
+export interface TradeStateEvent {
+  /** null = no trade open (finished or cancelled). */
+  trade: { partner: string; partnerId: string; mine: TradeSideView; theirs: TradeSideView } | null;
+}
+
 /** Short feedback line for the player ("+5 altın", "Envanter dolu"). */
 export interface NoticeEvent {
   message: string;
@@ -517,6 +603,10 @@ export interface PlayerView {
   gearFeet: string;
   /** Market stall title ("" = no stall open). */
   stall: string;
+  /** Fishing: the float lies on the water at (fishX, fishY). */
+  fishing: boolean;
+  fishX: number;
+  fishY: number;
 }
 
 export interface MobView {
