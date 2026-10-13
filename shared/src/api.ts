@@ -32,7 +32,6 @@ export interface CharacterSummary {
 
 export interface CreateCharacterRequest {
   name: string;
-  classId: string;
   look: CharacterLook;
   /** One of TUNIC_COLORS. */
   color: number;

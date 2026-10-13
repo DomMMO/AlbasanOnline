@@ -3,10 +3,13 @@ import type { QuestDef } from "./quests";
 import type { EquipSlot } from "./items";
 import type { CombatStats } from "./progression";
 
-// Playable classes. Warrior = tank (rage), Mage = ranged damage (mana),
-// Priest = healer (mana): the trio party content will be built around.
+// Classes. Every character starts as an Acemi (novice) with no skills; the opening quest
+// sends them into the keep, where one of the seven masters by the fire takes them on:
+// Alp (Savaşçı), Kam (Şaman), Börü (Suikastçı), Tigin (Okçu), Erşek (Druid),
+// Ak Ana (Şifacı) and Erlik Ruh Eğitmeni (Nekromant). Ayşe Teyze can undo the choice
+// for gold, which makes the character an Acemi again.
 
-export type ClassId = "warrior" | "mage" | "priest" | "necromancer" | "guardian" | "rogue";
+export type ClassId = "novice" | "warrior" | "shaman" | "rogue" | "archer" | "druid" | "priest" | "necromancer";
 /** Rage fills from fighting, mana regenerates slowly, energy regenerates quickly. */
 export type ResourceType = "rage" | "mana" | "energy";
 
@@ -40,10 +43,24 @@ export interface ClassDef {
 }
 
 export const CLASSES: Record<ClassId, ClassDef> = {
+  novice: {
+    id: "novice",
+    name: "Acemi",
+    description: "Henüz bir ustanın yanında yetişmemiş. Yeteneği yok; kılıcıyla idare eder. Kaledeki ustalardan birini seçince yolu belli olur.",
+    resource: "rage",
+    baseStats: (level) => ({ maxHp: 75 + (level - 1) * 16, attack: 7 + (level - 1) * 2, defense: 2 + Math.floor((level - 1) * 0.6), attackSpeedMs: 2000 }),
+    maxResource: () => 100,
+    autoAttack: { range: MELEE_RANGE, multiplier: 1, ranged: false },
+    skills: [],
+    potions: ["minor_hp_potion", "hp_potion"],
+    starterEquipment: { weapon: "rusty_sword", chest: "cloth_shirt" },
+    starterInventory: [{ defId: "minor_hp_potion", qty: 5 }],
+    color: "#ced4da",
+  },
   warrior: {
     id: "warrior",
     name: "Savaşçı",
-    description: "Yakın dövüş. Vurdukça ve hasar aldıkça öfke kazanır. Dayanıklı; ileride grubun tankı.",
+    description: "Alp'in yolu. Yakın dövüş; vurdukça ve hasar aldıkça öfke kazanır. Dayanıklıdır, grubun önünde durur.",
     resource: "rage",
     baseStats: (level) => ({ maxHp: 80 + (level - 1) * 20, attack: 8 + (level - 1) * 3, defense: 2 + (level - 1), attackSpeedMs: 2000 }),
     maxResource: () => 100,
@@ -54,28 +71,79 @@ export const CLASSES: Record<ClassId, ClassDef> = {
     starterInventory: [{ defId: "minor_hp_potion", qty: 5 }],
     color: "#e03131",
   },
-  mage: {
-    id: "mage",
-    name: "Büyücü",
-    description: "Uzaktan güçlü büyüler. Mana kullanır. Kırılgandır; düşmanları dondurup mesafe korur.",
+  shaman: {
+    id: "shaman",
+    name: "Şaman",
+    description: "Kam'ın yolu. Göğü ve ataların ruhlarını çağırır: şimşek indirir, davuluyla düşmanı sarsar, yaralıyı iyileştirir. Mana kullanır.",
     resource: "mana",
-    baseStats: (level) => ({ maxHp: 60 + (level - 1) * 14, attack: 10 + Math.round((level - 1) * 3.4), defense: 1 + Math.floor((level - 1) * 0.6), attackSpeedMs: 1800 }),
-    maxResource: (level) => 120 + (level - 1) * 12,
+    baseStats: (level) => ({ maxHp: 68 + (level - 1) * 15, attack: 10 + Math.round((level - 1) * 3.3), defense: 1 + Math.floor((level - 1) * 0.7), attackSpeedMs: 1800 }),
+    maxResource: (level) => 125 + (level - 1) * 12,
     autoAttack: { range: TILE_SIZE * 7, multiplier: 0.5, ranged: true },
-    skills: ["fireball", "frostNova", "lightning", "flameBurst", "blink", "arcanePower"],
+    skills: ["skyLash", "thunderDrum", "ancestorSpirit", "spiritBind", "windWalk", "skyBlessing"],
     potions: ["minor_hp_potion", "minor_mana_potion"],
     starterEquipment: { weapon: "apprentice_staff", chest: "cloth_shirt" },
     starterInventory: [
       { defId: "minor_hp_potion", qty: 5 },
       { defId: "minor_mana_potion", qty: 5 },
     ],
-    headwear: { color: 0x5f3dc4, style: "hat" },
-    color: "#7950f2",
+    headwear: { color: 0x1c7ed6, style: "hat" },
+    color: "#339af0",
+  },
+  rogue: {
+    id: "rogue",
+    name: "Suikastçı",
+    description: "Börü'nün yolu. Kurt gibi sessiz ve hızlı: kritikleri ölümcüldür, düşmanını sersemletip arkasında belirir. Hızla dolan enerji kullanır.",
+    resource: "energy",
+    baseStats: (level) => ({ maxHp: 72 + (level - 1) * 17, attack: 9 + Math.round((level - 1) * 3.1), defense: 2 + Math.floor((level - 1) * 0.8), attackSpeedMs: 1600 }),
+    maxResource: () => 100,
+    autoAttack: { range: MELEE_RANGE, multiplier: 0.9, ranged: false },
+    skills: ["sinisterStrike", "fanOfKnives", "eviscerate", "blind", "shadowStep", "adrenaline"],
+    potions: ["minor_hp_potion", "hp_potion"],
+    starterEquipment: { weapon: "rusty_sword", chest: "cloth_shirt" },
+    starterInventory: [{ defId: "minor_hp_potion", qty: 5 }],
+    headwear: { color: 0x343a40, style: "hood" },
+    color: "#ffe066",
+    rewardsLike: "warrior",
+  },
+  archer: {
+    id: "archer",
+    name: "Okçu",
+    description: "Tigin'in yolu. Yay ve ok: uzaktan nişan alır, ok yağdırır, düşmanı yere çiviler. Hızla dolan enerji kullanır.",
+    resource: "energy",
+    baseStats: (level) => ({ maxHp: 70 + (level - 1) * 16, attack: 9 + Math.round((level - 1) * 3.2), defense: 2 + Math.floor((level - 1) * 0.8), attackSpeedMs: 1700 }),
+    maxResource: () => 100,
+    autoAttack: { range: TILE_SIZE * 7, multiplier: 0.75, ranged: true },
+    skills: ["aimedShot", "arrowRain", "quickShot", "pinningShot", "hawkLeap", "eagleEye"],
+    potions: ["minor_hp_potion", "hp_potion"],
+    starterEquipment: { weapon: "short_bow", chest: "cloth_shirt" },
+    starterInventory: [{ defId: "minor_hp_potion", qty: 5 }],
+    headwear: { color: 0x2b5422, style: "hood" },
+    color: "#94d82d",
+    rewardsLike: "warrior",
+  },
+  druid: {
+    id: "druid",
+    name: "Druid",
+    description: "Erşek'in yolu. Ormanın sesi: dikenle vurur, kökle bağlar, yaprakla iyileştirir, bozkurt gibi atılır. Mana kullanır.",
+    resource: "mana",
+    baseStats: (level) => ({ maxHp: 74 + (level - 1) * 17, attack: 9 + Math.round((level - 1) * 3.1), defense: 2 + Math.floor((level - 1) * 0.9), attackSpeedMs: 1800 }),
+    maxResource: (level) => 125 + (level - 1) * 12,
+    autoAttack: { range: TILE_SIZE * 7, multiplier: 0.45, ranged: true },
+    skills: ["thornLash", "entangle", "rejuvenate", "barkskin", "wildCharge", "springTide"],
+    potions: ["minor_hp_potion", "minor_mana_potion"],
+    starterEquipment: { weapon: "apprentice_staff", chest: "cloth_shirt" },
+    starterInventory: [
+      { defId: "minor_hp_potion", qty: 5 },
+      { defId: "minor_mana_potion", qty: 5 },
+    ],
+    headwear: { color: 0x5c940d, style: "hood" },
+    color: "#40c057",
+    rewardsLike: "shaman",
   },
   priest: {
     id: "priest",
     name: "Şifacı",
-    description: "İyileştirir ve kalkan verir, kutsal ışıkla hasar yapar. Mana kullanır; ileride grubun şifacısı.",
+    description: "Ak Ana'nın yolu. Arındırır ve kutsar: yaraları iyileştirir, kalkan verir, kutsal ışıkla kötülüğü yakar. Mana kullanır.",
     resource: "mana",
     baseStats: (level) => ({ maxHp: 70 + (level - 1) * 16, attack: 9 + (level - 1) * 3, defense: 1 + Math.floor((level - 1) * 0.8), attackSpeedMs: 1800 }),
     maxResource: (level) => 130 + (level - 1) * 12,
@@ -90,44 +158,10 @@ export const CLASSES: Record<ClassId, ClassDef> = {
     headwear: { color: 0xf1f3f5, style: "hood" },
     color: "#fab005",
   },
-  guardian: {
-    id: "guardian",
-    name: "Muhafız",
-    description: "Grubun kalkanı. Vurduğu düşmanın dikkatini hemen üstüne çeker, %10 daha az hasar alır. Öfke kullanır; hasarı da hafife alınmaz.",
-    resource: "rage",
-    baseStats: (level) => ({ maxHp: 100 + (level - 1) * 25, attack: 7 + Math.round((level - 1) * 2.6), defense: 4 + Math.round((level - 1) * 1.5), attackSpeedMs: 2000 }),
-    maxResource: () => 100,
-    autoAttack: { range: MELEE_RANGE, multiplier: 1, ranged: false },
-    skills: ["shieldSlam", "challengingShout", "shieldWall", "concussiveBlow", "shieldCharge"],
-    potions: ["minor_hp_potion", "hp_potion"],
-    starterEquipment: { weapon: "rusty_sword", chest: "cloth_shirt" },
-    starterInventory: [{ defId: "minor_hp_potion", qty: 5 }],
-    headwear: { color: 0x868e96, style: "hood" },
-    color: "#4dabf7",
-    rewardsLike: "warrior",
-    tauntOnHit: true,
-    damageTaken: 0.9,
-  },
-  rogue: {
-    id: "rogue",
-    name: "Suikastçı",
-    description: "Gölgelerin ustası. Hızlı vurur, kritikleri ölümcüldür, düşmanını sersemletip arkasında belirir. Hızla dolan enerji kullanır.",
-    resource: "energy",
-    baseStats: (level) => ({ maxHp: 72 + (level - 1) * 17, attack: 9 + Math.round((level - 1) * 3.1), defense: 2 + Math.floor((level - 1) * 0.8), attackSpeedMs: 1600 }),
-    maxResource: () => 100,
-    autoAttack: { range: MELEE_RANGE, multiplier: 0.9, ranged: false },
-    skills: ["sinisterStrike", "fanOfKnives", "eviscerate", "blind", "shadowStep", "adrenaline"],
-    potions: ["minor_hp_potion", "hp_potion"],
-    starterEquipment: { weapon: "rusty_sword", chest: "cloth_shirt" },
-    starterInventory: [{ defId: "minor_hp_potion", qty: 5 }],
-    headwear: { color: 0x343a40, style: "hood" },
-    color: "#ffe066",
-    rewardsLike: "warrior",
-  },
   necromancer: {
     id: "necromancer",
     name: "Nekromant",
-    description: "Ölülerin efendisi. Düşmanın canını emer, iskelet çağırır, kemik patlatır. Mana kullanır.",
+    description: "Erlik Ruh Eğitmeni'nin yolu. Ölülerin efendisi: düşmanın canını emer, iskelet çağırır, kemik patlatır. Mana kullanır.",
     resource: "mana",
     baseStats: (level) => ({ maxHp: 66 + (level - 1) * 15, attack: 9 + Math.round((level - 1) * 3.2), defense: 1 + Math.floor((level - 1) * 0.7), attackSpeedMs: 1800 }),
     maxResource: (level) => 125 + (level - 1) * 12,
@@ -141,11 +175,18 @@ export const CLASSES: Record<ClassId, ClassDef> = {
     ],
     headwear: { color: 0x2b2f36, style: "hood" },
     color: "#51cf66",
-    rewardsLike: "mage",
+    rewardsLike: "shaman",
   },
 };
 
 export const CLASS_IDS = Object.keys(CLASSES) as ClassId[];
+/** Classes a master can teach (everything but the novice). */
+export const PLAYABLE_CLASS_IDS = CLASS_IDS.filter((id) => id !== "novice");
+
+/** Ayşe Teyze's price for undoing the class choice. */
+export function classResetPrice(level: number): number {
+  return 100 * level;
+}
 
 export function isClassId(value: unknown): value is ClassId {
   return typeof value === "string" && value in CLASSES;
@@ -158,7 +199,7 @@ export function classQuestItems(quest: QuestDef, classId: string) {
   return items?.[cls.id] ?? (cls.rewardsLike ? items?.[cls.rewardsLike] : undefined) ?? [];
 }
 
-/** Characters created before classes existed are warriors. */
+/** Unknown or retired classes count as a novice (they choose again at the keep). */
 export function classOf(value: string): ClassDef {
-  return isClassId(value) ? CLASSES[value] : CLASSES.warrior;
+  return isClassId(value) ? CLASSES[value] : CLASSES.novice;
 }

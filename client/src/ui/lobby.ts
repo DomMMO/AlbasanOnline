@@ -1,8 +1,6 @@
 import type Phaser from "phaser";
 import type { Room } from "colyseus.js";
 import {
-  CLASS_IDS,
-  CLASSES,
   classOf,
   DEFAULT_LOOK,
   GENDER_NAMES,
@@ -20,7 +18,6 @@ import {
   ZONES,
   type CharacterLook,
   type CharacterSummary,
-  type ClassId,
   type Gender,
   type ZoneId,
 } from "../../../shared/src";
@@ -55,7 +52,6 @@ const gmLink = $("gm-link");
 
 const createPanel = $<HTMLFormElement>("create-panel");
 const characterNameInput = $<HTMLInputElement>("character-name");
-const classPicker = $("class-picker");
 const genderPicker = $("gender-picker");
 const hairName = $("hair-name");
 const createError = $("create-error");
@@ -78,7 +74,6 @@ let characters: CharacterSummary[] = [];
 let selectedId: number | null = null;
 
 // The character being made.
-let chosenClass: ClassId = "warrior";
 let look: CharacterLook = { ...DEFAULT_LOOK };
 let tunic = TUNIC_COLORS[0];
 
@@ -237,24 +232,6 @@ function swatches(containerId: string, colors: number[], current: number, choose
 }
 
 function renderCreate() {
-  classPicker.replaceChildren(
-    ...CLASS_IDS.map((id) => {
-      const def = CLASSES[id];
-      const card = document.createElement("button");
-      card.type = "button";
-      card.className = `class-card${id === chosenClass ? " active" : ""}`;
-      card.title = def.description;
-      card.style.setProperty("--class-color", def.color);
-      card.innerHTML = `<b></b><span></span>`;
-      card.querySelector("b")!.textContent = def.name;
-      card.querySelector("span")!.textContent = def.description;
-      card.addEventListener("click", () => {
-        chosenClass = id;
-        renderCreate();
-      });
-      return card;
-    }),
-  );
   genderPicker.replaceChildren(
     ...GENDERS.map((gender) => {
       const button = document.createElement("button");
@@ -269,7 +246,8 @@ function renderCreate() {
   swatches("hair-colors", HAIR_COLORS, look.hairColor, (color) => (look.hairColor = color));
   swatches("skin-colors", SKIN_COLORS, look.skin, (color) => (look.skin = color));
   swatches("tunic-colors", TUNIC_COLORS, tunic, (color) => (tunic = color));
-  scene.showPreview(chosenClass, tunic, look);
+  // Everyone starts as a novice; the class is chosen in game from a master in the keep.
+  scene.showPreview("novice", tunic, look);
 }
 
 /** Switching gender also offers that gender's usual hair first (still changeable). */
@@ -289,7 +267,6 @@ function randomize() {
   const pick = <T>(list: readonly T[]) => list[Math.floor(Math.random() * list.length)];
   look = { gender: pick(GENDERS), hairStyle: pick(HAIR_STYLES), hairColor: pick(HAIR_COLORS), skin: pick(SKIN_COLORS) };
   tunic = pick(TUNIC_COLORS);
-  chosenClass = pick(CLASS_IDS);
   renderCreate();
 }
 
@@ -300,7 +277,7 @@ async function create() {
   setBusy(createPanel, true);
   createError.textContent = "";
   try {
-    const created = await api.createCharacter(name, chosenClass, look, tunic);
+    const created = await api.createCharacter(name, look, tunic);
     look = { ...DEFAULT_LOOK };
     await showCharacters(username, created.id);
   } catch (error) {

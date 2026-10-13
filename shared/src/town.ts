@@ -61,6 +61,11 @@ export const TOWN_SPOTS = {
   /** Teleport gate to the harbour, at the end of the path branching south off the east road. */
   harborGate: px(66, 51),
   fromHarbor: px(66, 47),
+  /** The keep's front door (into the great hall) and where you come out of it. */
+  keepDoor: { x: 32 * TILE_SIZE, y: 18 * TILE_SIZE + 6 },
+  fromKeep: px(32, 20),
+  /** The market square's north entrance. */
+  market: px(32, 40),
   pvpPortal: px(49, 15),
   pvpReturn: px(49, 18),
   spawn: px(32, 34),

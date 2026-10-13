@@ -198,7 +198,7 @@ export function useSkill(game: Game, sessionId: string, skillId: string, aim?: {
   if (now < (runtime.cooldowns.get(skill.id) ?? 0)) return fail(game, sessionId, "Henüz hazır değil");
   const resolved = resolveTarget(game, sessionId, player, runtime, skill);
   if (typeof resolved === "string") return fail(game, sessionId, resolved);
-  if (player.resource < skillCost(runtime, skill)) return fail(game, sessionId, usesRage(player) ? "Yeterli öfke yok" : "Yeterli mana yok");
+  if (player.resource < skillCost(runtime, skill)) return fail(game, sessionId, `Yeterli ${{ rage: "öfke", mana: "mana", energy: "enerji" }[classOf(player.cls).resource]} yok`);
 
   if (skill.castMs > 0) {
     // Cast time: start now, resolve in updatePlayerCombat. Moving cancels it.

@@ -144,3 +144,118 @@ export function castingGlow(scene: Phaser.Scene, follow: () => Point, color: num
     g.destroy();
   };
 }
+
+/** An arrow flying straight and fast from the archer to the target. */
+export function arrowShot(scene: Phaser.Scene, from: Point, to: Point, onArrive?: () => void) {
+  const g = scene.add.graphics().setDepth(100000);
+  g.lineStyle(1, 0x8a5a2b, 1).lineBetween(-6, 0, 3, 0);
+  g.fillStyle(0xced4da, 1).fillTriangle(3, -1.5, 3, 1.5, 6, 0);
+  g.fillStyle(0xff8787, 1).fillRect(-7, -1.5, 2, 1).fillRect(-7, 0.5, 2, 1);
+  g.setPosition(from.x, from.y - CHEST).setRotation(Math.atan2(to.y - from.y, to.x - from.x));
+  const distance = Phaser.Math.Distance.Between(from.x, from.y, to.x, to.y);
+  scene.tweens.add({
+    targets: g,
+    x: to.x,
+    y: to.y - CHEST,
+    duration: Math.max(90, distance * 1.3),
+    onComplete: () => {
+      g.destroy();
+      burst(scene, to, 0xffe8cc, 4);
+      onArrive?.();
+    },
+  });
+}
+
+/** Arrows raining down over an area (Ok Yağmuru). */
+export function arrowVolley(scene: Phaser.Scene, at: Point, radius: number) {
+  for (let i = 0; i < 12; i++) {
+    const tx = at.x + Phaser.Math.Between(-radius, radius);
+    const ty = at.y + Phaser.Math.Between(-radius / 2, radius / 2);
+    const g = scene.add.graphics().setDepth(100000);
+    g.lineStyle(1, 0x8a5a2b, 1).lineBetween(0, -8, 0, 0);
+    g.fillStyle(0xced4da, 1).fillTriangle(-1.5, 0, 1.5, 0, 0, 3);
+    g.setPosition(tx - 10, ty - 70).setRotation(-0.14);
+    scene.tweens.add({
+      targets: g,
+      x: tx,
+      y: ty - 2,
+      delay: i * 35,
+      duration: 260,
+      ease: "Quad.easeIn",
+      onComplete: () => {
+        scene.tweens.add({ targets: g, alpha: 0, delay: 250, duration: 200, onComplete: () => g.destroy() });
+      },
+    });
+  }
+  const ring = scene.add.graphics().setDepth(at.y + 20).setPosition(at.x, at.y - 2);
+  ring.lineStyle(2, 0xe67700, 0.7).strokeEllipse(0, 0, radius * 2, radius);
+  scene.tweens.add({ targets: ring, alpha: 0, delay: 350, duration: 300, onComplete: () => ring.destroy() });
+}
+
+/** Thunder rolling out from the shaman's drum: a blue ring and bolts striking round it. */
+export function stormRing(scene: Phaser.Scene, at: Point, radius: number) {
+  const g = scene.add.graphics().setDepth(at.y + 20).setPosition(at.x, at.y - 2);
+  g.fillStyle(0x339af0, 0.2).fillEllipse(0, 0, radius * 2, radius);
+  g.lineStyle(3, 0x74c0fc, 0.9).strokeEllipse(0, 0, radius * 2, radius);
+  g.setScale(0.2);
+  scene.tweens.add({ targets: g, scale: 1, duration: 240, ease: "Cubic.easeOut" });
+  scene.tweens.add({ targets: g, alpha: 0, delay: 280, duration: 300, onComplete: () => g.destroy() });
+  for (let i = 0; i < 3; i++) {
+    const a = (i / 3) * Math.PI * 2 + Math.random();
+    scene.time.delayedCall(i * 70, () => lightning(scene, { x: at.x + Math.cos(a) * radius * 0.7, y: at.y + Math.sin(a) * radius * 0.35 }));
+  }
+}
+
+/** Pale green spirits drifting up around someone (Ata Ruhu, Ruh Bağı). */
+export function spiritWisps(scene: Phaser.Scene, at: Point) {
+  for (let i = 0; i < 6; i++) {
+    const a = (i / 6) * Math.PI * 2;
+    const g = scene.add.graphics().setDepth(100000);
+    g.fillStyle(0x96f2d7, 0.5).fillCircle(0, 0, 3);
+    g.fillStyle(0xe6fcf5, 0.9).fillCircle(0, 0, 1.5);
+    g.setPosition(at.x + Math.cos(a) * 10, at.y - 4 + Math.sin(a) * 4);
+    scene.tweens.add({ targets: g, x: at.x + Math.cos(a + 1.5) * 4, y: at.y - 24, alpha: 0, delay: i * 50, duration: 700, ease: "Sine.easeOut", onComplete: () => g.destroy() });
+  }
+  burst(scene, at, 0x63e6be, 7);
+}
+
+/** Leaves whirling out from a point (druid spells). */
+export function leafBurst(scene: Phaser.Scene, at: Point, radius: number) {
+  const count = 10;
+  for (let i = 0; i < count; i++) {
+    const angle = (i / count) * Math.PI * 2;
+    const g = scene.add.graphics().setDepth(100000);
+    g.fillStyle(i % 2 ? 0x69db7c : 0x2f9e44, 1).fillEllipse(0, 0, 4, 2);
+    g.setPosition(at.x, at.y - CHEST).setRotation(angle);
+    scene.tweens.add({
+      targets: g,
+      x: at.x + Math.cos(angle) * radius,
+      y: at.y - CHEST + Math.sin(angle) * radius * 0.5,
+      rotation: angle + 4,
+      alpha: 0,
+      duration: 500,
+      ease: "Cubic.easeOut",
+      onComplete: () => g.destroy(),
+    });
+  }
+}
+
+/** Roots bursting from the ground in a ring (Sarmaşık). */
+export function rootsRing(scene: Phaser.Scene, at: Point, radius: number) {
+  const g = scene.add.graphics().setDepth(at.y + 20).setPosition(at.x, at.y - 2);
+  g.fillStyle(0x5c940d, 0.22).fillEllipse(0, 0, radius * 2, radius);
+  for (let i = 0; i < 10; i++) {
+    const a = (i / 10) * Math.PI * 2;
+    const x = Math.cos(a) * radius * 0.8;
+    const y = Math.sin(a) * radius * 0.4;
+    g.lineStyle(2, 0x6b4423, 1).beginPath();
+    g.moveTo(x, y);
+    g.lineTo(x + 2, y - 6);
+    g.lineTo(x - 1, y - 10);
+    g.strokePath();
+    g.fillStyle(0x69db7c, 1).fillRect(x - 2, y - 11, 3, 2);
+  }
+  g.setScale(1, 0.2);
+  scene.tweens.add({ targets: g, scaleY: 1, duration: 220, ease: "Back.easeOut" });
+  scene.tweens.add({ targets: g, alpha: 0, delay: 600, duration: 300, onComplete: () => g.destroy() });
+}

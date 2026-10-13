@@ -8,7 +8,9 @@ import type { ClassId } from "./classes";
 
 export type QuestObjective =
   | { type: "kill"; mobs: string[]; count: number; label: string }
-  | { type: "collect"; item: string; count: number };
+  | { type: "collect"; item: string; count: number }
+  /** Choose a class from one of the masters in the keep (done once you are no longer a novice). */
+  | { type: "path" };
 
 export interface QuestRewardItem {
   item: string;
@@ -61,6 +63,31 @@ const DINNER = "Akşam Yemeği";
 const CRAFTS = "Meslekler";
 
 const QUEST_LIST: QuestDef[] = [
+  // ---- Prologue: choosing a path ---------------------------------------------------
+  {
+    id: "m0_path",
+    chain: MAIN,
+    title: "Ustaların Ateşi",
+    giver: "commander",
+    turnIn: "commander",
+    minLevel: 1,
+    text:
+      "Yeni bir yüz... Uzun zamandır bu kapıdan kimse girmemişti. Kılıcı tutuşuna bakılırsa sana daha kimse yol göstermemiş. Kalenin büyük salonunda, ateşin başında yedi usta oturur: Alp, Kam, Börü, Tigin, Erşek, Ak Ana ve Erlik Ruh Eğitmeni. Git, her birini dinle ve birinin yolunu seç. Sonra bana dön.",
+    progressText: "Ustalardan birini seçmeden sana iş veremem. Kale meydanın kuzeyinde; yolu muhafızlara sorabilirsin.",
+    completeText: "Demek yolunu buldun. Ustan sana güveniyorsa ben de güvenirim. Al şunları; yolun başında işine yarar.",
+    objectives: [{ type: "path" }],
+    reward: {
+      xp: 40,
+      gold: 15,
+      items: [{ item: "minor_hp_potion", qty: 3 }],
+      classItems: {
+        archer: [{ item: "short_bow" }],
+        shaman: [{ item: "apprentice_staff" }, { item: "minor_mana_potion", qty: 5 }],
+        priest: [{ item: "apprentice_staff" }, { item: "minor_mana_potion", qty: 5 }],
+      },
+    },
+  },
+
   // ---- Chapter 1: the valley -------------------------------------------------------
   {
     id: "m1_stranger",
@@ -69,7 +96,8 @@ const QUEST_LIST: QuestDef[] = [
     giver: "commander",
     turnIn: "sage",
     minLevel: 1,
-    text: "Yeni bir yüz... Uzun zamandır bu kapıdan kimse girmemişti. Bu diyar eskisi gibi değil yabancı. Nedenini en iyi Bilge Ozan anlatır; onu meydandaki çeşmenin başında bulursun.",
+    requires: "m0_path",
+    text: "Artık bir yolun var. Ama bu diyar eskisi gibi değil yabancı; nedenini bilmeden yürüyemezsin. Nedenini en iyi Bilge Ozan anlatır; onu meydandaki çeşmenin başında bulursun.",
     completeText:
       "Demek Baran seni gönderdi. Otur, dinle. Yüzyıllar önce Gölge Efendisi Moraz bu toprakları karanlığa boğmuştu. Atalarımız onu Altın Mühür ile yerin altına zincirledi. Ama mühür kırıldı evlat... Parçaları diyara saçıldı ve gölge sızmaya başladı. Balçıklar, kurtlar, goblinler: hepsi o gölgenin çağrısıyla azgınlaştı.",
     objectives: [],
@@ -131,7 +159,7 @@ const QUEST_LIST: QuestDef[] = [
     reward: {
       xp: 400,
       gold: 40,
-      classItems: { warrior: [{ item: "iron_sword" }], mage: [{ item: "oak_staff" }], priest: [{ item: "oak_staff" }] },
+      classItems: { warrior: [{ item: "iron_sword" }], archer: [{ item: "hunting_bow" }], shaman: [{ item: "oak_staff" }], priest: [{ item: "oak_staff" }] },
     },
   },
   {
@@ -163,7 +191,7 @@ const QUEST_LIST: QuestDef[] = [
     reward: {
       xp: 900,
       gold: 60,
-      classItems: { warrior: [{ item: "goblin_cleaver" }], mage: [{ item: "seer_staff" }], priest: [{ item: "seer_staff" }] },
+      classItems: { warrior: [{ item: "goblin_cleaver" }], archer: [{ item: "wolf_bow" }], shaman: [{ item: "seer_staff" }], priest: [{ item: "seer_staff" }] },
     },
   },
   {
@@ -239,7 +267,7 @@ const QUEST_LIST: QuestDef[] = [
     reward: {
       xp: 2000,
       gold: 80,
-      classItems: { warrior: [{ item: "plate_chest_1" }], mage: [{ item: "robe_chest_1" }], priest: [{ item: "robe_chest_1" }] },
+      classItems: { warrior: [{ item: "plate_chest_1" }], shaman: [{ item: "robe_chest_1" }], priest: [{ item: "robe_chest_1" }] },
     },
   },
   {
@@ -258,7 +286,7 @@ const QUEST_LIST: QuestDef[] = [
       xp: 2400,
       gold: 80,
       items: [{ item: "large_hp_potion", qty: 5 }, { item: "large_mana_potion", qty: 5 }],
-      classItems: { warrior: [{ item: "plate_head_1" }], mage: [{ item: "robe_head_1" }], priest: [{ item: "robe_head_1" }] },
+      classItems: { warrior: [{ item: "plate_head_1" }], shaman: [{ item: "robe_head_1" }], priest: [{ item: "robe_head_1" }] },
     },
   },
   {
@@ -304,7 +332,7 @@ const QUEST_LIST: QuestDef[] = [
     reward: {
       xp: 4000,
       gold: 150,
-      classItems: { warrior: [{ item: "sword_2" }], mage: [{ item: "staff_2" }], priest: [{ item: "mace_2" }] },
+      classItems: { warrior: [{ item: "sword_2" }], archer: [{ item: "bow_2" }], shaman: [{ item: "staff_2" }], priest: [{ item: "mace_2" }] },
     },
   },
   {
@@ -323,7 +351,7 @@ const QUEST_LIST: QuestDef[] = [
       xp: 5000,
       gold: 200,
       items: [{ item: "emerald_earring" }],
-      classItems: { warrior: [{ item: "plate_legs_3" }], mage: [{ item: "robe_legs_3" }], priest: [{ item: "robe_legs_3" }] },
+      classItems: { warrior: [{ item: "plate_legs_3" }], shaman: [{ item: "robe_legs_3" }], priest: [{ item: "robe_legs_3" }] },
     },
   },
   {
@@ -342,7 +370,7 @@ const QUEST_LIST: QuestDef[] = [
       xp: 5000,
       gold: 200,
       items: [{ item: "super_hp_potion", qty: 5 }],
-      classItems: { warrior: [{ item: "plate_feet_3" }], mage: [{ item: "robe_feet_3" }], priest: [{ item: "robe_feet_3" }] },
+      classItems: { warrior: [{ item: "plate_feet_3" }], shaman: [{ item: "robe_feet_3" }], priest: [{ item: "robe_feet_3" }] },
     },
   },
   {
@@ -361,7 +389,7 @@ const QUEST_LIST: QuestDef[] = [
       xp: 8000,
       gold: 500,
       items: [{ item: "upgrade_scroll_high" }],
-      classItems: { warrior: [{ item: "sword_4" }], mage: [{ item: "staff_4" }], priest: [{ item: "mace_4" }] },
+      classItems: { warrior: [{ item: "sword_4" }], archer: [{ item: "bow_4" }], shaman: [{ item: "staff_4" }], priest: [{ item: "mace_4" }] },
     },
   },
   {
@@ -661,8 +689,11 @@ export function questAvailable(quest: QuestDef, level: number, log: Map<string, 
 }
 
 /** True when every objective is met (kills counted, items in the inventory). */
-export function questReady(quest: QuestDef, entry: QuestProgress, countItem: (defId: string) => number): boolean {
-  return quest.objectives.every((objective, i) =>
-    objective.type === "kill" ? (entry.kills[i] ?? 0) >= objective.count : countItem(objective.item) >= objective.count,
-  );
+/** True when every objective is met (kills counted, items in the inventory, a class chosen). */
+export function questReady(quest: QuestDef, entry: QuestProgress, countItem: (defId: string) => number, cls = ""): boolean {
+  return quest.objectives.every((objective, i) => {
+    if (objective.type === "kill") return (entry.kills[i] ?? 0) >= objective.count;
+    if (objective.type === "path") return cls !== "" && cls !== "novice";
+    return countItem(objective.item) >= objective.count;
+  });
 }

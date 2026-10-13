@@ -28,11 +28,15 @@ export enum Tile {
   DarkGrass = 13,
   /** Wooden bridge deck (walkable; rails are drawn as decor). */
   Bridge = 14,
+  /** Plank floor indoors (the keep's great hall). */
+  WoodFloor = 15,
+  /** Timbered wall indoors. */
+  WoodWall = 16,
 }
 
-export const TILE_COUNT = 15;
+export const TILE_COUNT = 17;
 
-const BLOCKING = new Set<Tile>([Tile.Water, Tile.Tree, Tile.CaveWall, Tile.Wall, Tile.Solid]);
+const BLOCKING = new Set<Tile>([Tile.Water, Tile.Tree, Tile.CaveWall, Tile.Wall, Tile.Solid, Tile.WoodWall]);
 
 /** Goblin Cave entrance in the world (tile coordinates); a path leads there from the centre. */
 export const CAVE_ENTRANCE_TILE = { tx: 10, ty: 43 };

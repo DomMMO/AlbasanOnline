@@ -70,7 +70,13 @@ export type SkillVisual =
   | "blink"
   | "leap"
   | "charge"
-  | "shadow";
+  | "shadow"
+  | "arrow"
+  | "volley"
+  | "storm"
+  | "spirit"
+  | "nature"
+  | "roots";
 
 /** What the skill is for (every class has at least one of each of the first five). */
 export type SkillCategory = "single" | "aoe" | "cc" | "dash" | "buff" | "utility";
@@ -93,7 +99,7 @@ export interface SkillDef {
   category: SkillCategory;
   /** Character level needed to put points in it. */
   level: number;
-  /** Rage for warriors, mana for casters, energy for rogues. */
+  /** Rage for warriors, mana for casters, energy for assassins and archers. */
   cost: number;
   cooldownMs: number;
   triggersGcd: boolean;
@@ -122,20 +128,29 @@ export const SKILLS: Record<string, SkillDef> = Object.fromEntries(
     skill({ id: "leapSlam", name: "Sıçrayış", short: "SY", category: "dash", level: 6, description: "Hedefin yanına sıçrar, indiği yerin çevresindeki herkese vurur.", cost: 15, cooldownMs: 15_000, triggersGcd: true, castMs: 0, target: "enemy", range: DASH_RANGE, effect: { type: "dash", mode: "toTarget", distance: DASH_RANGE, landRadius: TILE_SIZE * 2, multiplier: 0.8 }, visual: "leap", color: "#c92a2a" }),
     skill({ id: "battleShout", name: "Savaş Çığlığı", short: "SÇ", category: "buff", level: 8, description: "12 sn boyunca saldırın %25 artar.", cost: 10, cooldownMs: 40_000, triggersGcd: false, castMs: 0, target: "none", range: 0, effect: { type: "buff", durationMs: 12_000, attackPct: 0.25 }, visual: "buff", color: "#f08c00" }),
 
-    // ---- Guardian (rage, tank)
-    skill({ id: "shieldSlam", name: "Kalkan Darbesi", short: "KD", category: "single", level: 1, description: "Hedefe kalkanla sert bir darbe indirir.", cost: 12, cooldownMs: 0, triggersGcd: true, castMs: 0, target: "enemy", range: MELEE_RANGE, effect: { type: "strike", multiplier: 1.35, bonus: 8 }, visual: "melee", color: "#1c7ed6" }),
-    skill({ id: "challengingShout", name: "Meydan Okuma", short: "MO", category: "aoe", level: 2, description: "Etrafındaki tüm düşmanlara vurur ve hepsinin dikkatini üstüne çeker.", cost: 20, cooldownMs: 8000, triggersGcd: true, castMs: 0, target: "none", range: 0, effect: { type: "whirlwind", radius: TILE_SIZE * 2.5, multiplier: 0.75 }, visual: "shout", color: "#e03131" }),
-    skill({ id: "shieldWall", name: "Kalkan Duvarı", short: "KW", category: "buff", level: 3, description: "8 sn boyunca %50 daha az hasar alırsın.", cost: 0, cooldownMs: 25_000, triggersGcd: true, castMs: 0, target: "none", range: 0, effect: { type: "guard", reduction: 0.5, durationMs: 8000 }, visual: "guard", color: "#74c0fc" }),
-    skill({ id: "concussiveBlow", name: "Sersemletici Vuruş", short: "SV", category: "cc", level: 4, description: "Kalkanın kenarıyla vurur, hedefi 3 sn sersemletir.", cost: 15, cooldownMs: 18_000, triggersGcd: true, castMs: 0, target: "enemy", range: MELEE_RANGE, effect: { type: "stun", multiplier: 0.6, bonus: 6, stunMs: 3000 }, visual: "stun", color: "#4dabf7" }),
-    skill({ id: "shieldCharge", name: "Kalkan Hücumu", short: "KH", category: "dash", level: 6, description: "Kalkanını öne verip hedefe koşar, çarptığı düşmanı 1,5 sn sersemletir.", cost: 10, cooldownMs: 14_000, triggersGcd: true, castMs: 0, target: "enemy", range: DASH_RANGE, effect: { type: "dash", mode: "toTarget", distance: DASH_RANGE, multiplier: 0.6, stunMs: 1500 }, visual: "charge", color: "#1971c2" }),
+    // ---- Shaman (Kam, mana): sky and spirits
+    skill({ id: "skyLash", name: "Gök Kamçısı", short: "GK", category: "single", level: 1, description: "Gökten hedefe bir şimşek kamçısı indirir. 1,3 sn büyü.", cost: 22, cooldownMs: 0, triggersGcd: true, castMs: 1300, target: "enemy", range: SPELL_RANGE, effect: { type: "strike", multiplier: 2.0, bonus: 7 }, visual: "lightning", color: "#4dabf7" }),
+    skill({ id: "thunderDrum", name: "Gök Davulu", short: "GD", category: "aoe", level: 2, description: "Davulunu döver, gök gürler: çevrendeki tüm düşmanlara vurur.", cost: 30, cooldownMs: 9000, triggersGcd: true, castMs: 0, target: "none", range: 0, effect: { type: "whirlwind", radius: TILE_SIZE * 2.5, multiplier: 0.9 }, visual: "storm", color: "#1c7ed6" }),
+    skill({ id: "ancestorSpirit", name: "Ata Ruhu", short: "AR", category: "utility", level: 3, description: "Ataların ruhunu çağırır: hedef oyuncuyu (yoksa kendini) iyileştirir. 1,2 sn büyü.", cost: 28, cooldownMs: 0, triggersGcd: true, castMs: 1200, target: "friendly", range: SPELL_RANGE, effect: { type: "healTarget", multiplier: 1.6, bonus: 14 }, visual: "spirit", color: "#63e6be" }),
+    skill({ id: "spiritBind", name: "Ruh Bağı", short: "RB", category: "cc", level: 4, description: "Görünmez ruhlar hedefi sarar, 3 sn kıpırdayamaz.", cost: 25, cooldownMs: 15_000, triggersGcd: true, castMs: 0, target: "enemy", range: SPELL_RANGE, effect: { type: "stun", multiplier: 0.5, bonus: 4, stunMs: 3000 }, visual: "spirit", color: "#38d9a9" }),
+    skill({ id: "windWalk", name: "Yel Yürüyüşü", short: "YY", category: "dash", level: 6, description: "Rüzgâra binip baktığın yöne 6 kare uçarsın.", cost: 20, cooldownMs: 12_000, triggersGcd: false, castMs: 0, target: "none", range: 0, effect: { type: "dash", mode: "forward", distance: TILE_SIZE * 6 }, visual: "blink", color: "#a5d8ff" }),
+    skill({ id: "skyBlessing", name: "Tengri'nin Lütfu", short: "TL", category: "buff", level: 8, description: "12 sn boyunca sen ve yakındaki grup arkadaşların %15 daha güçlü ve %15 daha hızlı vurur.", cost: 35, cooldownMs: 45_000, triggersGcd: false, castMs: 0, target: "none", range: 0, effect: { type: "buff", durationMs: 12_000, attackPct: 0.15, speedPct: 0.15, partyRadius: TILE_SIZE * 8 }, visual: "buff", color: "#339af0" }),
 
-    // ---- Mage (mana)
-    skill({ id: "fireball", name: "Ateş Topu", short: "AT", category: "single", level: 1, description: "Hedefe yüksek hasarlı bir ateş topu fırlatır. 1,5 sn büyü.", cost: 25, cooldownMs: 0, triggersGcd: true, castMs: 1500, target: "enemy", range: SPELL_RANGE, effect: { type: "strike", multiplier: 2.2, bonus: 8 }, visual: "fireball", color: "#e8590c" }),
-    skill({ id: "frostNova", name: "Buz Halkası", short: "BH", category: "cc", level: 2, description: "Etrafındaki düşmanlara hasar verir ve 4 sn dondurur.", cost: 30, cooldownMs: 12_000, triggersGcd: true, castMs: 0, target: "none", range: 0, effect: { type: "nova", radius: TILE_SIZE * 2.5, multiplier: 0.6, rootMs: 4000 }, visual: "frost", color: "#1c7ed6" }),
-    skill({ id: "lightning", name: "Yıldırım", short: "YD", category: "single", level: 3, description: "Hedefe anında yıldırım düşürür.", cost: 20, cooldownMs: 6000, triggersGcd: true, castMs: 0, target: "enemy", range: SPELL_RANGE, effect: { type: "strike", multiplier: 1.3, bonus: 4 }, visual: "lightning", color: "#f08c00" }),
-    skill({ id: "flameBurst", name: "Alev Patlaması", short: "AP", category: "aoe", level: 4, description: "Hedefin olduğu yerde alevler patlar, çevresindeki tüm düşmanlar yanar. 1,2 sn büyü.", cost: 35, cooldownMs: 8000, triggersGcd: true, castMs: 1200, target: "enemy", range: SPELL_RANGE, effect: { type: "blast", radius: TILE_SIZE * 2.5, multiplier: 1.1 }, visual: "blast", color: "#ff6b00" }),
-    skill({ id: "blink", name: "Işınlanma", short: "IŞ", category: "dash", level: 6, description: "Baktığın yöne 6 kare ışınlanırsın.", cost: 20, cooldownMs: 12_000, triggersGcd: false, castMs: 0, target: "none", range: 0, effect: { type: "dash", mode: "forward", distance: TILE_SIZE * 6 }, visual: "blink", color: "#9775fa" }),
-    skill({ id: "arcanePower", name: "Arkana Gücü", short: "AG", category: "buff", level: 8, description: "12 sn boyunca büyülerin %30 daha güçlü.", cost: 30, cooldownMs: 45_000, triggersGcd: false, castMs: 0, target: "none", range: 0, effect: { type: "buff", durationMs: 12_000, attackPct: 0.3 }, visual: "buff", color: "#cc5de8" }),
+    // ---- Archer (Tigin, energy): bow and arrow
+    skill({ id: "aimedShot", name: "Nişanlı Atış", short: "NA", category: "single", level: 1, description: "Yayı sonuna kadar gerip tek, güçlü bir ok atar. 1 sn nişan.", cost: 30, cooldownMs: 0, triggersGcd: true, castMs: 1000, target: "enemy", range: SPELL_RANGE, effect: { type: "strike", multiplier: 1.9, bonus: 6 }, visual: "arrow", color: "#d9480f" }),
+    skill({ id: "arrowRain", name: "Ok Yağmuru", short: "OY", category: "aoe", level: 2, description: "Hedefin üstüne ok yağdırır, çevresindeki tüm düşmanlara vurur.", cost: 40, cooldownMs: 9000, triggersGcd: true, castMs: 0, target: "enemy", range: SPELL_RANGE, effect: { type: "blast", radius: TILE_SIZE * 2.5, multiplier: 1.0 }, visual: "volley", color: "#e67700" }),
+    skill({ id: "quickShot", name: "Seri Atış", short: "SA", category: "single", level: 3, description: "Hiç beklemeden peş peşe iki ok gönderir.", cost: 25, cooldownMs: 5000, triggersGcd: true, castMs: 0, target: "enemy", range: SPELL_RANGE, effect: { type: "strike", multiplier: 1.3, bonus: 4 }, visual: "arrow", color: "#f59f00" }),
+    skill({ id: "pinningShot", name: "Çivileyen Ok", short: "ÇO", category: "cc", level: 4, description: "Hedefi olduğu yere çiviler: 2,5 sn kıpırdayamaz.", cost: 25, cooldownMs: 15_000, triggersGcd: true, castMs: 0, target: "enemy", range: SPELL_RANGE, effect: { type: "stun", multiplier: 0.6, bonus: 4, stunMs: 2500 }, visual: "arrow", color: "#a61e4d" }),
+    skill({ id: "hawkLeap", name: "Doğan Sıçrayışı", short: "DS", category: "dash", level: 6, description: "Doğan gibi baktığın yöne 5 kare sıçrarsın.", cost: 20, cooldownMs: 12_000, triggersGcd: false, castMs: 0, target: "none", range: 0, effect: { type: "dash", mode: "forward", distance: TILE_SIZE * 5 }, visual: "blink", color: "#ffd8a8" }),
+    skill({ id: "eagleEye", name: "Kartal Gözü", short: "KG", category: "buff", level: 8, description: "12 sn boyunca %20 daha güçlü ve %20 daha hızlı atarsın.", cost: 0, cooldownMs: 40_000, triggersGcd: false, castMs: 0, target: "none", range: 0, effect: { type: "buff", durationMs: 12_000, attackPct: 0.2, speedPct: 0.2 }, visual: "buff", color: "#f08c00" }),
+
+    // ---- Druid (Erşek, mana): forest and beasts
+    skill({ id: "thornLash", name: "Diken Kırbacı", short: "DK", category: "single", level: 1, description: "Topraktan fışkıran dikenli bir sarmaşık hedefi kırbaçlar. 1,2 sn büyü.", cost: 20, cooldownMs: 0, triggersGcd: true, castMs: 1200, target: "enemy", range: SPELL_RANGE, effect: { type: "strike", multiplier: 1.85, bonus: 6 }, visual: "nature", color: "#2f9e44" }),
+    skill({ id: "entangle", name: "Sarmaşık", short: "SR", category: "cc", level: 2, description: "Çevrendeki düşmanların ayaklarını kökler sarar: hasar alır, 3,5 sn yerinden kıpırdayamaz.", cost: 30, cooldownMs: 12_000, triggersGcd: true, castMs: 0, target: "none", range: 0, effect: { type: "nova", radius: TILE_SIZE * 2.5, multiplier: 0.5, rootMs: 3500 }, visual: "roots", color: "#5c940d" }),
+    skill({ id: "rejuvenate", name: "Yaprak Şifası", short: "YŞ", category: "utility", level: 3, description: "Taze yapraklar hedef oyuncuyu (yoksa seni) sarar ve iyileştirir. 1,2 sn büyü.", cost: 28, cooldownMs: 0, triggersGcd: true, castMs: 1200, target: "friendly", range: SPELL_RANGE, effect: { type: "healTarget", multiplier: 1.7, bonus: 14 }, visual: "heal", color: "#69db7c" }),
+    skill({ id: "barkskin", name: "Ağaç Kabuğu", short: "AK", category: "buff", level: 4, description: "Derin meşe kabuğu gibi sertleşir: 8 sn boyunca %35 daha az hasar alırsın.", cost: 15, cooldownMs: 25_000, triggersGcd: true, castMs: 0, target: "none", range: 0, effect: { type: "guard", reduction: 0.35, durationMs: 8000 }, visual: "guard", color: "#8a5a2b" }),
+    skill({ id: "wildCharge", name: "Bozkurt Hücumu", short: "BH", category: "dash", level: 6, description: "Bozkurt gibi hedefe atılır, çarptığında 1,5 sn sersemletirsin.", cost: 20, cooldownMs: 14_000, triggersGcd: true, castMs: 0, target: "enemy", range: DASH_RANGE, effect: { type: "dash", mode: "toTarget", distance: DASH_RANGE, multiplier: 0.6, stunMs: 1500 }, visual: "charge", color: "#868e96" }),
+    skill({ id: "springTide", name: "Bahar Dalgası", short: "BD", category: "aoe", level: 8, description: "Etrafına yeşil bir dalga yayılır: düşmanlara vurur, seni ve yakındaki grup arkadaşlarını iyileştirir.", cost: 35, cooldownMs: 10_000, triggersGcd: true, castMs: 0, target: "none", range: 0, effect: { type: "radiance", radius: TILE_SIZE * 3, multiplier: 0.75, healMultiplier: 0.6 }, visual: "nature", color: "#40c057" }),
 
     // ---- Priest (mana)
     skill({ id: "smite", name: "Kutsal Işık", short: "Kİ", category: "single", level: 1, description: "Hedefi kutsal ışıkla yakar. 1,2 sn büyü.", cost: 20, cooldownMs: 0, triggersGcd: true, castMs: 1200, target: "enemy", range: SPELL_RANGE, effect: { type: "strike", multiplier: 1.8, bonus: 6 }, visual: "holy", color: "#e0a800" }),

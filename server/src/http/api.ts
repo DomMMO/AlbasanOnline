@@ -1,6 +1,5 @@
 import express, { type NextFunction, type Request, type Response } from "express";
 import {
-  isClassId,
   sanitizeLook,
   TUNIC_COLORS,
   MAX_CHARACTERS_PER_ACCOUNT,
@@ -80,13 +79,12 @@ export function createApiRouter() {
     const name = typeof req.body?.name === "string" ? req.body.name.trim() : "";
     const invalid = validateCharacterName(name);
     if (invalid) return fail(res, 400, invalid);
-    const classId = req.body?.classId ?? "warrior";
-    if (!isClassId(classId)) return fail(res, 400, "Geçersiz sınıf");
     if ((await countCharacters(account.id)) >= MAX_CHARACTERS_PER_ACCOUNT) {
       return fail(res, 400, `En fazla ${MAX_CHARACTERS_PER_ACCOUNT} karakterin olabilir`);
     }
     const color = TUNIC_COLORS.includes(req.body?.color) ? (req.body.color as number) : TUNIC_COLORS[0];
-    const id = await createCharacter(account.id, name, color, classId, sanitizeLook(req.body?.look));
+    // Everyone starts as a novice; the class is chosen in game, from a master in the keep.
+    const id = await createCharacter(account.id, name, color, "novice", sanitizeLook(req.body?.look));
     if (id === null) return fail(res, 409, "Bu karakter adı alınmış");
     const character = (await listCharacters(account.id)).find((c) => c.id === id)!;
     res.status(201).json(character satisfies CharacterSummary);

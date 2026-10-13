@@ -67,6 +67,6 @@ export type Appearance =
   | { type: "wolf"; fur: number }
   | { type: "slime"; color: number }
   | { type: "chest" }
-  | { type: "portal"; style: "cave" | "exit" | "cursed" | "pvp" | "gate" }
+  | { type: "portal"; style: "cave" | "exit" | "cursed" | "pvp" | "gate" | "door" }
   /** Pre-rendered sprite sheet (art assets), e.g. bosses. `key` names the sheet on the client. */
   | { type: "image"; key: string; tint?: number };

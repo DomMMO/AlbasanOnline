@@ -16,6 +16,7 @@ export function weaponGrip(shape: IconShape): { x: number; y: number } {
   if (shape === "axe") return { x: 7.5 / ICON_SIZE, y: 9.5 / ICON_SIZE };
   if (shape === "scythe") return { x: 6.5 / ICON_SIZE, y: 8.5 / ICON_SIZE };
   if (shape === "staff" || shape === "mace") return { x: 4.5 / ICON_SIZE, y: 8.5 / ICON_SIZE };
+  if (shape === "bow") return { x: 9.5 / ICON_SIZE, y: 6 / ICON_SIZE };
   return { x: 1.5 / ICON_SIZE, y: 10.5 / ICON_SIZE }; // sword: diagonal, handle bottom-left
 }
 

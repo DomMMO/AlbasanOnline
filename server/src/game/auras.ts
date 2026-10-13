@@ -19,7 +19,7 @@ function aurasOf(game: Game, player: Player, runtime: PlayerRuntime): AuraView[]
   if (player.protected) add("protected", "aura_protect", "buff", runtime.protectedUntil);
   if (fortuneBonus(runtime) > 0) add("fortune", "aura_fortune", "buff", null);
   add("stun", "aura_stun", "debuff", runtime.stunnedUntil);
-  if (player.rooted && now >= runtime.stunnedUntil) add("root", "frostNova", "debuff", runtime.rootedUntil);
+  if (player.rooted && now >= runtime.stunnedUntil) add("root", "entangle", "debuff", runtime.rootedUntil);
   return auras.filter((a) => a.icon.startsWith("aura_") || SKILLS[a.icon]);
 }
 

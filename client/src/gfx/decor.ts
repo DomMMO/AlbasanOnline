@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import { COLOSSEUM, TILE_SIZE, type Decor, type IconShape } from "../../../shared/src";
 import { addLight } from "../fx/nightLights";
 import { ICON_SIZE, paintIcon } from "./icons";
+import { bench, firepit, rack, rug, shelf, stool, table } from "./interior";
 
 // Town decor drawn in code on top of the tiles: buildings, the fountain, lamps…
 // Each piece is depth-sorted by its bottom edge like characters, so players walking
@@ -97,6 +98,27 @@ export function drawDecor(scene: Phaser.Scene, decor: Decor[]) {
         break;
       case "lighthouse":
         lighthouse(scene, piece);
+        break;
+      case "firepit":
+        firepit(scene, piece);
+        break;
+      case "rug":
+        rug(scene, piece);
+        break;
+      case "table":
+        table(scene, piece);
+        break;
+      case "shelf":
+        shelf(scene, piece);
+        break;
+      case "rack":
+        rack(scene, piece);
+        break;
+      case "stool":
+        stool(scene, piece);
+        break;
+      case "bench":
+        bench(scene, piece);
         break;
       case "colosseum":
         colosseum(scene);

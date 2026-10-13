@@ -15,7 +15,7 @@ const SPECIAL: Record<string, { name: string; text: string }> = {
   aura_stun: { name: "Sersemlemiş", text: "Yürüyemez, saldıramaz ve skill kullanamazsın." },
   aura_protect: { name: "Doğuş Koruması", text: "Oyuncular sana vuramaz. Saldırınca koruma biter." },
   aura_fortune: { name: "Ayşe Teyze'nin Duası", text: "Fincanında iyi şeyler çıktı: bugün bütün yükseltmelerin başarı şansı %10 daha yüksek." },
-  frostNova: { name: "Donmuş", text: "Yerinden kıpırdayamazsın." },
+  entangle: { name: "Kökler", text: "Kökler ayaklarını sardı; yerinden kıpırdayamazsın." },
 };
 
 interface Shown {
