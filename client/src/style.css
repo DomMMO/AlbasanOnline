@@ -1,9 +1,3 @@
-@font-face {
-  font-family: "Cloister Black TR";
-  src: url("./assets/fonts/CloisterBlackTR.ttf") format("truetype");
-  font-display: block;
-}
-
 :root {
   --rarity-common: #9d9d9d;
   --rarity-uncommon: #1eff00;

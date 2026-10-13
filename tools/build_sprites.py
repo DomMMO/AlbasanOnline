@@ -23,8 +23,9 @@ import sys
 from PIL import Image
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-MOB_OUT = os.path.join(ROOT, "client", "src", "assets", "mobs")
-ITEM_OUT = os.path.join(ROOT, "client", "src", "assets", "items")
+# Third-party art: written to the git-ignored licensed/ folder, never committed.
+MOB_OUT = os.path.join(ROOT, "client", "src", "assets", "licensed", "mobs")
+ITEM_OUT = os.path.join(ROOT, "client", "src", "assets", "licensed", "items")
 
 PACKS = {
     "Golem": "craftpix-891178-free-golem-tiny-style-2d-character-sprites",

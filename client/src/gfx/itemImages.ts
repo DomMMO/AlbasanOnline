@@ -1,11 +1,12 @@
-import grips from "../assets/items/items.json";
-
 // Art-asset item pictures (tools/build_sprites.py): <key>.png is the 36 px inventory icon,
 // <key>_held.png the small sprite in a character's hand; items.json has each one's grip
-// point (where the hand holds it, as a fraction of the held sprite).
+// point (where the hand holds it, as a fraction of the held sprite). Third-party art kept
+// out of the repository (assets/licensed/): without it items show their drawn icon.
 
-const urls = import.meta.glob<string>("../assets/items/*.png", { eager: true, query: "?url", import: "default" });
-const urlOf = (file: string) => urls[`../assets/items/${file}.png`];
+const gripFiles = import.meta.glob<Record<string, { grip: number[] }>>("../assets/licensed/items/items.json", { eager: true, import: "default" });
+const grips = Object.values(gripFiles)[0] ?? {};
+const urls = import.meta.glob<string>("../assets/licensed/items/*.png", { eager: true, query: "?url", import: "default" });
+const urlOf = (file: string) => urls[`../assets/licensed/items/${file}.png`];
 
 export interface ItemImage {
   icon: string;
@@ -16,7 +17,7 @@ export interface ItemImage {
 }
 
 const images = new Map<string, ItemImage>();
-for (const [key, { grip }] of Object.entries(grips as Record<string, { grip: number[] }>)) {
+for (const [key, { grip }] of Object.entries(grips)) {
   const icon = urlOf(key);
   const held = urlOf(`${key}_held`);
   if (!icon || !held) continue;

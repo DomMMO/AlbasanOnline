@@ -10,6 +10,7 @@ import { closeMenu, initMenu } from "./ui/menu";
 import { initTouchControls } from "./ui/touch";
 import { initWindows } from "./ui/windows";
 import { installCursorStyles } from "./gfx/cursors";
+import { loadTitleFont } from "./gfx/fonts";
 
 const disconnected = document.getElementById("disconnected")!;
 const disconnectedText = document.getElementById("disconnected-text")!;
@@ -37,7 +38,7 @@ let characterId = 0;
 let currentRoom: Room | null = null;
 
 /** In-canvas names are drawn with the title font; it must be loaded before the first scene draws text. */
-const fontsReady = document.fonts.load('10px "Cloister Black TR"').catch(() => undefined);
+const fontsReady = loadTitleFont();
 
 /** Lobby (login / character select), then into the world. Runs again after a character switch or logout. */
 async function play() {
