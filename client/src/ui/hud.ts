@@ -39,6 +39,10 @@ const targetInvite = $<HTMLButtonElement>("target-invite");
 let inviteCallback: (() => void) | null = null;
 targetInvite.addEventListener("mousedown", (e) => e.preventDefault());
 targetInvite.addEventListener("click", () => inviteCallback?.());
+const targetTrade = $<HTMLButtonElement>("target-trade");
+let tradeCallback: (() => void) | null = null;
+targetTrade.addEventListener("mousedown", (e) => e.preventDefault());
+targetTrade.addEventListener("click", () => tradeCallback?.());
 const targetDuel = $<HTMLButtonElement>("target-duel");
 let duelCallback: (() => void) | null = null;
 targetDuel.addEventListener("mousedown", (e) => e.preventDefault());
@@ -188,6 +192,8 @@ export interface TargetFrameData {
   onInvite?: () => void;
   /** Shows the "Düello" button when set. */
   onDuel?: () => void;
+  /** Shows the "Takas" button when set. */
+  onTrade?: () => void;
 }
 
 export function setTargetFrame(data: TargetFrameData | null) {
@@ -202,6 +208,8 @@ export function setTargetFrame(data: TargetFrameData | null) {
   targetInvite.hidden = !data.onInvite;
   duelCallback = data.onDuel ?? null;
   targetDuel.hidden = !data.onDuel;
+  tradeCallback = data.onTrade ?? null;
+  targetTrade.hidden = !data.onTrade;
 }
 
 // ---- Hotbar ------------------------------------------------------------

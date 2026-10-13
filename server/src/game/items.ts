@@ -33,6 +33,8 @@ import { broadcastSystem } from "./chat";
 import type { Game } from "./Game";
 import { addItem, equippedItems, hasSpaceFor, indexOfItem, newStack, removeAt, socketedJewels, toView, type ItemStack } from "./inventory";
 import { autoSocket, socketJewel, unsocketJewel } from "./passives";
+import { moveWithStorage } from "./storage";
+import { toggleFishing } from "./fishing";
 import { partyIdOf } from "./party";
 
 // Everything players do with items: equip, use, move, loot, buy, sell.
@@ -130,6 +132,8 @@ export function moveItem(game: Game, sessionId: string, from: SlotRef, to: SlotR
   if (!ctx) return;
   const { inv } = ctx;
 
+  if (from.area === "storage" || to.area === "storage") return moveWithStorage(game, sessionId, from, to);
+
   if (from.area === "inv" && to.area === "inv") {
     if (!validIndex(from.index) || !validIndex(to.index) || from.index === to.index) return;
     const a = inv.slots[from.index];
@@ -191,6 +195,7 @@ export function useItem(game: Game, sessionId: string, index: number | undefined
   if (def.slot) return equipFromInventory(game, sessionId, index);
   if (def.jewel) return autoSocket(game, sessionId, index);
   if (def.recall) return recall(game, sessionId, index);
+  if (def.fishingRod) return toggleFishing(game, sessionId);
   if (!def.heal && !def.mana) return;
 
   const { player, runtime } = ctx;

@@ -146,6 +146,15 @@ const MIGRATIONS: { version: number; name: string; sql: string }[] = [
       ALTER TABLE characters ADD COLUMN fortune JSONB;
     `,
   },
+  {
+    version: 10,
+    name: "storage (depo)",
+    sql: `
+      ALTER TABLE items DROP CONSTRAINT items_container_check;
+      ALTER TABLE items ADD CONSTRAINT items_container_check CHECK (container IN ('inventory', 'equipment', 'passive', 'storage'));
+      ALTER TABLE characters ADD COLUMN storage_gold INT NOT NULL DEFAULT 0 CHECK (storage_gold >= 0);
+    `,
+  },
 ];
 
 export async function runMigrations() {

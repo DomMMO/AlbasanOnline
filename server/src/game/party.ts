@@ -1,6 +1,7 @@
 import {
   MAX_PARTY_SIZE,
   Msg,
+  ZONES,
   type ChatEvent,
   type PartyInviteEvent,
   type PartyMemberView,
@@ -126,6 +127,11 @@ export function respond(characterId: number, accept: boolean) {
   if (party.members.length >= MAX_PARTY_SIZE) return system(characterId, "Grup dolu.");
   party.members.push(characterId);
   partyOfCharacter.set(characterId, party.id);
+  // A member already inside a dungeon makes that copy the party's: the others can follow them in.
+  for (const id of party.members) {
+    const entry = onlineCharacters.get(id);
+    if (entry?.game.zone.instanced) registerInstance(id, entry.game.zone.id, entry.roomId);
+  }
   tellParty(party, `${nameOf(characterId)} gruba katıldı.`);
   broadcastUpdate(party);
 }
@@ -133,6 +139,7 @@ export function respond(characterId: number, accept: boolean) {
 export function leave(characterId: number, reason = "gruptan ayrıldı") {
   const party = partyOf(characterId);
   if (!party) return system(characterId, "Bir grupta değilsin.");
+  removeFromPartyInstance(party, characterId);
   party.members = party.members.filter((id) => id !== characterId);
   partyOfCharacter.delete(characterId);
   send(characterId, Msg.PartyUpdate, { partyId: null, members: [] } satisfies PartyUpdateEvent);
@@ -175,6 +182,20 @@ function disband(party: Party) {
 }
 
 // ---- Dungeon instances -----------------------------------------------------------
+
+/**
+ * Someone leaving the party (or kicked) can't stay in the party's dungeon copy: they are
+ * sent out through the dungeon's exit, back in front of its entrance.
+ */
+function removeFromPartyInstance(party: Party, characterId: number) {
+  const entry = onlineCharacters.get(characterId);
+  const zone = entry?.game.zone;
+  if (!entry || !zone?.instanced || party.instances.get(zone.id) !== entry.roomId) return;
+  const exit = zone.portals.find((p) => p.style === "exit" && !p.requiresClear) ?? zone.portals.find((p) => p.style === "exit");
+  if (!exit) return;
+  system(characterId, `Gruptan ayrıldığın için ${ZONES[zone.id].name} terk edildi.`);
+  entry.game.io.evict(entry.sessionId, exit.to);
+}
 
 /** The party's open instance of a zone, if any. */
 export function instanceFor(characterId: number, zone: string): string | undefined {

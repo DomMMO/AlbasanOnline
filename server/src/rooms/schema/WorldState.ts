@@ -49,6 +49,10 @@ export class Player extends Schema {
   @type("string") gearFeet = "";
   /** Market stall title ("" = no stall). */
   @type("string") stall = "";
+  /** Fishing: the float lies on the water at (fishX, fishY). */
+  @type("boolean") fishing = false;
+  @type("number") fishX = 0;
+  @type("number") fishY = 0;
 }
 
 export class Mob extends Schema {

@@ -37,6 +37,8 @@ import { dismissMinions, updateMinions, type MinionRuntime } from "./minions";
 import { sendSkillRanks } from "./talents";
 import { sendFortuneState } from "./fortune";
 import { loseDuel, updateDuels, type DuelInvite, type DuelState } from "./duel";
+import { cancelTrade, updateTrades, type TradeInvite, type TradeSession } from "./trade";
+import { stopFishing, updateFishing, type FishingState } from "./fishing";
 import { worldMinute } from "./worldClock";
 import type { SpawnZone } from "../../../shared/src";
 
@@ -51,6 +53,8 @@ export interface GameIO {
   persist(sessionIds: string[]): void;
   /** Send a player to another zone (return scroll), as if through a portal. */
   transfer(sessionId: string, zone: ZoneId, arriveAt?: { x: number; y: number }): void;
+  /** Like transfer, but they must go: still here a few seconds later, they are disconnected. */
+  evict(sessionId: string, zone: ZoneId): void;
 }
 
 export interface PlayerRuntime {
@@ -106,6 +110,12 @@ export interface PlayerRuntime {
   duel: DuelState | null;
   /** A duel challenge waiting for our answer. */
   duelInvite: DuelInvite | null;
+  /** The trade window we have open (shared with the other trader). */
+  trade: TradeSession | null;
+  /** A trade request waiting for our answer. */
+  tradeInvite: TradeInvite | null;
+  /** Our line is in the water (harbour). */
+  fishing: FishingState | null;
 }
 
 export interface ActiveBuff {
@@ -194,6 +204,8 @@ export class Game {
     updateMinions(this);
     updatePlayerCombat(this);
     updateDuels(this);
+    updateTrades(this);
+    updateFishing(this);
   }
 
   /**
@@ -228,7 +240,7 @@ export class Game {
       lastQueuedSeq: 0,
       inputBudget: MAX_INPUT_BURST,
       stats: statsWithEquipment(character.class, 1, []), // set by refreshStats below
-      inventory: fromStored(character.gold, character.items),
+      inventory: fromStored(character.gold, character.items, character.storageGold),
       targetId: null,
       attacking: false,
       nextSwingAt: 0,
@@ -256,6 +268,9 @@ export class Game {
       auraSignature: "",
       duel: null,
       duelInvite: null,
+      trade: null,
+      tradeInvite: null,
+      fishing: null,
     });
 
     refreshStats(this, sessionId);
@@ -275,7 +290,7 @@ export class Game {
   /** What gets written to the database for this player. */
   progressOf(
     sessionId: string,
-  ): { characterId: number; progress: CharacterProgress; gold: number; items: StoredItem[]; quests: QuestProgress[] } | null {
+  ): { characterId: number; progress: CharacterProgress; gold: number; storageGold: number; items: StoredItem[]; quests: QuestProgress[] } | null {
     const player = this.state.players.get(sessionId);
     const runtime = this.playerRuntime.get(sessionId);
     if (!player || !runtime) return null;
@@ -296,6 +311,7 @@ export class Game {
         fortune: runtime.fortune,
       },
       gold: runtime.inventory.gold,
+      storageGold: runtime.inventory.storageGold,
       items: toStored(runtime.inventory),
       quests: [...runtime.quests.values()],
     };
@@ -303,6 +319,7 @@ export class Game {
 
   removePlayer(sessionId: string) {
     loseDuel(this, sessionId, "left");
+    cancelTrade(this, sessionId, "Takas iptal edildi: karşı taraf ayrıldı");
     closeStall(this, sessionId);
     dismissMinions(this, sessionId);
     forgetPlayer(this, sessionId);
@@ -379,8 +396,9 @@ export class Game {
       runtime.inputBudget--;
     }
     player.moving = processed > 0;
-    // Moving interrupts spells with a cast time.
+    // Moving interrupts spells with a cast time, and reels the fishing line in.
     if (processed > 0 && runtime.casting) cancelCast(this, sessionId, "Büyü iptal edildi");
+    if (processed > 0 && runtime.fishing) stopFishing(this, sessionId, "Oltayı topladın");
   }
 
   private updateClock() {

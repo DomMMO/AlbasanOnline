@@ -98,3 +98,24 @@ export const MAX_GOLD = 2_000_000_000;
 export const STALL_RANGE = TILE_SIZE * 3;
 /** Stalls can't be opened closer than this to another stall. */
 export const STALL_SPACING = TILE_SIZE * 1.5;
+
+// ---- Storage (depo) ---------------------------------------------------------------
+
+/** Slots in a character's storage at the Depocu. */
+export const STORAGE_SIZE = 48;
+
+// ---- Player trade (takas) -------------------------------------------------------
+
+/** Items each side can put in a trade. */
+export const TRADE_SLOTS = 8;
+/** You can only offer a trade to someone standing this close. */
+export const TRADE_RANGE = TILE_SIZE * 5;
+/** Traders who get this far apart call the trade off. */
+export const TRADE_MAX_DISTANCE = TILE_SIZE * 8;
+export const TRADE_INVITE_MS = 30_000;
+
+// ---- Party dungeons ---------------------------------------------------------------
+
+/** Party members this close to someone entering a dungeon are asked to come along. */
+export const DUNGEON_INVITE_RANGE = TILE_SIZE * 15;
+export const DUNGEON_INVITE_MS = 30_000;

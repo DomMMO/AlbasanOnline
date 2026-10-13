@@ -61,8 +61,8 @@ export function renderSlot(el: HTMLElement, item: ItemView | null | undefined) {
   if (item.enhance > 0) el.append(Object.assign(document.createElement("span"), { className: "plus", textContent: `+${item.enhance}` }));
 }
 
-/** Bag and equipment slots (the passive tree has its own window). */
-type BagRef = Exclude<SlotRef, { area: "passive" }>;
+/** Bag and equipment slots (the passive tree and storage have their own windows). */
+type BagRef = Extract<SlotRef, { area: "inv" | "equip" }>;
 
 function itemAt(ref: BagRef): ItemView | null | undefined {
   if (!state) return null;

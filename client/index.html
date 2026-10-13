@@ -50,6 +50,7 @@
         <div class="bar hp"><div id="target-hp-fill" class="fill"></div><span id="target-hp-text"></span></div>
         <div class="target-actions">
           <button id="target-invite" type="button" tabindex="-1" hidden>Gruba davet et</button>
+          <button id="target-trade" type="button" tabindex="-1" hidden>Takas</button>
           <button id="target-duel" type="button" tabindex="-1" hidden>Düello</button>
         </div>
       </div>
@@ -69,6 +70,22 @@
         <div class="row">
           <button id="duel-accept" type="button" tabindex="-1">Kabul</button>
           <button id="duel-decline" type="button" tabindex="-1">Reddet</button>
+        </div>
+      </div>
+
+      <div id="trade-invite" class="window" hidden>
+        <p id="trade-invite-text"></p>
+        <div class="row">
+          <button id="trade-accept" type="button" tabindex="-1">Kabul</button>
+          <button id="trade-decline" type="button" tabindex="-1">Reddet</button>
+        </div>
+      </div>
+
+      <div id="dungeon-invite" class="window" hidden>
+        <p id="dungeon-invite-text"></p>
+        <div class="row">
+          <button id="dungeon-accept" type="button" tabindex="-1">Katıl</button>
+          <button id="dungeon-decline" type="button" tabindex="-1">Reddet</button>
         </div>
       </div>
 
@@ -149,7 +166,7 @@
         <div id="xp-bar" class="bar"><div id="xp-fill" class="fill"></div><span id="xp-text"></span></div>
       </div>
 
-      <div id="help">Tab: hedef · Sol tık: saldır / al / konuş / portal · 1-0: skill (K'dan sürükle) · Q / R: iksir · I: envanter · K: yetenekler · P: pasif ağaç · T: şehir portalı · J: görevler · M: harita · E: al/konuş/portal · Enter: sohbet · L: PvP sıralaması · Esc: menü</div>
+      <div id="help">Tab: hedef · Sol tık: saldır / al / konuş / portal · 1-0: skill (K'dan sürükle) · Q / R: iksir · I: envanter · K: yetenekler · P: pasif ağaç · T: şehir portalı · J: görevler · M: harita · E: al/konuş/portal · Enter: sohbet · L: PvP sıralaması · /takas İsim: takas · Esc: menü</div>
 
       <div id="inventory-window" class="window" hidden>
         <div class="window-title"><span>Karakter</span><button id="inventory-close" class="close" tabindex="-1">×</button></div>
@@ -184,6 +201,7 @@
       </div>
 
       <button id="stall-button" type="button" tabindex="-1" hidden>Pazar Kur</button>
+      <button id="fish-button" type="button" tabindex="-1" hidden>Balık Tut</button>
 
       <div id="quest-tracker" hidden></div>
 
@@ -246,6 +264,39 @@
         <div id="stall-browse-seller" class="window-hint"></div>
         <div id="stall-browse-list" class="stall-list"></div>
         <p class="window-hint">Fiyatlar birim başınadır. Adet yazıp Al'a bas.</p>
+      </div>
+
+      <div id="storage-window" class="window" hidden>
+        <div class="window-title"><span>Depo</span><button id="storage-close" class="close" tabindex="-1">×</button></div>
+        <div id="storage-grid"></div>
+        <div class="storage-gold">
+          <span class="coin"></span><span id="storage-gold">0</span>
+          <input id="storage-gold-input" type="number" min="1" placeholder="Miktar" autocomplete="off" />
+          <button id="storage-deposit" type="button" class="stall-action" tabindex="-1">Koy</button>
+          <button id="storage-withdraw" type="button" class="stall-action" tabindex="-1">Al</button>
+        </div>
+        <p class="window-hint">Sağ tık ya da sürükle: envanter ↔ depo. Depo bu karaktere aittir, eşyaların burada güvende.</p>
+      </div>
+
+      <div id="trade-window" class="window" hidden>
+        <div class="window-title"><span id="trade-title">Takas</span><button id="trade-close" class="close" tabindex="-1">×</button></div>
+        <div class="trade-sides">
+          <div id="trade-mine" class="trade-side">
+            <div class="trade-side-title">Senin teklifin <span id="trade-mine-status" class="trade-status"></span></div>
+            <div id="trade-mine-grid" class="trade-grid"></div>
+            <div class="trade-gold"><span class="coin"></span><input id="trade-gold-input" type="number" min="0" value="0" autocomplete="off" /></div>
+          </div>
+          <div id="trade-theirs" class="trade-side">
+            <div class="trade-side-title"><span id="trade-partner"></span> <span id="trade-theirs-status" class="trade-status"></span></div>
+            <div id="trade-theirs-grid" class="trade-grid"></div>
+            <div class="trade-gold"><span class="coin"></span><span id="trade-theirs-gold">0</span></div>
+          </div>
+        </div>
+        <p id="trade-hint" class="window-hint"></p>
+        <div class="trade-buttons">
+          <button id="trade-action" type="button" class="stall-action" tabindex="-1">Teklifi Kilitle</button>
+          <button id="trade-cancel" type="button" class="stall-action" tabindex="-1">İptal</button>
+        </div>
       </div>
     </div>
 

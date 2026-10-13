@@ -52,7 +52,7 @@ let initialised = false;
 const formatGold = (n: number) => n.toLocaleString("tr-TR");
 
 /** Typing in market inputs must not move the character or trigger hotkeys. */
-function isolateKeys(input: HTMLInputElement) {
+export function isolateKeys(input: HTMLInputElement) {
   input.addEventListener("keydown", (event) => {
     event.stopPropagation();
     if (event.key === "Escape" || event.key === "Enter") input.blur();
