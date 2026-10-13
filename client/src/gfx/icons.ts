@@ -1,4 +1,5 @@
 import { itemRarity, RARITY_COLORS, type Affix, type IconShape, type ItemDef } from "../../../shared/src";
+import { itemImage } from "./itemImages";
 
 // 12x12 pixel-art item icons, drawn once per (shape, colour) into data URLs for the DOM UI.
 // Legend: k outline, m item colour, l lighter, d darker, w highlight, h wood/handle, g gold, n glass,
@@ -449,6 +450,8 @@ const cache = new Map<string, string>();
 
 /** An item instance's icon: jewels take their rarity's colour, everything else its own. */
 export function itemIconUrl(def: ItemDef, affixes?: Affix[]): string {
+  const picture = itemImage(def.image);
+  if (picture) return picture.icon;
   if (!def.jewel) return iconUrl(def.icon.shape, def.icon.color);
   const color = Number.parseInt(RARITY_COLORS[itemRarity(def, affixes)].slice(1), 16);
   return iconUrl(def.icon.shape, color);

@@ -23,9 +23,24 @@ interface ImageSprite {
   once: string[];
 }
 
+// Mob sheets built by tools/build_sprites.py from the CraftPix packs: <key>.png + <key>.json.
+const mobMetas = import.meta.glob<ImageSpriteMeta>("../assets/mobs/*.json", { eager: true, import: "default" });
+const mobUrls = import.meta.glob<string>("../assets/mobs/*.png", { eager: true, query: "?url", import: "default" });
+const sheetKey = (path: string) => path.split("/").pop()!.replace(/\.(json|png)$/, "");
+
 export const IMAGE_SPRITES: Record<string, ImageSprite> = {
   jack: { url: jackUrl, meta: jackMeta, fps: { walk: 12, run: 14, jump: 9, slide: 16, dead: 12 }, once: ["jump", "dead"] },
+  ...Object.fromEntries(
+    Object.entries(mobMetas).map(([path, meta]) => {
+      const url = mobUrls[path.replace(/\.json$/, ".png")];
+      const sprite: ImageSprite = { url, meta, fps: { idle: 8, walk: 14, attack: 18, hurt: 16, dead: 14 }, once: ["attack", "hurt", "dead"] };
+      return [sheetKey(path), sprite];
+    }),
+  ),
 };
+
+/** Whether a sheet has an animation of that name (e.g. "attack", "hurt"). */
+export const hasImageAnim = (key: string, anim: string) => !!IMAGE_SPRITES[key]?.meta.anims[anim];
 
 export const imageTextureKey = (key: string) => `img-${key}`;
 

@@ -1,5 +1,5 @@
 import { ITEMS, RARITY_COLORS, type NpcDef } from "../../../shared/src";
-import { iconUrl } from "../gfx/icons";
+import { iconUrl, itemIconUrl } from "../gfx/icons";
 import { hideTooltip, showItemTooltip } from "./tooltip";
 
 // Merchant window. Buying is a click; selling happens from the inventory
@@ -51,7 +51,7 @@ export function openShop(npc: NpcDef) {
       row.tabIndex = -1;
       row.dataset.itemId = itemId;
       row.innerHTML = `<img alt="" /><span class="name"></span><span class="price"></span>`;
-      (row.querySelector("img") as HTMLImageElement).src = iconUrl(def.icon.shape, def.icon.color);
+      (row.querySelector("img") as HTMLImageElement).src = itemIconUrl(def);
       const name = row.querySelector(".name") as HTMLElement;
       name.textContent = def.name;
       name.style.color = RARITY_COLORS[def.rarity];

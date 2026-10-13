@@ -41,7 +41,7 @@ const fontsReady = document.fonts.load('10px "Cloister Black TR"').catch(() => u
 
 /** Lobby (login / character select), then into the world. Runs again after a character switch or logout. */
 async function play() {
-  const result = await runLobby();
+  const result = await runLobby(game);
   await fontsReady;
   characterId = result.characterId;
   showHud();

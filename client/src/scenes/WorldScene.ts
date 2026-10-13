@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import { getStateCallbacks, type Room } from "colyseus.js";
 import {
   castSpot,
+  sanitizeLook,
   Direction,
   RARITY_COLORS,
   directionFrom,
@@ -185,10 +186,17 @@ interface Point {
 }
 
 /** A player's look: tunic colour plus whatever armour they wear. */
+/** The parts of a humanoid appearance a player chose at character creation. */
+export function lookAppearance(look: { gender: string; hairStyle: string; hairColor: number; skin: number }) {
+  const valid = sanitizeLook(look);
+  return { gender: valid.gender, hairStyle: valid.hairStyle, hair: valid.hairColor, skin: valid.skin };
+}
+
 function playerAppearance(player: PlayerView): Appearance {
   return {
     type: "humanoid",
     tunic: player.color,
+    ...lookAppearance(player),
     headwear: classOf(player.cls).headwear,
     gear: {
       head: player.gearHead || undefined,
@@ -554,7 +562,7 @@ export class WorldScene extends Phaser.Scene {
         });
         this.refreshLocalUi();
         view.setWeapon(player.weapon, player.weaponPlus);
-        setDollLook(player.color, player.cls);
+        setDollLook(player.color, player.cls, lookAppearance(player));
         this.rebuildHotbar(player.cls);
         initPotions(player.name, player.cls, {
           use: (defId) => this.room.send(Msg.UseItem, { defId }),

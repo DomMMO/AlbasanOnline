@@ -14,7 +14,7 @@ import {
   type QuestProgress,
   type QuestRewardItem,
 } from "../../../shared/src";
-import { iconUrl } from "../gfx/icons";
+import { iconUrl, itemIconUrl } from "../gfx/icons";
 import { countItem } from "./inventory";
 import { hideTooltip, showItemTooltip } from "./tooltip";
 
@@ -237,7 +237,7 @@ function rewardBlock(quest: QuestDef): HTMLElement {
     if (!def) continue;
     const item = el("div", "reward-item");
     const img = el("img");
-    img.src = iconUrl(def.icon.shape, def.icon.color);
+    img.src = itemIconUrl(def);
     const name = el("span", "", `${def.name}${(reward.qty ?? 1) > 1 ? ` x${reward.qty}` : ""}`);
     name.style.color = RARITY_COLORS[def.rarity];
     item.append(img, name);

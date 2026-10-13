@@ -105,6 +105,8 @@ export interface ItemDef {
   questItem?: boolean;
   /** How worn armour looks on the character: plain cloth/leather, chain "mail", or shiny "plate". */
   look?: "mail" | "plate";
+  /** Art-asset picture (client/src/assets/items/<image>.png); `icon` stays as the fallback. */
+  image?: string;
   /** Passive tree jewel: "major" goes in a big socket, "greater" only in a greater one, "minor" in a small one. */
   jewel?: "major" | "minor" | "greater";
   description?: string;
@@ -124,6 +126,16 @@ export const ITEMS: Record<string, ItemDef> = Object.fromEntries(
     def({ id: "wolf_fang_blade", classes: MELEE, name: "Kurt Dişi Kılıcı", rarity: "uncommon", level: 3, slot: "weapon", stats: { attack: 10 }, attackSpeedMs: 1900, maxStack: 1, sellPrice: 25, icon: { shape: "sword", color: 0xe8e2c8 } }),
     def({ id: "war_axe", classes: MELEE, name: "Savaş Baltası", rarity: "common", level: 5, slot: "weapon", stats: { attack: 14 }, attackSpeedMs: 2400, maxStack: 1, buyPrice: 200, sellPrice: 40, icon: { shape: "axe", color: 0xb0b4bc } }),
     def({ id: "grukk_axe", classes: MELEE, name: "Grukk'un Baltası", rarity: "epic", level: 7, slot: "weapon", stats: { attack: 24, maxHp: 20 }, attackSpeedMs: 2300, maxStack: 1, sellPrice: 150, icon: { shape: "axe", color: 0xa83232 }, description: "Goblin Şefi'nin kanlı baltası." }),
+    // ---- Monster weapons (art from the CraftPix packs: image = client/src/assets/items/<id>.png)
+    def({ id: "minotaur_mace", classes: ["priest"], image: "minotaur_mace", name: "Minotor Gürzü", rarity: "rare", level: 10, slot: "weapon", stats: { attack: 22, maxHp: 15 }, attackSpeedMs: 1900, maxStack: 1, sellPrice: 140, icon: { shape: "mace", color: 0xb0a890 }, description: "Ustabaşı Dorak'ın taş başlı gürzü. İpleri hâlâ sıkı." }),
+    def({ id: "minotaur_club", classes: MELEE, image: "minotaur_club", name: "Minotor Sopası", rarity: "uncommon", level: 11, slot: "weapon", stats: { attack: 25 }, attackSpeedMs: 2100, maxStack: 1, sellPrice: 110, icon: { shape: "mace", color: 0x8a5a2b } }),
+    def({ id: "stone_blade", classes: MELEE, image: "stone_blade", name: "Taş Kılıç", rarity: "rare", level: 11, slot: "weapon", stats: { attack: 26, maxHp: 15 }, attackSpeedMs: 2000, maxStack: 1, sellPrice: 210, icon: { shape: "sword", color: 0x9aa8b8 }, description: "Kristal Golem'in kolundan koparılmış taş. Keskin olmasına şaşarsın." }),
+    def({ id: "satyr_club", classes: MELEE, image: "satyr_club", name: "Satir Sopası", rarity: "uncommon", level: 12, slot: "weapon", stats: { attack: 27 }, attackSpeedMs: 2100, maxStack: 1, sellPrice: 160, icon: { shape: "mace", color: 0x8a5a2b } }),
+    def({ id: "minotaur_hammer", classes: MELEE, image: "minotaur_hammer", name: "Maden Kralı'nın Çekici", rarity: "epic", level: 12, slot: "weapon", stats: { attack: 40, maxHp: 25 }, attackSpeedMs: 2400, maxStack: 1, sellPrice: 420, icon: { shape: "mace", color: 0x6b4423 }, description: "Gırtlak bu çekiçle madenin bütün tünellerini açtı. Bir o kadar da kafa." }),
+    def({ id: "satyr_spear", classes: MELEE, image: "satyr_spear", name: "Satir Mızrağı", rarity: "uncommon", level: 13, slot: "weapon", stats: { attack: 29 }, attackSpeedMs: 2000, maxStack: 1, sellPrice: 190, icon: { shape: "sword", color: 0xb0b4bc } }),
+    def({ id: "golem_axe", classes: MELEE, image: "golem_axe", name: "Golem Baltası", rarity: "rare", level: 13, slot: "weapon", stats: { attack: 40, maxHp: 20 }, attackSpeedMs: 2500, maxStack: 1, sellPrice: 330, icon: { shape: "axe", color: 0x9aa4b4 }, description: "Taş Muhafız'ın yosun tutmuş baltası. Tapınak gibi o da sular altında kalmış." }),
+    def({ id: "satyr_axe", classes: MELEE, image: "satyr_axe", name: "Satir Reisi'nin Baltası", rarity: "rare", level: 15, slot: "weapon", stats: { attack: 42 }, attackSpeedMs: 2500, maxStack: 1, sellPrice: 380, icon: { shape: "axe", color: 0xb0b4bc } }),
+    def({ id: "log_club", classes: MELEE, image: "log_club", name: "Kütük Gürz", rarity: "rare", level: 17, slot: "weapon", stats: { attack: 47, defense: 3 }, attackSpeedMs: 2600, maxStack: 1, sellPrice: 450, icon: { shape: "mace", color: 0x8a5a2b }, description: "Yosun Golemi'nin kolundan farkı yok. Kaldırabilen için ağır bir ders." }),
     def({ id: "pumpkin_scythe", classes: MELEE, name: "Kabak Jack'in Tırpanı", rarity: "legendary", level: 8, slot: "weapon", stats: { attack: 30, maxHp: 30 }, attackSpeedMs: 2600, maxStack: 1, sellPrice: 300, icon: { shape: "scythe", color: 0x6e5a44 }, description: "Mahzenin lanetinden kalma tırpan. Ağır ama ölümcül." }),
     def({ id: "steel_sword", classes: MELEE, name: "Çelik Kılıç", rarity: "uncommon", level: 6, slot: "weapon", stats: { attack: 16 }, attackSpeedMs: 2000, maxStack: 1, buyPrice: 450, sellPrice: 90, icon: { shape: "sword", color: 0xe0e6f0 } }),
     def({ id: "goblin_cleaver", classes: MELEE, name: "Goblin Satırı", rarity: "rare", level: 5, slot: "weapon", stats: { attack: 17, maxHp: 10 }, attackSpeedMs: 2200, maxStack: 1, sellPrice: 70, icon: { shape: "axe", color: 0x7cb342 } }),

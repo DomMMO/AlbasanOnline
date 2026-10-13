@@ -155,6 +155,15 @@ const MIGRATIONS: { version: number; name: string; sql: string }[] = [
       ALTER TABLE characters ADD COLUMN storage_gold INT NOT NULL DEFAULT 0 CHECK (storage_gold >= 0);
     `,
   },
+  {
+    version: 11,
+    name: "character looks and play time",
+    sql: `
+      -- { "gender": "female", "hairStyle": "ponytail", "hairColor": 9127187, "skin": 15779994 }; {} = defaults
+      ALTER TABLE characters ADD COLUMN look JSONB NOT NULL DEFAULT '{}';
+      ALTER TABLE characters ADD COLUMN play_seconds INT NOT NULL DEFAULT 0;
+    `,
+  },
 ];
 
 export async function runMigrations() {
