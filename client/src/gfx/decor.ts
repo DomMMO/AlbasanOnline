@@ -127,6 +127,9 @@ export function drawDecor(scene: Phaser.Scene, decor: Decor[]) {
       case "trough":
         trough(scene, piece.tx, piece.ty);
         break;
+      case "parkBench":
+        parkBench(scene, piece);
+        break;
       case "colosseum":
         colosseum(scene);
         break;
@@ -862,6 +865,36 @@ function farmHorse(scene: Phaser.Scene, h: Extract<Decor, { kind: "horse" }>) {
       });
     },
   });
+}
+
+/**
+ * A park bench: wooden slats on cast-iron legs with a backrest. Sitters face `facing`; the
+ * backrest is on the far side, so for a bench looking north (at the fountain from the south)
+ * it stands in front of whoever sits there and is drawn over them.
+ */
+function parkBench(scene: Phaser.Scene, b: Extract<Decor, { kind: "parkBench" }>) {
+  const x0 = b.tx * TILE_SIZE;
+  const W = b.w * TILE_SIZE;
+  const bottom = (b.ty + 1) * TILE_SIZE;
+  const IRON = 0x2a2a30;
+  const WOOD = 0x8a5a2b;
+  const WOOD_LIGHT = 0xb07b48;
+  const WOOD_DARK = 0x5b3a1e;
+  // Shadow, legs and seat sit just under the sitter.
+  const seat = scene.add.graphics().setPosition(x0, bottom).setDepth(bottom - 0.5);
+  seat.fillStyle(0x000000, 0.25).fillEllipse(W / 2, -1, W, 4);
+  for (const lx of [3, W - 5]) seat.fillStyle(IRON).fillRect(lx, -6, 2, 6).fillRect(lx - 1, -1, 4, 1);
+  seat.fillStyle(WOOD_DARK).fillRect(1, -8, W - 2, 3);
+  seat.fillStyle(WOOD).fillRect(1, -9, W - 2, 2).fillRect(1, -6, W - 2, 1);
+  seat.fillStyle(WOOD_LIGHT).fillRect(1, -9, W - 2, 1);
+  // Backrest: two slats on iron posts.
+  const behind = b.facing === "down";
+  const back = scene.add.graphics().setPosition(x0, bottom).setDepth(behind ? bottom - 0.6 : bottom + 0.5);
+  const top = behind ? -18 : -6;
+  for (const lx of [3, W - 5]) back.fillStyle(IRON).fillRect(lx, top, 2, behind ? 10 : 6);
+  for (const [dy, color] of [[0, WOOD_LIGHT], [1, WOOD], [4, WOOD_LIGHT], [5, WOOD]] as const) back.fillStyle(color).fillRect(0, top + 1 + dy, W, 1);
+  back.fillStyle(WOOD_DARK).fillRect(0, top + 3, W, 1).fillRect(0, top + 7, W, 1);
+  for (const lx of [0, W - 1]) back.fillStyle(IRON).fillRect(lx, top, 1, 8);
 }
 
 /** A long wooden water trough (two tiles wide). */

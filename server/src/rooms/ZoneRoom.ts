@@ -62,6 +62,7 @@ import { respondDuel } from "../game/duel";
 import { notice, sendInventory } from "../game/items";
 import { chooseClass, resetClass } from "../game/classPath";
 import { buyHorse, selectHorse, styleHorse } from "../game/stable";
+import { sitOnBench } from "../game/benches";
 import { friendJoined, friendLeft, removeFriend, requestFriend, respondFriend } from "../game/friends";
 import { forgetInstance, instanceFor, refreshFor, registerInstance, respond, sameParty } from "../game/party";
 import { claimCharacter } from "../game/presence";
@@ -301,6 +302,7 @@ export class ZoneRoom extends Room<WorldState> {
     });
     this.onMessage(Msg.Fish, (client) => toggleFishing(this.game, client.sessionId));
     this.onMessage(Msg.Mount, (client) => toggleMount(this.game, client.sessionId));
+    this.onMessage(Msg.Sit, (client, message: { bench?: unknown }) => sitOnBench(this.game, client.sessionId, message?.bench));
     this.onMessage(Msg.TradeRespond, (client, message: { accept?: unknown }) => respondTrade(this.game, client.sessionId, message?.accept === true));
     this.onMessage(Msg.TradeOffer, (client, message: Partial<TradeOfferMessage>) => setOffer(this.game, client.sessionId, message?.items, message?.gold));
     this.onMessage(Msg.TradeLock, (client) => lockOffer(this.game, client.sessionId));

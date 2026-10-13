@@ -2,7 +2,11 @@ import Phaser from "phaser";
 import { getStateCallbacks, type Room } from "colyseus.js";
 import {
   castSpot,
+  benchSeats,
+  HOME_ZONE,
   darkness,
+  TOWN_BENCHES,
+  type Bench,
   horseSpeedBonus,
   type TownPlace,
   sanitizeLook,
@@ -435,6 +439,14 @@ export class WorldScene extends Phaser.Scene {
       if (def.style === "door") view.sprite.setAlpha(0);
       this.portals.push({ def, view });
     }
+    // Benches round the fountain: click one to walk over and sit down.
+    if (this.zone.id === HOME_ZONE) {
+      for (const bench of TOWN_BENCHES) {
+        const w = bench.w * TILE_SIZE;
+        const zone = this.add.zone(bench.tx * TILE_SIZE + w / 2, bench.ty * TILE_SIZE + 4, w, TILE_SIZE + 8).setInteractive({ cursor: cursor("pointer") });
+        zone.on("pointerdown", (pointer: Phaser.Input.Pointer) => !pointer.event.altKey && this.sitOn(bench));
+      }
+    }
 
     this.bindControls();
     this.bindState();
@@ -694,6 +706,7 @@ export class WorldScene extends Phaser.Scene {
           view.setWeapon(player.weapon, player.weaponPlus);
           view.setLook(playerAppearance(player));
           this.syncMount(view, player.mounted, player.horseLook);
+          view.setSeated(player.seated);
           view.setGallop(player.galloping && player.moving);
           view.setGmTag(player.gm);
           this.syncStall(sessionId, player);
@@ -1416,6 +1429,12 @@ export class WorldScene extends Phaser.Scene {
     local.view.setWeapon(p.weapon, p.weaponPlus);
     local.view.setLook(playerAppearance(p));
     this.syncMount(local.view, p.mounted, p.horseLook);
+    local.view.setSeated(p.seated);
+    // Sitting down turns us to face the fountain.
+    if (p.seated && local.dir !== p.dir) {
+      local.dir = p.dir;
+      local.view.setAnimation(p.dir, false);
+    }
     local.view.setGmTag(p.gm);
     setMountButton(this.zone.instanced || this.zone.pvp ? null : { mounted: p.mounted });
     if (p.dead && this.targetId) this.selectTarget(null, false, false);
@@ -1811,6 +1830,14 @@ export class WorldScene extends Phaser.Scene {
     for (const ping of this.pings) dots.push({ x: ping.x, y: ping.y, kind: "ping" });
     if (this.guide) dots.push({ x: this.guide.place.x, y: this.guide.place.y, kind: "guide" });
     drawMinimap(dots);
+  }
+
+  /** Walk to the bench's nearest seat and sit down (the server picks a free one). */
+  private sitOn(bench: Bench) {
+    const local = this.local;
+    if (!local) return;
+    const nearest = () => benchSeats(bench).sort((a, b) => distance(local.curr, a) - distance(local.curr, b))[0];
+    this.walkTo(nearest, TILE_SIZE * 1.5, () => this.room.send(Msg.Sit, { bench: bench.id }));
   }
 
   /** A guard pointed the way: an arrow at our feet and a mark on the minimap until we get there. */

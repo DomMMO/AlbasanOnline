@@ -26,6 +26,30 @@ const GATE_ROWS = [28, 29, 30];
 const MARKET_AREA = { tx: 20, ty: 40, w: 24, h: 9 };
 /** The market's north entrance, under its signboard (tiles). */
 const MARKET_GATE = { tx: 30, w: 5 };
+/** A bench in town that players can sit on. */
+export interface Bench {
+  id: string;
+  tx: number;
+  ty: number;
+  /** Width in tiles; one seat per tile. */
+  w: number;
+  /** The way someone sitting on it looks. */
+  facing: "up" | "down";
+}
+
+/** Park benches round the fountain, all looking at it: two on the north side, two on the south. */
+export const TOWN_BENCHES: Bench[] = [
+  { id: "fountain_nw", tx: 28, ty: 26, w: 2, facing: "down" },
+  { id: "fountain_ne", tx: 35, ty: 26, w: 2, facing: "down" },
+  { id: "fountain_sw", tx: 28, ty: 33, w: 2, facing: "up" },
+  { id: "fountain_se", tx: 35, ty: 33, w: 2, facing: "up" },
+];
+
+/** Feet positions of a bench's seats (pixels). */
+export function benchSeats(bench: Bench): { x: number; y: number }[] {
+  return Array.from({ length: bench.w }, (_, i) => px(bench.tx + i, bench.ty));
+}
+
 /** The horse farm's paddock (fence tiles, inclusive) and its two-tile gate in the south side. */
 const HORSE_FARM = { x0: 62, y0: 15, x1: 72, y1: 24, gateX: 66 };
 /** The cobbled lane from the east road down to the harbour gate (centre line, tiles). */
@@ -273,6 +297,8 @@ export function buildTown(): DungeonLayout {
     decor.push({ kind: "lamp", tx, ty });
   }
   decor.push({ kind: "signboard", tx: 64, ty: 33, w: 5, text: "LİMAN" });
+  // Benches round the fountain (walk-through: you sit by clicking one).
+  for (const { tx, ty, w, facing } of TOWN_BENCHES) decor.push({ kind: "parkBench", tx, ty, w, facing });
 
   // ---- The horse farm ----
   // A red barn, a fenced paddock with horses grazing in it, hay and a water trough;

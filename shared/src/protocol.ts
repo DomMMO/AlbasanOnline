@@ -50,6 +50,8 @@ export const Msg = {
   SkillRank: "skillRank",
   /** Ayşe Teyze: read today's fortune. */
   ReadFortune: "readFortune",
+  /** Sit on a bench (town): the nearest free seat of it. Moving gets you up. */
+  Sit: "sit",
   /** Stable: buy a breed, ride another of yours, or restyle the ridden one. */
   HorseBuy: "horseBuy",
   HorseSelect: "horseSelect",
@@ -723,6 +725,8 @@ export interface PlayerView {
   mounted: boolean;
   /** Galloping (Shift on horseback) this tick. */
   galloping: boolean;
+  /** Sitting on a bench. */
+  seated: boolean;
   /** Breed of the horse they ride (data/horses.ts): sets riding speed. */
   horse: string;
   /** Its colours, encodeHorseLook(). */

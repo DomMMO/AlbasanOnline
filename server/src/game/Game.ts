@@ -442,6 +442,7 @@ export class Game {
       runtime.inputBudget--;
     }
     player.moving = processed > 0;
+    if (processed > 0) player.seated = false;
     player.galloping = galloped;
     // Moving interrupts spells with a cast time, gathering, and reels the fishing line in.
     if (processed > 0 && runtime.casting) cancelCast(this, sessionId, "Büyü iptal edildi");
