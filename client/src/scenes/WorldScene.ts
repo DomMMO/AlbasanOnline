@@ -146,6 +146,7 @@ import { preloadImageSprites } from "../gfx/imageSprites";
 import { createTileset, renderTiles, TILESET_KEY } from "../gfx/textures";
 import { drawDecor } from "../gfx/decor";
 import { NightLayer, resetLights } from "../fx/nightLights";
+import { setBossMusic } from "../audio/bossMusic";
 import {
   closeNpcDialog,
   dialogNpc,
@@ -510,6 +511,8 @@ export class WorldScene extends Phaser.Scene {
     });
     const stopFriends = onFriendsChange(() => this.refreshTargetFrame());
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, stopFriends);
+    // Leaving the zone (portal, logout) ends any boss music.
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => setBossMusic(null));
     initParty({
       select: (member) => {
         if (member.sessionId && this.players.has(member.sessionId)) this.selectTarget(member.sessionId, false);
@@ -1338,9 +1341,13 @@ export class WorldScene extends Phaser.Scene {
   private refreshBossBar() {
     const boss = this.bossId ? this.mobs.get(this.bossId) : undefined;
     const local = this.local;
-    if (!boss || !local || distance(local.view, boss.view) > TILE_SIZE * 14) return hud.setBossBar(null);
+    if (!boss || !local || distance(local.view, boss.view) > TILE_SIZE * 14 || boss.state.hp <= 0) {
+      setBossMusic(null);
+      return hud.setBossBar(null);
+    }
     const { hp, maxHp, enraged, kind } = boss.state;
     hud.setBossBar({ name: MOBS[kind].name, hp, maxHp, enraged });
+    setBossMusic(kind);
   }
 
   /** E: use a nearby portal, talk to a nearby NPC, otherwise open the nearest loot chest. */

@@ -8,10 +8,12 @@ export interface Settings {
   helpText: boolean;
   /** Damage / healing meter panel. */
   damageMeter: boolean;
+  /** Music in boss fights that have a theme. */
+  bossMusic: boolean;
 }
 
 const KEY = "mmo.settings";
-const DEFAULTS: Settings = { zoom: "auto", damageNumbers: true, speechBubbles: true, helpText: true, damageMeter: true };
+const DEFAULTS: Settings = { zoom: "auto", damageNumbers: true, speechBubbles: true, helpText: true, damageMeter: true, bossMusic: true };
 
 function load(): Settings {
   try {
