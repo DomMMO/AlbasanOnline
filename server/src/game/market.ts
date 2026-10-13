@@ -10,6 +10,7 @@ import {
   STALL_SLOTS,
   STALL_SPACING,
   STALL_TITLE_MAX,
+  stallSpotProblem,
   Tile,
   TILE_SIZE,
   type ChatEvent,
@@ -97,10 +98,10 @@ export function openStall(game: Game, sessionId: string, rawTitle: unknown, rawI
   if (!c) return;
   const { player, runtime, inv } = c;
   if (runtime.stall) return notice(game, sessionId, "Pazarın zaten açık");
-  if (!game.zone.market) return notice(game, sessionId, "Pazar sadece Ana Merkez'de kurulabilir");
   if (player.dead) return;
-  const tile = game.map.tiles[Math.floor((player.y - 1) / TILE_SIZE)]?.[Math.floor(player.x / TILE_SIZE)];
-  if (tile !== Tile.Market) return notice(game, sessionId, "Pazar kurmak için pazar meydanına git");
+  // Anywhere in town, as long as it is not a doorway or someone's spot.
+  const problem = stallSpotProblem(game.zone.id, player.x, player.y);
+  if (problem) return notice(game, sessionId, problem);
   for (const [otherId, other] of game.state.players) {
     if (otherId !== sessionId && other.stall && distance(other, player) < STALL_SPACING) {
       return notice(game, sessionId, "Burası başka bir tezgâha çok yakın");

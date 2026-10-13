@@ -4,8 +4,8 @@ import { defineConfig } from "vite";
 export default defineConfig({
   build: {
     rollupOptions: {
-      // Two pages: the game and the GM panel.
-      input: { main: resolve(__dirname, "index.html"), admin: resolve(__dirname, "admin.html") },
+      // Three pages: the game, the GM panel and the GM map editor.
+      input: { main: resolve(__dirname, "index.html"), admin: resolve(__dirname, "admin.html"), editor: resolve(__dirname, "editor.html") },
     },
   },
   server: {

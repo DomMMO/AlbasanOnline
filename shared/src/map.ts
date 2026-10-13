@@ -32,11 +32,13 @@ export enum Tile {
   WoodFloor = 15,
   /** Timbered wall indoors. */
   WoodWall = 16,
+  /** Open sky round a floating island (Ana Merkez): drawn see-through over the clouds, never walkable. */
+  Sky = 17,
 }
 
-export const TILE_COUNT = 17;
+export const TILE_COUNT = 18;
 
-const BLOCKING = new Set<Tile>([Tile.Water, Tile.Tree, Tile.CaveWall, Tile.Wall, Tile.Solid, Tile.WoodWall]);
+const BLOCKING = new Set<Tile>([Tile.Water, Tile.Tree, Tile.CaveWall, Tile.Wall, Tile.Solid, Tile.WoodWall, Tile.Sky]);
 
 /** Goblin Cave entrance in the world (tile coordinates); a path leads there from the centre. */
 export const CAVE_ENTRANCE_TILE = { tx: 10, ty: 43 };
@@ -56,6 +58,19 @@ export interface WorldMap {
   /** tiles[y][x] */
   tiles: Tile[][];
   spawn: { x: number; y: number };
+  /**
+   * Map editor: tiles whose blocking is set by quarters instead of by the tile, keyed
+   * y * width + x. Bits 1, 2, 4, 8 = top-left, top-right, bottom-left, bottom-right quarter
+   * blocked; 0 = open (an invisible blocker taken away).
+   */
+  blockMask?: Map<number, number>;
+}
+
+/** Side of a blocking quarter, in pixels. */
+export const QUARTER = TILE_SIZE / 2;
+
+export function isBlockingTile(tile: Tile): boolean {
+  return BLOCKING.has(tile);
 }
 
 export function mulberry32(seed: number): () => number {
@@ -178,12 +193,30 @@ export function hasLineOfSight(map: WorldMap, a: { x: number; y: number }, b: { 
   for (let i = 1; i < steps; i++) {
     const tx = Math.floor((ax + (dx * i) / steps) / TILE_SIZE);
     const ty = Math.floor((ay + (dy * i) / steps) / TILE_SIZE);
-    if (OPAQUE.has(map.tiles[ty]?.[tx])) return false;
+    // A blocker the map editor took away no longer hides anything.
+    if (OPAQUE.has(map.tiles[ty]?.[tx]) && map.blockMask?.get(ty * map.width + tx) !== 0) return false;
   }
   return true;
 }
 
+/** Whether the whole tile blocks (a tile with blocking quarters only does not). */
 export function isBlockedTile(map: WorldMap, tx: number, ty: number): boolean {
   if (tx < 0 || ty < 0 || tx >= map.width || ty >= map.height) return true;
+  const mask = map.blockMask?.get(ty * map.width + tx);
+  if (mask !== undefined) return mask === 15;
   return BLOCKING.has(map.tiles[ty][tx]);
+}
+
+/** Whether the rect [x0, x1) x [y0, y1) (pixels) touches a blocked part of tile (tx, ty). */
+export function blocksRect(map: WorldMap, tx: number, ty: number, x0: number, y0: number, x1: number, y1: number): boolean {
+  if (tx < 0 || ty < 0 || tx >= map.width || ty >= map.height) return true;
+  const mask = map.blockMask?.get(ty * map.width + tx);
+  if (mask === undefined) return BLOCKING.has(map.tiles[ty][tx]);
+  for (let q = 0; q < 4; q++) {
+    if (!(mask & (1 << q))) continue;
+    const qx = tx * TILE_SIZE + (q & 1) * QUARTER;
+    const qy = ty * TILE_SIZE + (q >> 1) * QUARTER;
+    if (qx < x1 && qx + QUARTER > x0 && qy < y1 && qy + QUARTER > y0) return true;
+  }
+  return false;
 }

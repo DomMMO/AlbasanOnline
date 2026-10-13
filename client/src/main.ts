@@ -11,6 +11,8 @@ import { initTouchControls } from "./ui/touch";
 import { initWindows } from "./ui/windows";
 import { installCursorStyles } from "./gfx/cursors";
 import { loadTitleFont } from "./gfx/fonts";
+import { loadTileArt } from "./gfx/tileArt";
+import { loadZoneEdits } from "./net/mapEdits";
 
 const disconnected = document.getElementById("disconnected")!;
 const disconnectedText = document.getElementById("disconnected-text")!;
@@ -42,8 +44,10 @@ const fontsReady = loadTitleFont();
 
 /** Lobby (login / character select), then into the world. Runs again after a character switch or logout. */
 async function play() {
+  // The lobby is drawn in front of the keep: use the town as edited in the map editor.
+  await Promise.all([loadZoneEdits("town"), loadTileArt()]);
   const result = await runLobby(game);
-  await fontsReady;
+  await Promise.all([fontsReady, loadZoneEdits(result.zone)]);
   characterId = result.characterId;
   showHud();
   enterZone(result.room, result.zone);
@@ -93,7 +97,10 @@ async function transfer(current: Room, event: TransferEvent) {
   loading.hidden = false;
   try {
     await current.leave();
-    const next = await joinZone(event.zone, { token: getToken()!, characterId, ticket: event.ticket }, event.roomId);
+    const [next] = await Promise.all([
+      joinZone(event.zone, { token: getToken()!, characterId, ticket: event.ticket }, event.roomId),
+      loadZoneEdits(event.zone),
+    ]);
     enterZone(next, event.zone, true);
   } catch (error) {
     console.error(error);

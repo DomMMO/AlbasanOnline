@@ -68,6 +68,7 @@ import { forgetInstance, instanceFor, refreshFor, registerInstance, respond, sam
 import { claimCharacter } from "../game/presence";
 import { consumeTicket, issueTicket } from "../game/tickets";
 import { onlineCharacters } from "../game/registry";
+import { onZoneMapChanged } from "../game/liveMaps";
 import { TownPortal, WorldState } from "./schema/WorldState";
 import { changeRank } from "../game/talents";
 import { startGather } from "../game/gathering";
@@ -117,6 +118,7 @@ export class ZoneRoom extends Room<WorldState> {
   private releases = new Map<string, () => void>();
   private saveQueue: Promise<void> = Promise.resolve();
   private stopPortalSync: (() => void) | null = null;
+  private stopMapListener: (() => void) | null = null;
   /** Instances: kept alive (autoDispose off) because a town portal leads here. */
   private keptForPortal = false;
   /** sessionId -> a party member's "come along into the dungeon" waiting for an answer. */
@@ -127,6 +129,12 @@ export class ZoneRoom extends Room<WorldState> {
     this.zone = ZONES[options.zoneId];
     // Instances belong to one party.
     this.maxClients = this.zone.instanced ? MAX_PARTY_SIZE : 100;
+    this.stopMapListener = onZoneMapChanged((zone) => {
+      if (zone !== this.zone.id) return;
+      this.game.reloadMap();
+      this.broadcast(Msg.MapChanged, {});
+      console.log(`[maps] ${zone}: live reload in room ${this.roomId} (${this.clients.length} online)`);
+    });
     this.game = new Game(
       this.state,
       {
@@ -478,6 +486,7 @@ export class ZoneRoom extends Room<WorldState> {
 
   onDispose() {
     this.stopPortalSync?.();
+    this.stopMapListener?.();
     forgetInstance(this.roomId);
   }
 

@@ -94,6 +94,8 @@ export const Msg = {
   Notice: "notice",
   UpgradeResult: "upgradeResult",
   Transfer: "transfer",
+  /** The map editor changed this zone's map: fetch the edits again and rebuild the ground. */
+  MapChanged: "mapChanged",
   BossCast: "bossCast",
   CastStart: "castStart",
   CastEnd: "castEnd",

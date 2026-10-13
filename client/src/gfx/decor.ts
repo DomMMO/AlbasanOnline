@@ -1,9 +1,12 @@
 import Phaser from "phaser";
-import { COLOSSEUM, TILE_SIZE, type Decor, type IconShape } from "../../../shared/src";
-import { addLight } from "../fx/nightLights";
+import { CASTLE_MERLON_H, CASTLE_TOWER_H, CASTLE_WALL_H, COLOSSEUM, insideCastle, mulberry32, TILE_SIZE, type Decor, type IconShape } from "../../../shared/src";
+import { addGlow, addLight } from "../fx/nightLights";
 import { ICON_SIZE, paintIcon } from "./icons";
 import { bench, firepit, rack, rug, shelf, stool, table } from "./interior";
 import { ensureHorse, HorseFrame } from "./horse";
+import { hash01 } from "./pixelArt";
+import { barrelSprite, bushSprite, crateSprite, dummySprite, haySprite, houseSprite, palaceSprite, plantSprite, ROOF_PAD, sackSprite, treeSprite, wellSprite, type SpriteInfo } from "./sprites";
+import { decorArtTexture } from "./tileArt";
 
 // Town decor drawn in code on top of the tiles: buildings, the fountain, lamps…
 // Each piece is depth-sorted by its bottom edge like characters, so players walking
@@ -130,6 +133,29 @@ export function drawDecor(scene: Phaser.Scene, decor: Decor[]) {
       case "parkBench":
         parkBench(scene, piece);
         break;
+      case "bigTree":
+        bigTree(scene, piece.tx, piece.ty, piece.variant);
+        break;
+      case "roundFence":
+        roundFence(scene, piece);
+        break;
+      case "plant": {
+        // Its own spot within the tile, so plants do not line up on the grid.
+        const jx = ((piece.variant * 7) % 9) - 4;
+        const jy = ((piece.variant * 5) % 7) - 3;
+        placeSprite(scene, plantSprite(scene, piece.variant), (piece.tx + 0.5) * TILE_SIZE + jx, (piece.ty + 1) * TILE_SIZE + jy);
+        break;
+      }
+      case "bush": {
+        const x = (piece.tx + 0.5) * TILE_SIZE;
+        const bottom = (piece.ty + 1) * TILE_SIZE;
+        groundShadow(scene, x + 3, bottom - 1, 20, 6);
+        placeSprite(scene, bushSprite(scene, piece.variant), x, bottom);
+        break;
+      }
+      case "clouds":
+        clouds(scene, piece.w, piece.h);
+        break;
       case "colosseum":
         colosseum(scene);
         break;
@@ -142,8 +168,11 @@ export function drawDecor(scene: Phaser.Scene, decor: Decor[]) {
 // its footprint, and where the camera sees the side of a wall (its south edge) a stone face
 // fills the gap. Battlements line the side facing away from the courtyard.
 
-const WALL_H = 24;
-const TOWER_H = 40;
+// A GM can replace the wall walk, the wall face and whole towers with uploaded images
+// (tileArt.ts); battlements are still drawn over an uploaded wall.
+
+const WALL_H = CASTLE_WALL_H;
+const TOWER_H = CASTLE_TOWER_H;
 const STONE = {
   top: 0x9a9384,
   topDark: 0x847d6f,
@@ -189,25 +218,38 @@ function merlons(g: Phaser.GameObjects.Graphics, side: "n" | "s" | "e" | "w", x:
   }
 }
 
+/** The wall walk of one wall tile, seen from above (big flagstones), `top` pixels up. */
+function paintWallWalk(g: Phaser.GameObjects.Graphics, top: number, seed: number) {
+  g.fillStyle(STONE.top).fillRect(0, top, TILE_SIZE, TILE_SIZE);
+  g.fillStyle(STONE.topDark).fillRect(0, top + 7, TILE_SIZE, 1).fillRect(0, top + 15, TILE_SIZE, 1);
+  g.fillRect((seed % 2) * 8 + 3, top, 1, 7).fillRect(((seed + 1) % 2) * 8 + 3, top + 8, 1, 7);
+  g.fillStyle(STONE.topLight).fillRect((seed % 5) + 6, top + 2, 3, 1);
+}
+
 function castleWall(scene: Phaser.Scene, w: Extract<Decor, { kind: "castleWall" }>) {
   const keys = new Set(w.tiles.map(({ tx, ty }) => `${tx},${ty}`));
   const has = (tx: number, ty: number) => keys.has(`${tx},${ty}`);
-  const inside = (tx: number, ty: number) => tx >= w.inner.x0 && tx <= w.inner.x1 && ty >= w.inner.y0 && ty <= w.inner.y1;
+  const inside = (tx: number, ty: number) =>
+    w.innerShape ? insideCastle(w.innerShape, tx, ty) : tx >= w.inner.x0 && tx <= w.inner.x1 && ty >= w.inner.y0 && ty <= w.inner.y1;
+  const topArt = decorArtTexture(scene, "castle_top");
+  const faceArt = decorArtTexture(scene, "castle_face");
   for (const { tx, ty } of w.tiles) {
     const bottom = (ty + 1) * TILE_SIZE;
-    // Each tile sorts on its own, so players pass behind and in front of the wall correctly.
-    const g = scene.add.graphics().setPosition(tx * TILE_SIZE, bottom).setDepth(bottom);
     const top = -TILE_SIZE - WALL_H;
     const seed = tx * 7 + ty * 13;
+    const open = !has(tx, ty + 1);
+    // Uploaded pieces first: the battlements (in g, same depth) go over them.
+    if (topArt) scene.add.image(tx * TILE_SIZE, bottom + top, topArt).setOrigin(0, 0).setDisplaySize(TILE_SIZE, TILE_SIZE).setDepth(bottom);
+    if (faceArt && open) scene.add.image(tx * TILE_SIZE, bottom - WALL_H, faceArt).setOrigin(0, 0).setDisplaySize(TILE_SIZE, WALL_H).setDepth(bottom);
+    // Each tile sorts on its own, so players pass behind and in front of the wall correctly.
+    const g = scene.add.graphics().setPosition(tx * TILE_SIZE, bottom).setDepth(bottom);
 
     // The wall walk: big flagstones.
-    g.fillStyle(STONE.top).fillRect(0, top, TILE_SIZE, TILE_SIZE);
-    g.fillStyle(STONE.topDark).fillRect(0, top + 7, TILE_SIZE, 1).fillRect(0, top + 15, TILE_SIZE, 1);
-    g.fillRect((seed % 2) * 8 + 3, top, 1, 7).fillRect(((seed + 1) % 2) * 8 + 3, top + 8, 1, 7);
-    g.fillStyle(STONE.topLight).fillRect((seed % 5) + 6, top + 2, 3, 1);
+    if (!topArt) paintWallWalk(g, top, seed);
 
     // Seen from the south: the face down to the ground.
-    if (!has(tx, ty + 1)) {
+    if (open && faceArt) g.fillStyle(0x000000, 0.25).fillRect(0, -2, TILE_SIZE, 2);
+    else if (open) {
       stoneCourses(g, 0, -WALL_H, TILE_SIZE, WALL_H, seed);
       g.fillStyle(0x000000, 0.25).fillRect(0, -2, TILE_SIZE, 2);
       if (seed % 3 === 0) g.fillStyle(STONE.moss).fillRect(seed % 11, -3, 4, 1).fillRect((seed % 11) + 1, -4, 2, 1);
@@ -253,9 +295,20 @@ function tower(scene: Phaser.Scene, t: Extract<Decor, { kind: "tower" }>) {
   const D = t.h * TILE_SIZE;
   const x0 = t.tx * TILE_SIZE;
   const bottom = (t.ty + t.h) * TILE_SIZE;
+  const art = decorArtTexture(scene, "tower");
+  if (art) {
+    // An uploaded tower is the whole thing, flag included; only its shadow is ours.
+    scene.add.graphics().setPosition(x0, bottom).setDepth(bottom - 0.01).fillStyle(0x000000, 0.3).fillEllipse(W / 2, 0, W + 8, 6);
+    scene.add.image(x0, bottom, art).setOrigin(0, 1).setDisplaySize(W, CASTLE_MERLON_H + D + TOWER_H).setDepth(bottom);
+    return;
+  }
   const g = scene.add.graphics().setPosition(x0, bottom).setDepth(bottom);
-  const seed = t.tx + t.ty;
+  paintTower(g, W, D, t.tx + t.ty);
+  waveFlag(scene, x0 + W / 2 - 1, bottom - TOWER_H - D / 2, t.flag, bottom + 0.1);
+}
 
+/** A tower W wide and D deep, drawn up from its bottom-left corner at (0, 0) in g. */
+function paintTower(g: Phaser.GameObjects.Graphics, W: number, D: number, seed: number) {
   // Plinth, face with shaded corners, slits.
   g.fillStyle(0x000000, 0.3).fillEllipse(W / 2, 0, W + 8, 6);
   stoneCourses(g, 0, -TOWER_H, W, TOWER_H, seed);
@@ -279,7 +332,31 @@ function tower(scene: Phaser.Scene, t: Extract<Decor, { kind: "tower" }>) {
   merlons(g, "w", 0, top, D);
   merlons(g, "e", W, top, D);
   merlons(g, "s", 0, -TOWER_H, W);
-  waveFlag(scene, x0 + W / 2 - 1, bottom + top + D / 2, t.flag, bottom + 0.1);
+}
+
+/**
+ * A castle piece the way the game draws it, into g with its top-left at (0, 0): the editor
+ * offers it as the "original" to download and draw over.
+ */
+export function paintCastlePiece(g: Phaser.GameObjects.Graphics, key: string) {
+  if (key === "castle_top") paintWallWalk(g, 0, 0);
+  else if (key === "castle_face") stoneCourses(g, 0, 0, TILE_SIZE, WALL_H, 0);
+  else if (key === "tower") {
+    const W = 4 * TILE_SIZE;
+    const D = 4 * TILE_SIZE;
+    const lift = CASTLE_MERLON_H + D + TOWER_H;
+    g.translateCanvas(0, lift);
+    paintTower(g, W, D, 0);
+    // The flag, still (in the game it waves).
+    const fx = W / 2 - 1;
+    const fy = -TOWER_H - D / 2;
+    g.fillStyle(0x3b2414).fillRect(fx, fy - 22, 2, 22);
+    g.fillStyle(0xe8c33a).fillRect(fx, fy - 24, 2, 2);
+    g.fillStyle(0x9c2a2a).fillRect(fx + 2, fy - 21, 12, 7);
+    g.fillTriangle(fx + 14, fy - 21, fx + 14, fy - 14, fx + 17, fy - 17.5);
+    g.fillStyle(0xe8c33a).fillRect(fx + 6, fy - 19, 3, 3);
+    g.translateCanvas(0, -lift);
+  }
 }
 
 function gateArch(scene: Phaser.Scene, a: Extract<Decor, { kind: "gateArch" }>) {
@@ -304,93 +381,38 @@ function gateArch(scene: Phaser.Scene, a: Extract<Decor, { kind: "gateArch" }>) 
   merlons(g, "e", W - 4, top, H);
 }
 
+/**
+ * The palace (İç Kale): its painted sprite, flags waving from its three spires, lanterns by the
+ * door that light up at dusk, and windows that glow at night.
+ */
 function keep(scene: Phaser.Scene, k: Extract<Decor, { kind: "keep" }>) {
   const W = k.w * TILE_SIZE;
-  const D = k.h * TILE_SIZE;
   const x0 = k.tx * TILE_SIZE;
   const bottom = (k.ty + k.h) * TILE_SIZE;
-  const FACE_H = 44;
-  const g = scene.add.graphics().setPosition(x0, bottom).setDepth(bottom);
-
-  g.fillStyle(0x000000, 0.3).fillEllipse(W / 2, 0, W + 12, 8);
-
-  // The donjon rising behind the hall roof, with its own battlements and the town flag.
-  const dw = 5 * TILE_SIZE;
-  const dx = (W - dw) / 2;
-  const donjonTop = -FACE_H - D - 34;
-  const roofTop = -FACE_H - D + 10;
-  stoneCourses(g, dx, donjonTop + 24, dw, roofTop - donjonTop - 22, 3);
-  g.fillStyle(STONE.faceDark).fillRect(dx + dw - 3, donjonTop + 24, 3, roofTop - donjonTop - 22);
-  g.fillStyle(STONE.top).fillRect(dx, donjonTop, dw, 24);
-  g.fillStyle(STONE.topDark).fillRect(dx + 4, donjonTop + 4, dw - 8, 16);
-  merlons(g, "n", dx, donjonTop, dw);
-  merlons(g, "w", dx, donjonTop, 24);
-  merlons(g, "e", dx + dw, donjonTop, 24);
-  merlons(g, "s", dx, donjonTop + 24, dw);
-  for (const wx of [dx + 14, dx + dw - 18]) {
-    g.fillStyle(0x1a1714).fillRoundedRect(wx, donjonTop + 32, 5, 9, { tl: 2, tr: 2, bl: 0, br: 0 });
-    g.fillStyle(0xf5d77a, 0.8).fillRect(wx + 1, donjonTop + 35, 3, 5);
+  const sprite = palaceSprite(scene, k.w, k.h, k.banner);
+  const left = x0 - sprite.pad;
+  const top = bottom - sprite.height;
+  groundShadow(scene, x0 + W / 2 + 10, bottom + 1, W + 30, 14, 0.3);
+  placeSprite(scene, sprite, left, bottom);
+  for (const f of sprite.flags) waveFlag(scene, left + f.x, top + f.y + 2, k.banner, bottom + 0.1, f.big ? 1.3 : 0.9);
+  for (const w of sprite.windows) {
+    const pane = scene.add
+      .rectangle(left + w.x + w.w / 2, top + w.y + w.h / 2, w.w, w.h, 0xffc860)
+      .setBlendMode(Phaser.BlendModes.ADD)
+      .setDepth(bottom + 0.05);
+    addGlow(scene, pane, 0.8, 0.08);
   }
-
-  // Hall roof: dark slate, shingle rows, a ridge.
-  const slate = 0x3d4a5c;
-  const slateDark = 0x2c3644;
-  g.fillStyle(slate).fillRect(-3, roofTop, W + 6, D - 7);
-  for (let y = roofTop + 4, row = 0; y < -FACE_H + 3; y += 4, row++) {
-    g.fillStyle(slateDark).fillRect(-3, y, W + 6, 1);
-    for (let x = (row % 2) * 4; x < W + 6; x += 8) g.fillRect(x - 3, y - 3, 1, 3);
+  for (const l of sprite.lanterns) {
+    const x = left + l.x + 0.5;
+    const y = top + l.y;
+    const flame = scene.add.rectangle(x, y, 3, 5, 0xffe08a).setDepth(bottom + 0.06);
+    addGlow(scene, flame, 1, 0.1);
+    const halo = scene.add.circle(x, y, 13, 0xffc04d, 0.3).setBlendMode(Phaser.BlendModes.ADD).setDepth(bottom + 0.1);
+    addGlow(scene, halo, 0.3, 0.25);
+    addLight(scene, x, y + 8, 72, 0xffd08a, 0.05);
   }
-  g.fillStyle(0x56657a).fillRect(-3, roofTop, W + 6, 2);
-  g.fillStyle(0x000000, 0.35).fillRect(0, -FACE_H + 3, W, 2);
-
-  // Front face: stone, a broad door with steps, lit arched windows, banners.
-  stoneCourses(g, 0, -FACE_H, W, FACE_H, 1);
-  g.fillStyle(STONE.faceDark).fillRect(-1, -5, W + 2, 5);
-  g.fillStyle(STONE.faceLight).fillRect(-1, -5, W + 2, 1);
-  const doorW = 22;
-  const doorX = Math.round(W / 2 - doorW / 2);
-  g.fillStyle(0x2a1a0e).fillRect(doorX - 3, -30, doorW + 6, 30);
-  g.fillStyle(0x2a1a0e).fillCircle(doorX + doorW / 2, -30, doorW / 2 + 3);
-  g.fillStyle(0x6b4423).fillRect(doorX, -28, doorW, 28);
-  g.fillStyle(0x6b4423).fillCircle(doorX + doorW / 2, -28, doorW / 2);
-  g.fillStyle(0x4a2e16).fillRect(doorX + doorW / 2, -38, 1, 38);
-  for (const y of [-22, -9]) g.fillStyle(0x2a2a30).fillRect(doorX, y, doorW, 2);
-  for (const x of [doorX + 3, doorX + doorW - 4]) g.fillStyle(0xb0b4bc).fillRect(x, -16, 1, 1);
-  g.fillStyle(0xb3ac9c).fillRect(doorX - 6, -3, doorW + 12, 3);
-  g.fillStyle(0xc4bdb0).fillRect(doorX - 4, -5, doorW + 8, 2);
-  for (const wx of [30, 58, W - 64, W - 36]) {
-    g.fillStyle(0x1a1714).fillRoundedRect(wx - 1, -36, 10, 15, { tl: 5, tr: 5, bl: 0, br: 0 });
-    g.fillStyle(0xf5d77a).fillRoundedRect(wx, -35, 8, 13, { tl: 4, tr: 4, bl: 0, br: 0 });
-    g.fillStyle(0x1a1714).fillRect(wx + 3, -35, 1, 13).fillRect(wx, -29, 8, 1);
-  }
-  for (const bx of [doorX - 18, doorX + doorW + 8]) {
-    g.fillStyle(0x2a1a0e).fillRect(bx - 1, -FACE_H + 4, 12, 2);
-    g.fillStyle(k.banner).fillRect(bx, -FACE_H + 6, 10, 22);
-    g.fillTriangle(bx, -FACE_H + 28, bx + 10, -FACE_H + 28, bx + 5, -FACE_H + 33);
-    g.fillStyle(0xe8c33a).fillRect(bx + 3, -FACE_H + 12, 4, 4).fillRect(bx + 4, -FACE_H + 17, 2, 6);
-    g.fillStyle(0xffffff, 0.2).fillRect(bx, -FACE_H + 7, 1, 21);
-  }
-
-  // Round turrets on the front corners, taller than the hall, with conical slate roofs.
-  for (const [cx, flip] of [[2, false], [W - 2, true]] as const) {
-    const tw = 26;
-    const tx = cx - tw / 2;
-    const th = FACE_H + 22;
-    stoneCourses(g, tx, -th, tw, th, flip ? 1 : 0);
-    g.fillStyle(STONE.faceLight).fillRect(tx, -th, 3, th);
-    g.fillStyle(STONE.faceDark).fillRect(tx + tw - 4, -th, 4, th);
-    g.fillStyle(STONE.faceDark).fillRect(tx - 1, -6, tw + 2, 6);
-    g.fillStyle(0x1a1714).fillRect(cx - 1, -th + 14, 3, 10).fillRect(cx - 1, -th + 36, 3, 10);
-    g.fillStyle(0xffc04d, 0.4).fillRect(cx, -th + 16, 1, 6);
-    g.fillStyle(slateDark).fillTriangle(tx - 4, -th + 2, tx + tw + 4, -th + 2, cx, -th - 30);
-    g.fillStyle(slate).fillTriangle(tx - 4, -th + 2, cx, -th + 2, cx, -th - 30);
-    g.fillStyle(0x56657a).fillRect(tx - 4, -th, tw + 8, 2);
-    waveFlag(scene, x0 + cx - 1, bottom - th - 28, k.banner, bottom + 0.1, 0.8);
-  }
-  waveFlag(scene, x0 + W / 2 - 1, bottom + donjonTop + 12, k.banner, bottom + 0.1, 1.3);
 }
 
-/** East-west planks over the moat: drawn under characters (they walk on it). */
 function drawbridge(scene: Phaser.Scene, d: Extract<Decor, { kind: "drawbridge" }>) {
   const W = d.w * TILE_SIZE;
   const H = d.h * TILE_SIZE;
@@ -422,7 +444,26 @@ function drawbridge(scene: Phaser.Scene, d: Extract<Decor, { kind: "drawbridge" 
   }
 }
 
+/** Props painted as pixel sprites (the rest are drawn below). */
+const PROP_SPRITES: Partial<Record<Extract<Decor, { kind: "prop" }>["prop"], (scene: Phaser.Scene) => SpriteInfo>> = {
+  well: wellSprite,
+  barrel: barrelSprite,
+  crate: crateSprite,
+  hay: haySprite,
+  dummy: dummySprite,
+  sack: sackSprite,
+};
+
 function prop(scene: Phaser.Scene, p: Extract<Decor, { kind: "prop" }>) {
+  const painted = PROP_SPRITES[p.prop];
+  if (painted) {
+    const size = p.prop === "well" ? 2 : 1;
+    const x = p.tx * TILE_SIZE + (size * TILE_SIZE) / 2;
+    const bottom = (p.ty + size) * TILE_SIZE;
+    groundShadow(scene, x + 3, bottom - 1, size * 16, size * 5);
+    placeSprite(scene, painted(scene), x, bottom);
+    return;
+  }
   const size = p.prop === "well" ? 2 : 1;
   const wide = p.prop === "well" || p.prop === "obelisk" ? 2 : 1;
   const x = p.tx * TILE_SIZE + (wide * TILE_SIZE) / 2;
@@ -566,53 +607,40 @@ function groundFrame(scene: Phaser.Scene, f: Extract<Decor, { kind: "groundFrame
   g.lineStyle(2, f.color, 0.7).strokeRect(x + 1, y + 1, w - 2, h - 2);
 }
 
+/** A sprite standing with its feet at (x, bottom), sorted with characters by its bottom edge. */
+function placeSprite(scene: Phaser.Scene, sprite: SpriteInfo, x: number, bottom: number, depth = bottom) {
+  return scene.add.image(x, bottom, sprite.key).setOrigin(sprite.originX, sprite.originY).setDepth(depth);
+}
+
+/** A soft shadow on the ground (under everyone walking past), cast down and right. */
+function groundShadow(scene: Phaser.Scene, x: number, y: number, w: number, h: number, alpha = 0.28) {
+  scene.add.graphics().setDepth(-0.4).fillStyle(0x0b1a08, alpha).fillEllipse(x, y, w, h);
+}
+
 function building(scene: Phaser.Scene, b: Extract<Decor, { kind: "building" }>) {
   const W = b.w * TILE_SIZE;
   const H = b.h * TILE_SIZE;
   const x0 = b.tx * TILE_SIZE;
   const bottom = (b.ty + b.h) * TILE_SIZE;
-  const g = scene.add.graphics().setPosition(x0, bottom).setDepth(bottom);
-  const wallH = 26;
+  // Roofs face different ways: ridge across or front to back, by the map or by the spot.
+  const ridge = b.ridge ?? (hash01(b.tx, b.ty, 7) < 0.4 ? "v" : "h");
+  const sprite = houseSprite(scene, { w: b.w, h: b.h, roof: b.roof, ridge, chimney: !!b.chimney, sign: !!b.sign, seed: b.tx * 131 + b.ty * 31 });
+  const left = x0 - ROOF_PAD;
+  const top = bottom - (H + 18);
+  // Its shadow falls to the right of it and a little in front.
+  scene.add
+    .graphics()
+    .setDepth(-0.4)
+    .fillStyle(0x0b1a08, 0.3)
+    .fillRect(x0 + W + ROOF_PAD, bottom - H + 8, 9, H - 4)
+    .fillTriangle(x0 + W + ROOF_PAD, bottom - H + 2, x0 + W + ROOF_PAD + 9, bottom - H + 8, x0 + W + ROOF_PAD, bottom - H + 8)
+    .fillRect(x0 + 6, bottom, W + ROOF_PAD + 3, 4)
+    .fillTriangle(x0 + 2, bottom, x0 + 6, bottom, x0 + 6, bottom + 4);
+  placeSprite(scene, sprite, left, bottom);
 
-  // Front wall: plaster between timber beams on a stone footing.
-  g.fillStyle(0xe3d3ad).fillRect(0, -wallH, W, wallH);
-  g.fillStyle(0x5b3a1e).fillRect(0, -wallH, W, 2);
-  for (let x = 0; x < W; x += TILE_SIZE * 2) g.fillRect(x, -wallH, 2, wallH);
-  g.fillRect(W - 2, -wallH, 2, wallH);
-  g.fillStyle(0x8a8478).fillRect(0, -4, W, 4);
-  g.fillStyle(0x6f695e).fillRect(0, -1, W, 1);
-
-  // Door in the middle, windows either side.
-  const doorX = Math.round(W / 2 - 5);
-  g.fillStyle(0x3b2414).fillRect(doorX - 1, -17, 12, 17);
-  g.fillStyle(0x7a4e2a).fillRect(doorX, -16, 10, 16);
-  g.fillStyle(0x5e3a1d).fillRect(doorX + 4, -16, 1, 16);
-  g.fillStyle(0xe8c33a).fillRect(doorX + 7, -8, 1, 1);
-  for (const wx of [10, W - 18]) {
-    if (Math.abs(wx - doorX) < 14) continue;
-    g.fillStyle(0x3b2414).fillRect(wx - 1, -21, 10, 9);
-    g.fillStyle(0xf5d77a).fillRect(wx, -20, 8, 7);
-    g.fillStyle(0x3b2414).fillRect(wx + 3, -20, 1, 7).fillRect(wx, -17, 8, 1);
-  }
-
-  // Roof with shingle rows, overhanging the wall a little.
-  const roofTop = -(H + 8);
-  const roofBottom = -wallH + 3;
-  const roofDark = Phaser.Display.Color.IntegerToColor(b.roof).darken(25).color;
-  g.fillStyle(b.roof).fillRect(-2, roofTop, W + 4, roofBottom - roofTop);
-  for (let y = roofTop + 4, row = 0; y < roofBottom; y += 4, row++) {
-    g.fillStyle(roofDark).fillRect(-2, y, W + 4, 1);
-    for (let x = (row % 2) * 4; x < W + 4; x += 8) g.fillRect(x - 2, y - 3, 1, 3);
-  }
-  g.fillStyle(Phaser.Display.Color.IntegerToColor(b.roof).lighten(20).color).fillRect(-2, roofTop, W + 4, 2);
-  g.fillStyle(0x000000, 0.35).fillRect(0, roofBottom, W, 2);
-
-  if (b.chimney) {
-    const cx = W - 16;
-    g.fillStyle(0x6b3a2e).fillRect(cx, roofTop - 8, 7, 12);
-    g.fillStyle(0x3a1f18).fillRect(cx - 1, roofTop - 9, 9, 2);
+  if (sprite.chimney) {
     scene.add
-      .particles(x0 + cx + 3, bottom + roofTop - 10, DOT_KEY, {
+      .particles(left + sprite.chimney.x, top + sprite.chimney.y, DOT_KEY, {
         speedY: { min: -14, max: -8 },
         speedX: { min: -2, max: 5 },
         scale: { start: 1.5, end: 3 },
@@ -623,14 +651,17 @@ function building(scene: Phaser.Scene, b: Extract<Decor, { kind: "building" }>) 
       })
       .setDepth(bottom + 1);
   }
-
-  if (b.sign) {
-    // Hanging shop sign beside the door shows what is sold inside.
-    const sx = doorX + 15;
-    g.fillStyle(0x3b2414).fillRect(sx + 6, -wallH + 2, 1, 3);
-    g.fillStyle(0x3b2414).fillRect(sx - 1, -wallH + 5, 16, 15);
-    g.fillStyle(0x9a6a3c).fillRect(sx, -wallH + 6, 14, 13);
-    scene.add.image(x0 + sx + 1, bottom - wallH + 7, iconTexture(scene, b.sign.shape, b.sign.color)).setOrigin(0, 0).setDepth(bottom + 0.1);
+  // Lit windows at night: a warm glow over each pane, with the lamps.
+  for (const w of sprite.windows) {
+    const pane = scene.add
+      .rectangle(left + w.x + w.w / 2, top + w.y + w.h / 2, w.w, w.h, 0xffc860)
+      .setBlendMode(Phaser.BlendModes.ADD)
+      .setDepth(bottom + 0.05);
+    addGlow(scene, pane, 0.75, 0.08);
+  }
+  if (b.sign && sprite.sign) {
+    // The shop's icon on its hanging board shows what is sold inside.
+    scene.add.image(left + sprite.sign.x, top + sprite.sign.y, iconTexture(scene, b.sign.shape, b.sign.color)).setOrigin(0, 0).setDepth(bottom + 0.1);
   }
 }
 
@@ -693,13 +724,17 @@ function lamp(scene: Phaser.Scene, tx: number, ty: number) {
   g.fillStyle(0x000000, 0.25).fillEllipse(0, -1, 10, 3);
   g.fillStyle(0x2a2a30).fillRect(-1, -24, 3, 23).fillRect(-3, -3, 7, 2);
   g.fillStyle(0x2a2a30).fillRect(-4, -31, 9, 2).fillRect(-3, -25, 7, 2);
-  g.fillStyle(0xffd97a).fillRect(-3, -29, 7, 4);
-  g.fillStyle(0xfff3c4).fillRect(-1, -28, 3, 2);
+  // The glass is dull by day; the flame behind it and its halo come up with the lamps.
+  g.fillStyle(0x6e6650).fillRect(-3, -29, 7, 4);
+  g.fillStyle(0x8a8266).fillRect(-1, -28, 3, 1);
+  const flame = scene.add.graphics().setPosition(x, bottom).setDepth(bottom + 0.05);
+  flame.fillStyle(0xffd97a).fillRect(-3, -29, 7, 4).fillStyle(0xfff3c4).fillRect(-1, -28, 3, 2);
+  addGlow(scene, flame, 1, 0.05);
   const glow = scene.add
     .circle(x + 0.5, bottom - 27, 14, 0xffc04d, 0.28)
     .setBlendMode(Phaser.BlendModes.ADD)
     .setDepth(bottom + 0.1);
-  scene.tweens.add({ targets: glow, alpha: 0.16, scale: 0.85, duration: 900 + Math.random() * 400, yoyo: true, repeat: -1, ease: "Sine.easeInOut" });
+  addGlow(scene, glow, 0.28, 0.2);
   addLight(scene, x + 0.5, bottom - 22, 58, 0xffd08a, 0.03);
 }
 
@@ -770,7 +805,7 @@ function campfire(scene: Phaser.Scene, tx: number, ty: number) {
     .setDepth(bottom + 0.2);
   const glow = scene.add.circle(x, bottom - 6, 26, 0xff9a3c, 0.16).setBlendMode(Phaser.BlendModes.ADD).setDepth(bottom + 0.1);
   scene.tweens.add({ targets: glow, alpha: 0.08, scale: 0.9, duration: 260, yoyo: true, repeat: -1, ease: "Sine.easeInOut" });
-  addLight(scene, x, bottom - 6, 80, 0xffa040, 0.08);
+  addLight(scene, x, bottom - 6, 80, 0xffa040, 0.08, false);
 }
 
 function tent(scene: Phaser.Scene, t: Extract<Decor, { kind: "tent" }>) {
@@ -872,6 +907,121 @@ function farmHorse(scene: Phaser.Scene, h: Extract<Decor, { kind: "horse" }>) {
  * backrest is on the far side, so for a bench looking north (at the fountain from the south)
  * it stands in front of whoever sits there and is drawn over them.
  */
+/**
+ * A round fence: posts spaced evenly round an ellipse, two rails from post to post. Every post
+ * and rail sorts by its own foot, so the far side stands behind what is in the paddock and the
+ * near side in front of it.
+ */
+function roundFence(scene: Phaser.Scene, f: Extract<Decor, { kind: "roundFence" }>) {
+  const cx = f.cx * TILE_SIZE;
+  const cy = f.cy * TILE_SIZE;
+  const rx = f.rx * TILE_SIZE;
+  const ry = f.ry * TILE_SIZE;
+  const around = Math.PI * Math.sqrt((rx * rx + ry * ry) * 2);
+  const count = Math.max(12, Math.round(around / 11));
+  const inGate = (a: number) => {
+    const angle = Math.atan2(Math.sin(a), Math.cos(a));
+    return angle >= f.gate[0] && angle <= f.gate[1];
+  };
+  const points = Array.from({ length: count }, (_, i) => {
+    const a = (i / count) * Math.PI * 2;
+    return { a, x: cx + Math.cos(a) * rx, y: cy + Math.sin(a) * ry };
+  });
+  points.forEach((p, i) => {
+    const q = points[(i + 1) % count];
+    if (inGate(p.a) || inGate(q.a)) return;
+    // The rails to the next post, at two heights, lit along the top.
+    const g = scene.add.graphics().setDepth(Math.max(p.y, q.y) - 0.1);
+    for (const h of [5, 10]) {
+      g.lineStyle(2, 0x6b4423).lineBetween(p.x, p.y - h, q.x, q.y - h);
+      g.lineStyle(1, 0xb07b48).lineBetween(p.x, p.y - h - 1, q.x, q.y - h - 1);
+    }
+  });
+  for (const p of points) {
+    if (inGate(p.a)) continue;
+    const g = scene.add.graphics().setPosition(Math.round(p.x), Math.round(p.y)).setDepth(p.y);
+    g.fillStyle(0x000000, 0.22).fillEllipse(1, 0, 7, 3);
+    g.fillStyle(0x3b2414).fillRect(-2, -13, 5, 13);
+    g.fillStyle(0x6b4423).fillRect(-1, -13, 3, 13);
+    g.fillStyle(0xb07b48).fillRect(-1, -14, 3, 2);
+  }
+  // Gateposts either side of the opening, a little taller.
+  for (const a of f.gate) {
+    const x = Math.round(cx + Math.cos(a) * rx);
+    const y = Math.round(cy + Math.sin(a) * ry);
+    const g = scene.add.graphics().setPosition(x, y).setDepth(y);
+    g.fillStyle(0x3b2414).fillRect(-2, -17, 5, 17);
+    g.fillStyle(0x7a4e2a).fillRect(-1, -17, 3, 17);
+    g.fillStyle(0xc08a52).fillRect(-2, -18, 5, 2);
+  }
+}
+
+// ---- Big trees and the sky ------------------------------------------------------------
+
+/** A big tree: its painted sprite on the trunk's tile, its shadow cast down and right. */
+function bigTree(scene: Phaser.Scene, tx: number, ty: number, variant: number) {
+  const x = (tx + 0.5) * TILE_SIZE;
+  const bottom = (ty + 1) * TILE_SIZE;
+  groundShadow(scene, x + 9, bottom - 3, 48, 16, 0.3);
+  placeSprite(scene, treeSprite(scene, variant), x, bottom);
+}
+
+const CLOUD_KEYS = ["cloud-0", "cloud-1", "cloud-2"];
+
+/** Cloud puffs (soft white bubbles with a shaded underside), made once per scene. */
+function ensureClouds(scene: Phaser.Scene) {
+  CLOUD_KEYS.forEach((key, i) => {
+    if (scene.textures.exists(key)) return;
+    const rand = mulberry32(31 + i * 17);
+    const w = 96 + i * 32;
+    const h = 44 + i * 8;
+    const texture = scene.textures.createCanvas(key, w, h)!;
+    const ctx = texture.context;
+    const puffs = Array.from({ length: 6 + i * 2 }, () => ({ x: 18 + rand() * (w - 36), y: h * 0.45 + (rand() - 0.5) * h * 0.3, r: 12 + rand() * (h * 0.32) }));
+    for (const [color, dy] of [["#c3d6e8", 4], ["#f4f8fc", 0], ["#ffffff", -3]] as const) {
+      ctx.fillStyle = color;
+      for (const p of puffs) {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y + dy, color === "#ffffff" ? p.r * 0.7 : p.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    texture.refresh();
+  });
+}
+
+/**
+ * The sky under a floating island: a blue backdrop and clouds drifting slowly east below the
+ * island (under the ground layer), wrapping round when they leave the map.
+ */
+function clouds(scene: Phaser.Scene, wTiles: number, hTiles: number) {
+  scene.cameras.main.setBackgroundColor(0x8ec8ee);
+  ensureClouds(scene);
+  const width = wTiles * TILE_SIZE;
+  const height = hTiles * TILE_SIZE;
+  const rand = mulberry32(777);
+  const drifting: { image: Phaser.GameObjects.Image; speed: number }[] = [];
+  for (let i = 0; i < Math.round((wTiles * hTiles) / 260); i++) {
+    const far = i % 3 === 0;
+    const image = scene.add
+      .image(rand() * (width + 300) - 150, rand() * height, CLOUD_KEYS[i % CLOUD_KEYS.length])
+      .setDepth(far ? -3 : -2)
+      .setAlpha(far ? 0.55 : 0.9)
+      .setScale(far ? 0.7 : 1 + rand() * 0.6);
+    drifting.push({ image, speed: (far ? 3 : 6) + rand() * 4 });
+  }
+  scene.time.addEvent({
+    delay: 100,
+    loop: true,
+    callback: () => {
+      for (const cloud of drifting) {
+        cloud.image.x += cloud.speed * 0.1;
+        if (cloud.image.x > width + 160) cloud.image.x = -160;
+      }
+    },
+  });
+}
+
 function parkBench(scene: Phaser.Scene, b: Extract<Decor, { kind: "parkBench" }>) {
   const x0 = b.tx * TILE_SIZE;
   const W = b.w * TILE_SIZE;
@@ -920,7 +1070,8 @@ function torch(scene: Phaser.Scene, tx: number, ty: number) {
   g.fillStyle(0x6f695e).fillRect(-3, -3, 6, 3);
   g.fillStyle(0x4a2e16).fillRect(-1, -20, 3, 18);
   g.fillStyle(0x2a2a30).fillRect(-3, -22, 7, 3);
-  scene.add
+  // The flame is lit with the lamps at dusk and put out at dawn.
+  const flame = scene.add
     .particles(x + 0.5, bottom - 23, DOT_KEY, {
       x: { min: -2, max: 2 },
       speedY: { min: -26, max: -14 },
@@ -932,8 +1083,9 @@ function torch(scene: Phaser.Scene, tx: number, ty: number) {
       blendMode: Phaser.BlendModes.ADD,
     })
     .setDepth(bottom + 0.2);
+  addGlow(scene, flame, 1, 0.1);
   const glow = scene.add.circle(x + 0.5, bottom - 24, 20, 0xff9a3c, 0.18).setBlendMode(Phaser.BlendModes.ADD).setDepth(bottom + 0.1);
-  scene.tweens.add({ targets: glow, alpha: 0.09, scale: 0.85, duration: 220 + Math.random() * 120, yoyo: true, repeat: -1 });
+  addGlow(scene, glow, 0.18, 0.4);
   addLight(scene, x + 0.5, bottom - 20, 62, 0xffa850, 0.08);
 }
 

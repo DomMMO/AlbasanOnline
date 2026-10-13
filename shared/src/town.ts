@@ -1,31 +1,62 @@
 import { TILE_SIZE } from "./constants";
-import type { Decor, DungeonLayout } from "./dungeons";
+import { insideCastle, type CastleShape, type Decor, type DungeonLayout } from "./dungeons";
 import { mulberry32, Tile } from "./map";
 
-// The main town (Ana Merkez): a castle town. A moat and a thick curtain wall with towers
-// ring it; the only way in is the east gatehouse over the drawbridge. Inside, the keep
-// stands in the north, the fountain square in the middle and the market in the south;
-// crooked streets wind between them and the shops are scattered along those streets
-// rather than lined up. No mobs and no PvP here.
+// The main town (Ana Merkez): a castle town on a floating island above the clouds. The island
+// is round-ish with a ragged edge (cliffs underneath, a waterfall where the brook runs off it);
+// a rounded curtain wall with towers rings the town, with a gate east (the road to the valley
+// gate and, round the south, the harbour gate) and one west (out to the brook and the pond).
+// Inside: the keep in the north, the fountain square in the middle, shops and houses along
+// crooked streets, the horse farm in the south-east. Stalls can be opened anywhere in town.
+// No mobs and no PvP here.
 
 const px = (tx: number, ty: number) => ({ x: (tx + 0.5) * TILE_SIZE, y: (ty + 1) * TILE_SIZE });
 
-export const TOWN_WIDTH = 76;
-export const TOWN_HEIGHT = 58;
+export const TOWN_WIDTH = 150;
+export const TOWN_HEIGHT = 132;
 
-/** Curtain wall, two tiles thick (outer tile bounds, inclusive). */
-const WALL = { x0: 8, y0: 8, x1: 57, y1: 51 };
-const WALL_THICKNESS = 2;
-/** The courtyard inside the wall (inclusive). */
-const INNER = { x0: WALL.x0 + WALL_THICKNESS, y0: WALL.y0 + WALL_THICKNESS, x1: WALL.x1 - WALL_THICKNESS, y1: WALL.y1 - WALL_THICKNESS };
-/** Moat: a two-tile ring of water one tile outside the wall (outer bounds). */
-const MOAT = { x0: WALL.x0 - 3, y0: WALL.y0 - 3, x1: WALL.x1 + 3, y1: WALL.y1 + 3 };
-/** Rows of the east gate, the drawbridge and the road out to the teleport gate. */
-const GATE_ROWS = [28, 29, 30];
-/** The market square, where players may open stalls (tiles). */
-const MARKET_AREA = { tx: 20, ty: 40, w: 24, h: 9 };
-/** The market's north entrance, under its signboard (tiles). */
-const MARKET_GATE = { tx: 30, w: 5 };
+/** The island: an ellipse with a wavy edge and two headlands (east: the valley gate, south: the harbour gate). */
+const ISLAND = { cx: 75, cy: 62, rx: 58, ry: 50 };
+
+/** Whether tile (x, y) is on the island (the rest is sky). */
+export function onIsland(x: number, y: number): boolean {
+  const dx = (x + 0.5 - ISLAND.cx) / ISLAND.rx;
+  const dy = (y + 0.5 - ISLAND.cy) / ISLAND.ry;
+  const angle = Math.atan2(y + 0.5 - ISLAND.cy, x + 0.5 - ISLAND.cx);
+  const bump = (centre: number, height: number, width: number) => {
+    const d = Math.atan2(Math.sin(angle - centre), Math.cos(angle - centre));
+    return height * Math.exp(-((d / width) ** 2));
+  };
+  const edge =
+    1 +
+    0.05 * Math.sin(3 * angle + 0.8) +
+    0.035 * Math.sin(5 * angle + 2.1) +
+    0.02 * Math.sin(11 * angle + 0.3) +
+    bump(0, 0.13, 0.2) +
+    bump(Math.PI / 2, 0.22, 0.2);
+  return Math.hypot(dx, dy) <= edge;
+}
+
+/** The curtain wall's outer edge; the courtyard is this shrunk by the wall's thickness. */
+export const CASTLE: CastleShape = { cx: 74, cy: 58, a: 40, b: 33, p: 2.3, wobble: [0.045, 3, 0.9] };
+const WALL_THICKNESS = 2.6;
+/** The courtyard (inside the wall), for the wall's battlements and for placing things. */
+const COURTYARD: CastleShape = { ...CASTLE, a: CASTLE.a - WALL_THICKNESS, b: CASTLE.b - WALL_THICKNESS };
+/** Rows of the east and west gates. */
+const GATE_ROWS = [57, 58, 59];
+
+/** The keep (14 x 6 tiles) in the north of the courtyard. */
+const KEEP = { tx: 67, ty: 33, w: 14, h: 6 };
+/** The fountain square (an ellipse of paving) and the fountain in its middle. */
+const SQUARE = { cx: 74.5, cy: 60, rx: 10, ry: 7 };
+const FOUNTAIN = { tx: 72, ty: 58, w: 5, h: 4 };
+/** The horse farm's paddock (fence tiles, inclusive) and its two-tile gate in the north side. */
+const HORSE_FARM = { x0: 86, y0: 72, x1: 96, y1: 80, gateX: 90 };
+/** The arena yard (sand) round the PvP portal, north-west of the keep. */
+const ARENA_YARD = { x0: 48, y0: 40, x1: 56, y1: 46 };
+/** The pond south-west of the town, and the brook from it south to the island's edge (a waterfall). */
+const POND = { cx: 40, cy: 97, rx: 5.5, ry: 3.5 };
+
 /** A bench in town that players can sit on. */
 export interface Bench {
   id: string;
@@ -39,10 +70,10 @@ export interface Bench {
 
 /** Park benches round the fountain, all looking at it: two on the north side, two on the south. */
 export const TOWN_BENCHES: Bench[] = [
-  { id: "fountain_nw", tx: 28, ty: 26, w: 2, facing: "down" },
-  { id: "fountain_ne", tx: 35, ty: 26, w: 2, facing: "down" },
-  { id: "fountain_sw", tx: 28, ty: 33, w: 2, facing: "up" },
-  { id: "fountain_se", tx: 35, ty: 33, w: 2, facing: "up" },
+  { id: "fountain_nw", tx: 69, ty: 55, w: 2, facing: "down" },
+  { id: "fountain_ne", tx: 79, ty: 55, w: 2, facing: "down" },
+  { id: "fountain_sw", tx: 69, ty: 65, w: 2, facing: "up" },
+  { id: "fountain_se", tx: 79, ty: 65, w: 2, facing: "up" },
 ];
 
 /** Feet positions of a bench's seats (pixels). */
@@ -50,69 +81,51 @@ export function benchSeats(bench: Bench): { x: number; y: number }[] {
   return Array.from({ length: bench.w }, (_, i) => px(bench.tx + i, bench.ty));
 }
 
-/** The horse farm's paddock (fence tiles, inclusive) and its two-tile gate in the south side. */
-const HORSE_FARM = { x0: 62, y0: 15, x1: 72, y1: 24, gateX: 66 };
-/** The cobbled lane from the east road down to the harbour gate (centre line, tiles). */
-const HARBOR_ROAD: [number, number][] = [[66, 31], [66, 34], [68, 37], [68, 41], [65, 44], [65, 46], [66, 48], [66, 52]];
-/** The meadow the road runs through (columns cleared of trees). */
-const HARBOR_ROAD_X0 = 61;
-const HARBOR_ROAD_X1 = 72;
-/** The fountain square (an ellipse of paving). */
-const SQUARE = { cx: 32, cy: 30, rx: 7.5, ry: 5.5 };
-
-/** The market square's edge tiles that get a fence: all but the gates (north, east, west). */
-function marketFence(): { tx: number; ty: number }[] {
-  const { tx, ty, w, h } = MARKET_AREA;
-  const x1 = tx + w - 1;
-  const y1 = ty + h - 1;
-  const midY = ty + Math.floor(h / 2);
-  const isGate = (x: number, y: number) =>
-    (y === ty && x >= MARKET_GATE.tx && x < MARKET_GATE.tx + MARKET_GATE.w) || ((x === tx || x === x1) && Math.abs(y - midY) <= 1);
-  const tiles: { tx: number; ty: number }[] = [];
-  for (let y = ty; y <= y1; y++) {
-    for (let x = tx; x <= x1; x++) {
-      const edge = x === tx || x === x1 || y === ty || y === y1;
-      if (edge && !isGate(x, y)) tiles.push({ tx: x, ty: y });
-    }
-  }
-  return tiles;
-}
+/** Where the login screen's characters stand (tile coordinates): the keep's forecourt, between the lamps. */
+export const TOWN_LOBBY = {
+  slots: [
+    { tx: KEEP.tx + 3, ty: KEEP.ty + KEEP.h + 2.5 },
+    { tx: KEEP.tx + 7.5, ty: KEEP.ty + KEEP.h + 2.5 },
+    { tx: KEEP.tx + 12, ty: KEEP.ty + KEEP.h + 2.5 },
+  ],
+  preview: { tx: KEEP.tx + 7.5, ty: KEEP.ty + KEEP.h + 2.8 },
+};
 
 /** Feet positions of things placed in town (tile coordinates). */
 export const TOWN_SPOTS = {
-  /** Teleport gate at the end of the east road. */
-  fieldGate: px(71, 29),
-  /** Where you appear when you come back from the hunting grounds: on the road, facing the drawbridge. */
-  fromField: px(66, 29),
-  /** Teleport gate to the harbour, at the end of the path branching south off the east road. */
-  harborGate: px(66, 51),
-  fromHarbor: px(66, 47),
+  /** Teleport gate on the east headland, at the end of the road from the east gate. */
+  fieldGate: px(139, 58),
+  /** Where you appear when you come back from the hunting grounds: on the road, facing the town. */
+  fromField: px(133, 58),
+  /** Teleport gate to the harbour, on the south headland. */
+  harborGate: px(74, 115),
+  fromHarbor: px(74, 111),
   /** The keep's front door (into the great hall) and where you come out of it. */
-  keepDoor: { x: 32 * TILE_SIZE, y: 18 * TILE_SIZE + 6 },
-  fromKeep: px(32, 20),
-  /** The market square's north entrance. */
-  market: px(32, 40),
-  /** Seyis Yusuf, at the gate of the horse farm north of the east road. */
-  stableMaster: px(64, 26),
-  pvpPortal: px(49, 15),
-  pvpReturn: px(49, 18),
-  spawn: px(32, 34),
-  weaponsmith: px(47, 27),
-  armorer: px(39, 26),
-  scribe: px(20, 15),
-  alchemist: px(15, 18),
-  blacksmith: px(15, 28),
-  jeweler: px(15, 38),
-  storekeeper: px(50, 44),
-  commander: px(50, 26),
-  sage: px(27, 30),
-  cook: px(43, 38),
-  guardGateNorth: px(54, 27),
-  guardGateSouth: px(54, 31),
-  guardKeepWest: px(28, 18),
-  guardKeepEast: px(36, 18),
+  keepDoor: { x: (KEEP.tx + KEEP.w / 2) * TILE_SIZE, y: (KEEP.ty + KEEP.h) * TILE_SIZE + 6 },
+  fromKeep: px(KEEP.tx + 7, KEEP.ty + KEEP.h + 2),
+  /** Stalls can be opened anywhere in town; most traders set up round the fountain. */
+  market: px(74, 67),
+  /** Seyis Yusuf, at the gate of the horse farm. */
+  stableMaster: px(HORSE_FARM.gateX - 2, HORSE_FARM.y0 - 1),
+  pvpPortal: px(52, 42),
+  pvpReturn: px(52, 45),
+  spawn: px(74, 68),
+  weaponsmith: px(101, 56),
+  armorer: px(85, 54),
+  scribe: px(59, 38),
+  alchemist: px(47, 47),
+  blacksmith: px(47, 56),
+  jeweler: px(53, 71),
+  storekeeper: px(103, 72),
+  commander: px(96, 61),
+  sage: px(63, 60),
+  cook: px(89, 66),
+  guardGateNorth: px(106, 55),
+  guardGateSouth: px(106, 61),
+  guardKeepWest: px(KEEP.tx + 1, KEEP.ty + KEEP.h + 1),
+  guardKeepEast: px(KEEP.tx + KEEP.w - 2, KEEP.ty + KEEP.h + 1),
   /** Zanaatkâr Murat (life skills), next to the jeweler. */
-  craftsman: px(18, 38),
+  craftsman: px(57, 71),
 };
 
 type Building = Extract<Decor, { kind: "building" }>;
@@ -121,21 +134,15 @@ export function buildTown(): DungeonLayout {
   const width = TOWN_WIDTH;
   const height = TOWN_HEIGHT;
   const rand = mulberry32(2024);
-  const inRect = (x: number, y: number, r: { x0: number; y0: number; x1: number; y1: number }) => x >= r.x0 && x <= r.x1 && y >= r.y0 && y <= r.y1;
-  const nearRoad = (y: number) => y >= GATE_ROWS[0] - 2 && y <= GATE_ROWS[2] + 2;
-  const tiles: Tile[][] = Array.from({ length: height }, (_, y) =>
-    Array.from({ length: width }, (_, x) => {
-      if (x < 2 || y < 2 || x >= width - 2 || y >= height - 2) return Tile.Tree;
-      const r = rand();
-      // Woods outside the moat, thinning out towards the road.
-      const outside = !inRect(x, y, MOAT);
-      if (outside && r < 0.14 && !(x > MOAT.x1 && nearRoad(y))) return Tile.Tree;
-      return r < 0.04 ? Tile.Flower : r < 0.3 ? Tile.GrassAlt : Tile.Grass;
-    }),
-  );
-  const fill = (x0: number, y0: number, x1: number, y1: number, tile: Tile) => {
-    for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) tiles[y][x] = tile;
+  const grass = () => {
+    const r = rand();
+    return r < 0.035 ? Tile.Flower : r < 0.32 ? Tile.GrassAlt : Tile.Grass;
   };
+  const tiles: Tile[][] = Array.from({ length: height }, (_, y) => Array.from({ length: width }, (_, x) => (onIsland(x, y) ? grass() : Tile.Sky)));
+  const fill = (x0: number, y0: number, x1: number, y1: number, tile: Tile) => {
+    for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) if (tiles[y]?.[x] !== undefined && tiles[y][x] !== Tile.Sky) tiles[y][x] = tile;
+  };
+  const isGreen = (t: Tile | undefined) => t === Tile.Grass || t === Tile.GrassAlt || t === Tile.Flower;
   /** Paints a winding street through these points, `radius` tiles either side of its centre line. */
   const street = (points: [number, number][], tile = Tile.Cobble, radius = 1) => {
     for (let i = 1; i < points.length; i++) {
@@ -148,98 +155,67 @@ export function buildTown(): DungeonLayout {
         for (let y = cy - radius; y <= cy + radius; y++) {
           for (let x = cx - radius; x <= cx + radius; x++) {
             const t = tiles[y]?.[x];
-            // Streets never pave over the plaza, walls or water.
-            if (t === Tile.Grass || t === Tile.GrassAlt || t === Tile.Flower || t === Tile.Path) tiles[y][x] = tile;
+            // Streets never pave over the plaza, walls, water or the sky.
+            if (isGreen(t) || t === Tile.Path) tiles[y][x] = tile;
           }
         }
       }
     }
   };
+  const inCourtyard = (x: number, y: number) => insideCastle(COURTYARD, x, y);
 
-  // ---- Moat, wall and the gate ----
-  fill(MOAT.x0, MOAT.y0, MOAT.x1, MOAT.y1, Tile.Water);
-  fill(MOAT.x0 + 2, MOAT.y0 + 2, MOAT.x1 - 2, MOAT.y1 - 2, Tile.Grass);
-  fill(WALL.x0, WALL.y0, WALL.x1, WALL.y1, Tile.Wall);
-  fill(INNER.x0, INNER.y0, INNER.x1, INNER.y1, Tile.Grass);
-  for (let y = INNER.y0; y <= INNER.y1; y++) {
-    for (let x = INNER.x0; x <= INNER.x1; x++) {
-      const r = rand();
-      tiles[y][x] = r < 0.03 ? Tile.Flower : r < 0.35 ? Tile.GrassAlt : Tile.Grass;
-    }
+  // ---- The curtain wall and its two gates ----
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) if (insideCastle(CASTLE, x, y) && !inCourtyard(x, y)) tiles[y][x] = Tile.Wall;
   }
   const [gateTop, , gateBottom] = GATE_ROWS;
-  // Gate passage through the wall, the bank, the drawbridge and the road to the teleport gate.
-  fill(WALL.x1 - 1, gateTop, WALL.x1, gateBottom, Tile.Cobble);
-  fill(WALL.x1 + 1, gateTop, WALL.x1 + 1, gateBottom, Tile.Path);
-  fill(MOAT.x1 - 1, gateTop, MOAT.x1, gateBottom, Tile.Bridge);
-  fill(MOAT.x1 + 1, gateTop, width - 3, gateBottom, Tile.Path);
-  fill(MOAT.x1 + 1, gateTop - 1, width - 3, gateTop - 1, Tile.Grass);
-  fill(MOAT.x1 + 1, gateBottom + 1, width - 3, gateBottom + 1, Tile.Grass);
-  // The road south to the harbour gate: the woods are cleared back into a meadow and a
-  // cobbled lane winds down to a paved circle round the gate (trees, lamps and flower
-  // beds along it are placed with the rest of the decor below).
-  for (let y = gateBottom + 1; y <= height - 3; y++) {
-    for (let x = HARBOR_ROAD_X0; x <= HARBOR_ROAD_X1; x++) {
-      if (tiles[y][x] === Tile.Tree) tiles[y][x] = rand() < 0.5 ? Tile.GrassAlt : Tile.Grass;
+  /** Opens a gate through the wall in the gate rows on one side; returns the passage's columns. */
+  const openGate = (east: boolean) => {
+    let x0 = Infinity;
+    let x1 = -Infinity;
+    for (const y of GATE_ROWS) {
+      for (let x = 0; x < width; x++) {
+        if (tiles[y][x] !== Tile.Wall || x > CASTLE.cx !== east) continue;
+        tiles[y][x] = Tile.Cobble;
+        x0 = Math.min(x0, x);
+        x1 = Math.max(x1, x);
+      }
+    }
+    return { x0, x1 };
+  };
+  const eastGate = openGate(true);
+  const westGate = openGate(false);
+
+  // ---- Open spaces in town ----
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      if (inCourtyard(x, y) && ((x + 0.5 - SQUARE.cx) / SQUARE.rx) ** 2 + ((y + 0.5 - SQUARE.cy) / SQUARE.ry) ** 2 <= 1) tiles[y][x] = Tile.Plaza;
     }
   }
-  for (let y = 48; y <= height - 3; y++) {
-    for (let x = 62; x <= 70; x++) if (((x - 66) / 3.6) ** 2 + ((y - 51) / 2.6) ** 2 <= 1) tiles[y][x] = Tile.Plaza;
-  }
-  const roadCentre = new Map<number, number>();
-  for (let i = 1; i < HARBOR_ROAD.length; i++) {
-    const [ax, ay] = HARBOR_ROAD[i - 1];
-    const [bx, by] = HARBOR_ROAD[i];
-    const steps = Math.max(Math.abs(bx - ax), Math.abs(by - ay));
-    for (let s = 0; s <= steps; s++) roadCentre.set(Math.round(ay + ((by - ay) * s) / steps), Math.round(ax + ((bx - ax) * s) / steps));
-  }
-  street(HARBOR_ROAD, Tile.Cobble, 1);
-
-  // The horse farm north of the east road, outside the moat: the woods are cleared for it.
-  for (let y = HORSE_FARM.y0 - 2; y <= GATE_ROWS[0] - 2; y++) {
-    for (let x = HORSE_FARM.x0 - 1; x <= HORSE_FARM.x1 + 1; x++) if (tiles[y][x] === Tile.Tree) tiles[y][x] = Tile.Grass;
-  }
-  fill(HORSE_FARM.gateX, HORSE_FARM.y1, HORSE_FARM.gateX + 1, GATE_ROWS[0] - 1, Tile.Path);
-
-  // ---- Open spaces ----
-  // Fountain square: an oval of paving.
-  for (let y = INNER.y0; y <= INNER.y1; y++) {
-    for (let x = INNER.x0; x <= INNER.x1; x++) {
-      if (((x - SQUARE.cx) / SQUARE.rx) ** 2 + ((y - SQUARE.cy) / SQUARE.ry) ** 2 <= 1) tiles[y][x] = Tile.Plaza;
-    }
-  }
-  // The keep's forecourt and the sand of the arena yard (PvP portal).
-  fill(27, 18, 37, 20, Tile.Plaza);
-  fill(45, 12, 53, 19, Tile.Path);
-  // Market square.
-  fill(MARKET_AREA.tx, MARKET_AREA.ty, MARKET_AREA.tx + MARKET_AREA.w - 1, MARKET_AREA.ty + MARKET_AREA.h - 1, Tile.Market);
+  // The keep's forecourt, and the sand of the arena yard (PvP portal).
+  fill(KEEP.tx - 1, KEEP.ty + KEEP.h, KEEP.tx + KEEP.w, KEEP.ty + KEEP.h + 3, Tile.Plaza);
+  fill(ARENA_YARD.x0, ARENA_YARD.y0, ARENA_YARD.x1, ARENA_YARD.y1, Tile.Path);
 
   // ---- Streets ----
-  // Gate street: from the gatehouse to the square, kinking past the weaponsmith.
-  street([[55, 29], [48, 29], [44, 31], [39, 30]]);
+  const cx = Math.round(SQUARE.cx - 0.5);
+  // Gate streets: from each gate to the square, kinking past the shops.
+  street([[eastGate.x0 - 1, 58], [96, 58], [90, 60], [84, 59]]);
+  street([[westGate.x1 + 1, 58], [52, 58], [58, 60], [64, 59]]);
   // Keep avenue, straight up from the square.
-  street([[32, 24], [32, 20]]);
-  // Forge street: west from the square to the smithy.
-  street([[25, 30], [20, 29], [12, 29]]);
-  // Back alley north: past the alchemist and the scribe, then east to the keep.
-  street([[21, 28], [21, 22], [17, 19], [13, 19]]);
-  street([[21, 22], [20, 16]]);
-  street([[20, 19], [27, 19]]);
-  // Jeweller's lane and on to the market's west gate.
-  street([[19, 30], [19, 37], [14, 39]]);
-  street([[19, 37], [19, 44]]);
-  // Market street, south from the square.
-  street([[32, 35], [32, 39]]);
-  // Arena lane: up from the gate street to the arena yard.
-  street([[51, 28], [51, 21], [49, 19]]);
-  // Back lane east: past Ayşe Teyze's door, the market's east gate and the storehouse.
-  street([[47, 30], [47, 38], [43, 39]]);
-  street([[47, 38], [45, 41], [45, 44], [51, 45]]);
-  // Armourer's lane.
-  street([[39, 26], [40, 29]], Tile.Cobble, 0);
-  street([[38, 27], [41, 27]], Tile.Cobble, 0);
+  street([[cx, 52], [cx, KEEP.ty + KEEP.h + 3]]);
+  // North-west: past the forge and the alchemist to the arena yard and the scribe.
+  street([[52, 58], [50, 50], [52, 47]]);
+  street([[52, 47], [57, 43], [62, 40], [KEEP.tx - 1, 40]]);
+  // North-east: from the gate street up past the armorer to the houses under the wall.
+  street([[96, 58], [94, 50], [88, 45], [KEEP.tx + KEEP.w + 1, 41]]);
+  // South: from the square down to the houses and the south garden.
+  street([[cx, 67], [cx, 76], [70, 82]]);
+  // South-west: jeweler's lane.
+  street([[58, 60], [57, 67], [60, 74], [cx, 76]]);
+  // South-east: Ayşe Teyze's door, the horse farm's gate and the storehouse.
+  street([[90, 60], [91, 66], [HORSE_FARM.gateX, HORSE_FARM.y0 - 2], [100, 68], [104, 69]]);
 
-  const decor: Decor[] = [];
+  const decor: Decor[] = [{ kind: "clouds", w: width, h: height }];
   const solid = (tx: number, ty: number, w: number, h: number) => fill(tx, ty, tx + w - 1, ty + h - 1, Tile.Solid);
   const building = (tx: number, ty: number, w: number, h: number, roof: number, sign?: Building["sign"], chimney = false) => {
     solid(tx, ty, w, h);
@@ -249,149 +225,228 @@ export function buildTown(): DungeonLayout {
     solid(tx, ty, kind === "well" ? 2 : 1, kind === "well" ? 2 : 1);
     decor.push({ kind: "prop", tx, ty, prop: kind });
   };
-  const tree = (tx: number, ty: number) => (tiles[ty][tx] = Tile.Tree);
-
-  // ---- The keep ----
-  solid(25, 12, 14, 6);
-  decor.push({ kind: "keep", tx: 25, ty: 12, w: 14, h: 6, banner: 0x9c2a2a });
-
-  // ---- Shops, scattered along the streets; the keeper stands at the door ----
-  building(44, 22, 6, 5, 0x9c3b2e, { shape: "sword", color: 0xc8ccd4 }); // Silahçı Kerem, by the gate
-  building(37, 22, 5, 4, 0x3b5f8a, { shape: "chest", color: 0x9aa4b4 }); // Zırhçı Leyla
-  building(18, 11, 5, 4, 0x6a4c93, { shape: "scroll", color: 0x3f7fd9 }); // Parşömenci Nuri, near the keep
-  building(12, 14, 6, 4, 0x2f7a4f, { shape: "potion", color: 0xd94141 }, true); // İksirci Zehra, back alley
-  building(12, 23, 6, 5, 0x4a4040, { shape: "axe", color: 0xb0b4bc }, true); // Demirci Hasan's forge
-  solid(18, 27, 1, 1);
-  decor.push({ kind: "anvil", tx: 18, ty: 27 });
-  building(12, 34, 6, 4, 0x8c6d1f, { shape: "ring", color: 0xffd43b }); // Kuyumcu Selin
-  building(47, 40, 7, 4, 0x6b5a3a, { shape: "chest", color: 0xc8a165 }); // Depocu Hatice's storehouse
-  building(40, 34, 6, 4, 0x9c3b5a, undefined, true); // Ayşe Teyze's house
-
-  // Houses and the barracks, to fill the streets out.
-  building(49, 33, 6, 4, 0x6b1a1a); // barracks by the gate
-  building(23, 21, 4, 3, 0x8a5a3a, undefined, true);
-  building(11, 42, 5, 4, 0x5a6b8a, undefined, true);
-  building(16, 46, 4, 3, 0x8a4a3a);
-  building(22, 32, 4, 3, 0x7a6a4a, undefined, true);
-  building(41, 13, 4, 4, 0x4f6b4a, undefined, true);
-
-  solid(30, 28, 5, 4);
-  decor.push({ kind: "fountain", tx: 30, ty: 28, w: 5, h: 4 });
-
-  // ---- Street life ----
-  for (const [tx, ty] of [[24, 15], [39, 19], [26, 37], [36, 23], [16, 32], [44, 47], [54, 39], [12, 47], [53, 23], [11, 12], [13, 11]] as const) tree(tx, ty);
-  prop(22, 36, "well");
-  for (const [tx, ty] of [[43, 25], [50, 22], [36, 37], [18, 26]] as const) prop(tx, ty, "barrel");
-  for (const [tx, ty] of [[54, 41], [54, 42], [11, 27]] as const) prop(tx, ty, "crate");
-  for (const [tx, ty] of [[54, 37], [53, 37]] as const) prop(tx, ty, "hay");
-  prop(26, 24, "cart");
-
-  for (const [tx, ty] of [
-    [26, 26], [38, 26], [26, 34], [38, 34], // square
-    [17, 41], [54, 44], // market and storehouse
-    [44, 27], [53, 32], // gate street
-    [22, 27], [18, 21], [29, 20], [35, 20], // west streets and the forecourt
-    [52, 19], [46, 13], // arena yard
-  ]) {
+  const lamp = (tx: number, ty: number) => {
     solid(tx, ty, 1, 1);
     decor.push({ kind: "lamp", tx, ty });
+  };
+  const bigTree = (tx: number, ty: number) => {
+    solid(tx, ty, 1, 1);
+    decor.push({ kind: "bigTree", tx, ty, variant: Math.floor(rand() * 3) });
+  };
+
+  // ---- The keep ----
+  solid(KEEP.tx, KEEP.ty, KEEP.w, KEEP.h);
+  decor.push({ kind: "keep", ...KEEP, banner: 0x9c2a2a });
+
+  // ---- Shops, scattered along the streets; the keeper stands at the door ----
+  building(98, 51, 6, 5, 0x9c3b2e, { shape: "sword", color: 0xc8ccd4 }); // Silahçı Kerem, by the east gate
+  building(83, 50, 5, 4, 0x3b5f8a, { shape: "chest", color: 0x9aa4b4 }); // Zırhçı Leyla
+  building(57, 34, 5, 4, 0x6a4c93, { shape: "scroll", color: 0x3f7fd9 }); // Parşömenci Nuri, by the keep
+  building(44, 43, 6, 4, 0x2f7a4f, { shape: "potion", color: 0xd94141 }, true); // İksirci Zehra
+  building(44, 51, 6, 5, 0x4a4040, { shape: "axe", color: 0xb0b4bc }, true); // Demirci Hasan's forge, by the west gate
+  solid(50, 55, 1, 1);
+  decor.push({ kind: "anvil", tx: 50, ty: 55 });
+  building(50, 67, 6, 4, 0x8c6d1f, { shape: "ring", color: 0xffd43b }); // Kuyumcu Selin
+  building(100, 68, 7, 4, 0x6b5a3a, { shape: "chest", color: 0xc8a165 }); // Depocu Hatice's storehouse
+  building(86, 62, 6, 4, 0x9c3b5a, undefined, true); // Ayşe Teyze's house
+
+  // The barracks by the east gate, and houses filling the streets out.
+  building(94, 62, 6, 4, 0x6b1a1a);
+  for (const [tx, ty, w, h, roof, chimney] of [
+    [62, 45, 4, 3, 0x8a5a3a, true],
+    [84, 42, 4, 4, 0x4f6b4a, true],
+    [90, 46, 4, 3, 0x7a4a3a, false],
+    [60, 64, 4, 3, 0x7a6a4a, true],
+    [62, 70, 5, 4, 0x5a6b8a, true],
+    [55, 76, 4, 3, 0x8a4a3a, false],
+    [64, 79, 4, 3, 0x6b4a6a, true],
+    [77, 70, 4, 3, 0x3a5a7a, false],
+    [79, 77, 5, 4, 0x8a5a3a, true],
+    [45, 61, 4, 3, 0x4a6a3a, false],
+    [100, 45, 4, 3, 0x7a3a3a, true],
+    [65, 51, 4, 3, 0x5a4a8a, false],
+    [79, 45, 4, 3, 0x8a6a2a, false],
+    [104, 62, 3, 3, 0x6a5a4a, false],
+  ] as const) {
+    building(tx, ty, w, h, roof, undefined, chimney);
   }
-  decor.push({ kind: "signboard", tx: 64, ty: 33, w: 5, text: "LİMAN" });
+
+  solid(FOUNTAIN.tx, FOUNTAIN.ty, FOUNTAIN.w, FOUNTAIN.h);
+  decor.push({ kind: "fountain", ...FOUNTAIN });
   // Benches round the fountain (walk-through: you sit by clicking one).
   for (const { tx, ty, w, facing } of TOWN_BENCHES) decor.push({ kind: "parkBench", tx, ty, w, facing });
 
   // ---- The horse farm ----
   // A red barn, a fenced paddock with horses grazing in it, hay and a water trough;
-  // Seyis Yusuf waits at the paddock gate by the road.
-  building(HORSE_FARM.x0 + 1, HORSE_FARM.y0 - 6, 6, 4, 0x8a2a1a, undefined, true);
-  const paddock: { tx: number; ty: number }[] = [];
-  for (let y = HORSE_FARM.y0; y <= HORSE_FARM.y1; y++) {
-    for (let x = HORSE_FARM.x0; x <= HORSE_FARM.x1; x++) {
-      const edge = x === HORSE_FARM.x0 || x === HORSE_FARM.x1 || y === HORSE_FARM.y0 || y === HORSE_FARM.y1;
-      const gate = y === HORSE_FARM.y1 && (x === HORSE_FARM.gateX || x === HORSE_FARM.gateX + 1);
-      if (edge && !gate) paddock.push({ tx: x, ty: y });
+  // Seyis Yusuf waits at the paddock gate by the lane.
+  building(HORSE_FARM.x1 + 2, HORSE_FARM.y0 + 1, 6, 4, 0x8a2a1a, undefined, true);
+  // A round paddock in the farm's rectangle: a smooth ring of posts and rails (drawn off the
+  // tile grid), the tiles under the ring solid, a gate at the top facing the lane.
+  const ring = {
+    cx: (HORSE_FARM.x0 + HORSE_FARM.x1 + 1) / 2,
+    cy: (HORSE_FARM.y0 + HORSE_FARM.y1 + 1) / 2,
+    rx: (HORSE_FARM.x1 - HORSE_FARM.x0 + 1) / 2 - 0.5,
+    ry: (HORSE_FARM.y1 - HORSE_FARM.y0 + 1) / 2 - 0.5,
+  };
+  const gate: [number, number] = [-Math.PI / 2 - 0.24, -Math.PI / 2 + 0.24];
+  const inGate = (angle: number) => angle >= gate[0] && angle <= gate[1];
+  for (let y = HORSE_FARM.y0 - 1; y <= HORSE_FARM.y1 + 1; y++) {
+    for (let x = HORSE_FARM.x0 - 1; x <= HORSE_FARM.x1 + 1; x++) {
+      const dx = (x + 0.5 - ring.cx) / ring.rx;
+      const dy = (y + 0.5 - ring.cy) / ring.ry;
+      const off = (Math.hypot(dx, dy) - 1) * Math.min(ring.rx, ring.ry);
+      if (Math.abs(off) <= 0.62 && !inGate(Math.atan2(dy, dx))) solid(x, y, 1, 1);
     }
   }
-  for (const { tx, ty } of paddock) solid(tx, ty, 1, 1);
-  decor.push({ kind: "fence", tiles: paddock });
-  decor.push({ kind: "signboard", tx: HORSE_FARM.gateX - 1, ty: HORSE_FARM.y1 + 1, w: 4, text: "AT ÇİFTLİĞİ" });
+  decor.push({ kind: "roundFence", ...ring, gate });
+  decor.push({ kind: "signboard", tx: HORSE_FARM.gateX + 2, ty: HORSE_FARM.y0 - 2, w: 6, text: "AT ÇİFTLİĞİ" });
   const farmHorses: Extract<Decor, { kind: "horse" }>[] = [
-    { kind: "horse", tx: 64, ty: 17, look: { coat: 0xd8d4cc, mane: 0xf1f3f5, blanket: 0x1c7ed6, saddle: 0x8a5a2b }, facing: "right" },
-    { kind: "horse", tx: 69, ty: 18, look: { coat: 0xd4a017, mane: 0x8a6a10, blanket: 0x2b8a3e, saddle: 0x6b1a1a }, facing: "left" },
-    { kind: "horse", tx: 66, ty: 21, look: { coat: 0x26232a, mane: 0x0f0d12, blanket: 0x9c2a2a, saddle: 0x111111 }, facing: "down" },
-    { kind: "horse", tx: 70, ty: 22, look: { coat: 0xb08850, mane: 0x3a2a1a, blanket: 0x7a2a2a, saddle: 0x5b3a1e }, facing: "left" },
+    { kind: "horse", tx: 88, ty: 74, look: { coat: 0xd8d4cc, mane: 0xf1f3f5, blanket: 0x1c7ed6, saddle: 0x8a5a2b }, facing: "right" },
+    { kind: "horse", tx: 93, ty: 75, look: { coat: 0xd4a017, mane: 0x8a6a10, blanket: 0x2b8a3e, saddle: 0x6b1a1a }, facing: "left" },
+    { kind: "horse", tx: 90, ty: 78, look: { coat: 0x26232a, mane: 0x0f0d12, blanket: 0x9c2a2a, saddle: 0x111111 }, facing: "down" },
+    { kind: "horse", tx: 94, ty: 78, look: { coat: 0xb08850, mane: 0x3a2a1a, blanket: 0x7a2a2a, saddle: 0x5b3a1e }, facing: "left" },
   ];
   for (const horse of farmHorses) {
     solid(horse.tx, horse.ty, 1, 1);
     decor.push(horse);
   }
-  solid(HORSE_FARM.x0 + 1, HORSE_FARM.y0 + 5, 2, 1);
-  decor.push({ kind: "trough", tx: HORSE_FARM.x0 + 1, ty: HORSE_FARM.y0 + 5 });
-  for (const [tx, ty] of [[HORSE_FARM.x1 - 1, HORSE_FARM.y0 + 1], [HORSE_FARM.x1 - 2, HORSE_FARM.y0 + 1], [HORSE_FARM.x0 + 1, HORSE_FARM.y1 - 1]] as const) prop(tx, ty, "hay");
-  prop(HORSE_FARM.x0 + 7, HORSE_FARM.y0 - 3, "cart");
-  for (const [tx, ty] of [[HORSE_FARM.gateX - 3, HORSE_FARM.y1 + 1], [HORSE_FARM.gateX + 4, HORSE_FARM.y1 + 1]] as const) {
-    solid(tx, ty, 1, 1);
-    decor.push({ kind: "lamp", tx, ty });
+  solid(HORSE_FARM.x0 + 2, HORSE_FARM.y0 + 4, 2, 1);
+  decor.push({ kind: "trough", tx: HORSE_FARM.x0 + 2, ty: HORSE_FARM.y0 + 4 });
+  for (const [tx, ty] of [[HORSE_FARM.x1 - 3, HORSE_FARM.y0 + 5], [HORSE_FARM.x1 - 2, HORSE_FARM.y0 + 5], [HORSE_FARM.x0 + 6, HORSE_FARM.y0 + 2]] as const) prop(tx, ty, "hay");
+  prop(HORSE_FARM.x1 + 3, HORSE_FARM.y0 + 6, "cart");
+  lamp(HORSE_FARM.gateX - 1, HORSE_FARM.y0 - 1);
+
+  // ---- Street life ----
+  prop(58, 74, "well");
+  for (const [tx, ty] of [[97, 50], [43, 50], [82, 54], [99, 67]] as const) prop(tx, ty, "barrel");
+  for (const [tx, ty] of [[107, 67], [107, 68], [43, 56]] as const) prop(tx, ty, "crate");
+  for (const [tx, ty] of [[101, 66], [102, 66]] as const) prop(tx, ty, "hay");
+  prop(66, 57, "cart");
+  for (const [tx, ty] of [
+    [65, 54], [84, 54], [65, 66], [84, 66], // square
+    [96, 55], [104, 60], [57, 55], [44, 60], // gate streets
+    [70, 42], [79, 42], [62, 42], // forecourt and the north-west lane
+    [cx - 2, 72], [86, 58], [54, 64], [92, 69], [95, 51],
+  ]) {
+    lamp(tx, ty);
+  }
+  // Trees in town: a little park under the north-east wall, and here and there along the lanes.
+  for (const [tx, ty] of [[96, 41], [99, 40], [93, 38], [58, 50], [68, 74], [84, 74], [47, 66], [60, 82], [74, 84], [86, 84], [55, 37], [103, 53]] as const) {
+    if (isGreen(tiles[ty]?.[tx])) bigTree(tx, ty);
   }
 
-  // ---- The harbour road ----
-  // An avenue of trees two tiles off the lane, lamps between them on alternate sides and
-  // flower beds along the kerb; banners and barrels by the gate.
-  const isFree = (x: number, y: number) => tiles[y]?.[x] === Tile.Grass || tiles[y]?.[x] === Tile.GrassAlt || tiles[y]?.[x] === Tile.Flower;
-  for (const [y, cx] of roadCentre) {
-    if (y < 35 || y > 47) continue;
-    if (y % 3 === 0) {
-      for (const x of [cx - 4, cx + 4]) if (isFree(x, y)) tree(x, y);
-    } else if (y % 3 === 1) {
-      const x = y % 6 === 1 ? cx - 3 : cx + 3;
-      if (isFree(x, y)) {
-        solid(x, y, 1, 1);
-        decor.push({ kind: "lamp", tx: x, ty: y });
-      }
-    } else {
-      for (const x of [cx - 2, cx + 2]) if (isFree(x, y) && rand() < 0.7) tiles[y][x] = Tile.Flower;
-    }
-  }
-  for (const [tx, ty, color] of [[62, 50, 0x2f6b8a], [70, 50, 0x2f6b8a]] as const) {
-    solid(tx, ty, 1, 1);
-    decor.push({ kind: "banner", tx, ty, color });
-  }
-  for (const [tx, ty] of [[63, 47], [69, 47]] as const) {
-    solid(tx, ty, 1, 1);
-    decor.push({ kind: "lamp", tx, ty });
-  }
-  for (const [tx, ty] of [[71, 37], [71, 38]] as const) prop(tx, ty, "hay");
-  prop(62, 41, "barrel");
-  prop(62, 42, "crate");
-  // Torches either side of the drawbridge and in the arena yard.
-  for (const [tx, ty] of [[MOAT.x1 + 1, gateTop - 1], [MOAT.x1 + 1, gateBottom + 1], [45, 17], [53, 17]] as const) {
+  // ---- The arena yard, with training dummies in its corner ----
+  for (const [tx, ty] of [[50, 44], [55, 44], [50, 46], [55, 46]] as const) prop(tx, ty, "dummy");
+  for (const [tx, ty] of [[ARENA_YARD.x0, ARENA_YARD.y0], [ARENA_YARD.x1, ARENA_YARD.y0]] as const) {
     solid(tx, ty, 1, 1);
     decor.push({ kind: "torch", tx, ty });
   }
-  for (const [tx, ty, color] of [[23, 39, 0xc92a2a], [27, 39, 0xe0a83f], [37, 39, 0x3b5bdb], [41, 39, 0x2f9e44], [45, 19, 0x9c2a2a], [53, 19, 0x9c2a2a]] as const) {
+  for (const [tx, ty] of [[ARENA_YARD.x0, ARENA_YARD.y0 + 2], [ARENA_YARD.x1, ARENA_YARD.y0 + 2]] as const) {
+    solid(tx, ty, 1, 1);
+    decor.push({ kind: "banner", tx, ty, color: 0x9c2a2a });
+  }
+
+  // ---- Outside the walls ----
+  // The east road out to the valley gate on the headland, and the harbour road branching off it
+  // round the south of the wall to the harbour gate on the south headland.
+  street([[eastGate.x1 + 1, 58], [139, 58]], Tile.Path, 1);
+  street([[122, 59], [121, 70], [115, 82], [104, 94], [90, 104], [79, 108], [74, 114]], Tile.Cobble, 1);
+  street([[westGate.x0 - 1, 58], [30, 58], [24, 60]], Tile.Path, 1);
+  // Paved circles round the two teleport gates and a little lookout at the end of the west road.
+  for (const [gx, gy, r] of [[139, 58, 3.2], [74, 115, 3.4], [23, 60, 2.6]] as const) {
+    for (let y = Math.floor(gy - r); y <= gy + r; y++) {
+      for (let x = Math.floor(gx - r); x <= gx + r; x++) if (Math.hypot(x - gx, y - gy) <= r && tiles[y]?.[x] !== Tile.Sky) tiles[y][x] = Tile.Plaza;
+    }
+  }
+  // The pond, and the brook from it south to the edge, where it falls off the island.
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      if (((x + 0.5 - POND.cx) / POND.rx) ** 2 + ((y + 0.5 - POND.cy) / POND.ry) ** 2 <= 1 && tiles[y][x] !== Tile.Sky) tiles[y][x] = Tile.Water;
+    }
+  }
+  for (let y = POND.cy; y < height && tiles[y][POND.cx] !== undefined; y++) {
+    const x = Math.round(POND.cx - 1 + 2 * Math.sin(y * 0.35));
+    if (tiles[y][x] === Tile.Sky && tiles[y][x + 1] === Tile.Sky) break;
+    for (const xx of [x, x + 1]) if (tiles[y][xx] !== Tile.Sky) tiles[y][xx] = Tile.Water;
+  }
+
+  // Lamps along the roads, torches at the gates, banners at the teleport gates.
+  for (let x = eastGate.x1 + 4; x < 136; x += 6) lamp(x, x % 12 === 0 ? 56 : 60);
+  for (const [tx, ty] of [[118, 76], [109, 88], [96, 99], [84, 107]] as const) lamp(tx, ty);
+  for (const [tx, ty] of [[eastGate.x1 + 1, gateTop - 1], [eastGate.x1 + 1, gateBottom + 1], [westGate.x0 - 1, gateTop - 1], [westGate.x0 - 1, gateBottom + 1]] as const) {
+    if (tiles[ty]?.[tx] === Tile.Sky) continue;
+    solid(tx, ty, 1, 1);
+    decor.push({ kind: "torch", tx, ty });
+  }
+  for (const [tx, ty, color] of [[135, 55, 0x2b8a3e], [135, 61, 0x2b8a3e], [70, 112, 0x2f6b8a], [78, 112, 0x2f6b8a]] as const) {
     solid(tx, ty, 1, 1);
     decor.push({ kind: "banner", tx, ty, color });
   }
-  // Make the market square unmistakable: a sign over its entrance and a gold line around it.
-  decor.push({ kind: "signboard", tx: MARKET_GATE.tx, ty: MARKET_AREA.ty - 1, w: MARKET_GATE.w, text: "PAZAR" });
-  decor.push({ kind: "groundFrame", ...MARKET_AREA, color: 0xe8c33a });
-  const fence = marketFence();
-  for (const { tx, ty } of fence) solid(tx, ty, 1, 1);
-  decor.push({ kind: "fence", tiles: fence });
+  decor.push({ kind: "signboard", tx: 120, ty: 62, w: 5, text: "LİMAN" });
+  lamp(21, 58);
+  lamp(21, 62);
+
+  // Woods: big trees outside the wall, thick in patches, thin elsewhere; none on the roads,
+  // next to the wall or the edge.
+  const trees: { x: number; y: number }[] = [];
+  const clear = (x: number, y: number, r: number) => {
+    for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) if (!isGreen(tiles[y + dy]?.[x + dx])) return false;
+    return true;
+  };
+  for (let y = 4; y < height - 4; y++) {
+    for (let x = 4; x < width - 4; x++) {
+      if (insideCastle(CASTLE, x, y, -4) || !clear(x, y, 2)) continue;
+      const woods = Math.sin(x * 0.11 + 1.3) * Math.cos(y * 0.13 - 0.4) + 0.4 * Math.sin((x + y) * 0.07);
+      if (rand() > (woods > 0.35 ? 0.2 : 0.035)) continue;
+      if (trees.some((t) => Math.abs(t.x - x) < 3 && Math.abs(t.y - y) < 3)) continue;
+      trees.push({ x, y });
+    }
+  }
+  for (const t of trees) bigTree(t.x, t.y);
+
+  // Bushes (walk-through): beside the houses in town, and along the edges of the woods.
+  const bush = (tx: number, ty: number) => {
+    if (!isGreen(tiles[ty]?.[tx])) return;
+    decor.push({ kind: "bush", tx, ty, variant: Math.floor(rand() * 6) });
+  };
+  // By the houses: a bush on one side, crates, barrels or sacks stacked on the other.
+  const goods: Extract<Decor, { kind: "prop" }>["prop"][] = ["crate", "barrel", "sack", "crate"];
+  for (const d of [...decor]) {
+    if (d.kind !== "building") continue;
+    if (rand() < 0.75) bush(d.tx - 1, d.ty + d.h - 1);
+    const sx = d.tx + d.w;
+    const sy = d.ty + d.h - 1;
+    if (rand() < 0.6 && isGreen(tiles[sy]?.[sx]) && isGreen(tiles[sy - 1]?.[sx])) {
+      prop(sx, sy, goods[Math.floor(rand() * goods.length)]);
+      if (rand() < 0.5) prop(sx, sy - 1, goods[Math.floor(rand() * goods.length)]);
+    } else if (rand() < 0.5) bush(sx, sy);
+  }
+  for (const t of trees) {
+    if (rand() < 0.45) bush(t.x + (rand() < 0.5 ? -2 : 2), t.y + 1);
+  }
+  // Plants scattered over the grass to break up the meadow: ferns, tall grass, flowers, weeds.
+  for (let y = 2; y < height - 2; y++) {
+    for (let x = 2; x < width - 2; x++) {
+      if (!isGreen(tiles[y][x]) || rand() > 0.055) continue;
+      decor.push({ kind: "plant", tx: x, ty: y, variant: Math.floor(rand() * 64) });
+    }
+  }
 
   // ---- Fortifications ----
-  const towers: { tx: number; ty: number }[] = [
-    { tx: WALL.x0 - 1, ty: WALL.y0 - 1 },
-    { tx: WALL.x1 - 2, ty: WALL.y0 - 1 },
-    { tx: WALL.x0 - 1, ty: WALL.y1 - 2 },
-    { tx: WALL.x1 - 2, ty: WALL.y1 - 2 },
-    { tx: 30, ty: WALL.y0 - 1 },
-    { tx: 46, ty: WALL.y1 - 2 },
-    { tx: WALL.x0 - 1, ty: 28 },
-    // Gatehouse towers either side of the gate.
-    { tx: WALL.x1 - 2, ty: gateTop - 4 },
-    { tx: WALL.x1 - 2, ty: gateBottom + 1 },
-  ];
+  // Towers round the wall, and a pair either side of each gate.
+  const ringPoint = (angle: number) => {
+    let r = 0;
+    while (insideCastle(CASTLE, CASTLE.cx + Math.cos(angle) * (r + 0.25) - 0.5, CASTLE.cy + Math.sin(angle) * (r + 0.25) - 0.5, WALL_THICKNESS / 2)) r += 0.25;
+    return { x: CASTLE.cx + Math.cos(angle) * r, y: CASTLE.cy + Math.sin(angle) * r };
+  };
+  const towers: { tx: number; ty: number }[] = [50, 90, 130, 230, 270, 310].map((deg) => {
+    const p = ringPoint((deg * Math.PI) / 180);
+    return { tx: Math.round(p.x - 2), ty: Math.round(p.y - 2) };
+  });
+  for (const gate of [eastGate, westGate]) {
+    const tx = Math.round((gate.x0 + gate.x1) / 2 - 1.5);
+    towers.push({ tx, ty: gateTop - 5 }, { tx, ty: gateBottom + 2 });
+  }
   const towerTiles = new Set<string>();
   for (const { tx, ty } of towers) {
     fill(tx, ty, tx + 3, ty + 3, Tile.Wall);
@@ -401,9 +456,14 @@ export function buildTown(): DungeonLayout {
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) if (tiles[y][x] === Tile.Wall && !towerTiles.has(`${x},${y}`)) wallTiles.push({ tx: x, ty: y });
   }
-  decor.push({ kind: "castleWall", tiles: wallTiles, inner: INNER });
-  decor.push({ kind: "drawbridge", tx: MOAT.x1 - 1, ty: gateTop, w: 2, h: GATE_ROWS.length });
-  decor.push({ kind: "gateArch", tx: WALL.x1 - 1, ty: gateTop, w: WALL_THICKNESS, h: GATE_ROWS.length });
+  const inner = {
+    x0: Math.ceil(COURTYARD.cx - COURTYARD.a),
+    y0: Math.ceil(COURTYARD.cy - COURTYARD.b),
+    x1: Math.floor(COURTYARD.cx + COURTYARD.a),
+    y1: Math.floor(COURTYARD.cy + COURTYARD.b),
+  };
+  decor.push({ kind: "castleWall", tiles: wallTiles, inner, innerShape: COURTYARD });
+  for (const gate of [eastGate, westGate]) decor.push({ kind: "gateArch", tx: gate.x0, ty: gateTop, w: gate.x1 - gate.x0 + 1, h: GATE_ROWS.length });
   towers.forEach(({ tx, ty }, i) => decor.push({ kind: "tower", tx, ty, w: 4, h: 4, flag: i % 2 === 0 ? 0x9c2a2a : 0xe0a83f }));
 
   return { map: { width, height, tiles, spawn: TOWN_SPOTS.spawn }, mobs: [], decor };

@@ -199,7 +199,7 @@ export const NPCS: Record<string, NpcDef> = {
       "Hoş geldin yiğidim! Bu çiftlikte bozkırın en iyi atları büyür. Pahalı mı? Pahalı. Ama Kara Yel'in sırtında rüzgârı geride bıraktığında parayı hatırlamazsın bile.",
   },
   guard_gate_north: guard("guard_gate_north", "Kapı Nöbetçisi Ali", TOWN_SPOTS.guardGateNorth, "Kapıdan geçen herkesi görürüm. Sen de temiz görünüyorsun, geç bakalım."),
-  guard_gate_south: guard("guard_gate_south", "Kapı Nöbetçisi Veli", TOWN_SPOTS.guardGateSouth, "Hendekte timsah yok... galiba. Ben olsam yine de yüzmezdim."),
+  guard_gate_south: guard("guard_gate_south", "Kapı Nöbetçisi Veli", TOWN_SPOTS.guardGateSouth, "Surun dışı uçurum, altı bulut. Kenara yaklaşma, aşağı düşen bir daha geri tırmanamıyor... galiba."),
   guard_keep_west: guard("guard_keep_west", "Kale Muhafızı Emre", TOWN_SPOTS.guardKeepWest, "Kalenin kapısı herkese açık; yedi usta içeride, ateşin başında. Yolunu seçmediysen önce onlara git. Bir yer arıyorsan sor, tarif edeyim."),
   guard_keep_east: guard("guard_keep_east", "Kale Muhafızı Kaan", TOWN_SPOTS.guardKeepEast, "Surlarda gece nöbeti tutuyoruz. Ormandan gelen ışıkları gören olursa Komutan'a haber versin."),
   guard_hall_west: guard("guard_hall_west", "Salon Muhafızı Oğuz", KEEP_HALL_SPOTS.guardWest, "Ustaların sözü dinlenir, sesi yükseltilmez. Şehirde bir yer arıyorsan bana sor."),

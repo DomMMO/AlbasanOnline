@@ -73,6 +73,9 @@ export type IconShape =
   | "rod"
   | "shell";
 
+/** Every IconShape (to check untrusted data, e.g. a shop sign moved in the map editor). */
+export const ICON_SHAPES: readonly IconShape[] = ["sword", "axe", "helm", "chest", "legs", "boots", "potion", "blob", "pelt", "ear", "scroll", "gem", "scythe", "staff", "mace", "ring", "amulet", "earring", "bone", "coin", "fang", "meat", "bowl", "jewel_major", "jewel_minor", "jewel_greater", "ore", "herb", "pickaxe", "sickle", "bow", "fish", "rod", "shell"];
+
 export interface ItemStats {
   attack?: number;
   defense?: number;

@@ -1,0 +1,26 @@
+Bir web tabanlı oyun projesi geliştiriyoruz. Admin yetkisine sahip kullanıcıların sürükle-bırak (Drag and Drop) yöntemiyle harita/sahne tasarlayabileceği güvenli bir "Edit Scene / Map Editor" modülü oluşturmak istiyoruz.
+
+Lütfen bu sistemi hem Güvenlik/Yetkilendirme (Admin Access) hem de Editör Mantığı (Frontend UI/Canvas) olarak adım adım, temiz ve modüler kod örnekleriyle açıkla.
+
+### 1. Güvenlik ve Yetkilendirme (Admin Only Access):
+- **Front-end Koruması:** Sadece 'admin' rolüne sahip kullanıcıların Editör butonunu/ekranını görmesini ve erişmesini sağlayan Route Guard veya koşullu render yapısı.
+- **Back-end & API Koruması:** Haritayı kaydetme/güncelleme (`POST/PUT /api/maps`) API isteklerinde JWT veya Session tabanlı yetki kontrolü (Middleware / Auth Check). Front-end koruması atlatılsa bile yetkisiz kişilerin haritayı kaydedememesi garanti edilmeli.
+
+### 2. Editör Özellikleri (Core Features):
+- **Object Palette:** Sahneye eklenebilir objelerin (Zemin, Duvar, Ağaç, Spawn Noktası vb.) listelendiği sürüklenebilir öğeler paneli.
+- **Drag and Drop & Snap-to-Grid:** Objelerin paletten sahneye sürüklenip bırakılabilmesi ve seçilen izgara boyutuna (örn: 32x32px) otomatik kilitlenmesi.
+- **Obje Yönetimi:** Sahnede duran objeleri seçme, taşıma, döndürme (rotation) ve silme (Delete tuşu veya arayüz butonu ile).
+- **Katman Yönetimi (Layers):** Zemin, Engel (Collider) ve Spawn objelerinin katmanlara ayrılması.
+
+### 3. Veri Akışı ve Kaydetme (JSON Schema & Persistence):
+- Sahnede yer alan objelerin koordinatlarını (`x, y, z`), tiplerini, katmanlarını ve rotasyonlarını barındıran temiz bir JSON şeması.
+- "Save Scene" butonuna basıldığında bu veriyi admin yetkisi token'ı ile güvenli şekilde API'ye gönderen fonksiyon.
+- "Load Scene" fonksiyonu ile mevcut JSON harita verisini veritabanından çekip sahneye yükleme yapısı.
+
+### İstenen Çıktılar:
+1. Yetkilendirme mimarisi (Front-end + Back-end koruması nasıl kurulmalı?).
+2. Editör arayüzü ve Canvas/Sürükle-Bırak mantığı için frontend kod örneği.
+3. Node.js/Express (veya benzeri) backend için admin kontrollü Save API endpoint örneği.
+4. Örnek Map JSON şeması.
+
+Not: Eğer belirli bir oyun motoru (Phaser, Three.js, PixiJS, Canvas) veya framework (React, Vue, Node.js) entegrasyonu öneriyorsan bunu belirterek kod örneklerini sunabilirsin.

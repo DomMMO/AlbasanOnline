@@ -17,7 +17,7 @@ export interface MobPlacement {
  * The tiles underneath are Tile.Solid, so collision stays purely tile based.
  */
 export type Decor =
-  | { kind: "building"; tx: number; ty: number; w: number; h: number; roof: number; sign?: { shape: IconShape; color: number }; chimney?: boolean }
+  | { kind: "building"; tx: number; ty: number; w: number; h: number; roof: number; sign?: { shape: IconShape; color: number }; chimney?: boolean; ridge?: "h" | "v" }
   | { kind: "fountain"; tx: number; ty: number; w: number; h: number }
   | { kind: "lamp"; tx: number; ty: number }
   | { kind: "anvil"; tx: number; ty: number }
@@ -35,9 +35,10 @@ export type Decor =
   | { kind: "groundFrame"; tx: number; ty: number; w: number; h: number; color: number }
   /**
    * Castle curtain wall on these (Tile.Wall) tiles: a raised wall walk with battlements
-   * on the side facing away from `inner` (the courtyard, tile bounds inclusive).
+   * on the side facing away from `inner` (the courtyard, tile bounds inclusive). A wall that
+   * is not a rectangle gives its courtyard as `innerShape` (see insideCastle) instead.
    */
-  | { kind: "castleWall"; tiles: { tx: number; ty: number }[]; inner: { x0: number; y0: number; x1: number; y1: number } }
+  | { kind: "castleWall"; tiles: { tx: number; ty: number }[]; inner: { x0: number; y0: number; x1: number; y1: number }; innerShape?: CastleShape }
   /** A square wall tower with a crenellated top and a flag. */
   | { kind: "tower"; tx: number; ty: number; w: number; h: number; flag: number }
   /** The wall walk spanning a gate passage (players walk under it), portcullis raised. */
@@ -47,7 +48,7 @@ export type Decor =
   /** A drawbridge running east-west over the moat (deck tiles are Tile.Bridge). */
   | { kind: "drawbridge"; tx: number; ty: number; w: number; h: number }
   /** Small street clutter on a solid tile (well is 2x2). */
-  | { kind: "prop"; tx: number; ty: number; prop: "barrel" | "crate" | "hay" | "well" | "cart" | "column" | "obelisk" }
+  | { kind: "prop"; tx: number; ty: number; prop: "barrel" | "crate" | "hay" | "well" | "cart" | "column" | "obelisk" | "dummy" | "sack" }
   /** The arena's colosseum (stands, crowd, walls), drawn from COLOSSEUM. */
   | { kind: "colosseum" }
   /** A wooden pier over the water (deck tiles are Tile.Bridge): posts and shadow, no rails. */
@@ -75,7 +76,44 @@ export type Decor =
   /** A wooden water trough (1x2 tiles wide). */
   | { kind: "trough"; tx: number; ty: number }
   /** A park bench to sit on (walk-through), w tiles wide; `facing` is the way its sitters look. */
-  | { kind: "parkBench"; tx: number; ty: number; w: number; facing: "up" | "down" };
+  | { kind: "parkBench"; tx: number; ty: number; w: number; facing: "up" | "down" }
+  /**
+   * A round wooden fence (a paddock): posts on an ellipse round (cx, cy) with radii rx, ry (all
+   * in tiles), rails between them, an opening between the angles `gate` (radians, y down).
+   */
+  | { kind: "roundFence"; cx: number; cy: number; rx: number; ry: number; gate: [number, number] }
+  /** A small plant on the grass (walk-through): fern, tall grass, flowers or a weed, by `variant`. */
+  | { kind: "plant"; tx: number; ty: number; variant: number }
+  /** A round bush (walk-through), plain, with berries or with flowers by `variant`. */
+  | { kind: "bush"; tx: number; ty: number; variant: number }
+  /** A big leafy tree: its trunk stands on (tx, ty) (solid), the crown spreads about 3x3 tiles above. */
+  | { kind: "bigTree"; tx: number; ty: number; variant: number }
+  /** The sky round a floating island (w x h tiles): blue below everything, clouds drifting under the island. */
+  | { kind: "clouds"; w: number; h: number };
+
+/**
+ * A rounded courtyard: tiles whose centre has |dx/a|^p + |dy/b|^p <= 1 round (cx, cy) are inside,
+ * where a and b may swell with the angle by `wobble` (amplitude, number of bumps, phase).
+ */
+export interface CastleShape {
+  cx: number;
+  cy: number;
+  a: number;
+  b: number;
+  p: number;
+  wobble?: [amplitude: number, bumps: number, phase: number];
+}
+
+/** Whether tile (tx, ty) is inside a rounded castle shape. */
+export function insideCastle(shape: CastleShape, tx: number, ty: number, shrink = 0): boolean {
+  const dx = tx + 0.5 - shape.cx;
+  const dy = ty + 0.5 - shape.cy;
+  const [amp, bumps, phase] = shape.wobble ?? [0, 0, 0];
+  const k = 1 + amp * Math.sin(bumps * Math.atan2(dy, dx) + phase);
+  const a = Math.max(1, shape.a * k - shrink);
+  const b = Math.max(1, shape.b * k - shrink);
+  return Math.abs(dx / a) ** shape.p + Math.abs(dy / b) ** shape.p <= 1;
+}
 
 /** An area where a kind of mob lives and respawns (tile coordinates). */
 export interface SpawnZone {
@@ -95,6 +133,8 @@ export interface DungeonLayout {
   decor?: Decor[];
   /** Open-world zones: mobs live in these areas and respawn. */
   spawnZones?: SpawnZone[];
+  /** Map editor: tiles drawn turned, "x,y" -> degrees (90, 180, 270). */
+  rotations?: Record<string, number>;
 }
 
 const px = (tx: number, ty: number) => ({ x: (tx + 0.5) * TILE_SIZE, y: (ty + 1) * TILE_SIZE });
