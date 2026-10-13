@@ -1822,7 +1822,6 @@ export class WorldScene extends Phaser.Scene {
   }
 
   update(time: number, delta: number) {
-    this.nightLayer.update(time);
     this.updateGuide();
     if (time >= this.nextMinimapAt) {
       this.nextMinimapAt = time + 100;
@@ -1893,6 +1892,8 @@ export class WorldScene extends Phaser.Scene {
     const target = this.targetId ? (this.mobs.get(this.targetId) ?? this.players.get(this.targetId)) : undefined;
     this.targetRing.setVisible(!!target);
     if (target) this.targetRing.setPosition(Math.round(target.view.x), Math.round(target.view.y) - 1);
+    // Last, once the camera has followed us this frame.
+    this.nightLayer.update(time);
   }
 
   private fixedTick() {
