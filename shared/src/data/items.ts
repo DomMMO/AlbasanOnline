@@ -110,7 +110,7 @@ export interface ItemDef {
   questItem?: boolean;
   /** How worn armour looks on the character: plain cloth/leather, chain "mail", or shiny "plate". */
   look?: "mail" | "plate";
-  /** Art-asset picture (client/src/assets/items/<image>.png); `icon` stays as the fallback. */
+  /** Art-asset picture (client/src/assets/licensed/items/<image>.png, local only); `icon` stays as the fallback. */
   image?: string;
   /** Passive tree jewel: "major" goes in a big socket, "greater" only in a greater one, "minor" in a small one. */
   jewel?: "major" | "minor" | "greater";
@@ -133,7 +133,7 @@ export const ITEMS: Record<string, ItemDef> = Object.fromEntries(
     def({ id: "wolf_fang_blade", classes: MELEE, name: "Kurt Dişi Kılıcı", rarity: "uncommon", level: 3, slot: "weapon", stats: { attack: 10 }, attackSpeedMs: 1900, maxStack: 1, sellPrice: 25, icon: { shape: "sword", color: 0xe8e2c8 } }),
     def({ id: "war_axe", classes: MELEE, name: "Savaş Baltası", rarity: "common", level: 5, slot: "weapon", stats: { attack: 14 }, attackSpeedMs: 2400, maxStack: 1, buyPrice: 200, sellPrice: 40, icon: { shape: "axe", color: 0xb0b4bc } }),
     def({ id: "grukk_axe", classes: MELEE, name: "Grukk'un Baltası", rarity: "epic", level: 7, slot: "weapon", stats: { attack: 24, maxHp: 20 }, attackSpeedMs: 2300, maxStack: 1, sellPrice: 150, icon: { shape: "axe", color: 0xa83232 }, description: "Goblin Şefi'nin kanlı baltası." }),
-    // ---- Monster weapons (art from the CraftPix packs: image = client/src/assets/items/<id>.png)
+    // ---- Monster weapons (art from the CraftPix packs: image = client/src/assets/licensed/items/<id>.png, local only)
     def({ id: "minotaur_mace", classes: ["priest"], image: "minotaur_mace", name: "Minotor Gürzü", rarity: "rare", level: 10, slot: "weapon", stats: { attack: 22, maxHp: 15 }, attackSpeedMs: 1900, maxStack: 1, sellPrice: 140, icon: { shape: "mace", color: 0xb0a890 }, description: "Ustabaşı Dorak'ın taş başlı gürzü. İpleri hâlâ sıkı." }),
     def({ id: "minotaur_club", classes: MELEE, image: "minotaur_club", name: "Minotor Sopası", rarity: "uncommon", level: 11, slot: "weapon", stats: { attack: 25 }, attackSpeedMs: 2100, maxStack: 1, sellPrice: 110, icon: { shape: "mace", color: 0x8a5a2b } }),
     def({ id: "stone_blade", classes: MELEE, image: "stone_blade", name: "Taş Kılıç", rarity: "rare", level: 11, slot: "weapon", stats: { attack: 26, maxHp: 15 }, attackSpeedMs: 2000, maxStack: 1, sellPrice: 210, icon: { shape: "sword", color: 0x9aa8b8 }, description: "Kristal Golem'in kolundan koparılmış taş. Keskin olmasına şaşarsın." }),

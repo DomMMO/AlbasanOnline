@@ -183,7 +183,7 @@ Hazır sheet'leri `client/src/assets/` altına koy. Kabak Jack'teki gibi her she
 - **Esc** sırası: önce oyun menüsü (ayarlar/kontroller sayfasındaysan ana menüye döner), sonra **en son açılan pencere**, sonra hedef; hiçbir şey açık değilse menüyü açar. Grup davetinde Esc daveti reddeder.
 - Menü açıkken oyun girdisi kilitlidir (yürüme, skill, kısayollar).
 - Pencereler başlığından **sürüklenir**, tıklanan öne gelir; yeri bu tarayıcıda hatırlanır. Başlığa çift tıklamak varsayılan yerine döndürür.
-- Başlıklar, isimler ve düğmeler **Cloister Black** ile yazılır (`client/src/assets/fonts/`, Türkçe harfler eklenmiş kopya); uzun metinler okunaklı bir serif fontla. Pencere yönetimi `client/src/ui/windows.ts`, tema `style.css` sonundaki "Theme" bölümündedir.
+- Başlıklar, isimler ve düğmeler **Cloister Black** ile yazılır (`client/src/assets/licensed/fonts/`, Türkçe harfler eklenmiş kopya; depoda yok, yoksa serif kullanılır); uzun metinler okunaklı bir serif fontla. Pencere yönetimi `client/src/ui/windows.ts`, tema `style.css` sonundaki "Theme" bölümündedir.
 
 ### Hikaye: Kırık Mühür
 
@@ -259,7 +259,7 @@ Yeni silahlar bu canavarların kendi silahları; envanterde ve karakterin elinde
 
 Yeni malzemeler: Satir Boynuzu, Golem Çekirdeği (tüccara satılır).
 
-**Çizimleri yeniden üretmek / yeni paket eklemek:** `pip install pillow`, sonra `python tools/build_sprites.py "C:/Users/<sen>/Downloads"`. Araç paketlerin PNG karelerini ortak bir kutuya kırpar, oyun boyutuna küçültür, kenarları piksel-art gibi keskinleştirir ve `client/src/assets/mobs/<ad>.png/.json` (sprite sheet + ayak noktası + animasyon kareleri) ile `client/src/assets/items/<ad>.png` (36 px ikon, `_held` el çizimi, `items.json` tutma noktası) üretir. Yeni bir sheet otomatik yüklenir; bir moba `appearance: { type: "image", key: "<ad>" }` (isteğe bağlı `tint`), bir item'a `image: "<ad>"` vermek yeterli. Lisans notu `client/src/assets/CREDITS.md` içinde.
+**Çizimleri yeniden üretmek / yeni paket eklemek:** `pip install pillow`, sonra `python tools/build_sprites.py "C:/Users/<sen>/Downloads"`. Araç paketlerin PNG karelerini ortak bir kutuya kırpar, oyun boyutuna küçültür, kenarları piksel-art gibi keskinleştirir ve `client/src/assets/licensed/mobs/<ad>.png/.json` (sprite sheet + ayak noktası + animasyon kareleri) ile `client/src/assets/licensed/items/<ad>.png` (36 px ikon, `_held` el çizimi, `items.json` tutma noktası) üretir. Yeni bir sheet otomatik yüklenir; bir moba `appearance: { type: "image", key: "<ad>" }` (isteğe bağlı `tint`), bir item'a `image: "<ad>"` vermek yeterli. Lisans notu `client/src/assets/CREDITS.md` içinde.
 
 ### Item'lar
 
@@ -616,7 +616,8 @@ client/
 | 7.16 | Gece fenerlerin ışık havuzları, atta Shift ile dörtnala, Liman yolu, iki sütunlu yetenek sayfası, arkadaş sistemi (O) | ✅ |
 | 7.17 | İç Kale'ye girilebilir: ahşap büyük salon, ateş başında oturan 6 sınıf ustası (öğüt verir), muhafızlara yol sorma (yön oku + harita işareti) | ✅ |
 | 7.18 | Acemi başlangıç + Ustaların Ateşi görevi, 7 usta (Alp, Kam, Börü, Tigin, Erşek, Ak Ana, Erlik Ruh Eğitmeni), yeni sınıflar Şaman, Okçu, Druid (Büyücü ve Muhafız kalktı), onaylı sınıf seçimi, Ayşe Teyze'de altınla yol sıfırlama | ✅ |
-| 7.19 | Boss müziği: Kadim Ejder Azhdar'ın savaşında kendi şarkısı çalar (Esc → Ayarlar → Boss müziği); müzik `client/src/assets/music/`, eşleme `client/src/audio/bossMusic.ts` | ✅ |
+| 7.19 | Boss müziği: Kadim Ejder Azhdar'ın savaşında kendi şarkısı çalar (Esc → Ayarlar → Boss müziği); müzik `client/src/assets/licensed/music/<mob id>.weba`, eşleme `client/src/audio/bossMusic.ts` | ✅ |
+| 7.20 | Telifli varlıklar (şarkı, CraftPix ve Kabak Jack çizimleri, Cloister Black) depodan çıktı; `client/src/assets/licensed/` yalnızca yerelde, yoksa oyun kodla çizilen benzerlerini kullanır | ✅ |
 | 8 | Optimizasyon, anti-cheat, yedekleme, alfa testi | ⏳ |
 
 Faz 2 bitince oyun oynanabilir hale gelir. Sonraki fazlar bunun üzerine eklenir.

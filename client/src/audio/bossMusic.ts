@@ -1,12 +1,15 @@
 import { getSettings, onSettingsChange } from "../settings";
-import elderDragonTheme from "../assets/music/elder_dragon.weba?url";
 
 // Boss fight music. A boss with a theme starts it when its health bar comes up and it
 // fades out when the fight ends (boss dead, out of range, zone left). Toggle: Esc → Ayarlar.
+//
+// Songs are kept out of the repository (assets/licensed/music/, see CREDITS.md): a boss
+// plays the file named after its mob id (elder_dragon.weba) if this machine has it.
 
-const THEMES: Record<string, string> = {
-  elder_dragon: elderDragonTheme,
-};
+const files = import.meta.glob<string>("../assets/licensed/music/*.{weba,webm,ogg,mp3}", { eager: true, query: "?url", import: "default" });
+const THEMES: Record<string, string> = Object.fromEntries(
+  Object.entries(files).map(([path, url]) => [path.split("/").pop()!.replace(/\.[a-z0-9]+$/, ""), url]),
+);
 
 const VOLUME = 0.55;
 const FADE_MS = 1500;

@@ -1,10 +1,13 @@
 import Phaser from "phaser";
-import jackMeta from "../assets/bosses/jack.json";
-import jackUrl from "../assets/bosses/jack.png";
+import type { Appearance } from "../../../shared/src";
 
 // Pre-rendered sprite sheets (art assets) as opposed to the code-drawn pixel art.
 // Sheets are built from source frames by an offline script: uniform cells, the
 // character's feet at (originX, originY), and named frame ranges per animation.
+//
+// The sheets are third-party art kept out of the repository (assets/licensed/, see
+// CREDITS.md). Whatever is missing is simply absent here, and withFallback() draws that
+// creature in code instead, so a fresh clone or a public build still runs.
 
 export interface ImageSpriteMeta {
   frameWidth: number;
@@ -24,20 +27,43 @@ interface ImageSprite {
 }
 
 // Mob sheets built by tools/build_sprites.py from the CraftPix packs: <key>.png + <key>.json.
-const mobMetas = import.meta.glob<ImageSpriteMeta>("../assets/mobs/*.json", { eager: true, import: "default" });
-const mobUrls = import.meta.glob<string>("../assets/mobs/*.png", { eager: true, query: "?url", import: "default" });
+const mobMetas = import.meta.glob<ImageSpriteMeta>("../assets/licensed/mobs/*.json", { eager: true, import: "default" });
+const mobUrls = import.meta.glob<string>("../assets/licensed/mobs/*.png", { eager: true, query: "?url", import: "default" });
+const jackMeta = import.meta.glob<ImageSpriteMeta>("../assets/licensed/bosses/jack.json", { eager: true, import: "default" });
+const jackUrl = import.meta.glob<string>("../assets/licensed/bosses/jack.png", { eager: true, query: "?url", import: "default" });
 const sheetKey = (path: string) => path.split("/").pop()!.replace(/\.(json|png)$/, "");
+const only = <T>(found: Record<string, T>): T | undefined => Object.values(found)[0];
+
+const jack = only(jackMeta);
+const jackSheet = only(jackUrl);
 
 export const IMAGE_SPRITES: Record<string, ImageSprite> = {
-  jack: { url: jackUrl, meta: jackMeta, fps: { walk: 12, run: 14, jump: 9, slide: 16, dead: 12 }, once: ["jump", "dead"] },
+  ...(jack && jackSheet ? { jack: { url: jackSheet, meta: jack, fps: { walk: 12, run: 14, jump: 9, slide: 16, dead: 12 }, once: ["jump", "dead"] } } : {}),
   ...Object.fromEntries(
-    Object.entries(mobMetas).map(([path, meta]) => {
+    Object.entries(mobMetas).flatMap(([path, meta]) => {
       const url = mobUrls[path.replace(/\.json$/, ".png")];
+      if (!url) return [];
       const sprite: ImageSprite = { url, meta, fps: { idle: 8, walk: 14, attack: 18, hurt: 16, dead: 14 }, once: ["attack", "hurt", "dead"] };
-      return [sheetKey(path), sprite];
+      return [[sheetKey(path), sprite]];
     }),
   ),
 };
+
+/** Code-drawn stand-ins for each kind of sheet, used when its art isn't on this machine. */
+const FALLBACK_LOOKS: [prefix: string, look: Extract<Appearance, { type: "humanoid" }>][] = [
+  ["golem", { type: "humanoid", tunic: 0x6f695e, skin: 0x8a8478, hair: 0x5e584f, hairStyle: "bald" }],
+  ["minotaur", { type: "humanoid", tunic: 0x5b3a1e, skin: 0x8b5a2b, hair: 0x2a1a0e, gear: { chest: "chainmail" } }],
+  ["satyr", { type: "humanoid", tunic: 0x6b4423, skin: 0xc68a5a, hair: 0x3a2a1a, hairStyle: "spiky" }],
+  ["wraith", { type: "humanoid", tunic: 0x3b2a5a, skin: 0x9a8fb0, hair: 0x1a1a1a, headwear: { color: 0x2b1f40, style: "hood" } }],
+  ["jack", { type: "humanoid", tunic: 0x2b2b33, skin: 0xff922b, hair: 0x2f9e44, headwear: { color: 0x2f9e44, style: "hat" } }],
+];
+
+/** An image appearance whose sheet is missing becomes a drawn look-alike (the tint, if any, colours its clothes). */
+export function withFallback(appearance: Appearance): Appearance {
+  if (appearance.type !== "image" || IMAGE_SPRITES[appearance.key]) return appearance;
+  const look = FALLBACK_LOOKS.find(([prefix]) => appearance.key.startsWith(prefix))?.[1] ?? { type: "humanoid" as const, tunic: 0x495057 };
+  return appearance.tint === undefined ? look : { ...look, tunic: appearance.tint };
+}
 
 /** Whether a sheet has an animation of that name (e.g. "attack", "hurt"). */
 export const hasImageAnim = (key: string, anim: string) => !!IMAGE_SPRITES[key]?.meta.anims[anim];

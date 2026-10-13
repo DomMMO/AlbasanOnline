@@ -3,7 +3,7 @@ import { Direction, directionToward, glowTier, ITEMS, type Appearance, type Huma
 import { ringEffect, slashEffect } from "../fx/slash";
 import { ensureSpriteSet, HumanoidFrame, type SpriteSet } from "../gfx/textures";
 import { BODY_PART_Y, ensureItemTexture } from "../gfx/weapons";
-import { hasImageAnim, IMAGE_SPRITES } from "../gfx/imageSprites";
+import { hasImageAnim, IMAGE_SPRITES, withFallback } from "../gfx/imageSprites";
 import { ensureHorse, HORSE_KEY, HORSE_RIDER_LIFT, HorseFrame } from "../gfx/horse";
 import { CROWN_KEY, ensureCrown } from "../gfx/overhead";
 import { DOT_KEY, ensureDot } from "../gfx/decor";
@@ -42,6 +42,8 @@ export class EntityView {
   private scale: number;
 
   constructor(scene: Phaser.Scene, x: number, y: number, appearance: Appearance, name?: string, nameColor = "#ffffff", scale = 1) {
+    // Art that isn't on this machine (assets/licensed/) is drawn as a look-alike instead.
+    appearance = withFallback(appearance);
     this.set = ensureSpriteSet(scene, appearance);
     this.rawX = x;
     this.rawY = y;
