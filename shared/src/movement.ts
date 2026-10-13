@@ -1,4 +1,4 @@
-import { MOUNT_SPEED_MULTIPLIER, PLAYER_SPEED, TILE_SIZE } from "./constants";
+import { GALLOP_SPEED_MULTIPLIER, MOUNT_SPEED_MULTIPLIER, PLAYER_SPEED, TILE_SIZE } from "./constants";
 import { isBlockedTile, type WorldMap } from "./map";
 import { Direction, type Axis } from "./protocol";
 
@@ -48,6 +48,8 @@ export function stepMovement(
   dtSeconds: number,
   /** Riding a horse (MOUNT_SPEED_MULTIPLIER faster). */
   mounted = false,
+  /** Galloping (Shift on horseback); ignored on foot. */
+  gallop = false,
 ): { x: number; y: number } {
   let vx: number = dx;
   let vy: number = dy;
@@ -55,7 +57,7 @@ export function stepMovement(
     vx *= Math.SQRT1_2;
     vy *= Math.SQRT1_2;
   }
-  const speed = mounted ? PLAYER_SPEED * MOUNT_SPEED_MULTIPLIER : PLAYER_SPEED;
+  const speed = mounted ? PLAYER_SPEED * MOUNT_SPEED_MULTIPLIER * (gallop ? GALLOP_SPEED_MULTIPLIER : 1) : PLAYER_SPEED;
   return moveWithCollision(map, x, y, vx, vy, speed * dtSeconds);
 }
 

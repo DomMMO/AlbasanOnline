@@ -104,6 +104,7 @@ export class EntityView {
       this.horse = scene.add.sprite(this.rawX, this.rawY, HORSE_KEY, HorseFrame.Side).setOrigin(0.5, 1);
       this.horse.setAlpha(this.sprite.alpha);
     } else {
+      this.setGallop(false);
       this.horse?.destroy();
       this.horse = undefined;
     }
@@ -112,6 +113,36 @@ export class EntityView {
 
   get mounted() {
     return !!this.horse;
+  }
+
+  private gallopDust?: Phaser.GameObjects.Particles.ParticleEmitter;
+
+  /** Galloping: the horse's legs go faster and dust kicks up behind it. */
+  setGallop(on: boolean) {
+    on &&= !!this.horse;
+    if (on === !!this.gallopDust) return;
+    if (this.horse) this.horse.anims.timeScale = on ? 1.8 : 1;
+    if (!on) {
+      const dust = this.gallopDust!;
+      this.gallopDust = undefined;
+      dust.stop();
+      this.sprite.scene.time.delayedCall(600, () => dust.destroy());
+      return;
+    }
+    const scene = this.sprite.scene;
+    ensureDot(scene);
+    this.gallopDust = scene.add.particles(0, 0, DOT_KEY, {
+      follow: this.horse,
+      followOffset: { x: 0, y: -2 },
+      x: { min: -6, max: 6 },
+      speedY: { min: -14, max: -4 },
+      speedX: { min: -10, max: 10 },
+      scale: { start: 1.6, end: 3.2 },
+      alpha: { start: 0.45, end: 0 },
+      tint: [0xc8b490, 0xa89070, 0xe0d0b0],
+      lifespan: 420,
+      frequency: 50,
+    });
   }
 
   // ---- Above the name: the arena champion's crown, the GM tag ----
@@ -217,6 +248,7 @@ export class EntityView {
     if (this.horse) {
       // Seen from the front the horse's head is in front of the rider's legs.
       this.horse.setPosition(px, py).setDepth(this.facing === Direction.Down ? py + 0.3 : py - 0.2);
+      this.gallopDust?.setDepth(py - 0.3);
     }
     const top = py - lift - this.set.height * this.scale;
     this.hpBar.setPosition(px - HP_BAR_WIDTH / 2, top - 4).setDepth(100000 + py);
@@ -486,6 +518,7 @@ export class EntityView {
   }
 
   destroy(fade = false) {
+    this.gallopDust?.destroy();
     this.horse?.destroy();
     this.horse = undefined;
     this.setCrown(false);

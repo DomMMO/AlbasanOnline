@@ -19,6 +19,9 @@ import {
   Msg,
   TICK_MS,
   type InputMessage,
+  type FriendRemoveMessage,
+  type FriendRequestMessage,
+  type FriendRespondMessage,
   EQUIP_SLOTS,
   type BuyMessage,
   type EquipSlot,
@@ -57,12 +60,13 @@ import { abandonQuest, acceptQuest, turnInQuest } from "../game/quests";
 import { handleChat } from "../game/chat";
 import { respondDuel } from "../game/duel";
 import { notice, sendInventory } from "../game/items";
+import { friendJoined, friendLeft, removeFriend, requestFriend, respondFriend } from "../game/friends";
 import { forgetInstance, instanceFor, refreshFor, registerInstance, respond, sameParty } from "../game/party";
 import { claimCharacter } from "../game/presence";
 import { consumeTicket, issueTicket } from "../game/tickets";
 import { onlineCharacters } from "../game/registry";
 import { TownPortal, WorldState } from "./schema/WorldState";
-import { changeRank, resetRanks } from "../game/talents";
+import { changeRank } from "../game/talents";
 import { startGather } from "../game/gathering";
 import { isPingKind, sendPing } from "../game/pings";
 import { sortBags } from "../game/items";
@@ -207,6 +211,18 @@ export class ZoneRoom extends Room<WorldState> {
       const runtime = this.game.playerRuntime.get(client.sessionId);
       if (runtime) respond(runtime.characterId, message?.accept === true);
     });
+    this.onMessage(Msg.FriendRequest, (client, message: Partial<FriendRequestMessage>) => {
+      const runtime = this.game.playerRuntime.get(client.sessionId);
+      if (runtime && typeof message?.name === "string" && message.name.length <= 32) requestFriend(runtime.characterId, message.name);
+    });
+    this.onMessage(Msg.FriendRespond, (client, message: Partial<FriendRespondMessage>) => {
+      const runtime = this.game.playerRuntime.get(client.sessionId);
+      if (runtime && Number.isSafeInteger(message?.characterId)) respondFriend(runtime.characterId, message!.characterId!, message!.accept === true);
+    });
+    this.onMessage(Msg.FriendRemove, (client, message: Partial<FriendRemoveMessage>) => {
+      const runtime = this.game.playerRuntime.get(client.sessionId);
+      if (runtime && Number.isSafeInteger(message?.characterId)) removeFriend(runtime.characterId, message!.characterId!);
+    });
     this.onMessage(Msg.DuelRespond, (client, message: { accept?: unknown }) => respondDuel(this.game, client.sessionId, message?.accept === true));
     this.onMessage(Msg.StallOpen, (client, message: Partial<StallOpenMessage>) => {
       if (!tradeLocked(this.game, client.sessionId)) openStall(this.game, client.sessionId, message?.title, message?.items);
@@ -238,7 +254,6 @@ export class ZoneRoom extends Room<WorldState> {
     this.onMessage(Msg.SkillRank, (client, message: Partial<SkillRankMessage>) => {
       if (typeof message?.id === "string" && (message.delta === 1 || message.delta === -1)) changeRank(this.game, client.sessionId, message.id, message.delta);
     });
-    this.onMessage(Msg.SkillReset, (client) => resetRanks(this.game, client.sessionId));
     this.onMessage(Msg.Gather, (client, message: Partial<GatherMessage>) => {
       if (stallLocked(this.game, client.sessionId)) return;
       if (typeof message?.nodeId === "string") startGather(this.game, client.sessionId, message.nodeId);
@@ -345,6 +360,7 @@ export class ZoneRoom extends Room<WorldState> {
       });
       if (this.zone.instanced) registerInstance(character.id, this.zone.id, this.roomId);
       refreshFor(character.id);
+      friendJoined(character.id, character.name);
       this.game.playerRuntime.get(client.sessionId)!.isAdmin = auth.account.isAdmin;
       this.state.players.get(client.sessionId)!.gm = auth.account.isAdmin;
       this.releases.set(client.sessionId, release);
@@ -363,6 +379,7 @@ export class ZoneRoom extends Room<WorldState> {
     } finally {
       // Unregistered only after the final save, so a GM change can't slip between the two.
       if (characterId !== undefined) onlineCharacters.delete(characterId, client.sessionId);
+      if (characterId !== undefined && name) friendLeft(characterId, name);
       // Logged out (rather than changing zones): the town portal goes too.
       if (characterId !== undefined && townPortalOf(characterId)) {
         setTimeout(() => {
@@ -542,6 +559,7 @@ function isValidInput(message: unknown): message is InputMessage {
     (m.seq as number) > 0 &&
     isAxis(m.dx) &&
     isAxis(m.dy) &&
-    (m.dx !== 0 || m.dy !== 0)
+    (m.dx !== 0 || m.dy !== 0) &&
+    (m.sprint === undefined || typeof m.sprint === "boolean")
   );
 }

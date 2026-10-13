@@ -10,6 +10,8 @@ export const TICK_MS = 1000 / TICK_RATE;
 export const PLAYER_SPEED = 80;
 /** Riding a horse: this much faster than on foot. */
 export const MOUNT_SPEED_MULTIPLIER = 1.6;
+/** Holding Shift on horseback: a gallop on top of the mount speed. */
+export const GALLOP_SPEED_MULTIPLIER = 1.4;
 /** Time between two mount / dismount toggles. */
 export const MOUNT_COOLDOWN_MS = 1500;
 
@@ -42,6 +44,8 @@ export const COMBAT_TIMEOUT_MS = 5000;
 // ---- Party -------------------------------------------------------------------
 
 export const MAX_PARTY_SIZE = 5;
+/** Friends plus requests sent, per character. */
+export const MAX_FRIENDS = 50;
 /** Party members this close to a kill share its XP. */
 export const PARTY_XP_RANGE = TILE_SIZE * 40;
 /** XP bonus per extra member who shares a kill (grouping is rewarded). */

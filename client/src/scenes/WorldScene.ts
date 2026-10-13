@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import { getStateCallbacks, type Room } from "colyseus.js";
 import {
   castSpot,
+  darkness,
   sanitizeLook,
   Direction,
   RARITY_COLORS,
@@ -38,6 +39,10 @@ import {
   type ChatEvent,
   type PvpKillEvent,
   type PartyInviteEvent,
+  type FriendListEvent,
+  type FriendRemoveMessage,
+  type FriendRequestMessage,
+  type FriendRespondMessage,
   type PartyUpdateEvent,
   type DuelInviteEvent,
   type DuelStateEvent,
@@ -87,7 +92,7 @@ import {
 } from "../../../shared/src";
 import { EntityView, type SwingKind } from "../entities/EntityView";
 import { setDollLook, updateDoll } from "../ui/doll";
-import { addChatMessage, initChat } from "../ui/chat";
+import { addChatMessage, initChat, openChatWith } from "../ui/chat";
 import { addKillFeed, initLeaderboard, setPvpStats, toggleLeaderboard } from "../ui/pvp";
 import { initParty, renderParty, showInvite } from "../ui/party";
 import { initDuel, showDuelInvite } from "../ui/duel";
@@ -113,6 +118,7 @@ import { setAuras } from "../ui/auras";
 import { initPotions, refreshPotionKeys, render as renderPotions, startPotionCooldown, usePotion } from "../ui/potions";
 import { isTouchDevice } from "../ui/touch";
 import { initSkills, setSkillRanks, skillRank, toggleSkills } from "../ui/skills";
+import { initFriends, isFriendOrPending, onFriendsChange, setFriendList, toggleFriends } from "../ui/friends";
 import { hideSkillTooltip, showSkillTooltip } from "../ui/skillTooltip";
 import { hideTooltip, showItemTooltip } from "../ui/tooltip";
 import { initDamageMeter, recordCombat } from "../ui/damageMeter";
@@ -122,6 +128,7 @@ import { ringEffect } from "../fx/slash";
 import { preloadImageSprites } from "../gfx/imageSprites";
 import { createTileset, renderTiles, TILESET_KEY } from "../gfx/textures";
 import { drawDecor } from "../gfx/decor";
+import { NightLayer, resetLights } from "../fx/nightLights";
 import {
   closeNpcDialog,
   dialogNpc,
@@ -285,6 +292,7 @@ export class WorldScene extends Phaser.Scene {
   private npcMarkers: { npc: NpcDef; text: Phaser.GameObjects.Text }[] = [];
   private npcViews = new Map<string, EntityView>();
   private fishingLines!: FishingLines;
+  private nightLayer!: NightLayer;
   private arrived = false;
   /** Teleporting out: no more input, the scene is about to be replaced. */
   private leaving = false;
@@ -341,7 +349,9 @@ export class WorldScene extends Phaser.Scene {
     const tileset = tilemap.addTilesetImage(TILESET_KEY, TILESET_KEY, TILE_SIZE, TILE_SIZE, 0, 0)!;
     tilemap.createLayer(0, tileset, 0, 0)!.setDepth(-1);
     const decor = zoneLayout(this.zone.id).decor;
+    resetLights(this);
     if (decor) drawDecor(this, decor);
+    this.nightLayer = new NightLayer(this);
     this.fishingLines = new FishingLines(this);
     setMinimapZone(this.map, this.zone.name);
 
@@ -435,6 +445,7 @@ export class WorldScene extends Phaser.Scene {
     registerWindow("quest-log", () => toggleQuestLog(false));
     registerWindow("passive-window", () => togglePassives(false));
     registerWindow("skills-window", () => toggleSkills(false));
+    registerWindow("friends-window", () => toggleFriends(false));
     registerWindow("leaderboard", () => void toggleLeaderboard(false));
     registerWindow("stall-browse", closeBrowse);
     registerWindow("storage-window", closeStorage);
@@ -451,6 +462,7 @@ export class WorldScene extends Phaser.Scene {
     this.controls.onPressed(Action.QuestLog, () => toggleQuestLog());
     this.controls.onPressed(Action.PassiveTree, () => togglePassives());
     this.controls.onPressed(Action.Skills, () => toggleSkills());
+    this.controls.onPressed(Action.Friends, () => toggleFriends());
     this.controls.onPressed(Action.Potion1, () => usePotion(0));
     this.controls.onPressed(Action.Potion2, () => usePotion(1));
     this.controls.onPressed(Action.Minimap, () => toggleMinimap());
@@ -460,6 +472,15 @@ export class WorldScene extends Phaser.Scene {
     HOTBAR_ACTIONS.forEach((action, index) => this.controls.onPressed(action, () => this.useHotbar(index)));
 
     initChat((text) => this.room.send(Msg.Chat, { text }));
+    initFriends({
+      request: (name) => this.room.send(Msg.FriendRequest, { name } satisfies FriendRequestMessage),
+      respond: (characterId, accept) => this.room.send(Msg.FriendRespond, { characterId, accept } satisfies FriendRespondMessage),
+      remove: (characterId) => this.room.send(Msg.FriendRemove, { characterId } satisfies FriendRemoveMessage),
+      whisper: (name) => openChatWith(`/f ${name} `),
+      invite: (name) => this.room.send(Msg.Chat, { text: `/davet ${name}` }),
+    });
+    const stopFriends = onFriendsChange(() => this.refreshTargetFrame());
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, stopFriends);
     initParty({
       select: (member) => {
         if (member.sessionId && this.players.has(member.sessionId)) this.selectTarget(member.sessionId, false);
@@ -520,7 +541,6 @@ export class WorldScene extends Phaser.Scene {
     initPassives({ move: (from, to) => this.room.send(Msg.MoveItem, { from, to }), playerLevel });
     initSkills({
       change: (id, delta) => this.room.send(Msg.SkillRank, { id, delta }),
-      reset: () => this.room.send(Msg.SkillReset),
       playerLevel,
       playerClass: () => this.local?.state.cls ?? "warrior",
     });
@@ -616,6 +636,7 @@ export class WorldScene extends Phaser.Scene {
           view.setWeapon(player.weapon, player.weaponPlus);
           view.setLook(playerAppearance(player));
           this.syncMount(view, player.mounted);
+          view.setGallop(player.galloping && player.moving);
           view.setGmTag(player.gm);
           this.syncStall(sessionId, player);
           if (sessionId === this.targetId) this.refreshTargetFrame();
@@ -674,7 +695,10 @@ export class WorldScene extends Phaser.Scene {
     };
     syncPortals();
     $(this.room.state).listen("cleared", syncPortals);
-    $(this.room.state).listen("clock", (minute: number) => hud.setClock(minute, !!this.zone.outdoor));
+    $(this.room.state).listen("clock", (minute: number) => {
+      hud.setClock(minute);
+      this.nightLayer.setDarkness(this.zone.outdoor ? darkness(minute) : 0);
+    });
 
     $(this.room.state).loot.onAdd((loot: LootView, lootId: string) => {
       const view = new EntityView(this, loot.x, loot.y, { type: "chest" });
@@ -820,6 +844,7 @@ export class WorldScene extends Phaser.Scene {
     this.room.onMessage(Msg.ChatMessage, (event: ChatEvent) => this.showChat(event));
     this.room.onMessage(Msg.PvpKill, (event: PvpKillEvent) => addKillFeed(event, this.local?.state.name ?? ""));
     this.room.onMessage(Msg.PartyInvite, (event: PartyInviteEvent) => showInvite(event.from));
+    this.room.onMessage(Msg.FriendList, (event: FriendListEvent) => setFriendList(event));
     this.room.onMessage(Msg.PartyUpdate, (event: PartyUpdateEvent) => this.onPartyUpdate(event));
     this.room.onMessage(Msg.DuelInvite, (event: DuelInviteEvent) => showDuelInvite(event.from));
     this.room.onMessage(Msg.DungeonInvite, (event: DungeonInviteEvent) => showDungeonInvite(event.from, event.dungeon));
@@ -1362,6 +1387,7 @@ export class WorldScene extends Phaser.Scene {
         onInvite: canInvite ? () => this.room.send(Msg.Chat, { text: `/davet ${name}` }) : undefined,
         onDuel: canDuel ? () => this.room.send(Msg.Chat, { text: `/duello ${name}` }) : undefined,
         onTrade: !this.isEnemyPlayer(this.targetId!) && !isTradeOpen() ? () => this.room.send(Msg.Chat, { text: `/takas ${name}` }) : undefined,
+        onFriend: isFriendOrPending(name) ? undefined : () => this.room.send(Msg.FriendRequest, { name } satisfies FriendRequestMessage),
       });
       return;
     }
@@ -1673,7 +1699,7 @@ export class WorldScene extends Phaser.Scene {
     this.pendingInputs = this.pendingInputs.filter((input) => input.seq > server.lastSeq);
     let pos: Point = { x: server.x, y: server.y };
     for (const input of this.pendingInputs) {
-      pos = stepMovement(this.map, pos.x, pos.y, input.dx, input.dy, TICK_MS / 1000, server.mounted);
+      pos = stepMovement(this.map, pos.x, pos.y, input.dx, input.dy, TICK_MS / 1000, server.mounted, input.sprint === true);
     }
     if (distance(pos, local.curr) > TELEPORT_DISTANCE) local.prev = { ...pos };
     local.curr = pos;
@@ -1697,6 +1723,7 @@ export class WorldScene extends Phaser.Scene {
   }
 
   update(time: number, delta: number) {
+    this.nightLayer.update(time);
     if (time >= this.nextMinimapAt) {
       this.nextMinimapAt = time + 100;
       this.refreshMinimap();
@@ -1780,11 +1807,14 @@ export class WorldScene extends Phaser.Scene {
     // Rooted (Frost Nova in PvP) or keeping a stall: the server ignores movement, so don't predict any.
     if (local.state.dead || local.state.rooted || local.state.stall || this.leaving || (dx === 0 && dy === 0)) {
       local.moving = false;
+      local.view.setGallop(false);
       return;
     }
 
-    const input: InputMessage = { seq: this.nextSeq++, dx, dy };
-    local.curr = stepMovement(this.map, local.curr.x, local.curr.y, dx, dy, TICK_MS / 1000, local.state.mounted);
+    const sprint = local.state.mounted && this.controls.isDown(Action.Sprint);
+    const input: InputMessage = sprint ? { seq: this.nextSeq++, dx, dy, sprint } : { seq: this.nextSeq++, dx, dy };
+    local.curr = stepMovement(this.map, local.curr.x, local.curr.y, dx, dy, TICK_MS / 1000, local.state.mounted, sprint);
+    local.view.setGallop(sprint);
     local.dir = directionFrom(dx, dy, local.dir);
     local.moving = true;
     this.pendingInputs.push(input);

@@ -41,14 +41,6 @@ export function changeRank(game: Game, sessionId: string, id: string, delta: num
   changed(game, sessionId);
 }
 
-/** Takes back every point. */
-export function resetRanks(game: Game, sessionId: string) {
-  const runtime = game.playerRuntime.get(sessionId);
-  if (!runtime) return;
-  runtime.skillRanks = {};
-  changed(game, sessionId);
-}
-
 /** After a level change (GM): drop ranks the new level doesn't allow. */
 export function revalidateRanks(game: Game, sessionId: string) {
   const player = game.state.players.get(sessionId);

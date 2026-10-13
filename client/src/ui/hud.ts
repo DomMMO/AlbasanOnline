@@ -1,4 +1,4 @@
-import { darkness, formatClock, isNight, POTION_COOLDOWN_MS, type ItemDef, type SkillDef } from "../../../shared/src";
+import { formatClock, isNight, POTION_COOLDOWN_MS, type ItemDef, type SkillDef } from "../../../shared/src";
 import { iconUrl, itemIconUrl } from "../gfx/icons";
 import { skillIconUrl } from "../gfx/skillIcons";
 import { installGlobeFrame } from "./globeFrame";
@@ -43,6 +43,10 @@ const targetTrade = $<HTMLButtonElement>("target-trade");
 let tradeCallback: (() => void) | null = null;
 targetTrade.addEventListener("mousedown", (e) => e.preventDefault());
 targetTrade.addEventListener("click", () => tradeCallback?.());
+const targetFriend = $<HTMLButtonElement>("target-friend");
+let friendCallback: (() => void) | null = null;
+targetFriend.addEventListener("mousedown", (e) => e.preventDefault());
+targetFriend.addEventListener("click", () => friendCallback?.());
 const targetDuel = $<HTMLButtonElement>("target-duel");
 let duelCallback: (() => void) | null = null;
 targetDuel.addEventListener("mousedown", (e) => e.preventDefault());
@@ -62,24 +66,20 @@ export function showHud() {
 /** Leaving the game (character switch / logout): hide the HUD and every in-game window. */
 export function resetGameUi() {
   hud.hidden = true;
-  for (const id of ["inventory-window", "shop-window", "upgrade-window", "leaderboard", "party-frames", "party-invite", "duel-invite", "boss-bar", "cast-bar", "target-frame", "pvp-stats", "death", "loading", "tooltip", "stall-button", "stall-setup", "stall-browse", "npc-dialog", "quest-log", "quest-tracker", "passive-window", "skills-window"]) {
+  for (const id of ["inventory-window", "shop-window", "upgrade-window", "leaderboard", "party-frames", "party-invite", "duel-invite", "boss-bar", "cast-bar", "target-frame", "pvp-stats", "death", "loading", "tooltip", "stall-button", "stall-setup", "stall-browse", "npc-dialog", "quest-log", "quest-tracker", "passive-window", "skills-window", "friends-window"]) {
     document.getElementById(id)!.hidden = true;
   }
   document.getElementById("killfeed")!.replaceChildren();
   clearAuras();
-  nightOverlay.style.opacity = "0";
 }
 
 const clock = $("clock");
-const nightOverlay = $("night-overlay");
-
-/** World clock in the corner; outdoor zones also darken at night. */
-export function setClock(minute: number, outdoor: boolean) {
+/** World clock in the corner (the darkness itself is drawn by the scene's NightLayer). */
+export function setClock(minute: number) {
   const night = isNight(minute);
   clock.textContent = `${night ? "☾" : "☀"} ${formatClock(minute)}`;
   clock.classList.toggle("night", night);
   clock.title = night ? "Gece: yaratıklar %20 daha güçlü ve ödüllü, gece yaratıkları dolaşıyor" : "Gündüz";
-  nightOverlay.style.opacity = String(outdoor ? darkness(minute) * 0.6 : 0);
 }
 
 export function setOnlineCount(count: number) {
@@ -194,6 +194,8 @@ export interface TargetFrameData {
   onDuel?: () => void;
   /** Shows the "Takas" button when set. */
   onTrade?: () => void;
+  /** Shows the "Arkadaş ekle" button when set. */
+  onFriend?: () => void;
 }
 
 export function setTargetFrame(data: TargetFrameData | null) {
@@ -210,6 +212,8 @@ export function setTargetFrame(data: TargetFrameData | null) {
   targetDuel.hidden = !data.onDuel;
   tradeCallback = data.onTrade ?? null;
   targetTrade.hidden = !data.onTrade;
+  friendCallback = data.onFriend ?? null;
+  targetFriend.hidden = !data.onFriend;
 }
 
 // ---- Hotbar ------------------------------------------------------------

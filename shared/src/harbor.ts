@@ -85,9 +85,21 @@ export function buildHarbor(): DungeonLayout {
   for (const [tx, ty] of [[24, 16], [25, 16], [36, 16], [45, 16], [46, 17], [38, 19]] as const) prop(tx, ty, "crate");
   for (const [tx, ty] of [[23, 16], [33, 16], [34, 16], [44, 17], [16, 18]] as const) prop(tx, ty, "barrel");
   prop(31, 15, "cart");
-  for (const [tx, ty] of [[26, 15], [30, 15], [22, 20], [35, 20], [44, 20], [10, 20], [26, 8], [30, 8]] as const) {
+  for (const [tx, ty] of [[26, 15], [30, 15], [22, 20], [35, 20], [44, 20], [10, 20], [26, 8], [30, 8], [26, 5], [30, 12]] as const) {
     solid(tx, ty, 1, 1);
     decor.push({ kind: "lamp", tx, ty });
   }
+
+  // The road down from the town gate: an avenue of trees with flower beds along the kerb.
+  const free = (x: number, y: number) => tiles[y][x] === Tile.Grass || tiles[y][x] === Tile.GrassAlt || tiles[y][x] === Tile.Flower;
+  for (let y = 4; y <= 14; y++) {
+    if (y % 3 === 1) {
+      for (const x of [25, 31]) if (free(x, y)) tiles[y][x] = Tile.Tree;
+    } else {
+      for (const x of [26, 30]) if (free(x, y)) tiles[y][x] = Tile.Flower;
+    }
+  }
+  // Clear the odd tree right beside the lane so the avenue reads cleanly.
+  for (let y = 3; y <= 14; y++) for (const x of [24, 26, 30, 32]) if (tiles[y][x] === Tile.Tree) tiles[y][x] = Tile.Grass;
   return { map: { width: WIDTH, height: HEIGHT, tiles, spawn: HARBOR_SPOTS.spawn }, mobs: [], decor };
 }

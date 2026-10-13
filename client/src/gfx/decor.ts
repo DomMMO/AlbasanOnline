@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { COLOSSEUM, TILE_SIZE, type Decor, type IconShape } from "../../../shared/src";
+import { addLight } from "../fx/nightLights";
 import { ICON_SIZE, paintIcon } from "./icons";
 
 // Town decor drawn in code on top of the tiles: buildings, the fountain, lamps…
@@ -663,10 +664,11 @@ function lamp(scene: Phaser.Scene, tx: number, ty: number) {
   g.fillStyle(0xffd97a).fillRect(-3, -29, 7, 4);
   g.fillStyle(0xfff3c4).fillRect(-1, -28, 3, 2);
   const glow = scene.add
-    .circle(x + 0.5, bottom - 27, 12, 0xffc04d, 0.18)
+    .circle(x + 0.5, bottom - 27, 14, 0xffc04d, 0.28)
     .setBlendMode(Phaser.BlendModes.ADD)
     .setDepth(bottom + 0.1);
-  scene.tweens.add({ targets: glow, alpha: 0.1, scale: 0.85, duration: 900 + Math.random() * 400, yoyo: true, repeat: -1, ease: "Sine.easeInOut" });
+  scene.tweens.add({ targets: glow, alpha: 0.16, scale: 0.85, duration: 900 + Math.random() * 400, yoyo: true, repeat: -1, ease: "Sine.easeInOut" });
+  addLight(scene, x + 0.5, bottom - 22, 58, 0xffd08a, 0.03);
 }
 
 function anvil(scene: Phaser.Scene, tx: number, ty: number) {
@@ -736,6 +738,7 @@ function campfire(scene: Phaser.Scene, tx: number, ty: number) {
     .setDepth(bottom + 0.2);
   const glow = scene.add.circle(x, bottom - 6, 26, 0xff9a3c, 0.16).setBlendMode(Phaser.BlendModes.ADD).setDepth(bottom + 0.1);
   scene.tweens.add({ targets: glow, alpha: 0.08, scale: 0.9, duration: 260, yoyo: true, repeat: -1, ease: "Sine.easeInOut" });
+  addLight(scene, x, bottom - 6, 80, 0xffa040, 0.08);
 }
 
 function tent(scene: Phaser.Scene, t: Extract<Decor, { kind: "tent" }>) {
@@ -827,6 +830,7 @@ function torch(scene: Phaser.Scene, tx: number, ty: number) {
     .setDepth(bottom + 0.2);
   const glow = scene.add.circle(x + 0.5, bottom - 24, 20, 0xff9a3c, 0.18).setBlendMode(Phaser.BlendModes.ADD).setDepth(bottom + 0.1);
   scene.tweens.add({ targets: glow, alpha: 0.09, scale: 0.85, duration: 220 + Math.random() * 120, yoyo: true, repeat: -1 });
+  addLight(scene, x + 0.5, bottom - 20, 62, 0xffa850, 0.08);
 }
 
 // ---- Harbour ------------------------------------------------------------------------
@@ -960,6 +964,7 @@ function lighthouse(scene: Phaser.Scene, l: Extract<Decor, { kind: "lighthouse" 
   const lampY = bottom + towerTop - 8;
   const glow = scene.add.circle(x0 + cx, lampY, 18, 0xffe08a, 0.3).setBlendMode(Phaser.BlendModes.ADD).setDepth(bottom + 0.1);
   scene.tweens.add({ targets: glow, alpha: 0.12, scale: 0.8, duration: 1200, yoyo: true, repeat: -1, ease: "Sine.easeInOut" });
+  addLight(scene, x0 + cx, lampY, 90, 0xfff0b0, 0.02);
   // The sweeping beam.
   const beam = scene.add.graphics().setPosition(x0 + cx, lampY).setDepth(bottom + 0.2).setBlendMode(Phaser.BlendModes.ADD);
   beam.fillStyle(0xfff3c4, 0.16).fillTriangle(0, 0, 150, -16, 150, 16);

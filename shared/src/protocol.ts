@@ -26,6 +26,12 @@ export const Msg = {
   /** Sent once the client's handlers are ready; the server replies with the inventory snapshot. */
   RequestInventory: "requestInventory",
   PartyRespond: "partyRespond",
+  /** Friends: send a request by character name. */
+  FriendRequest: "friendRequest",
+  /** Friends: accept or decline someone's request. */
+  FriendRespond: "friendRespond",
+  /** Friends: remove a friend, or withdraw a request you sent. */
+  FriendRemove: "friendRemove",
   DuelRespond: "duelRespond",
   StallOpen: "stallOpen",
   StallClose: "stallClose",
@@ -42,7 +48,6 @@ export const Msg = {
   MapPing: "mapPing",
   /** Skill page: add (+1) or take back (-1) a rank; or reset all. */
   SkillRank: "skillRank",
-  SkillReset: "skillReset",
   /** Ayşe Teyze: read today's fortune. */
   ReadFortune: "readFortune",
   /** T: open a town portal where you stand. */
@@ -109,6 +114,8 @@ export const Msg = {
   /** A party member pinged the map. */
   PingEvent: "pingEvent",
   TradeInvite: "tradeInvite",
+  /** Your friend list and requests (on join and whenever they or a friend's status change). */
+  FriendList: "friendList",
   /** A party member nearby just went into a dungeon: join them? */
   DungeonInvite: "dungeonInvite",
   /** Someone in the zone caught something (splash on their float). */
@@ -134,6 +141,8 @@ export interface InputMessage {
   seq: number;
   dx: Axis;
   dy: Axis;
+  /** Shift held: gallop if mounted. */
+  sprint?: boolean;
 }
 
 export interface JoinOptions {
@@ -341,6 +350,37 @@ export interface PartyUpdateEvent {
 
 export interface PartyInviteEvent {
   from: string;
+}
+
+export interface FriendView {
+  characterId: number;
+  name: string;
+  cls: string;
+  level: number;
+  online: boolean;
+  /** Where they are, when online. */
+  zone?: ZoneId;
+}
+
+export interface FriendListEvent {
+  friends: FriendView[];
+  /** Requests waiting for your answer. */
+  incoming: FriendView[];
+  /** Requests you sent that are still unanswered. */
+  outgoing: FriendView[];
+}
+
+export interface FriendRequestMessage {
+  name: string;
+}
+
+export interface FriendRespondMessage {
+  characterId: number;
+  accept: boolean;
+}
+
+export interface FriendRemoveMessage {
+  characterId: number;
 }
 
 export interface PartyRespondMessage {
@@ -665,6 +705,8 @@ export interface PlayerView {
   gm: boolean;
   /** Riding a horse. */
   mounted: boolean;
+  /** Galloping (Shift on horseback) this tick. */
+  galloping: boolean;
   /** Fishing: the float lies on the water at (fishX, fishY). */
   fishing: boolean;
   fishX: number;

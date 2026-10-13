@@ -58,6 +58,8 @@ export class Player extends Schema {
   @type("boolean") gm = false;
   /** Riding a horse (moves faster, drawn on horseback). */
   @type("boolean") mounted = false;
+  /** Galloping this tick (Shift on horseback): faster legs and dust for everyone watching. */
+  @type("boolean") galloping = false;
   /** Fishing: the float lies on the water at (fishX, fishY). */
   @type("boolean") fishing = false;
   @type("number") fishX = 0;

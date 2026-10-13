@@ -38,6 +38,7 @@ export const BINDABLE: { group: string; actions: [Action, string][] }[] = [
       [Action.Interact, "Etkileşim (al, konuş, portal)"],
       [Action.TownPortal, "Şehir portalı"],
       [Action.Mount, "Ata bin / in"],
+      [Action.Sprint, "Dörtnala koş (atta basılı tut)"],
     ],
   },
   {
@@ -47,6 +48,7 @@ export const BINDABLE: { group: string; actions: [Action, string][] }[] = [
       [Action.Skills, "Yetenekler"],
       [Action.PassiveTree, "Pasif ağaç"],
       [Action.QuestLog, "Görev günlüğü"],
+      [Action.Friends, "Arkadaşlar"],
       [Action.Leaderboard, "PvP sıralaması"],
       [Action.Minimap, "Mini harita"],
     ],

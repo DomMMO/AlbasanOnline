@@ -611,6 +611,7 @@ client/
 | 7.13 | At: sağ alttaki at düğmesi / H ile binip inme, %60 hız, açık dünyada | ✅ |
 | 7.14 | Arenada en yüksek puanlıya parlayan taç, GM'lerin üstünde zıplayan GM yazısı | ✅ |
 | 7.15 | Kan Arenası kolezyum oldu: tribünler, seyirciler, imparator locası, kemerli cephe, sütunlar | ✅ |
+| 7.16 | Gece fenerlerin ışık havuzları, atta Shift ile dörtnala, Liman yolu, iki sütunlu yetenek sayfası, arkadaş sistemi (O) | ✅ |
 | 8 | Optimizasyon, anti-cheat, yedekleme, alfa testi | ⏳ |
 
 Faz 2 bitince oyun oynanabilir hale gelir. Sonraki fazlar bunun üzerine eklenir.
