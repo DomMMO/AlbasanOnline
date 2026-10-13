@@ -4,6 +4,9 @@ import { ringEffect, slashEffect } from "../fx/slash";
 import { ensureSpriteSet, HumanoidFrame, type SpriteSet } from "../gfx/textures";
 import { BODY_PART_Y, ensureItemTexture } from "../gfx/weapons";
 import { hasImageAnim, IMAGE_SPRITES } from "../gfx/imageSprites";
+import { ensureHorse, HORSE_KEY, HORSE_RIDER_LIFT, HorseFrame } from "../gfx/horse";
+import { CROWN_KEY, ensureCrown } from "../gfx/overhead";
+import { DOT_KEY, ensureDot } from "../gfx/decor";
 import { WeaponView } from "./WeaponView";
 
 const HP_BAR_WIDTH = 16;
@@ -80,7 +83,125 @@ export class EntityView {
 
   /** Top of the sprite, for floating text. */
   get headY() {
-    return this.rawY - this.set.height * this.scale;
+    return this.rawY - this.lift() - this.set.height * this.scale;
+  }
+
+  // ---- Riding ----
+  private horse?: Phaser.GameObjects.Sprite;
+  private moving = false;
+
+  /** Rider's feet above the ground while on horseback. */
+  private lift() {
+    return this.horse ? HORSE_RIDER_LIFT : 0;
+  }
+
+  /** Puts the character on a horse (or takes them off). */
+  setMounted(mounted: boolean) {
+    if (mounted === !!this.horse) return;
+    if (mounted) {
+      const scene = this.sprite.scene;
+      ensureHorse(scene);
+      this.horse = scene.add.sprite(this.rawX, this.rawY, HORSE_KEY, HorseFrame.Side).setOrigin(0.5, 1);
+      this.horse.setAlpha(this.sprite.alpha);
+    } else {
+      this.horse?.destroy();
+      this.horse = undefined;
+    }
+    this.setAnimation(this.facing, this.moving);
+  }
+
+  get mounted() {
+    return !!this.horse;
+  }
+
+  // ---- Above the name: the arena champion's crown, the GM tag ----
+  private crown?: { image: Phaser.GameObjects.Image; glow: Phaser.GameObjects.Arc; sparkles: Phaser.GameObjects.Particles.ParticleEmitter; tweens: Phaser.Tweens.Tween[] };
+  private gmTag?: { text: Phaser.GameObjects.Text; bounce: { y: number }; tween: Phaser.Tweens.Tween };
+
+  /** The glowing crown of the best PvP player in the arena. */
+  setCrown(on: boolean) {
+    if (on === !!this.crown) return;
+    if (!on) {
+      this.crown!.tweens.forEach((t) => t.stop());
+      this.crown!.image.destroy();
+      this.crown!.glow.destroy();
+      this.crown!.sparkles.destroy();
+      this.crown = undefined;
+      return;
+    }
+    const scene = this.sprite.scene;
+    ensureCrown(scene);
+    ensureDot(scene);
+    const image = scene.add.image(0, 0, CROWN_KEY).setOrigin(0.5, 1);
+    // WebGL: a real glow around the crown; the halo and sparkles work on any renderer.
+    image.preFX?.addGlow(0xffd34d, 2, 0, false, 0.1, 10);
+    const glow = scene.add.circle(0, 0, 9, 0xffd34d, 0.28).setBlendMode(Phaser.BlendModes.ADD);
+    const sparkles = scene.add.particles(0, 0, DOT_KEY, {
+      x: { min: -7, max: 7 },
+      y: { min: -8, max: 0 },
+      speedY: { min: -10, max: -4 },
+      scale: { start: 0.8, end: 0 },
+      alpha: { start: 1, end: 0 },
+      tint: [0xffffff, 0xfff3b0, 0xffd34d],
+      lifespan: 700,
+      frequency: 140,
+      blendMode: Phaser.BlendModes.ADD,
+    });
+    const tweens = [
+      scene.tweens.add({ targets: glow, alpha: 0.1, scale: 1.35, duration: 750, yoyo: true, repeat: -1, ease: "Sine.easeInOut" }),
+      scene.tweens.add({ targets: image, angle: { from: -6, to: 6 }, duration: 1300, yoyo: true, repeat: -1, ease: "Sine.easeInOut" }),
+    ];
+    this.crown = { image, glow, sparkles, tweens };
+    this.setPosition(this.rawX, this.rawY);
+  }
+
+  /** A bouncing "GM" over game masters' names. */
+  setGmTag(on: boolean) {
+    if (on === !!this.gmTag) return;
+    if (!on) {
+      this.gmTag!.tween.stop();
+      this.gmTag!.text.destroy();
+      this.gmTag = undefined;
+      return;
+    }
+    const scene = this.sprite.scene;
+    const text = scene.add
+      .text(0, 0, "GM", {
+        fontFamily: '"Cloister Black TR", serif',
+        fontSize: "11px",
+        color: "#ffdd55",
+        stroke: "#7a0a0a",
+        strokeThickness: 3,
+      })
+      .setOrigin(0.5, 1)
+      .setResolution(4)
+      .setShadow(0, 0, "#ff3b3b", 6, true, true);
+    const bounce = { y: 0 };
+    const tween = scene.tweens.add({
+      targets: bounce,
+      y: -4,
+      duration: 320,
+      yoyo: true,
+      repeat: -1,
+      ease: "Quad.easeOut",
+      onUpdate: () => this.setPosition(this.rawX, this.rawY),
+    });
+    this.gmTag = { text, bounce, tween };
+    this.setPosition(this.rawX, this.rawY);
+  }
+
+  /** Stacks the crown and the GM tag above the name (or the head when there's no name). */
+  private layoutOverhead(px: number, py: number, top: number) {
+    if (!this.crown && !this.gmTag) return;
+    let y = this.label ? this.label.y - this.label.displayHeight + 1 : top - 2;
+    const depth = 100000 + py + 0.2;
+    if (this.crown) {
+      this.crown.image.setPosition(px, y).setDepth(depth + 0.1);
+      this.crown.glow.setPosition(px, y - 4).setDepth(depth);
+      this.crown.sparkles.setPosition(px, y).setDepth(depth + 0.2);
+      y -= 10;
+    }
+    if (this.gmTag) this.gmTag.text.setPosition(px, y + this.gmTag.bounce.y).setDepth(depth + 0.3);
   }
 
   setPosition(x: number, y: number) {
@@ -89,13 +210,19 @@ export class EntityView {
     // Snap to whole world pixels; at 3-4x zoom, fractional positions show up as jitter.
     const px = Math.round(x + this.offset.x);
     const py = Math.round(y + this.offset.y);
-    this.sprite.setPosition(px, py);
+    const lift = this.lift();
+    this.sprite.setPosition(px, py - lift);
     // Y-sort: things lower on screen draw in front.
     this.sprite.setDepth(py);
-    const top = py - this.set.height * this.scale;
+    if (this.horse) {
+      // Seen from the front the horse's head is in front of the rider's legs.
+      this.horse.setPosition(px, py).setDepth(this.facing === Direction.Down ? py + 0.3 : py - 0.2);
+    }
+    const top = py - lift - this.set.height * this.scale;
     this.hpBar.setPosition(px - HP_BAR_WIDTH / 2, top - 4).setDepth(100000 + py);
     this.label?.setPosition(px, this.hpBarVisible ? top - 5 : top - 1).setDepth(100000 + py);
-    this.weapon?.layout(px, py, this.facing);
+    this.layoutOverhead(px, py, top);
+    this.weapon?.layout(px, py - lift, this.facing);
   }
 
   /**
@@ -269,6 +396,17 @@ export class EntityView {
 
     const name = dir === Direction.Up ? "up" : dir === Direction.Down ? "down" : "side";
     if (dir === Direction.Up || dir === Direction.Down) this.sprite.setFlipX(false);
+    this.moving = moving;
+    if (this.horse) {
+      // The horse walks; the rider just sits.
+      this.horse.setFlipX(dir === Direction.Left);
+      if (moving) this.horse.anims.play(`horse-${name}`, true);
+      else {
+        this.horse.anims.stop();
+        this.horse.setFrame(name === "up" ? HorseFrame.Up : name === "down" ? HorseFrame.Down : HorseFrame.Side);
+      }
+      moving = false;
+    }
     if (moving) {
       this.sprite.anims.play(`${key}-${name}`, true);
     } else {
@@ -316,6 +454,11 @@ export class EntityView {
 
   setVisible(visible: boolean) {
     this.sprite.setVisible(visible);
+    this.horse?.setVisible(visible);
+    this.crown?.image.setVisible(visible);
+    this.crown?.glow.setVisible(visible);
+    this.crown?.sparkles.setVisible(visible);
+    this.gmTag?.text.setVisible(visible);
     this.label?.setVisible(visible);
     this.hpBar.setVisible(visible && this.hpBarVisible);
     this.weapon?.setVisible(visible && !this.weaponHidden);
@@ -339,9 +482,14 @@ export class EntityView {
     const alpha = this.dimmed ? 0.4 : this.ghost ? 0.55 : 1;
     this.sprite.setAlpha(alpha);
     this.weapon?.setAlpha(alpha);
+    this.horse?.setAlpha(alpha);
   }
 
   destroy(fade = false) {
+    this.horse?.destroy();
+    this.horse = undefined;
+    this.setCrown(false);
+    this.setGmTag(false);
     this.label?.destroy();
     this.hpBar.destroy();
     this.weapon?.destroy();

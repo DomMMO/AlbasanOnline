@@ -90,7 +90,7 @@ Yanındaki bir oyuncuya tıklayıp hedef çerçevesindeki **Düello**'ya bas ya 
 
 ### Kan Arenası (PvP)
 
-Ana Merkez'deki kırmızı portaldan (seviye 5+) girilen, herkesin herkese saldırabildiği ortak arena.
+Ana Merkez'deki kırmızı portaldan (seviye 5+) girilen, herkesin herkese saldırabildiği ortak arena. Bir **kolezyum**: oval kum arena, etrafında kırmızı mermer podyum duvarı ve meşaleler; yedi sıra taş tribünde tezahürat yapan seyirciler, merdiven koridorları ve tünel ağızları; kuzeyde tenteli **imparator locası** (altın taht), dış duvarda kırmızı bayraklar, güneyde iki katlı kemerli cephe. Arenadaki dört mermer sütun ve ortadaki dikilitaş görüş hattını keser (siper). Dört kapının ağzından rastgele birinde doğarsın; çıkış güney kapısında. Harita ve çizim aynı halkalardan üretilir (`COLOSSEUM`, `shared/src/dungeons.ts`; çizim `client/src/gfx/decor.ts`).
 
 - Arenada diğer oyuncular düşmandır: kırmızı isim, tıkla ya da Tab ile hedef al. Skill'ler, otomatik saldırı, Girdap ve Buz Halkası oyunculara da işler.
 - Oyuncuya verilen hasar %50'dir (skill'ler mob'lara göre ayarlı). Buz Halkası oyuncuları yarı süre (2 sn) dondurur.
@@ -98,12 +98,14 @@ Ana Merkez'deki kırmızı portaldan (seviye 5+) girilen, herkesin herkese sald�
 - Ölünce XP kaybı yok, arenada rastgele bir köşede yeniden doğarsın.
 - **PvP puanı:** Elo benzeri, 1000'den başlar; güçlü birini yenmek daha çok kazandırır. Aynı kişiyi 2 dakika içinde tekrar öldürmek puan getirmez.
 - **L**: sıralama tablosu (çevrimiçi oyuncuların değerleri canlı). 5, 10, … seri öldürmeler tüm sunucuya duyurulur.
+- **Arenanın kralı:** arenada bulunanlar arasında PvP puanı en yüksek olanın (eşitlikte öldürmesi çok olanın) başında **parlayan altın bir taç** durur; puanlar değiştikçe taç el değiştirir. Hiç dövüşmemiş (puanı başlangıçta olan) oyuncular sayılmaz.
 
 ### Sohbet
 
 **Enter** ile yaz, **Enter** ile gönder, **Esc** ile vazgeç. Mesajlar tüm sunucuya (mağaradakiler dahil) gider; aynı bölgedekiler karakterinin üstünde konuşma balonu da görür.
 
 - Fısıltı: `/f İsim mesaj` (sohbetteki bir isme tıklamak fısıltıyı başlatır).
+- GM hesaplarının isminin üstünde kırmızı parıltılı, zıplayan bir **GM** yazısı durur (herkes görür).
 - GM mesajları [GM] etiketiyle görünür; +7 ve üstü item basmaları sistem mesajı olarak düşer.
 - Flood koruması: 5 saniyede en fazla 5 mesaj.
 
@@ -125,6 +127,7 @@ Tuşlar **Esc → Menü → Tuş Atamaları** sayfasından değiştirilebilir: 1
 | K | Yetenekler (puan ver / geri al) |
 | P | Pasif ağaç |
 | T | Şehir portalı (bulunduğun yerde açılır) |
+| H | Ata bin / attan in (sağ alttaki at düğmesi de aynısını yapar) |
 | L | PvP sıralaması |
 | M | Mini harita aç/kapat (sağ üst: sarı sen, yeşil grup arkadaşların, beyaz diğer oyuncular, mavi NPC, mor portal) |
 | /davet İsim, /p, /ayril | Grup |
@@ -362,6 +365,16 @@ Ekran bir çemberdir (dolum animasyonsuzdur; seçim değişince altın renk yumu
 
 Kurallar `shared/src/data/passives.ts` ve `shared/src/data/affixes.ts`, sunucu tarafı `server/src/game/passives.ts` içindedir. Takılı mücevherler `items` tablosunda `container = 'passive'` olarak saklanır.
 
+### At (H)
+
+Sağ altta, mana/öfke küresinin solundaki **at düğmesine** bas (ya da **H**): atın gelir ve binersin; tekrar basınca inersin. Herkesin kendi atı vardır, satın almak gerekmez.
+
+- At üstünde **%60 daha hızlı** gidersin. Hız sunucuda hesaplanır ve hareket tahmini aynı fonksiyonu kullanır, yani at üstünde de takılma olmaz.
+- **Binilebilen yerler:** Ana Merkez, Başlangıç Vadisi, Kara Orman, Liman. Zindanlarda ve Kan Arenası'nda binilmez; savaştayken (son 5 saniyede vurduysan ya da vurulduysan) binilmez.
+- **Attan inersin:** saldırınca ya da skill kullanınca, balık tutmaya başlayınca, pazar kurunca, ölünce. Bölge değiştirince at geride kalır, varınca yeniden binersin.
+- Binip inmek arasında 1,5 saniye bekleme var. Binince ve inince ayaklarının dibinde toz kalkar.
+- At kodla çizilir (`client/src/gfx/horse.ts`): yandan yürürken bacakları adım atar, önden atın başı, arkadan sağrısı ve kuyruğu görünür; herkes seni atlı görür. Mantık `server/src/game/mount.ts`.
+
 ### Şehir portalı (T)
 
 **T**'ye basınca bulunduğun yerde (zindan dahil, şehir hariç) Ana Merkez'e bir portal açılır. Şehirde de seni tam bıraktığın yere geri götüren bir portal durur; ikisine **E** ya da tıklamayla girilir. Portal sen başka bir haritaya girene ya da oyundan çıkana kadar (20 sn tolerans) durur; yeni bir T eskisinin yerini alır. Portal açık olduğu sürece zindan kopyası kapanmaz, döndüğünde her şey bıraktığın gibidir. Portalları herkes görür, sadece sahibi kullanabilir. Kod: `server/src/game/townPortal.ts`.
@@ -576,6 +589,9 @@ client/
 | 7.10 | Grupça zindana giriş daveti, gruptan çıkanın zindandan atılması, Liman bölgesi ve AFK balık tutma | ✅ |
 | 7.11 | Karakter yaratma (cinsiyet, saç modeli/rengi, ten, kıyafet rengi), iç kale önünde Metin2 tarzı karakter seçme, karakter silme, oyun süresi | ✅ |
 | 7.12 | CraftPix canavar çizimleri (satir, golem, minotor, hortlak), Satir Korusu ve Yosun Golemleri, 9 canavar silahı, sprite dönüştürme aracı | ✅ |
+| 7.13 | At: sağ alttaki at düğmesi / H ile binip inme, %60 hız, açık dünyada | ✅ |
+| 7.14 | Arenada en yüksek puanlıya parlayan taç, GM'lerin üstünde zıplayan GM yazısı | ✅ |
+| 7.15 | Kan Arenası kolezyum oldu: tribünler, seyirciler, imparator locası, kemerli cephe, sütunlar | ✅ |
 | 8 | Optimizasyon, anti-cheat, yedekleme, alfa testi | ⏳ |
 
 Faz 2 bitince oyun oynanabilir hale gelir. Sonraki fazlar bunun üzerine eklenir.

@@ -57,6 +57,8 @@ export const Msg = {
   DungeonRespond: "dungeonRespond",
   /** Cast the fishing rod, or reel it in. */
   Fish: "fish",
+  /** Get on the horse, or off it. */
+  Mount: "mount",
   // server -> client
   Pong: "pong",
   Combat: "combat",
@@ -608,6 +610,10 @@ export interface PlayerView {
   hairStyle: string;
   hairColor: number;
   skin: number;
+  /** Game master account. */
+  gm: boolean;
+  /** Riding a horse. */
+  mounted: boolean;
   /** Fishing: the float lies on the water at (fishX, fishY). */
   fishing: boolean;
   fishX: number;

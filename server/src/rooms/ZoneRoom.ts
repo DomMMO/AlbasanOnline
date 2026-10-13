@@ -64,6 +64,7 @@ import { changeRank, resetRanks } from "../game/talents";
 import { readFortune } from "../game/fortune";
 import { quickStorage, storageGold } from "../game/storage";
 import { stopFishing, toggleFishing } from "../game/fishing";
+import { dismount, toggleMount } from "../game/mount";
 import { cancelTrade, confirmTrade, lockOffer, respondTrade, setOffer, tradeLocked } from "../game/trade";
 import {
   closeTownPortal,
@@ -140,12 +141,16 @@ export class ZoneRoom extends Room<WorldState> {
     });
     this.onMessage(Msg.SetTarget, (client, message: Partial<SetTargetMessage>) => {
       const targetId = typeof message?.targetId === "string" ? message.targetId : null;
-      if (message?.attack === true) stopFishing(this.game, client.sessionId, "Oltayı topladın");
+      if (message?.attack === true) {
+        stopFishing(this.game, client.sessionId, "Oltayı topladın");
+        dismount(this.game, client.sessionId);
+      }
       setTarget(this.game, client.sessionId, targetId, message?.attack === true);
     });
     this.onMessage(Msg.UseSkill, (client, message: Partial<UseSkillMessage>) => {
       if (typeof message?.skillId !== "string") return;
       stopFishing(this.game, client.sessionId, "Oltayı topladın");
+      dismount(this.game, client.sessionId);
       const aim = message.aim;
       const validAim = aim && Number.isFinite(aim.x) && Number.isFinite(aim.y) ? { x: Number(aim.x), y: Number(aim.y) } : undefined;
       useSkill(this.game, client.sessionId, message.skillId, validAim);
@@ -250,6 +255,7 @@ export class ZoneRoom extends Room<WorldState> {
       this.usePortal(client, invite.portalId, true);
     });
     this.onMessage(Msg.Fish, (client) => toggleFishing(this.game, client.sessionId));
+    this.onMessage(Msg.Mount, (client) => toggleMount(this.game, client.sessionId));
     this.onMessage(Msg.TradeRespond, (client, message: { accept?: unknown }) => respondTrade(this.game, client.sessionId, message?.accept === true));
     this.onMessage(Msg.TradeOffer, (client, message: Partial<TradeOfferMessage>) => setOffer(this.game, client.sessionId, message?.items, message?.gold));
     this.onMessage(Msg.TradeLock, (client) => lockOffer(this.game, client.sessionId));
@@ -323,6 +329,7 @@ export class ZoneRoom extends Room<WorldState> {
       if (this.zone.instanced) registerInstance(character.id, this.zone.id, this.roomId);
       refreshFor(character.id);
       this.game.playerRuntime.get(client.sessionId)!.isAdmin = auth.account.isAdmin;
+      this.state.players.get(client.sessionId)!.gm = auth.account.isAdmin;
       this.releases.set(client.sessionId, release);
       console.log(`[${this.zone.id}] ${character.name} (${auth.account.username}) joined (${this.state.players.size} online)`);
     } catch (error) {

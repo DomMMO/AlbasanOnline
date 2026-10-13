@@ -84,6 +84,8 @@ import { initParty, renderParty, showInvite } from "../ui/party";
 import { initDuel, showDuelInvite } from "../ui/duel";
 import { initDungeonInvite, showDungeonInvite } from "../ui/dungeonInvite";
 import { initFishButton, setFishButton } from "../ui/fishButton";
+import { initMountButton, setMountButton } from "../ui/mountButton";
+import { dustPuff } from "../fx/dust";
 import { FishingLines, fishSplash } from "../fx/fishing";
 import { closeStorage, initStorage, openStorage, storageNpc, updateStorage } from "../ui/storage";
 import { addToTrade, initTrade, isTradeOpen, onTradeState, showTradeInvite } from "../ui/trade";
@@ -452,6 +454,8 @@ export class WorldScene extends Phaser.Scene {
     initDuel((accept) => this.room.send(Msg.DuelRespond, { accept }));
     initDungeonInvite((accept) => this.room.send(Msg.DungeonRespond, { accept }));
     initFishButton(() => this.room.send(Msg.Fish));
+    initMountButton(() => this.toggleMount());
+    this.controls.onPressed(Action.Mount, () => this.toggleMount());
     initTrade({
       respond: (accept) => this.room.send(Msg.TradeRespond, { accept }),
       offer: (items, gold) => this.room.send(Msg.TradeOffer, { items, gold }),
@@ -593,6 +597,8 @@ export class WorldScene extends Phaser.Scene {
           view.setBaseTint(player.stunned ? 0xffe066 : player.rooted ? 0x9ad5ff : player.buffed ? 0xffe8a8 : null);
           view.setWeapon(player.weapon, player.weaponPlus);
           view.setLook(playerAppearance(player));
+          this.syncMount(view, player.mounted);
+          view.setGmTag(player.gm);
           this.syncStall(sessionId, player);
           if (sessionId === this.targetId) this.refreshTargetFrame();
         };
@@ -1225,6 +1231,9 @@ export class WorldScene extends Phaser.Scene {
     local.view.setHealth(p.hp, p.maxHp, p.hp < p.maxHp && !p.dead);
     local.view.setWeapon(p.weapon, p.weaponPlus);
     local.view.setLook(playerAppearance(p));
+    this.syncMount(local.view, p.mounted);
+    local.view.setGmTag(p.gm);
+    setMountButton(this.zone.instanced || this.zone.pvp ? null : { mounted: p.mounted });
     if (p.dead && this.targetId) this.selectTarget(null, false, false);
     if (p.dead) {
       closeShop();
@@ -1437,6 +1446,35 @@ export class WorldScene extends Phaser.Scene {
     this.speechBubble(view, event.text.length > 60 ? `${event.text.slice(0, 57)}…` : event.text);
   }
 
+  /**
+   * Arena only: the crown goes to the player here with the best PvP rating (most kills on a
+   * tie). Players who never fought (everyone starts at the same rating) don't count.
+   */
+  private updateCrown() {
+    let best: { id: string; rating: number; kills: number } | null = null;
+    if (this.zone.pvp) {
+      const everyone: [string, PlayerView][] = [...this.players].map(([id, p]) => [id, p.state]);
+      if (this.local) everyone.push([this.room.sessionId, this.local.state]);
+      for (const [id, p] of everyone) {
+        if (p.pvpKills + p.pvpDeaths === 0) continue;
+        if (!best || p.pvpRating > best.rating || (p.pvpRating === best.rating && p.pvpKills > best.kills)) best = { id, rating: p.pvpRating, kills: p.pvpKills };
+      }
+    }
+    this.local?.view.setCrown(best?.id === this.room.sessionId);
+    for (const [id, remote] of this.players) remote.view.setCrown(best?.id === id);
+  }
+
+  private toggleMount() {
+    if (this.local && !this.local.state.dead && !this.leaving) this.room.send(Msg.Mount);
+  }
+
+  /** Puts a character on (or off) their horse, with a puff of dust when it changes. */
+  private syncMount(view: EntityView, mounted: boolean) {
+    if (view.mounted === mounted) return;
+    view.setMounted(mounted);
+    dustPuff(this, view.x, view.y);
+  }
+
   /** Fishing lines for everyone, and the Balık Tut button for us. */
   private updateFishing() {
     const present = new Set<string>();
@@ -1539,7 +1577,7 @@ export class WorldScene extends Phaser.Scene {
     this.pendingInputs = this.pendingInputs.filter((input) => input.seq > server.lastSeq);
     let pos: Point = { x: server.x, y: server.y };
     for (const input of this.pendingInputs) {
-      pos = stepMovement(this.map, pos.x, pos.y, input.dx, input.dy, TICK_MS / 1000);
+      pos = stepMovement(this.map, pos.x, pos.y, input.dx, input.dy, TICK_MS / 1000, server.mounted);
     }
     if (distance(pos, local.curr) > TELEPORT_DISTANCE) local.prev = { ...pos };
     local.curr = pos;
@@ -1624,6 +1662,7 @@ export class WorldScene extends Phaser.Scene {
     for (const remote of this.mobs.values()) this.renderRemote(remote, renderTime);
     for (const remote of this.minions.values()) this.renderRemote(remote, renderTime);
     this.updateFishing();
+    this.updateCrown();
 
     const target = this.targetId ? (this.mobs.get(this.targetId) ?? this.players.get(this.targetId)) : undefined;
     this.targetRing.setVisible(!!target);
@@ -1646,7 +1685,7 @@ export class WorldScene extends Phaser.Scene {
     }
 
     const input: InputMessage = { seq: this.nextSeq++, dx, dy };
-    local.curr = stepMovement(this.map, local.curr.x, local.curr.y, dx, dy, TICK_MS / 1000);
+    local.curr = stepMovement(this.map, local.curr.x, local.curr.y, dx, dy, TICK_MS / 1000, local.state.mounted);
     local.dir = directionFrom(dx, dy, local.dir);
     local.moving = true;
     this.pendingInputs.push(input);

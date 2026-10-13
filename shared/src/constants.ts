@@ -8,6 +8,10 @@ export const TICK_MS = 1000 / TICK_RATE;
 
 /** Pixels per second. */
 export const PLAYER_SPEED = 80;
+/** Riding a horse: this much faster than on foot. */
+export const MOUNT_SPEED_MULTIPLIER = 1.6;
+/** Time between two mount / dismount toggles. */
+export const MOUNT_COOLDOWN_MS = 1500;
 
 /**
  * Movement inputs the server may consume per tick when catching up after network jitter.
