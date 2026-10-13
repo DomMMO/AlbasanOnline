@@ -4,6 +4,7 @@ import { buildForest, FOREST_SPOTS } from "./forest";
 import { BIG_DUNGEON_IDS, BIG_DUNGEONS, bigDungeonEntrance, type BigDungeonId } from "./bigDungeons";
 import { CAVE_BRIDGE, CAVE_ENTRANCE_TILE, CAVE_TORCHES, generateWorldMap, type WorldMap } from "./map";
 import { buildTown, TOWN_SPOTS } from "./town";
+import { buildHarbor, HARBOR_SPOTS } from "./harbor";
 
 // A zone is one map with its own room on the server: the main town, the open hunting
 // grounds, a shared PvP arena, or an instanced dungeon that every party gets a private copy of.
@@ -11,7 +12,7 @@ import { buildTown, TOWN_SPOTS } from "./town";
 // there and you log back in where you left. Every other zone is entered through a portal
 // and leaving it puts you back at the portal you used.
 
-export type ZoneId = "town" | "world" | "forest" | "goblin_cave" | "jack_lair" | "pvp_arena" | BigDungeonId;
+export type ZoneId = "town" | "world" | "forest" | "harbor" | "goblin_cave" | "jack_lair" | "pvp_arena" | BigDungeonId;
 
 /** New characters start here; the zone anyone can join without a portal ticket. */
 export const HOME_ZONE: ZoneId = "town";
@@ -48,6 +49,8 @@ export interface ZoneDef {
   pvp?: boolean;
   /** Players can open market stalls here (on market tiles). */
   market?: boolean;
+  /** Players with a rod can fish at the water's edge here. */
+  fishing?: boolean;
   /** Under the sky: gets dark at night, and its mobs grow stronger then. */
   outdoor?: boolean;
   npcs: string[];
@@ -87,7 +90,23 @@ export const ZONES: Record<ZoneId, ZoneDef> = {
     instanced: false,
     persistent: true,
     market: true,
-    npcs: ["weaponsmith", "armorer", "scribe", "alchemist", "blacksmith", "jeweler", "commander", "sage", "cook", "craftsman"],
+    npcs: [
+      "weaponsmith",
+      "armorer",
+      "scribe",
+      "alchemist",
+      "blacksmith",
+      "jeweler",
+      "storekeeper",
+      "commander",
+      "sage",
+      "cook",
+      "craftsman",
+      "guard_gate_north",
+      "guard_gate_south",
+      "guard_keep_west",
+      "guard_keep_east",
+    ],
     respawnText: "Şehir meydanında yeniden doğacaksın.",
     portals: [
       {
@@ -98,6 +117,15 @@ export const ZONES: Record<ZoneId, ZoneDef> = {
         style: "gate",
         auto: true,
         arriveAt: { x: worldTownGate.x + TILE_SIZE * 3, y: worldTownGate.y + TILE_SIZE * 2 },
+      },
+      {
+        id: "town_harbor_gate",
+        ...TOWN_SPOTS.harborGate,
+        to: "harbor",
+        label: "Liman",
+        style: "gate",
+        auto: true,
+        arriveAt: HARBOR_SPOTS.fromTown,
       },
       {
         id: "pvp_arena_entrance",
@@ -166,6 +194,19 @@ export const ZONES: Record<ZoneId, ZoneDef> = {
       },
     ],
   },
+  harbor: {
+    id: "harbor",
+    outdoor: true,
+    name: "Liman",
+    instanced: false,
+    persistent: true,
+    fishing: true,
+    npcs: ["fisherman"],
+    respawnText: "Limanda yeniden doğacaksın.",
+    portals: [
+      { id: "harbor_town_gate", ...HARBOR_SPOTS.townGate, to: "town", label: "Ana Merkez", style: "gate", auto: true, arriveAt: TOWN_SPOTS.fromHarbor },
+    ],
+  },
   pvp_arena: {
     id: "pvp_arena",
     outdoor: true,
@@ -174,7 +215,7 @@ export const ZONES: Record<ZoneId, ZoneDef> = {
     pvp: true,
     npcs: [],
     respawnText: "Arenada yeniden doğacaksın.",
-    portals: [{ id: "pvp_exit", x: 22.5 * TILE_SIZE, y: 31 * TILE_SIZE, to: "town", label: "Çıkış", style: "exit" }],
+    portals: [{ id: "pvp_exit", x: 32 * TILE_SIZE, y: 35 * TILE_SIZE, to: "town", label: "Çıkış", style: "exit" }],
   },
   goblin_cave: {
     id: "goblin_cave",
@@ -230,6 +271,7 @@ const BUILDERS: Record<ZoneId, () => DungeonLayout> = {
     decor: [{ kind: "bridge", ...CAVE_BRIDGE }, ...CAVE_TORCHES.map((t) => ({ kind: "torch" as const, ...t }))],
   }),
   forest: buildForest,
+  harbor: buildHarbor,
   goblin_cave: buildGoblinCave,
   jack_lair: buildJackLair,
   pvp_arena: buildPvpArena,

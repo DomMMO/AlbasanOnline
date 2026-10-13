@@ -1,6 +1,7 @@
 import { Msg, type ChatEvent } from "../../../shared/src";
 import type { Game } from "./Game";
 import { challenge } from "./duel";
+import { requestTrade } from "./trade";
 import { invite, kick, leave, partyChat } from "./party";
 import { onlineCharacters } from "./registry";
 
@@ -67,9 +68,11 @@ export function handleChat(game: Game, sessionId: string, raw: unknown) {
     case "/duello":
     case "/düello":
       return argument ? challenge(game, sessionId, argument) : system(game, sessionId, "Kullanım: /duello İsim");
+    case "/takas":
+      return argument ? requestTrade(game, sessionId, argument) : system(game, sessionId, "Kullanım: /takas İsim");
   }
   if (text.startsWith("/")) {
-    return system(game, sessionId, "Komutlar: /f İsim mesaj (fısıltı), /p mesaj (grup), /davet İsim, /ayril, /at İsim, /duello İsim");
+    return system(game, sessionId, "Komutlar: /f İsim mesaj (fısıltı), /p mesaj (grup), /davet İsim, /ayril, /at İsim, /duello İsim, /takas İsim");
   }
 
   for (const entry of onlineCharacters.all()) {

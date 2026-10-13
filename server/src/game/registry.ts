@@ -9,6 +9,8 @@ export interface OnlineEntry {
   game: Game;
   sessionId: string;
   name: string;
+  /** Id of the room (zone or dungeon instance) the character is in. */
+  roomId: string;
 }
 
 const online = new Map<number, OnlineEntry>();

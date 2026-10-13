@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { ITEMS, mulberry32, Tile, TILE_COUNT, TILE_SIZE, type Appearance } from "../../../shared/src";
 import { ensureImageAnims, IMAGE_SPRITES, imageTextureKey } from "./imageSprites";
+import { humanoidFrames } from "./humanoid";
 
 // Placeholder pixel art drawn in code, so we need no asset files yet.
 // Swap these for real sprite sheets later; callers only see texture/animation keys.
@@ -170,68 +171,9 @@ export function createTileset(scene: Phaser.Scene) {
 
 // ---- Sprite templates ------------------------------------------------------
 // Each string is a pixel row. Letters map to palette colours, '.' is transparent.
-// Common legend: k outline, e eye. Humanoid: h hair, s skin, t tunic, d tunic shade, p trousers, b boots.
-// Worn armour recolours these layers (see humanoidPixel).
+// Common legend: k outline, e eye. Humanoid templates live in humanoid.ts (hair styles, gender).
+// Worn armour recolours their layers (see humanoidPixel).
 // Wolf/slime: f body, d body shade, w highlight.
-
-const HEAD_DOWN = [
-  "...kkkkkk...",
-  "..khhhhhhk..",
-  ".khhhhhhhhk.",
-  ".khsssssshk.",
-  ".ksessssesk.",
-  ".kssssssssk.",
-  "..kssssssk..",
-];
-const HEAD_UP = [
-  "...kkkkkk...",
-  "..khhhhhhk..",
-  ".khhhhhhhhk.",
-  ".khhhhhhhhk.",
-  ".khhhhhhhhk.",
-  ".kshhhhhhsk.",
-  "..kssssssk..",
-];
-const BODY_FRONT = [
-  ".kdttttttdk.",
-  "ksttttttttsk",
-  "ksdttttttdsk",
-  ".kdttttttdk.",
-  ".kddddddddk.",
-  "..kppkkppk..",
-];
-const LEGS_FRONT = [
-  ["..kppkkppk..", "..kbbkkbbk..", "..kkk..kkk.."],
-  ["..kppkkppk..", "..kkk.kbbk..", ".......kkk.."],
-  ["..kppkkppk..", "..kbbk.kkk..", "..kkk......."],
-];
-const SIDE_HEAD_BODY = [
-  "....kkkkk...",
-  "...khhhhhk..",
-  "..khhhhhhhk.",
-  "..khhssssk..",
-  "..khsssesk..",
-  "..kssssssk..",
-  "...kssssk...",
-  "..kdttttdk..",
-  "..kttttttk..",
-  "..ktttsttk..",
-  "..kdttttdk..",
-  "..kddddddk..",
-  "...kppppk...",
-];
-const LEGS_SIDE = [
-  ["...kpppk....", "...kbbbk....", "...kkkkk...."],
-  ["..kppkppk...", ".kbbk..kbbk.", ".kkk....kkk."],
-  ["...kpppk....", "..kbbkbbk...", "..kkk.kkk..."],
-];
-
-/** 9 frames: down 0-2, up 3-5, side (facing right) 6-8. Frame 0 of each is idle. */
-const HUMANOID_FRAMES: string[][] = [
-  ...LEGS_FRONT.map((legs) => [...HEAD_DOWN, ...BODY_FRONT, ...legs]),
-  ...LEGS_FRONT.map((legs) => [...HEAD_UP, ...BODY_FRONT, ...legs]),
-  ...LEGS_SIDE.map((legs) => [...SIDE_HEAD_BODY, ...legs]),
-];
 
 /** Faces right. Frame 0 idle, 1 stride. */
 const WOLF_BODY = [
@@ -377,6 +319,8 @@ function paletteFor(appearance: Appearance): Record<string, string> {
         e: "#1a1420",
         h: css(appearance.hair ?? 0x5a3825),
         s: skin,
+        S: skin,
+        r: css(appearance.skin ?? 0xf0c49a, 0.78),
         t: css(appearance.tunic),
         d: css(appearance.tunic, 0.65),
         p: "#4a3b2c",
@@ -408,7 +352,7 @@ function paletteFor(appearance: Appearance): Record<string, string> {
 }
 
 function framesFor(appearance: Appearance): string[][] {
-  if (appearance.type === "humanoid") return HUMANOID_FRAMES;
+  if (appearance.type === "humanoid") return humanoidFrames(appearance.gender, appearance.hairStyle);
   if (appearance.type === "wolf") return WOLF_FRAMES;
   if (appearance.type === "chest") return CHEST_FRAMES;
   if (appearance.type === "portal") {
@@ -426,14 +370,16 @@ function humanoidPixel(appearance: Appearance & { type: "humanoid" }, char: stri
   const item = (id?: string) => (id ? ITEMS[id] : undefined);
 
   const head = item(gear.head);
+  // A bald scalp ("S") is covered like hair.
+  const hairLayer = char === "h" || char === "S";
   // Helmet covers the hair on the top of the head; the lowest covered row is the rim.
-  if (head && char === "h" && y <= 3) {
+  if (head && hairLayer && y <= 3) {
     const shine = head.look === "plate" && y === 1 && x % 3 === 0;
     return css(head.icon.color, shine ? 1.5 : y === 3 ? 0.7 : y === 0 ? 1.2 : 1);
   }
   // No helmet: class headwear. Wizard hat = top of the head with a band; hood = all the hair.
   const headwear = !head ? appearance.headwear : undefined;
-  if (headwear && char === "h") {
+  if (headwear && hairLayer) {
     if (headwear.style === "hat" && y <= 3) return css(headwear.color, y === 3 ? 0.55 : y === 0 ? 1.3 : 1);
     if (headwear.style === "hood") return css(headwear.color, y >= 4 ? 0.85 : 1);
   }

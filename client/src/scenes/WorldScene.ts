@@ -1,7 +1,10 @@
 import Phaser from "phaser";
 import { getStateCallbacks, type Room } from "colyseus.js";
 import {
+  castSpot,
+  sanitizeLook,
   Direction,
+  RARITY_COLORS,
   directionFrom,
   directionToward,
   distance,
@@ -38,6 +41,10 @@ import {
   type PartyUpdateEvent,
   type DuelInviteEvent,
   type DuelStateEvent,
+  type TradeInviteEvent,
+  type FishCatchEvent,
+  type DungeonInviteEvent,
+  type TradeStateEvent,
   type SkillDef,
   type BossCastEvent,
   type PortalDef,
@@ -84,6 +91,13 @@ import { addChatMessage, initChat } from "../ui/chat";
 import { addKillFeed, initLeaderboard, setPvpStats, toggleLeaderboard } from "../ui/pvp";
 import { initParty, renderParty, showInvite } from "../ui/party";
 import { initDuel, showDuelInvite } from "../ui/duel";
+import { initDungeonInvite, showDungeonInvite } from "../ui/dungeonInvite";
+import { initFishButton, setFishButton } from "../ui/fishButton";
+import { initMountButton, setMountButton } from "../ui/mountButton";
+import { dustPuff } from "../fx/dust";
+import { FishingLines, fishSplash } from "../fx/fishing";
+import { closeStorage, initStorage, openStorage, storageNpc, updateStorage } from "../ui/storage";
+import { addToTrade, initTrade, isTradeOpen, onTradeState, showTradeInvite } from "../ui/trade";
 import { drawMinimap, setMinimapZone, toggleMinimap, type MinimapDot } from "../ui/minimap";
 import { isMenuOpen, menuBack, openMenu } from "../ui/menu";
 import { closeTopWindow, registerWindow } from "../ui/windows";
@@ -186,10 +200,17 @@ interface Point {
 }
 
 /** A player's look: tunic colour plus whatever armour they wear. */
+/** The parts of a humanoid appearance a player chose at character creation. */
+export function lookAppearance(look: { gender: string; hairStyle: string; hairColor: number; skin: number }) {
+  const valid = sanitizeLook(look);
+  return { gender: valid.gender, hairStyle: valid.hairStyle, hair: valid.hairColor, skin: valid.skin };
+}
+
 function playerAppearance(player: PlayerView): Appearance {
   return {
     type: "humanoid",
     tunic: player.color,
+    ...lookAppearance(player),
     headwear: classOf(player.cls).headwear,
     gear: {
       head: player.gearHead || undefined,
@@ -262,6 +283,8 @@ export class WorldScene extends Phaser.Scene {
   private stalls = new Map<string, StallView>();
   /** "!" / "?" over quest NPCs. */
   private npcMarkers: { npc: NpcDef; text: Phaser.GameObjects.Text }[] = [];
+  private npcViews = new Map<string, EntityView>();
+  private fishingLines!: FishingLines;
   private arrived = false;
   /** Teleporting out: no more input, the scene is about to be replaced. */
   private leaving = false;
@@ -319,6 +342,7 @@ export class WorldScene extends Phaser.Scene {
     tilemap.createLayer(0, tileset, 0, 0)!.setDepth(-1);
     const decor = zoneLayout(this.zone.id).decor;
     if (decor) drawDecor(this, decor);
+    this.fishingLines = new FishingLines(this);
     setMinimapZone(this.map, this.zone.name);
 
     const camera = this.cameras.main;
@@ -342,6 +366,7 @@ export class WorldScene extends Phaser.Scene {
 
     for (const npc of this.zone.npcs.map((id) => NPCS[id])) {
       const view = new EntityView(this, npc.x, npc.y, npc.appearance, npc.name, "#7fe3ff");
+      this.npcViews.set(npc.id, view);
       view.sprite.setInteractive({ cursor: cursor("talk") });
       view.sprite.on("pointerdown", (pointer: Phaser.Input.Pointer) => !pointer.event.altKey && this.walkTo(() => npc, NPC_RANGE - 4, () => this.talkTo(npc)));
       const marker = this.add
@@ -412,6 +437,8 @@ export class WorldScene extends Phaser.Scene {
     registerWindow("skills-window", () => toggleSkills(false));
     registerWindow("leaderboard", () => void toggleLeaderboard(false));
     registerWindow("stall-browse", closeBrowse);
+    registerWindow("storage-window", closeStorage);
+    registerWindow("trade-window", () => this.room.send(Msg.TradeCancel));
     this.controls.onPressed(Action.ClearTarget, () => {
       if (isMenuOpen()) return menuBack();
       if (closeTopWindow()) return;
@@ -441,6 +468,18 @@ export class WorldScene extends Phaser.Scene {
       leave: () => this.room.send(Msg.Chat, { text: "/ayril" }),
     });
     initDuel((accept) => this.room.send(Msg.DuelRespond, { accept }));
+    initDungeonInvite((accept) => this.room.send(Msg.DungeonRespond, { accept }));
+    initFishButton(() => this.room.send(Msg.Fish));
+    initMountButton(() => this.toggleMount());
+    this.controls.onPressed(Action.Mount, () => this.toggleMount());
+    initTrade({
+      respond: (accept) => this.room.send(Msg.TradeRespond, { accept }),
+      offer: (items, gold) => this.room.send(Msg.TradeOffer, { items, gold }),
+      lock: () => this.room.send(Msg.TradeLock),
+      confirm: () => this.room.send(Msg.TradeConfirm),
+      cancel: () => this.room.send(Msg.TradeCancel),
+      playerLevel: () => this.local?.state.level ?? 1,
+    });
     hud.onRespawnClicked(() => this.room.send(Msg.Respawn));
 
     const playerLevel = () => this.local?.state.level ?? 1;
@@ -448,6 +487,9 @@ export class WorldScene extends Phaser.Scene {
       sort: () => this.room.send(Msg.SortInventory),
       move: (from, to) => this.room.send(Msg.MoveItem, { from, to }),
       activate: (index) => {
+        if (isTradeOpen()) return void addToTrade(index);
+        const keeper = storageNpc();
+        if (keeper) return this.room.send(Msg.StorageQuick, { npcId: keeper.id, from: { area: "inv", index } });
         if (openUpgradeNpc()) {
           if (!selectForUpgrade(index)) hud.showMessage("Bu item yükseltilemez");
           return;
@@ -462,9 +504,12 @@ export class WorldScene extends Phaser.Scene {
         const item = inventoryState()?.slots[index];
         const def = item && ITEMS[item.defId];
         if (!item || !def) return "";
+        if (isTradeOpen()) return def.questItem ? "Görev eşyası takas edilemez" : "Sağ tık: takasa koy";
+        if (storageNpc()) return "Sağ tık: depoya koy";
         if (openUpgradeNpc()) return isUpgradeable(def) ? "Sağ tık: yükseltmeye koy" : "Yükseltilemez";
         if (isStallSetupOpen() && !isStallOpen()) return "Sağ tık: tezgâha koy";
         if (openShopNpc()) return `Sağ tık: sat (${itemSellPrice(def, item.affixes) * item.qty} altın)`;
+        if (def.fishingRod) return this.zone.fishing ? "Sağ tık: balık tut (suyun kenarında)" : "Liman'da balık tutmak için";
         if (def.slot) return "Sağ tık: kuşan";
         if (def.jewel) return "Sağ tık: pasif ağaca tak (P)";
         if (def.heal || def.mana || def.recall) return "Sağ tık: kullan";
@@ -499,6 +544,12 @@ export class WorldScene extends Phaser.Scene {
       playerClass: () => this.local?.state.cls ?? "warrior",
       changed: () => this.refreshNpcMarkers(),
     });
+    initStorage({
+      move: (from, to) => this.room.send(Msg.MoveItem, { from, to }),
+      quick: (npcId, from) => this.room.send(Msg.StorageQuick, { npcId, from }),
+      gold: (npcId, amount) => this.room.send(Msg.StorageGold, { npcId, amount }),
+      playerLevel,
+    });
     initMarket({
       open: (title, items) => this.room.send(Msg.StallOpen, { title, items }),
       close: () => this.room.send(Msg.StallClose),
@@ -532,7 +583,7 @@ export class WorldScene extends Phaser.Scene {
         });
         this.refreshLocalUi();
         view.setWeapon(player.weapon, player.weaponPlus);
-        setDollLook(player.color, player.cls);
+        setDollLook(player.color, player.cls, lookAppearance(player));
         this.rebuildHotbar(player.cls);
         initPotions(player.name, player.cls, {
           use: (defId) => this.room.send(Msg.UseItem, { defId }),
@@ -564,6 +615,8 @@ export class WorldScene extends Phaser.Scene {
           view.setBaseTint(player.stunned ? 0xffe066 : player.rooted ? 0x9ad5ff : player.buffed ? 0xffe8a8 : null);
           view.setWeapon(player.weapon, player.weaponPlus);
           view.setLook(playerAppearance(player));
+          this.syncMount(view, player.mounted);
+          view.setGmTag(player.gm);
           this.syncStall(sessionId, player);
           if (sessionId === this.targetId) this.refreshTargetFrame();
         };
@@ -769,6 +822,10 @@ export class WorldScene extends Phaser.Scene {
     this.room.onMessage(Msg.PartyInvite, (event: PartyInviteEvent) => showInvite(event.from));
     this.room.onMessage(Msg.PartyUpdate, (event: PartyUpdateEvent) => this.onPartyUpdate(event));
     this.room.onMessage(Msg.DuelInvite, (event: DuelInviteEvent) => showDuelInvite(event.from));
+    this.room.onMessage(Msg.DungeonInvite, (event: DungeonInviteEvent) => showDungeonInvite(event.from, event.dungeon));
+    this.room.onMessage(Msg.FishCatch, (event: FishCatchEvent) => this.showCatch(event));
+    this.room.onMessage(Msg.TradeInvite, (event: TradeInviteEvent) => showTradeInvite(event.from));
+    this.room.onMessage(Msg.TradeState, (event: TradeStateEvent) => onTradeState(event));
     this.room.onMessage(Msg.DuelState, (event: DuelStateEvent) => {
       this.duelOpponent = event.opponent;
       this.refreshHostility();
@@ -785,6 +842,7 @@ export class WorldScene extends Phaser.Scene {
       renderPotions();
       updatePassives(event);
       updateDoll(event.equipment);
+      updateStorage(event);
       refreshShop();
       refreshUpgrade();
       refreshMarket();
@@ -944,7 +1002,13 @@ export class WorldScene extends Phaser.Scene {
     if (distance(local.view, npc) > NPC_RANGE) return hud.showMessage("Çok uzak");
     closeShop();
     closeUpgrade();
+    closeStorage();
     closeNpcDialog();
+    if (npc.role === "guard") {
+      const view = this.npcViews.get(npc.id);
+      if (view) this.speechBubble(view, npc.greeting);
+      return;
+    }
     if (openNpcDialog(npc)) return;
     this.openNpcWindow(npc);
   }
@@ -954,6 +1018,7 @@ export class WorldScene extends Phaser.Scene {
     closeNpcDialog();
     if (npc.role === "merchant") openShop(npc);
     else if (npc.role === "blacksmith") openUpgrade(npc);
+    else if (npc.role === "storage") openStorage(npc);
     else return;
     toggleInventory(true);
   }
@@ -1262,10 +1327,14 @@ export class WorldScene extends Phaser.Scene {
     local.view.setHealth(p.hp, p.maxHp, p.hp < p.maxHp && !p.dead);
     local.view.setWeapon(p.weapon, p.weaponPlus);
     local.view.setLook(playerAppearance(p));
+    this.syncMount(local.view, p.mounted);
+    local.view.setGmTag(p.gm);
+    setMountButton(this.zone.instanced || this.zone.pvp ? null : { mounted: p.mounted });
     if (p.dead && this.targetId) this.selectTarget(null, false, false);
     if (p.dead) {
       closeShop();
       closeUpgrade();
+      closeStorage();
     }
   }
 
@@ -1292,6 +1361,7 @@ export class WorldScene extends Phaser.Scene {
         subtitle: classOf(cls).name,
         onInvite: canInvite ? () => this.room.send(Msg.Chat, { text: `/davet ${name}` }) : undefined,
         onDuel: canDuel ? () => this.room.send(Msg.Chat, { text: `/duello ${name}` }) : undefined,
+        onTrade: !this.isEnemyPlayer(this.targetId!) && !isTradeOpen() ? () => this.room.send(Msg.Chat, { text: `/takas ${name}` }) : undefined,
       });
       return;
     }
@@ -1469,7 +1539,74 @@ export class WorldScene extends Phaser.Scene {
     // Same-room messages also appear as a speech bubble over the speaker.
     const view = event.fromSession ? this.viewFor(event.fromSession, "player") : undefined;
     if (!view || !getSettings().speechBubbles) return;
-    const text = event.text.length > 60 ? `${event.text.slice(0, 57)}…` : event.text;
+    this.speechBubble(view, event.text.length > 60 ? `${event.text.slice(0, 57)}…` : event.text);
+  }
+
+  /**
+   * Arena only: the crown goes to the player here with the best PvP rating (most kills on a
+   * tie). Players who never fought (everyone starts at the same rating) don't count.
+   */
+  private updateCrown() {
+    let best: { id: string; rating: number; kills: number } | null = null;
+    if (this.zone.pvp) {
+      const everyone: [string, PlayerView][] = [...this.players].map(([id, p]) => [id, p.state]);
+      if (this.local) everyone.push([this.room.sessionId, this.local.state]);
+      for (const [id, p] of everyone) {
+        if (p.pvpKills + p.pvpDeaths === 0) continue;
+        if (!best || p.pvpRating > best.rating || (p.pvpRating === best.rating && p.pvpKills > best.kills)) best = { id, rating: p.pvpRating, kills: p.pvpKills };
+      }
+    }
+    this.local?.view.setCrown(best?.id === this.room.sessionId);
+    for (const [id, remote] of this.players) remote.view.setCrown(best?.id === id);
+  }
+
+  private toggleMount() {
+    if (this.local && !this.local.state.dead && !this.leaving) this.room.send(Msg.Mount);
+  }
+
+  /** Puts a character on (or off) their horse, with a puff of dust when it changes. */
+  private syncMount(view: EntityView, mounted: boolean) {
+    if (view.mounted === mounted) return;
+    view.setMounted(mounted);
+    dustPuff(this, view.x, view.y);
+  }
+
+  /** Fishing lines for everyone, and the Balık Tut button for us. */
+  private updateFishing() {
+    const present = new Set<string>();
+    const local = this.local;
+    if (local) {
+      present.add(this.room.sessionId);
+      this.fishingLines.update(this.room.sessionId, local.view, local.state.fishing, { x: local.state.fishX, y: local.state.fishY });
+      local.view.setWeaponHidden(local.state.fishing);
+    }
+    for (const [id, remote] of this.players) {
+      present.add(id);
+      this.fishingLines.update(id, remote.view, remote.state.fishing, { x: remote.state.fishX, y: remote.state.fishY });
+      remote.view.setWeaponHidden(remote.state.fishing);
+    }
+    this.fishingLines.prune(present);
+
+    if (!this.zone.fishing || !local || local.state.dead || local.state.stall) return setFishButton(null);
+    if (local.state.fishing) return setFishButton({ fishing: true });
+    const hasRod = inventoryState()?.slots.some((s) => s && ITEMS[s.defId]?.fishingRod) ?? false;
+    const facing = { dx: local.dir === Direction.Right ? 1 : local.dir === Direction.Left ? -1 : 0, dy: local.dir === Direction.Down ? 1 : local.dir === Direction.Up ? -1 : 0 };
+    const nearWater = castSpot(this.map, local.view.x, local.view.y, facing) !== null;
+    setFishButton(hasRod && nearWater ? { fishing: false } : null);
+  }
+
+  /** Something bit: a splash at the float and the catch's name over the angler. */
+  private showCatch(event: FishCatchEvent) {
+    const isLocal = event.sessionId === this.room.sessionId;
+    const entry = isLocal ? this.local : this.players.get(event.sessionId);
+    const def = ITEMS[event.item];
+    if (!entry || !def) return;
+    fishSplash(this, entry.state.fishX, entry.state.fishY);
+    floatingText(this, entry.view.x, entry.view.headY - 6, def.name, RARITY_COLORS[def.rarity], isLocal && def.rarity !== "common");
+  }
+
+  /** A line of speech over someone's head for a few seconds. */
+  private speechBubble(view: EntityView, text: string) {
     const bubble = this.add
       .text(Math.round(view.x), Math.round(view.headY) - 12, text, {
         fontFamily: "Courier New, monospace",
@@ -1536,7 +1673,7 @@ export class WorldScene extends Phaser.Scene {
     this.pendingInputs = this.pendingInputs.filter((input) => input.seq > server.lastSeq);
     let pos: Point = { x: server.x, y: server.y };
     for (const input of this.pendingInputs) {
-      pos = stepMovement(this.map, pos.x, pos.y, input.dx, input.dy, TICK_MS / 1000);
+      pos = stepMovement(this.map, pos.x, pos.y, input.dx, input.dy, TICK_MS / 1000, server.mounted);
     }
     if (distance(pos, local.curr) > TELEPORT_DISTANCE) local.prev = { ...pos };
     local.curr = pos;
@@ -1609,6 +1746,8 @@ export class WorldScene extends Phaser.Scene {
     // Walking away from an NPC closes its window.
     const shopNpc = openShopNpc();
     if (shopNpc && local && distance(local.view, shopNpc) > NPC_RANGE + TILE_SIZE) closeShop();
+    const keeper = storageNpc();
+    if (keeper && local && distance(local.view, keeper) > NPC_RANGE + TILE_SIZE) closeStorage();
     const smith = openUpgradeNpc();
     if (smith && local && distance(local.view, smith) > NPC_RANGE + TILE_SIZE) closeUpgrade();
     const speaker = dialogNpc();
@@ -1621,6 +1760,8 @@ export class WorldScene extends Phaser.Scene {
     for (const remote of this.players.values()) this.renderRemote(remote, renderTime);
     for (const remote of this.mobs.values()) this.renderRemote(remote, renderTime);
     for (const remote of this.minions.values()) this.renderRemote(remote, renderTime);
+    this.updateFishing();
+    this.updateCrown();
 
     const target = this.targetId ? (this.mobs.get(this.targetId) ?? this.players.get(this.targetId)) : undefined;
     this.targetRing.setVisible(!!target);
@@ -1643,7 +1784,7 @@ export class WorldScene extends Phaser.Scene {
     }
 
     const input: InputMessage = { seq: this.nextSeq++, dx, dy };
-    local.curr = stepMovement(this.map, local.curr.x, local.curr.y, dx, dy, TICK_MS / 1000);
+    local.curr = stepMovement(this.map, local.curr.x, local.curr.y, dx, dy, TICK_MS / 1000, local.state.mounted);
     local.dir = directionFrom(dx, dy, local.dir);
     local.moving = true;
     this.pendingInputs.push(input);

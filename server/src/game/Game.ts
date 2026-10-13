@@ -10,6 +10,7 @@ import {
   TICK_MS,
   statsWithEquipment,
   sanitizeRanks,
+  sanitizeLook,
   type FortuneState,
   type LifeSkills,
   type SkillRanks,
@@ -39,6 +40,9 @@ import { sendSkillRanks } from "./talents";
 import { sendFortuneState } from "./fortune";
 import { cancelGather, sanitizeLifeSkills, sendLifeSkills, spawnGatherNodes, updateGathering } from "./gathering";
 import { loseDuel, updateDuels, type DuelInvite, type DuelState } from "./duel";
+import { cancelTrade, updateTrades, type TradeInvite, type TradeSession } from "./trade";
+import { stopFishing, updateFishing, type FishingState } from "./fishing";
+import { updateMounts } from "./mount";
 import { worldMinute } from "./worldClock";
 import type { SpawnZone } from "../../../shared/src";
 
@@ -53,6 +57,8 @@ export interface GameIO {
   persist(sessionIds: string[]): void;
   /** Send a player to another zone (return scroll), as if through a portal. */
   transfer(sessionId: string, zone: ZoneId, arriveAt?: { x: number; y: number }): void;
+  /** Like transfer, but they must go: still here a few seconds later, they are disconnected. */
+  evict(sessionId: string, zone: ZoneId): void;
 }
 
 export interface PlayerRuntime {
@@ -114,6 +120,17 @@ export interface PlayerRuntime {
   duel: DuelState | null;
   /** A duel challenge waiting for our answer. */
   duelInvite: DuelInvite | null;
+  /** The trade window we have open (shared with the other trader). */
+  trade: TradeSession | null;
+  /** A trade request waiting for our answer. */
+  tradeInvite: TradeInvite | null;
+  /** Our line is in the water (harbour). */
+  fishing: FishingState | null;
+  /** Game time of the last mount / dismount (toggle cooldown). */
+  mountToggledAt: number;
+  /** Play time stored before this session, and when this session began (wall clock). */
+  playSecondsBefore: number;
+  joinedAt: number;
 }
 
 export interface ActiveBuff {
@@ -204,6 +221,9 @@ export class Game {
     updateGathering(this);
     updatePlayerCombat(this);
     updateDuels(this);
+    updateTrades(this);
+    updateFishing(this);
+    updateMounts(this);
   }
 
   /**
@@ -220,6 +240,11 @@ export class Game {
     player.pvpRating = character.pvpRating;
     player.pvpKills = character.pvpKills;
     player.pvpDeaths = character.pvpDeaths;
+    const look = sanitizeLook(character.look);
+    player.gender = look.gender;
+    player.hairStyle = look.hairStyle;
+    player.hairColor = look.hairColor;
+    player.skin = look.skin;
     const savedSpot = this.zone.persistent && character.zone === this.zone.id && character.x !== null && character.y !== null;
     if (arriveAt && !collides(this.map, arriveAt.x, arriveAt.y)) {
       player.x = arriveAt.x;
@@ -238,7 +263,7 @@ export class Game {
       lastQueuedSeq: 0,
       inputBudget: MAX_INPUT_BURST,
       stats: statsWithEquipment(character.class, 1, []), // set by refreshStats below
-      inventory: fromStored(character.gold, character.items),
+      inventory: fromStored(character.gold, character.items, character.storageGold),
       targetId: null,
       attacking: false,
       nextSwingAt: 0,
@@ -269,6 +294,12 @@ export class Game {
       pingTimes: [],
       duel: null,
       duelInvite: null,
+      trade: null,
+      tradeInvite: null,
+      fishing: null,
+      mountToggledAt: -Infinity,
+      playSecondsBefore: character.playSeconds,
+      joinedAt: Date.now(),
     });
 
     refreshStats(this, sessionId);
@@ -289,7 +320,7 @@ export class Game {
   /** What gets written to the database for this player. */
   progressOf(
     sessionId: string,
-  ): { characterId: number; progress: CharacterProgress; gold: number; items: StoredItem[]; quests: QuestProgress[] } | null {
+  ): { characterId: number; progress: CharacterProgress; gold: number; storageGold: number; items: StoredItem[]; quests: QuestProgress[] } | null {
     const player = this.state.players.get(sessionId);
     const runtime = this.playerRuntime.get(sessionId);
     if (!player || !runtime) return null;
@@ -309,8 +340,10 @@ export class Game {
         skillRanks: runtime.skillRanks,
         fortune: runtime.fortune,
         lifeSkills: runtime.lifeSkills,
+        playSeconds: runtime.playSecondsBefore + Math.floor((Date.now() - runtime.joinedAt) / 1000),
       },
       gold: runtime.inventory.gold,
+      storageGold: runtime.inventory.storageGold,
       items: toStored(runtime.inventory),
       quests: [...runtime.quests.values()],
     };
@@ -318,6 +351,7 @@ export class Game {
 
   removePlayer(sessionId: string) {
     loseDuel(this, sessionId, "left");
+    cancelTrade(this, sessionId, "Takas iptal edildi: karşı taraf ayrıldı");
     closeStall(this, sessionId);
     dismissMinions(this, sessionId);
     forgetPlayer(this, sessionId);
@@ -384,7 +418,7 @@ export class Game {
       const input = runtime.inputQueue.shift()!;
       // Dead, rooted or stall-keeping players' inputs are still acknowledged so the client's pending list drains.
       if (!player.dead && !player.rooted && !player.stall) {
-        const next = stepMovement(this.map, player.x, player.y, input.dx, input.dy, dt);
+        const next = stepMovement(this.map, player.x, player.y, input.dx, input.dy, dt, player.mounted);
         player.x = next.x;
         player.y = next.y;
         player.dir = directionFrom(input.dx, input.dy, player.dir);
@@ -394,9 +428,10 @@ export class Game {
       runtime.inputBudget--;
     }
     player.moving = processed > 0;
-    // Moving interrupts spells with a cast time, and gathering.
+    // Moving interrupts spells with a cast time, gathering, and reels the fishing line in.
     if (processed > 0 && runtime.casting) cancelCast(this, sessionId, "Büyü iptal edildi");
     if (processed > 0 && runtime.gathering) cancelGather(this, sessionId, "Toplama yarıda kaldı");
+    if (processed > 0 && runtime.fishing) stopFishing(this, sessionId, "Oltayı topladın");
   }
 
   private updateClock() {

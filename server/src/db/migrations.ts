@@ -148,6 +148,24 @@ const MIGRATIONS: { version: number; name: string; sql: string }[] = [
   },
   {
     version: 10,
+    name: "storage (depo)",
+    sql: `
+      ALTER TABLE items DROP CONSTRAINT items_container_check;
+      ALTER TABLE items ADD CONSTRAINT items_container_check CHECK (container IN ('inventory', 'equipment', 'passive', 'storage'));
+      ALTER TABLE characters ADD COLUMN storage_gold INT NOT NULL DEFAULT 0 CHECK (storage_gold >= 0);
+    `,
+  },
+  {
+    version: 11,
+    name: "character looks and play time",
+    sql: `
+      -- { "gender": "female", "hairStyle": "ponytail", "hairColor": 9127187, "skin": 15779994 }; {} = defaults
+      ALTER TABLE characters ADD COLUMN look JSONB NOT NULL DEFAULT '{}';
+      ALTER TABLE characters ADD COLUMN play_seconds INT NOT NULL DEFAULT 0;
+    `,
+  },
+  {
+    version: 12,
     name: "life skills",
     sql: `
       -- { "mining": { "level": 3, "xp": 20 }, "herbalism": { ... } }; {} = everything at 1

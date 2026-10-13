@@ -36,6 +36,14 @@ import {
   type StallBuyMessage,
   type StallOpenMessage,
   type QuestMessage,
+  type StorageGoldMessage,
+  type StorageQuickMessage,
+  type TradeOfferMessage,
+  type DungeonInviteEvent,
+  type DungeonRespondMessage,
+  type PortalDef,
+  DUNGEON_INVITE_MS,
+  DUNGEON_INVITE_RANGE,
 } from "../../../shared/src";
 import { config } from "../config";
 import { accountForToken, type Account } from "../db/accounts";
@@ -59,6 +67,10 @@ import { startGather } from "../game/gathering";
 import { isPingKind, sendPing } from "../game/pings";
 import { sortBags } from "../game/items";
 import { readFortune } from "../game/fortune";
+import { quickStorage, storageGold } from "../game/storage";
+import { stopFishing, toggleFishing } from "../game/fishing";
+import { dismount, toggleMount } from "../game/mount";
+import { cancelTrade, confirmTrade, lockOffer, respondTrade, setOffer, tradeLocked } from "../game/trade";
 import {
   closeTownPortal,
   isPortalRoom,
@@ -68,6 +80,11 @@ import {
   roomHasPortal,
   townPortalOf,
 } from "../game/townPortal";
+
+/** A player sent out of a dungeon (left the party) who hasn't gone after this long is disconnected. */
+const EVICT_GRACE_MS = 8000;
+/** How long someone accepting a party dungeon invite waits for the party's copy to open. */
+const INSTANCE_WAIT_MS = 5000;
 
 /** A town portal survives a logout this long (the player may just be changing zones). */
 const TOWN_PORTAL_LOGOUT_GRACE_MS = 20_000;
@@ -95,6 +112,8 @@ export class ZoneRoom extends Room<WorldState> {
   private stopPortalSync: (() => void) | null = null;
   /** Instances: kept alive (autoDispose off) because a town portal leads here. */
   private keptForPortal = false;
+  /** sessionId -> a party member's "come along into the dungeon" waiting for an answer. */
+  private dungeonInvites = new Map<string, { portalId: string; expiresAt: number }>();
 
   onCreate(options: { zoneId?: string }) {
     if (!isZoneId(options.zoneId)) throw new Error(`unknown zone ${options.zoneId}`);
@@ -114,6 +133,10 @@ export class ZoneRoom extends Room<WorldState> {
           closeStall(this.game, sessionId);
           client.send(Msg.Transfer, { zone, ticket: issueTicket(runtime.characterId, zone, arriveAt) } satisfies TransferEvent);
         },
+        evict: (sessionId, zone) => {
+          this.game.io.transfer(sessionId, zone);
+          this.clock.setTimeout(() => this.clients.getById(sessionId)?.leave(), EVICT_GRACE_MS);
+        },
       },
       this.zone,
     );
@@ -123,10 +146,16 @@ export class ZoneRoom extends Room<WorldState> {
     });
     this.onMessage(Msg.SetTarget, (client, message: Partial<SetTargetMessage>) => {
       const targetId = typeof message?.targetId === "string" ? message.targetId : null;
+      if (message?.attack === true) {
+        stopFishing(this.game, client.sessionId, "Oltayı topladın");
+        dismount(this.game, client.sessionId);
+      }
       setTarget(this.game, client.sessionId, targetId, message?.attack === true);
     });
     this.onMessage(Msg.UseSkill, (client, message: Partial<UseSkillMessage>) => {
       if (typeof message?.skillId !== "string") return;
+      stopFishing(this.game, client.sessionId, "Oltayı topladın");
+      dismount(this.game, client.sessionId);
       const aim = message.aim;
       const validAim = aim && Number.isFinite(aim.x) && Number.isFinite(aim.y) ? { x: Number(aim.x), y: Number(aim.y) } : undefined;
       useSkill(this.game, client.sessionId, message.skillId, validAim);
@@ -134,39 +163,39 @@ export class ZoneRoom extends Room<WorldState> {
     this.onMessage(Msg.Respawn, (client) => respawn(this.game, client.sessionId));
 
     this.onMessage(Msg.MoveItem, (client, message: Partial<MoveItemMessage>) => {
-      if (stallLocked(this.game, client.sessionId)) return;
+      if (this.itemsLocked(client.sessionId)) return;
       const from = parseSlotRef(message?.from);
       const to = parseSlotRef(message?.to);
       if (from && to) moveItem(this.game, client.sessionId, from, to);
     });
     this.onMessage(Msg.UseItem, (client, message: Partial<UseItemMessage>) => {
-      if (stallLocked(this.game, client.sessionId)) return;
+      if (this.itemsLocked(client.sessionId)) return;
       const index = typeof message?.index === "number" ? message.index : undefined;
       const defId = typeof message?.defId === "string" ? message.defId : undefined;
       useItem(this.game, client.sessionId, index, defId);
     });
     this.onMessage(Msg.Unequip, (client, message: Partial<UnequipMessage>) => {
-      if (stallLocked(this.game, client.sessionId)) return;
+      if (this.itemsLocked(client.sessionId)) return;
       if (EQUIP_SLOTS.includes(message?.slot as EquipSlot)) unequip(this.game, client.sessionId, message.slot!);
     });
     this.onMessage(Msg.PickupLoot, (client, message: Partial<PickupLootMessage>) => {
-      if (stallLocked(this.game, client.sessionId)) return;
+      if (this.itemsLocked(client.sessionId)) return;
       if (typeof message?.lootId === "string") pickupLoot(this.game, client.sessionId, message.lootId);
     });
     this.onMessage(Msg.Buy, (client, message: Partial<BuyMessage>) => {
-      if (stallLocked(this.game, client.sessionId)) return;
+      if (this.itemsLocked(client.sessionId)) return;
       if (typeof message?.npcId === "string" && typeof message.itemId === "string") {
         buy(this.game, client.sessionId, message.npcId, message.itemId, Number(message.qty));
       }
     });
     this.onMessage(Msg.Sell, (client, message: Partial<SellMessage>) => {
-      if (stallLocked(this.game, client.sessionId)) return;
+      if (this.itemsLocked(client.sessionId)) return;
       if (typeof message?.npcId === "string" && typeof message.index === "number") {
         sell(this.game, client.sessionId, message.npcId, message.index);
       }
     });
     this.onMessage(Msg.Upgrade, (client, message: Partial<UpgradeMessage>) => {
-      if (stallLocked(this.game, client.sessionId)) return;
+      if (this.itemsLocked(client.sessionId)) return;
       if (typeof message?.npcId === "string" && typeof message.uid === "string") {
         upgradeItem(this.game, client.sessionId, message.npcId, message.uid, message.protect === true);
       }
@@ -179,14 +208,15 @@ export class ZoneRoom extends Room<WorldState> {
       if (runtime) respond(runtime.characterId, message?.accept === true);
     });
     this.onMessage(Msg.DuelRespond, (client, message: { accept?: unknown }) => respondDuel(this.game, client.sessionId, message?.accept === true));
-    this.onMessage(Msg.StallOpen, (client, message: Partial<StallOpenMessage>) =>
-      openStall(this.game, client.sessionId, message?.title, message?.items),
-    );
+    this.onMessage(Msg.StallOpen, (client, message: Partial<StallOpenMessage>) => {
+      if (!tradeLocked(this.game, client.sessionId)) openStall(this.game, client.sessionId, message?.title, message?.items);
+    });
     this.onMessage(Msg.StallClose, (client) => closeStall(this.game, client.sessionId, "Pazar kapandı"));
     this.onMessage(Msg.StallBrowse, (client, message: Partial<StallBrowseMessage>) => {
       if (typeof message?.sellerId === "string") browseStall(this.game, client.sessionId, message.sellerId);
     });
     this.onMessage(Msg.StallBuy, (client, message: Partial<StallBuyMessage>) => {
+      if (tradeLocked(this.game, client.sessionId)) return;
       if (typeof message?.sellerId === "string" && typeof message.uid === "string") {
         buyFromStall(this.game, client.sessionId, message.sellerId, message.uid, message.qty, message.price);
       }
@@ -195,7 +225,7 @@ export class ZoneRoom extends Room<WorldState> {
       if (typeof message?.questId === "string") acceptQuest(this.game, client.sessionId, message.questId, message.npcId);
     });
     this.onMessage(Msg.QuestTurnIn, (client, message: Partial<QuestMessage>) => {
-      if (stallLocked(this.game, client.sessionId)) return;
+      if (this.itemsLocked(client.sessionId)) return;
       if (typeof message?.questId === "string") turnInQuest(this.game, client.sessionId, message.questId, message.npcId);
     });
     this.onMessage(Msg.QuestAbandon, (client, message: Partial<QuestMessage>) => {
@@ -224,6 +254,30 @@ export class ZoneRoom extends Room<WorldState> {
     this.onMessage(Msg.ReadFortune, (client, message: { npcId?: unknown }) => {
       if (typeof message?.npcId === "string") readFortune(this.game, client.sessionId, message.npcId);
     });
+    this.onMessage(Msg.StorageGold, (client, message: Partial<StorageGoldMessage>) => {
+      if (this.itemsLocked(client.sessionId)) return;
+      if (typeof message?.npcId === "string") storageGold(this.game, client.sessionId, message.npcId, message.amount);
+    });
+    this.onMessage(Msg.StorageQuick, (client, message: Partial<StorageQuickMessage>) => {
+      if (this.itemsLocked(client.sessionId)) return;
+      const from = message?.from;
+      if (typeof message?.npcId !== "string" || (from?.area !== "inv" && from?.area !== "storage") || typeof from.index !== "number") return;
+      quickStorage(this.game, client.sessionId, message.npcId, { area: from.area, index: from.index });
+    });
+    this.onMessage(Msg.DungeonRespond, (client, message: Partial<DungeonRespondMessage>) => {
+      const invite = this.dungeonInvites.get(client.sessionId);
+      this.dungeonInvites.delete(client.sessionId);
+      if (message?.accept !== true) return;
+      if (!invite || invite.expiresAt < Date.now()) return notice(this.game, client.sessionId, "Davetin süresi doldu");
+      this.usePortal(client, invite.portalId, true);
+    });
+    this.onMessage(Msg.Fish, (client) => toggleFishing(this.game, client.sessionId));
+    this.onMessage(Msg.Mount, (client) => toggleMount(this.game, client.sessionId));
+    this.onMessage(Msg.TradeRespond, (client, message: { accept?: unknown }) => respondTrade(this.game, client.sessionId, message?.accept === true));
+    this.onMessage(Msg.TradeOffer, (client, message: Partial<TradeOfferMessage>) => setOffer(this.game, client.sessionId, message?.items, message?.gold));
+    this.onMessage(Msg.TradeLock, (client) => lockOffer(this.game, client.sessionId));
+    this.onMessage(Msg.TradeConfirm, (client) => confirmTrade(this.game, client.sessionId));
+    this.onMessage(Msg.TradeCancel, (client) => cancelTrade(this.game, client.sessionId, "Takas iptal edildi"));
     this.onMessage(Msg.UseTownPortal, (client, message: Partial<UseTownPortalMessage>) => {
       if (typeof message?.portalId === "string") this.useTownPortal(client, message.portalId);
     });
@@ -282,10 +336,17 @@ export class ZoneRoom extends Room<WorldState> {
       if (portal && this.zone.id !== HOME_ZONE && !isPortalRoom(portal, this.zone.id, this.roomId, this.zone.instanced)) {
         closeTownPortal(character.id);
       }
-      onlineCharacters.set(character.id, { characterId: character.id, game: this.game, sessionId: client.sessionId, name: character.name });
+      onlineCharacters.set(character.id, {
+        characterId: character.id,
+        game: this.game,
+        sessionId: client.sessionId,
+        name: character.name,
+        roomId: this.roomId,
+      });
       if (this.zone.instanced) registerInstance(character.id, this.zone.id, this.roomId);
       refreshFor(character.id);
       this.game.playerRuntime.get(client.sessionId)!.isAdmin = auth.account.isAdmin;
+      this.state.players.get(client.sessionId)!.gm = auth.account.isAdmin;
       this.releases.set(client.sessionId, release);
       console.log(`[${this.zone.id}] ${character.name} (${auth.account.username}) joined (${this.state.players.size} online)`);
     } catch (error) {
@@ -309,19 +370,28 @@ export class ZoneRoom extends Room<WorldState> {
         }, TOWN_PORTAL_LOGOUT_GRACE_MS);
       }
       this.game.removePlayer(client.sessionId);
+      this.dungeonInvites.delete(client.sessionId);
       this.releases.get(client.sessionId)?.();
       this.releases.delete(client.sessionId);
       console.log(`[${this.zone.id}] ${name} left (${this.state.players.size} online)`);
     }
   }
 
-  /** Validates a portal use and hands the client a ticket for the destination zone. */
-  private usePortal(client: Client, portalId: string) {
+  /** An open market stall or trade freezes the inventory. Returns true (and tells the player) if so. */
+  private itemsLocked(sessionId: string): boolean {
+    return stallLocked(this.game, sessionId) || tradeLocked(this.game, sessionId);
+  }
+
+  /**
+   * Validates a portal use and hands the client a ticket for the destination zone.
+   * `invited`: a party member accepted "come along" and needn't walk up to the portal.
+   */
+  private usePortal(client: Client, portalId: string, invited = false) {
     const player = this.state.players.get(client.sessionId);
     const entry = this.game.progressOf(client.sessionId);
     const portal = this.zone.portals.find((p) => p.id === portalId);
     if (!player || !entry || !portal || player.dead) return;
-    if (distance(player, portal) > PORTAL_RANGE) return notice(this.game, client.sessionId, "Çok uzak");
+    if (distance(player, portal) > (invited ? DUNGEON_INVITE_RANGE : PORTAL_RANGE)) return notice(this.game, client.sessionId, "Çok uzak");
     if (portal.requiresClear && !this.state.cleared) return notice(this.game, client.sessionId, "Portal henüz kapalı");
     if (portal.minLevel && player.level < portal.minLevel) {
       return notice(this.game, client.sessionId, `${portal.label} için seviye ${portal.minLevel} gerekli`);
@@ -331,11 +401,44 @@ export class ZoneRoom extends Room<WorldState> {
       player.x = portal.returnTo.x;
       player.y = portal.returnTo.y;
     }
-    // Party already inside this dungeon: join their instance instead of opening a new one.
-    const roomId = ZONES[portal.to].instanced ? instanceFor(entry.characterId, portal.to) : undefined;
     closeStall(this.game, client.sessionId);
-    const ticket = issueTicket(entry.characterId, portal.to, portal.arriveAt);
-    client.send(Msg.Transfer, { zone: portal.to, ticket, roomId } satisfies TransferEvent);
+    const instanced = ZONES[portal.to].instanced;
+    const go = () => {
+      if (!this.clients.getById(client.sessionId)) return;
+      // Party already inside this dungeon: join their instance instead of opening a new one.
+      const roomId = instanced ? instanceFor(entry.characterId, portal.to) : undefined;
+      const ticket = issueTicket(entry.characterId, portal.to, portal.arriveAt);
+      client.send(Msg.Transfer, { zone: portal.to, ticket, roomId } satisfies TransferEvent);
+    };
+    if (!invited || !instanced) go();
+    else {
+      // Whoever went in first may still be loading: wait for the party's copy to open.
+      const started = Date.now();
+      const tryJoin = () => {
+        if (instanceFor(entry.characterId, portal.to) || Date.now() - started > INSTANCE_WAIT_MS) go();
+        else this.clock.setTimeout(tryJoin, 200);
+      };
+      tryJoin();
+    }
+    if (instanced && !invited) this.inviteParty(client.sessionId, portal);
+  }
+
+  /** Someone went into a dungeon: ask their party members standing nearby to come along. */
+  private inviteParty(sessionId: string, portal: PortalDef) {
+    const player = this.state.players.get(sessionId);
+    const characterId = this.game.playerRuntime.get(sessionId)?.characterId;
+    if (!player || characterId === undefined) return;
+    for (const [otherId, other] of this.state.players) {
+      const otherCharacter = this.game.playerRuntime.get(otherId)?.characterId;
+      if (otherId === sessionId || otherCharacter === undefined || !sameParty(characterId, otherCharacter)) continue;
+      if (other.dead || distance(other, portal) > DUNGEON_INVITE_RANGE) continue;
+      if (portal.minLevel && other.level < portal.minLevel) {
+        notice(this.game, otherId, `${player.name} zindana girdi: ${portal.label} (seviye ${portal.minLevel} gerekli)`, "#74c0fc");
+        continue;
+      }
+      this.dungeonInvites.set(otherId, { portalId: portal.id, expiresAt: Date.now() + DUNGEON_INVITE_MS });
+      this.game.io.send(otherId, Msg.DungeonInvite, { from: player.name, dungeon: ZONES[portal.to].name } satisfies DungeonInviteEvent);
+    }
   }
 
   onDispose() {
@@ -423,6 +526,7 @@ function parseSlotRef(value: unknown): SlotRef | null {
   if (typeof value !== "object" || value === null) return null;
   const ref = value as Record<string, unknown>;
   if (ref.area === "inv" && typeof ref.index === "number") return { area: "inv", index: ref.index };
+  if (ref.area === "storage" && typeof ref.index === "number") return { area: "storage", index: ref.index };
   if (ref.area === "equip" && EQUIP_SLOTS.includes(ref.slot as EquipSlot)) return { area: "equip", slot: ref.slot as EquipSlot };
   if (ref.area === "passive" && typeof ref.socket === "number" && (ref.minor === null || typeof ref.minor === "number")) {
     return { area: "passive", socket: ref.socket, minor: ref.minor };

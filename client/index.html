@@ -24,19 +24,69 @@
       <p id="auth-error" class="error"></p>
     </form>
 
-    <div id="characters" class="panel" hidden>
+    <div id="characters" class="panel lobby-panel" hidden>
       <h1>Karakterler</h1>
       <p id="account-name" class="muted"></p>
-      <div id="character-list"></div>
-      <div id="class-picker"></div>
-      <form id="create-character" class="row" autocomplete="off">
-        <input id="character-name" maxlength="16" placeholder="Yeni karakter adı" />
-        <button type="submit">Oluştur</button>
-      </form>
+      <div id="character-info">
+        <div class="info-row"><span>İsim</span><b id="info-name"></b></div>
+        <div class="info-row"><span>Sınıf</span><b id="info-class"></b></div>
+        <div class="info-row"><span>Seviye</span><b id="info-level"></b></div>
+        <div class="info-row"><span>Bölge</span><b id="info-zone"></b></div>
+        <div class="info-row"><span>Oyun süresi</span><b id="info-time"></b></div>
+      </div>
+      <p id="no-characters" class="muted" hidden>Henüz karakterin yok. Boş yere tıkla ya da yeni bir karakter yarat.</p>
+      <p class="lobby-hint muted">Karakterine tıklayarak seç.</p>
+      <button type="button" id="play-btn">Başla</button>
+      <div class="row">
+        <button type="button" id="new-character-btn" class="secondary">Yeni Karakter</button>
+        <button type="button" id="delete-character-btn" class="secondary">Sil</button>
+      </div>
+      <div id="delete-confirm" hidden>
+        <p>Bu karakter <b>kalıcı olarak</b> silinecek. Onaylamak için adını yaz: <b id="delete-name"></b></p>
+        <input id="delete-input" maxlength="16" autocomplete="off" />
+        <div class="row">
+          <button type="button" id="delete-yes" class="danger">Sil</button>
+          <button type="button" id="delete-no" class="secondary">Vazgeç</button>
+        </div>
+      </div>
       <p id="characters-error" class="error"></p>
-      <a id="gm-link" href="/admin.html" class="gm-link" hidden>GM Paneli</a>
-      <button type="button" id="logout" class="link">Çıkış yap</button>
+      <div class="lobby-footer">
+        <a id="gm-link" href="/admin.html" class="gm-link" hidden>GM Paneli</a>
+        <button type="button" id="logout" class="link">Çıkış yap</button>
+      </div>
     </div>
+
+    <form id="create-panel" class="panel lobby-panel" autocomplete="off" hidden>
+      <h1>Karakter Yarat</h1>
+      <label for="character-name">İsim</label>
+      <input id="character-name" maxlength="16" placeholder="3-16 harf" />
+      <label>Sınıf</label>
+      <div id="class-picker"></div>
+      <label>Cinsiyet</label>
+      <div id="gender-picker" class="choice-row"></div>
+      <label>Saç modeli</label>
+      <div class="stepper">
+        <button type="button" id="hair-prev" class="secondary">‹</button>
+        <span id="hair-name"></span>
+        <button type="button" id="hair-next" class="secondary">›</button>
+      </div>
+      <label>Saç rengi</label>
+      <div id="hair-colors" class="swatches"></div>
+      <label>Ten rengi</label>
+      <div id="skin-colors" class="swatches"></div>
+      <label>Kıyafet rengi</label>
+      <div id="tunic-colors" class="swatches"></div>
+      <div class="row">
+        <button type="button" id="rotate-left" class="secondary" title="Sola döndür">⟲</button>
+        <button type="button" id="randomize" class="secondary">Rastgele</button>
+        <button type="button" id="rotate-right" class="secondary" title="Sağa döndür">⟳</button>
+      </div>
+      <div class="row">
+        <button type="submit" id="create-btn">Oluştur</button>
+        <button type="button" id="create-back" class="secondary">Geri</button>
+      </div>
+      <p id="create-error" class="error"></p>
+    </form>
 
     <div id="hud" hidden>
       <div id="player-frame" class="frame">
@@ -50,6 +100,7 @@
         <div class="bar hp"><div id="target-hp-fill" class="fill"></div><span id="target-hp-text"></span></div>
         <div class="target-actions">
           <button id="target-invite" type="button" tabindex="-1" hidden>Gruba davet et</button>
+          <button id="target-trade" type="button" tabindex="-1" hidden>Takas</button>
           <button id="target-duel" type="button" tabindex="-1" hidden>Düello</button>
         </div>
       </div>
@@ -69,6 +120,22 @@
         <div class="row">
           <button id="duel-accept" type="button" tabindex="-1">Kabul</button>
           <button id="duel-decline" type="button" tabindex="-1">Reddet</button>
+        </div>
+      </div>
+
+      <div id="trade-invite" class="window" hidden>
+        <p id="trade-invite-text"></p>
+        <div class="row">
+          <button id="trade-accept" type="button" tabindex="-1">Kabul</button>
+          <button id="trade-decline" type="button" tabindex="-1">Reddet</button>
+        </div>
+      </div>
+
+      <div id="dungeon-invite" class="window" hidden>
+        <p id="dungeon-invite-text"></p>
+        <div class="row">
+          <button id="dungeon-accept" type="button" tabindex="-1">Katıl</button>
+          <button id="dungeon-decline" type="button" tabindex="-1">Reddet</button>
         </div>
       </div>
 
@@ -133,6 +200,7 @@
       </div>
       <div id="potion-slots"></div>
       <div id="ping-wheel" hidden></div>
+      <button id="mount-button" type="button" tabindex="-1" title="Ata bin (H)" hidden><img alt="" /><span class="slot-key">H</span></button>
       <div id="resource-globe" class="globe rage">
         <div class="globe-orb">
           <div class="globe-liquid"><span class="globe-wave a"></span><span class="globe-wave b"></span></div>
@@ -150,7 +218,7 @@
         <div id="xp-bar" class="bar"><div id="xp-fill" class="fill"></div><span id="xp-text"></span></div>
       </div>
 
-      <div id="help">Tab: hedef · Sol tık: saldır / al / konuş / portal · 1-0: skill (K'dan sürükle) · Q / R: iksir · I: envanter · K: yetenekler · P: pasif ağaç · T: şehir portalı · J: görevler · M: harita · E: al/konuş/portal · Enter: sohbet · L: PvP sıralaması · Esc: menü</div>
+      <div id="help">Tab: hedef · Sol tık: saldır / al / konuş / portal · 1-0: skill (K'dan sürükle) · Q / R: iksir · I: envanter · K: yetenekler · P: pasif ağaç · T: şehir portalı · J: görevler · M: harita · E: al/konuş/portal · Enter: sohbet · L: PvP sıralaması · /takas İsim: takas · Esc: menü</div>
 
       <div id="inventory-window" class="window" hidden>
         <div class="window-title"><span>Karakter</span><button id="inventory-close" class="close" tabindex="-1">×</button></div>
@@ -188,6 +256,7 @@
       </div>
 
       <button id="stall-button" type="button" tabindex="-1" hidden>Pazar Kur</button>
+      <button id="fish-button" type="button" tabindex="-1" hidden>Balık Tut</button>
 
       <div id="quest-tracker" hidden></div>
 
@@ -203,6 +272,7 @@
           <button type="button" data-action="questLog">Görev</button>
           <button type="button" data-action="passiveTree">Pasif</button>
           <button type="button" data-action="townPortal">Portal</button>
+          <button type="button" data-action="mount">At</button>
           <button type="button" data-action="skills">Yetenek</button>
           <button type="button" id="touch-chat">Sohbet</button>
           <button type="button" data-action="clearTarget">Menü</button>
@@ -250,6 +320,39 @@
         <div id="stall-browse-seller" class="window-hint"></div>
         <div id="stall-browse-list" class="stall-list"></div>
         <p class="window-hint">Fiyatlar birim başınadır. Adet yazıp Al'a bas.</p>
+      </div>
+
+      <div id="storage-window" class="window" hidden>
+        <div class="window-title"><span>Depo</span><button id="storage-close" class="close" tabindex="-1">×</button></div>
+        <div id="storage-grid"></div>
+        <div class="storage-gold">
+          <span class="coin"></span><span id="storage-gold">0</span>
+          <input id="storage-gold-input" type="number" min="1" placeholder="Miktar" autocomplete="off" />
+          <button id="storage-deposit" type="button" class="stall-action" tabindex="-1">Koy</button>
+          <button id="storage-withdraw" type="button" class="stall-action" tabindex="-1">Al</button>
+        </div>
+        <p class="window-hint">Sağ tık ya da sürükle: envanter ↔ depo. Depo bu karaktere aittir, eşyaların burada güvende.</p>
+      </div>
+
+      <div id="trade-window" class="window" hidden>
+        <div class="window-title"><span id="trade-title">Takas</span><button id="trade-close" class="close" tabindex="-1">×</button></div>
+        <div class="trade-sides">
+          <div id="trade-mine" class="trade-side">
+            <div class="trade-side-title">Senin teklifin <span id="trade-mine-status" class="trade-status"></span></div>
+            <div id="trade-mine-grid" class="trade-grid"></div>
+            <div class="trade-gold"><span class="coin"></span><input id="trade-gold-input" type="number" min="0" value="0" autocomplete="off" /></div>
+          </div>
+          <div id="trade-theirs" class="trade-side">
+            <div class="trade-side-title"><span id="trade-partner"></span> <span id="trade-theirs-status" class="trade-status"></span></div>
+            <div id="trade-theirs-grid" class="trade-grid"></div>
+            <div class="trade-gold"><span class="coin"></span><span id="trade-theirs-gold">0</span></div>
+          </div>
+        </div>
+        <p id="trade-hint" class="window-hint"></p>
+        <div class="trade-buttons">
+          <button id="trade-action" type="button" class="stall-action" tabindex="-1">Teklifi Kilitle</button>
+          <button id="trade-cancel" type="button" class="stall-action" tabindex="-1">İptal</button>
+        </div>
       </div>
     </div>
 

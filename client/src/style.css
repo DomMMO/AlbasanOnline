@@ -607,6 +607,7 @@ table.controls td:first-child {
 }
 
 #target-invite,
+#target-trade,
 #target-duel {
   font: inherit;
   font-size: 11px;
@@ -676,7 +677,9 @@ table.controls td:first-child {
 }
 
 #party-invite,
-#duel-invite {
+#duel-invite,
+#trade-invite,
+#dungeon-invite {
   top: 22%;
   left: 50%;
   transform: translateX(-50%);
@@ -686,18 +689,24 @@ table.controls td:first-child {
 }
 
 #party-invite p,
-#duel-invite p {
+#duel-invite p,
+#trade-invite p,
+#dungeon-invite p {
   margin: 0;
 }
 
 #party-invite .row,
-#duel-invite .row {
+#duel-invite .row,
+#trade-invite .row,
+#dungeon-invite .row {
   display: flex;
   gap: 8px;
 }
 
 #party-invite button,
-#duel-invite button {
+#duel-invite button,
+#trade-invite button,
+#dungeon-invite button {
   flex: 1;
   font: inherit;
   font-weight: bold;
@@ -707,12 +716,16 @@ table.controls td:first-child {
 }
 
 #party-accept,
-#duel-accept {
+#duel-accept,
+#trade-accept,
+#dungeon-accept {
   background: #4cd964;
 }
 
 #party-decline,
 #duel-decline,
+#trade-decline,
+#dungeon-decline,
 #target-duel {
   background: #e05a5a;
   color: #fff;
@@ -1599,7 +1612,8 @@ body.touch #minimap {
 
 /* ---- Player market ---- */
 
-#stall-button {
+#stall-button,
+#fish-button {
   bottom: 118px;
   left: 50%;
   transform: translateX(-50%);
@@ -2106,7 +2120,8 @@ body.touch #help {
   display: none;
 }
 
-body.touch #stall-button {
+body.touch #stall-button,
+body.touch #fish-button {
   bottom: 194px;
 }
 
@@ -2264,9 +2279,13 @@ body.touch .window-title {
 .stall-action,
 .stall-row button,
 #stall-button,
+#fish-button,
 #party-invite button,
 #duel-invite button,
+#trade-invite button,
+#dungeon-invite button,
 #target-invite,
+#target-trade,
 #target-duel,
 .party-leave,
 #touch-menu button {
@@ -2287,7 +2306,8 @@ body.touch .window-title {
 #upgrade-button:hover:not(:disabled),
 .stall-action:hover,
 .stall-row button:hover,
-#stall-button:hover {
+#stall-button:hover,
+#fish-button:hover {
   filter: brightness(1.12);
 }
 
@@ -2321,6 +2341,8 @@ body.touch .window-title {
 
 #party-decline,
 #duel-decline,
+#trade-decline,
+#dungeon-decline,
 #target-duel {
   color: #fff;
   background: linear-gradient(180deg, #d9534f, #8a1f1a);
@@ -2330,7 +2352,8 @@ body.touch .window-title {
 /* Menu and login buttons use the title font: they are big enough to read. */
 #game-menu button,
 #auth button,
-#create-character button,
+#create-panel button[type="submit"],
+#play-btn,
 #death button,
 #disconnected button {
   font-family: var(--font-title);
@@ -2445,6 +2468,7 @@ table.controls td:first-child {
 }
 
 #target-invite,
+#target-trade,
 #target-duel {
   font-size: 12px;
   padding: 3px 6px;
@@ -3968,4 +3992,411 @@ body.touch #chat {
 
 .life-hint {
   font-size: 12px;
+/* ---- Storage (depo) and trade (takas) ---- */
+
+#storage-window {
+  top: 60px;
+  right: 372px;
+}
+
+#trade-window {
+  top: 60px;
+  right: 372px;
+  width: 400px;
+}
+
+@media (max-width: 760px) {
+  #storage-window,
+  #trade-window {
+    right: auto;
+    left: 8px;
+    top: 120px;
+  }
+}
+
+#storage-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 40px);
+  gap: 3px;
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+.storage-gold,
+.trade-gold {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: bold;
+  color: #ffd34d;
+}
+
+#storage-gold {
+  flex: 1;
+}
+
+.storage-gold input,
+.trade-gold input {
+  width: 100px;
+  font: inherit;
+  font-size: 13px;
+  padding: 3px 6px;
+  color: var(--text);
+  background: #0b0c12;
+  border: 1px solid var(--border);
+}
+
+.storage-gold button {
+  font-size: 12px;
+  padding: 3px 10px;
+}
+
+.trade-sides {
+  display: flex;
+  gap: 10px;
+}
+
+.trade-side {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px;
+  background: #00000040;
+  border: 1px solid var(--gold-dark, #6b5228);
+  transition: box-shadow 0.2s;
+}
+
+.trade-side.locked {
+  box-shadow: inset 0 0 0 2px #e0a83f;
+}
+
+.trade-side.confirmed {
+  box-shadow: inset 0 0 0 2px #4cd964;
+}
+
+.trade-side-title {
+  font-size: 13px;
+  font-weight: bold;
+  color: var(--gold-light, #f2d58c);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.trade-status {
+  font-size: 11px;
+  font-weight: normal;
+  font-style: italic;
+  color: #e0a83f;
+}
+
+.trade-side.confirmed .trade-status {
+  color: #4cd964;
+}
+
+.trade-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 40px);
+  gap: 3px;
+}
+
+.trade-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.trade-buttons button {
+  flex: 1;
+}
+
+.trade-buttons button:disabled {
+  opacity: 0.5;
+  cursor: default;
+  filter: none;
+}
+
+#target-trade {
+  color: #2a1a08;
+  background: linear-gradient(180deg, #f2d58c 0%, #c9a24a 45%, #8a6a28 100%);
+}
+
+/* ---- Character select & creation (lobby) ---- */
+
+/* Both panels sit on the left; the lobby scene shows the characters to their right. */
+#characters.lobby-panel,
+#create-panel.lobby-panel {
+  top: 50%;
+  left: 24px;
+  transform: translateY(-50%);
+  width: min(330px, calc(100vw - 48px));
+  text-align: left;
+  gap: 8px;
+}
+
+#create-panel.lobby-panel {
+  gap: 5px;
+  padding: 14px 18px;
+}
+
+#create-panel.lobby-panel h1 {
+  margin-bottom: 2px;
+  font-size: 30px;
+}
+
+#create-panel input {
+  padding: 5px 8px;
+}
+
+#create-panel .row > button,
+#create-panel .choice-row button {
+  padding: 5px;
+}
+
+#create-panel #create-btn,
+#create-panel #create-back {
+  font-size: 18px;
+}
+
+#characters.lobby-panel h1,
+#create-panel.lobby-panel h1 {
+  text-align: center;
+}
+
+#account-name {
+  margin: -8px 0 4px;
+  text-align: center;
+}
+
+#character-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  background: #0000004d;
+  border: 1px solid var(--gold-dark, #6b5228);
+}
+
+#character-info[hidden] {
+  display: none;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.info-row span {
+  color: var(--muted);
+}
+
+.info-row b {
+  min-width: 140px;
+  padding: 1px 8px;
+  text-align: center;
+  color: var(--gold-light);
+  background: #0b0806;
+  border: 1px solid #3a2a18;
+}
+
+.lobby-hint {
+  margin: 0;
+  font-size: 12px;
+  text-align: center;
+}
+
+#play-btn {
+  padding: 10px;
+  font-size: 18px;
+}
+
+.lobby-panel .row {
+  display: flex;
+  gap: 8px;
+}
+
+.lobby-panel .row > button {
+  flex: 1;
+}
+
+#delete-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  border: 1px solid #8a1f1a;
+  background: #3a0f0840;
+}
+
+#delete-confirm[hidden] {
+  display: none;
+}
+
+#delete-confirm p {
+  margin: 0;
+  font-size: 13px;
+}
+
+.panel button.danger,
+.panel button#delete-yes {
+  color: #fff;
+  background: linear-gradient(180deg, #d9534f, #8a1f1a);
+  text-shadow: 0 1px 0 #000;
+}
+
+.lobby-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#create-panel label {
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+#create-panel #class-picker {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+#create-panel .panel button.class-card span,
+#create-panel button.class-card span {
+  display: none;
+}
+
+#create-panel button.class-card {
+  align-items: center;
+  padding: 5px 4px;
+}
+
+#create-panel button.class-card b {
+  font-size: 16px;
+}
+
+.choice-row {
+  display: flex;
+  gap: 6px;
+}
+
+.choice-row button {
+  flex: 1;
+}
+
+.panel .choice-row button.active {
+  color: #2a1a08;
+  background: linear-gradient(180deg, #f2d58c 0%, #c9a24a 45%, #8a6a28 100%);
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stepper button {
+  width: 36px;
+  font-size: 18px;
+}
+
+.stepper span {
+  flex: 1;
+  text-align: center;
+  font-family: var(--font-title);
+  font-size: 19px;
+  color: var(--gold-light);
+}
+
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.panel .swatches button {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background: var(--swatch);
+  border: 2px solid #000;
+  border-radius: 50%;
+  box-shadow: inset 0 -3px 0 #0004;
+}
+
+.panel .swatches button.active {
+  border-color: var(--gold-light, #f2d58c);
+  box-shadow: 0 0 0 2px #000, 0 0 8px var(--gold, #c9a24a);
+  transform: scale(1.12);
+}
+
+@media (max-width: 760px) {
+  #characters.lobby-panel,
+#create-panel.lobby-panel {
+    left: 50%;
+    top: auto;
+    bottom: 8px;
+    transform: translateX(-50%);
+    max-height: 60vh;
+  }
+}
+
+/* ---- Horse button left of the resource globe (mirrors the potion slots) ---- */
+
+#mount-button {
+  position: fixed;
+  right: calc(6px + 150px + 4px);
+  bottom: 14px;
+  z-index: 4;
+  width: 54px;
+  height: 54px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(circle at 50% 40%, #241a10, #0c0805) padding-box,
+    linear-gradient(180deg, var(--wood) 0%, var(--wood-dark) 100%) border-box;
+  border: 5px solid transparent;
+  border-radius: 3px;
+  box-shadow: 0 0 0 2px var(--gold-dark), inset 0 0 0 1px #c9a24a33;
+  cursor: pointer;
+}
+
+#mount-button[hidden] {
+  display: none;
+}
+
+#mount-button img {
+  width: 40px;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+
+#mount-button:hover {
+  filter: brightness(1.15);
+}
+
+#mount-button.active {
+  box-shadow: 0 0 0 2px var(--gold, #c9a24a), 0 0 12px #e8c33a99, inset 0 0 0 1px #c9a24a66;
+}
+
+#mount-button .slot-key {
+  position: absolute;
+  left: 2px;
+  top: 0;
+  font-size: 10px;
+  font-weight: bold;
+  color: var(--gold-light, #f2d58c);
+  text-shadow: 1px 1px 0 #000;
+  pointer-events: none;
+}
+
+@media (max-width: 720px) {
+  #mount-button {
+    right: calc(6px + 100px + 2px);
+    width: 46px;
+    height: 46px;
+  }
 }

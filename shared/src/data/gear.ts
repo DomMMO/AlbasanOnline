@@ -285,6 +285,8 @@ export const GEAR: ItemDef[] = [
   def({ id: "bone_dust", name: "Kemik Tozu", rarity: "common", level: 1, maxStack: 50, sellPrice: 13, icon: { shape: "bone", color: 0xe8e4d8 } }),
   def({ id: "orc_tusk", name: "Ork Dişi", rarity: "common", level: 1, maxStack: 50, sellPrice: 16, icon: { shape: "fang", color: 0xe8e2c8 } }),
   def({ id: "bear_claw", name: "Ayı Pençesi", rarity: "uncommon", level: 1, maxStack: 50, sellPrice: 30, icon: { shape: "fang", color: 0x6b4a2b } }),
+  def({ id: "satyr_horn", name: "Satir Boynuzu", rarity: "common", level: 1, maxStack: 50, sellPrice: 13, icon: { shape: "fang", color: 0xd9c8a0 } }),
+  def({ id: "golem_core", name: "Golem Çekirdeği", rarity: "uncommon", level: 1, maxStack: 50, sellPrice: 28, icon: { shape: "gem", color: 0x8bd35a } }),
   def({ id: "spirit_stone", name: "Ruh Taşı", rarity: "rare", level: 1, maxStack: 20, sellPrice: 150, icon: { shape: "gem", color: 0x845ef7 }, description: "İçinde sönük bir ruh ışığı yanıp sönüyor. Tüccarlar iyi para verir." }),
 
   // ---- Quest items

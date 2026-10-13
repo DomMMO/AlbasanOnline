@@ -33,6 +33,7 @@ export enum Action {
   PassiveTree = "passiveTree",
   TownPortal = "townPortal",
   Minimap = "minimap",
+  Mount = "mount",
 }
 
 /** Hotbar slots in order. */
@@ -77,6 +78,7 @@ export const DEFAULT_BINDINGS: Record<Action, string[]> = {
   [Action.PassiveTree]: ["P"],
   [Action.TownPortal]: ["T"],
   [Action.Minimap]: ["M"],
+  [Action.Mount]: ["H"],
 };
 
 // On-screen touch controls (ui/touch.ts) drive the same actions through these.

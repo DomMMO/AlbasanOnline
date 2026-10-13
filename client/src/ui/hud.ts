@@ -1,5 +1,5 @@
 import { darkness, formatClock, isNight, POTION_COOLDOWN_MS, type ItemDef, type SkillDef } from "../../../shared/src";
-import { iconUrl } from "../gfx/icons";
+import { iconUrl, itemIconUrl } from "../gfx/icons";
 import { skillIconUrl } from "../gfx/skillIcons";
 import { installGlobeFrame } from "./globeFrame";
 import { actionKeyLabel } from "../input/keybindings";
@@ -39,6 +39,10 @@ const targetInvite = $<HTMLButtonElement>("target-invite");
 let inviteCallback: (() => void) | null = null;
 targetInvite.addEventListener("mousedown", (e) => e.preventDefault());
 targetInvite.addEventListener("click", () => inviteCallback?.());
+const targetTrade = $<HTMLButtonElement>("target-trade");
+let tradeCallback: (() => void) | null = null;
+targetTrade.addEventListener("mousedown", (e) => e.preventDefault());
+targetTrade.addEventListener("click", () => tradeCallback?.());
 const targetDuel = $<HTMLButtonElement>("target-duel");
 let duelCallback: (() => void) | null = null;
 targetDuel.addEventListener("mousedown", (e) => e.preventDefault());
@@ -188,6 +192,8 @@ export interface TargetFrameData {
   onInvite?: () => void;
   /** Shows the "Düello" button when set. */
   onDuel?: () => void;
+  /** Shows the "Takas" button when set. */
+  onTrade?: () => void;
 }
 
 export function setTargetFrame(data: TargetFrameData | null) {
@@ -202,6 +208,8 @@ export function setTargetFrame(data: TargetFrameData | null) {
   targetInvite.hidden = !data.onInvite;
   duelCallback = data.onDuel ?? null;
   targetDuel.hidden = !data.onDuel;
+  tradeCallback = data.onTrade ?? null;
+  targetTrade.hidden = !data.onTrade;
 }
 
 // ---- Hotbar ------------------------------------------------------------
@@ -309,7 +317,7 @@ export function initHotbar(
       const { item } = entry;
       element.classList.add("item");
       element.title = `${item.name}\n${item.description ?? ""}`;
-      const img = Object.assign(document.createElement("img"), { src: iconUrl(item.icon.shape, item.icon.color), draggable: false });
+      const img = Object.assign(document.createElement("img"), { src: itemIconUrl(item), draggable: false });
       count = Object.assign(document.createElement("span"), { className: "slot-count" });
       element.prepend(img);
       element.append(count);

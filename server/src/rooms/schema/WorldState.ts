@@ -49,6 +49,19 @@ export class Player extends Schema {
   @type("string") gearFeet = "";
   /** Market stall title ("" = no stall). */
   @type("string") stall = "";
+  /** Chosen at character creation: drawn for everyone. */
+  @type("string") gender = "male";
+  @type("string") hairStyle = "short";
+  @type("uint32") hairColor = 0x5a3825;
+  @type("uint32") skin = 0xf0c49a;
+  /** Game master account: a bouncing "GM" over the name. */
+  @type("boolean") gm = false;
+  /** Riding a horse (moves faster, drawn on horseback). */
+  @type("boolean") mounted = false;
+  /** Fishing: the float lies on the water at (fishX, fishY). */
+  @type("boolean") fishing = false;
+  @type("number") fishX = 0;
+  @type("number") fishY = 0;
 }
 
 export class Mob extends Schema {

@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 import { Direction, glowTier, ITEMS } from "../../../shared/src";
-import { ensureItemTexture, ensureSparkTexture, HAND, isWeaponMirrored, SPARK_KEY, weaponGrip } from "../gfx/weapons";
+import { ensureItemTexture, ensureSparkTexture, HAND, isWeaponMirrored, SPARK_KEY, weaponGripFor } from "../gfx/weapons";
 
 // The weapon in a character's hand: placement by facing, swing animation and
 // the +7..+10 purple glow.
@@ -39,7 +39,7 @@ export class WeaponView {
   ) {
     const def = ITEMS[defId];
     this.sprite = scene.add.sprite(0, 0, ensureItemTexture(scene, def), 0);
-    this.grip = weaponGrip(def.icon.shape);
+    this.grip = weaponGripFor(def);
     this.applyGlow(glowTier(enhance));
   }
 

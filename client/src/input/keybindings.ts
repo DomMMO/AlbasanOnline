@@ -37,6 +37,7 @@ export const BINDABLE: { group: string; actions: [Action, string][] }[] = [
       [Action.Attack, "Hedefe saldır"],
       [Action.Interact, "Etkileşim (al, konuş, portal)"],
       [Action.TownPortal, "Şehir portalı"],
+      [Action.Mount, "Ata bin / in"],
     ],
   },
   {

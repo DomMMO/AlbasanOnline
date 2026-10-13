@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { TILE_SIZE, type Decor, type IconShape } from "../../../shared/src";
+import { COLOSSEUM, TILE_SIZE, type Decor, type IconShape } from "../../../shared/src";
 import { ICON_SIZE, paintIcon } from "./icons";
 
 // Town decor drawn in code on top of the tiles: buildings, the fountain, lamps…
@@ -70,6 +70,402 @@ export function drawDecor(scene: Phaser.Scene, decor: Decor[]) {
       case "fence":
         fence(scene, piece.tiles);
         break;
+      case "castleWall":
+        castleWall(scene, piece);
+        break;
+      case "tower":
+        tower(scene, piece);
+        break;
+      case "gateArch":
+        gateArch(scene, piece);
+        break;
+      case "keep":
+        keep(scene, piece);
+        break;
+      case "drawbridge":
+        drawbridge(scene, piece);
+        break;
+      case "prop":
+        prop(scene, piece);
+        break;
+      case "pier":
+        pier(scene, piece);
+        break;
+      case "ship":
+        ship(scene, piece);
+        break;
+      case "lighthouse":
+        lighthouse(scene, piece);
+        break;
+      case "colosseum":
+        colosseum(scene);
+        break;
+    }
+  }
+}
+
+// ---- Castle -------------------------------------------------------------------------
+// Fortifications are drawn "standing up": a wall tile's walk is lifted WALL_H pixels above
+// its footprint, and where the camera sees the side of a wall (its south edge) a stone face
+// fills the gap. Battlements line the side facing away from the courtyard.
+
+const WALL_H = 24;
+const TOWER_H = 40;
+const STONE = {
+  top: 0x9a9384,
+  topDark: 0x847d6f,
+  topLight: 0xb3ac9c,
+  face: 0x7d766a,
+  faceLight: 0x958e81,
+  faceDark: 0x5e584f,
+  mortar: 0x4f4a43,
+  merlon: 0xa8a192,
+  merlonTop: 0xc4bdb0,
+  moss: 0x5a7a3a,
+};
+
+/** Stone courses on a vertical face: rows of blocks with offset joints. */
+function stoneCourses(g: Phaser.GameObjects.Graphics, x: number, y: number, w: number, h: number, seed: number) {
+  g.fillStyle(STONE.face).fillRect(x, y, w, h);
+  for (let row = 0, cy = y; cy < y + h; row++, cy += 6) {
+    g.fillStyle(STONE.mortar).fillRect(x, cy + 5, w, 1);
+    for (let jx = ((row + seed) % 2) * 5 + 2; jx < w; jx += 10) g.fillRect(x + jx, cy, 1, Math.min(5, y + h - cy));
+    g.fillStyle(STONE.faceLight).fillRect(x, cy, w, 1);
+  }
+}
+
+/** Battlements along one edge of a raised walk, seen from above and the south. */
+function merlons(g: Phaser.GameObjects.Graphics, side: "n" | "s" | "e" | "w", x: number, y: number, len: number) {
+  for (let i = 1; i + 5 <= len; i += 8) {
+    if (side === "n") {
+      g.fillStyle(STONE.faceDark).fillRect(x + i, y - 6, 5, 7);
+      g.fillStyle(STONE.merlon).fillRect(x + i, y - 6, 5, 4);
+      g.fillStyle(STONE.merlonTop).fillRect(x + i, y - 6, 5, 1);
+    } else if (side === "s") {
+      // Rising above the front face: we see their fronts.
+      g.fillStyle(STONE.face).fillRect(x + i, y - 6, 5, 6);
+      g.fillStyle(STONE.merlonTop).fillRect(x + i, y - 6, 5, 1);
+      g.fillStyle(STONE.mortar).fillRect(x + i + 4, y - 5, 1, 5);
+    } else {
+      // Down the west or east edge: block tops with a sliver of front face.
+      const bx = side === "w" ? x : x - 4;
+      g.fillStyle(STONE.merlon).fillRect(bx, y + i - 3, 4, 4);
+      g.fillStyle(STONE.merlonTop).fillRect(bx, y + i - 3, 4, 1);
+      g.fillStyle(STONE.faceDark).fillRect(bx, y + i + 1, 4, 2);
+    }
+  }
+}
+
+function castleWall(scene: Phaser.Scene, w: Extract<Decor, { kind: "castleWall" }>) {
+  const keys = new Set(w.tiles.map(({ tx, ty }) => `${tx},${ty}`));
+  const has = (tx: number, ty: number) => keys.has(`${tx},${ty}`);
+  const inside = (tx: number, ty: number) => tx >= w.inner.x0 && tx <= w.inner.x1 && ty >= w.inner.y0 && ty <= w.inner.y1;
+  for (const { tx, ty } of w.tiles) {
+    const bottom = (ty + 1) * TILE_SIZE;
+    // Each tile sorts on its own, so players pass behind and in front of the wall correctly.
+    const g = scene.add.graphics().setPosition(tx * TILE_SIZE, bottom).setDepth(bottom);
+    const top = -TILE_SIZE - WALL_H;
+    const seed = tx * 7 + ty * 13;
+
+    // The wall walk: big flagstones.
+    g.fillStyle(STONE.top).fillRect(0, top, TILE_SIZE, TILE_SIZE);
+    g.fillStyle(STONE.topDark).fillRect(0, top + 7, TILE_SIZE, 1).fillRect(0, top + 15, TILE_SIZE, 1);
+    g.fillRect((seed % 2) * 8 + 3, top, 1, 7).fillRect(((seed + 1) % 2) * 8 + 3, top + 8, 1, 7);
+    g.fillStyle(STONE.topLight).fillRect((seed % 5) + 6, top + 2, 3, 1);
+
+    // Seen from the south: the face down to the ground.
+    if (!has(tx, ty + 1)) {
+      stoneCourses(g, 0, -WALL_H, TILE_SIZE, WALL_H, seed);
+      g.fillStyle(0x000000, 0.25).fillRect(0, -2, TILE_SIZE, 2);
+      if (seed % 3 === 0) g.fillStyle(STONE.moss).fillRect(seed % 11, -3, 4, 1).fillRect((seed % 11) + 1, -4, 2, 1);
+      // Arrow slits on the outside face now and then.
+      if (!inside(tx, ty + 1) && tx % 4 === 0) {
+        g.fillStyle(0x1a1714).fillRect(7, -WALL_H + 7, 2, 10).fillRect(5, -WALL_H + 11, 6, 2);
+      }
+    }
+
+    // Battlements on the outer edges; a low lip on the courtyard side.
+    for (const [side, nx, ny] of [["n", tx, ty - 1], ["s", tx, ty + 1], ["w", tx - 1, ty], ["e", tx + 1, ty]] as const) {
+      if (has(nx, ny)) continue;
+      if (inside(nx, ny)) {
+        g.fillStyle(STONE.faceDark);
+        if (side === "w") g.fillRect(0, top, 2, TILE_SIZE);
+        else if (side === "e") g.fillRect(TILE_SIZE - 2, top, 2, TILE_SIZE);
+        else if (side === "n") g.fillRect(0, top, TILE_SIZE, 2);
+        else g.fillStyle(STONE.topLight).fillRect(0, -WALL_H - 2, TILE_SIZE, 2);
+        continue;
+      }
+      if (side === "n") merlons(g, "n", 0, top, TILE_SIZE);
+      else if (side === "s") merlons(g, "s", 0, -WALL_H, TILE_SIZE);
+      else if (side === "w") merlons(g, "w", 0, top, TILE_SIZE);
+      else merlons(g, "e", TILE_SIZE, top, TILE_SIZE);
+    }
+  }
+}
+
+function waveFlag(scene: Phaser.Scene, x: number, y: number, color: number, depth: number, size = 1) {
+  const pole = scene.add.graphics().setPosition(x, y).setDepth(depth);
+  pole.fillStyle(0x3b2414).fillRect(0, -22 * size, 2, 22 * size);
+  pole.fillStyle(0xe8c33a).fillRect(0, -24 * size, 2, 2);
+  const cloth = scene.add.graphics().setPosition(x + 2, y - 21 * size).setDepth(depth + 0.01);
+  cloth.fillStyle(color).fillRect(0, 0, 12 * size, 7 * size);
+  cloth.fillTriangle(12 * size, 0, 12 * size, 7 * size, 15 * size, 3.5 * size);
+  cloth.fillStyle(0xffffff, 0.3).fillRect(0, 1, 12 * size, 1);
+  cloth.fillStyle(0xe8c33a).fillRect(4 * size, 2 * size, 3 * size, 3 * size);
+  scene.tweens.add({ targets: cloth, scaleX: 0.75, duration: 900 + Math.random() * 400, yoyo: true, repeat: -1, ease: "Sine.easeInOut" });
+}
+
+function tower(scene: Phaser.Scene, t: Extract<Decor, { kind: "tower" }>) {
+  const W = t.w * TILE_SIZE;
+  const D = t.h * TILE_SIZE;
+  const x0 = t.tx * TILE_SIZE;
+  const bottom = (t.ty + t.h) * TILE_SIZE;
+  const g = scene.add.graphics().setPosition(x0, bottom).setDepth(bottom);
+  const seed = t.tx + t.ty;
+
+  // Plinth, face with shaded corners, slits.
+  g.fillStyle(0x000000, 0.3).fillEllipse(W / 2, 0, W + 8, 6);
+  stoneCourses(g, 0, -TOWER_H, W, TOWER_H, seed);
+  g.fillStyle(STONE.faceDark).fillRect(-1, -6, W + 2, 6);
+  g.fillStyle(STONE.faceLight).fillRect(-1, -6, W + 2, 1);
+  g.fillStyle(STONE.faceLight).fillRect(0, -TOWER_H, 2, TOWER_H - 6);
+  g.fillStyle(STONE.faceDark).fillRect(W - 3, -TOWER_H, 3, TOWER_H - 6);
+  for (const sx of [W / 2 - 1]) {
+    g.fillStyle(0x1a1714).fillRect(sx, -TOWER_H + 8, 3, 12).fillRect(sx - 3, -TOWER_H + 13, 9, 2);
+    g.fillStyle(0xffc04d, 0.35).fillRect(sx + 1, -TOWER_H + 10, 1, 8);
+  }
+
+  // Roof deck seen from above, framed by battlements on every side.
+  const top = -TOWER_H - D;
+  g.fillStyle(STONE.top).fillRect(0, top, W, D);
+  g.fillStyle(STONE.topDark).fillRect(4, top + 4, W - 8, D - 8);
+  for (let y = top + 10; y < top + D - 6; y += 8) g.fillStyle(STONE.top).fillRect(4, y, W - 8, 1);
+  g.fillStyle(0x5b3a1e).fillRect(W - 14, top + D - 14, 7, 6);
+  g.fillStyle(0x3b2414).fillRect(W - 13, top + D - 12, 5, 1);
+  merlons(g, "n", 0, top, W);
+  merlons(g, "w", 0, top, D);
+  merlons(g, "e", W, top, D);
+  merlons(g, "s", 0, -TOWER_H, W);
+  waveFlag(scene, x0 + W / 2 - 1, bottom + top + D / 2, t.flag, bottom + 0.1);
+}
+
+function gateArch(scene: Phaser.Scene, a: Extract<Decor, { kind: "gateArch" }>) {
+  const W = a.w * TILE_SIZE;
+  const H = a.h * TILE_SIZE;
+  const x0 = a.tx * TILE_SIZE;
+  const y0 = a.ty * TILE_SIZE;
+  const bottom = y0 + H;
+  // The passage floor lies in the gate's shadow.
+  scene.add.graphics().setDepth(-0.4).fillStyle(0x000000, 0.35).fillRect(x0, y0 - 4, W, H + 4);
+  // The wall walk spans the passage overhead: players walking through go under it.
+  const g = scene.add.graphics().setPosition(x0, bottom).setDepth(bottom + 1);
+  const top = -H - WALL_H;
+  g.fillStyle(STONE.faceDark).fillRect(0, top + H, W, 5);
+  g.fillStyle(STONE.top).fillRect(0, top, W, H);
+  for (let y = top + 7; y < top + H; y += 8) g.fillStyle(STONE.topDark).fillRect(0, y, W, 1);
+  g.fillStyle(STONE.topDark).fillRect(W / 2, top, 1, H);
+  // The raised portcullis: iron bars along the outer (east) edge with spikes below.
+  g.fillStyle(0x2a2a30).fillRect(W - 4, top, 4, H + 5);
+  for (let y = top + 2; y < top + H + 5; y += 4) g.fillStyle(0x4a4a55).fillRect(W - 4, y, 4, 1);
+  for (let y = top + 3; y < top + H; y += 6) g.fillStyle(0x6c707a).fillRect(W - 3, y, 1, 1);
+  merlons(g, "e", W - 4, top, H);
+}
+
+function keep(scene: Phaser.Scene, k: Extract<Decor, { kind: "keep" }>) {
+  const W = k.w * TILE_SIZE;
+  const D = k.h * TILE_SIZE;
+  const x0 = k.tx * TILE_SIZE;
+  const bottom = (k.ty + k.h) * TILE_SIZE;
+  const FACE_H = 44;
+  const g = scene.add.graphics().setPosition(x0, bottom).setDepth(bottom);
+
+  g.fillStyle(0x000000, 0.3).fillEllipse(W / 2, 0, W + 12, 8);
+
+  // The donjon rising behind the hall roof, with its own battlements and the town flag.
+  const dw = 5 * TILE_SIZE;
+  const dx = (W - dw) / 2;
+  const donjonTop = -FACE_H - D - 34;
+  const roofTop = -FACE_H - D + 10;
+  stoneCourses(g, dx, donjonTop + 24, dw, roofTop - donjonTop - 22, 3);
+  g.fillStyle(STONE.faceDark).fillRect(dx + dw - 3, donjonTop + 24, 3, roofTop - donjonTop - 22);
+  g.fillStyle(STONE.top).fillRect(dx, donjonTop, dw, 24);
+  g.fillStyle(STONE.topDark).fillRect(dx + 4, donjonTop + 4, dw - 8, 16);
+  merlons(g, "n", dx, donjonTop, dw);
+  merlons(g, "w", dx, donjonTop, 24);
+  merlons(g, "e", dx + dw, donjonTop, 24);
+  merlons(g, "s", dx, donjonTop + 24, dw);
+  for (const wx of [dx + 14, dx + dw - 18]) {
+    g.fillStyle(0x1a1714).fillRoundedRect(wx, donjonTop + 32, 5, 9, { tl: 2, tr: 2, bl: 0, br: 0 });
+    g.fillStyle(0xf5d77a, 0.8).fillRect(wx + 1, donjonTop + 35, 3, 5);
+  }
+
+  // Hall roof: dark slate, shingle rows, a ridge.
+  const slate = 0x3d4a5c;
+  const slateDark = 0x2c3644;
+  g.fillStyle(slate).fillRect(-3, roofTop, W + 6, D - 7);
+  for (let y = roofTop + 4, row = 0; y < -FACE_H + 3; y += 4, row++) {
+    g.fillStyle(slateDark).fillRect(-3, y, W + 6, 1);
+    for (let x = (row % 2) * 4; x < W + 6; x += 8) g.fillRect(x - 3, y - 3, 1, 3);
+  }
+  g.fillStyle(0x56657a).fillRect(-3, roofTop, W + 6, 2);
+  g.fillStyle(0x000000, 0.35).fillRect(0, -FACE_H + 3, W, 2);
+
+  // Front face: stone, a broad door with steps, lit arched windows, banners.
+  stoneCourses(g, 0, -FACE_H, W, FACE_H, 1);
+  g.fillStyle(STONE.faceDark).fillRect(-1, -5, W + 2, 5);
+  g.fillStyle(STONE.faceLight).fillRect(-1, -5, W + 2, 1);
+  const doorW = 22;
+  const doorX = Math.round(W / 2 - doorW / 2);
+  g.fillStyle(0x2a1a0e).fillRect(doorX - 3, -30, doorW + 6, 30);
+  g.fillStyle(0x2a1a0e).fillCircle(doorX + doorW / 2, -30, doorW / 2 + 3);
+  g.fillStyle(0x6b4423).fillRect(doorX, -28, doorW, 28);
+  g.fillStyle(0x6b4423).fillCircle(doorX + doorW / 2, -28, doorW / 2);
+  g.fillStyle(0x4a2e16).fillRect(doorX + doorW / 2, -38, 1, 38);
+  for (const y of [-22, -9]) g.fillStyle(0x2a2a30).fillRect(doorX, y, doorW, 2);
+  for (const x of [doorX + 3, doorX + doorW - 4]) g.fillStyle(0xb0b4bc).fillRect(x, -16, 1, 1);
+  g.fillStyle(0xb3ac9c).fillRect(doorX - 6, -3, doorW + 12, 3);
+  g.fillStyle(0xc4bdb0).fillRect(doorX - 4, -5, doorW + 8, 2);
+  for (const wx of [30, 58, W - 64, W - 36]) {
+    g.fillStyle(0x1a1714).fillRoundedRect(wx - 1, -36, 10, 15, { tl: 5, tr: 5, bl: 0, br: 0 });
+    g.fillStyle(0xf5d77a).fillRoundedRect(wx, -35, 8, 13, { tl: 4, tr: 4, bl: 0, br: 0 });
+    g.fillStyle(0x1a1714).fillRect(wx + 3, -35, 1, 13).fillRect(wx, -29, 8, 1);
+  }
+  for (const bx of [doorX - 18, doorX + doorW + 8]) {
+    g.fillStyle(0x2a1a0e).fillRect(bx - 1, -FACE_H + 4, 12, 2);
+    g.fillStyle(k.banner).fillRect(bx, -FACE_H + 6, 10, 22);
+    g.fillTriangle(bx, -FACE_H + 28, bx + 10, -FACE_H + 28, bx + 5, -FACE_H + 33);
+    g.fillStyle(0xe8c33a).fillRect(bx + 3, -FACE_H + 12, 4, 4).fillRect(bx + 4, -FACE_H + 17, 2, 6);
+    g.fillStyle(0xffffff, 0.2).fillRect(bx, -FACE_H + 7, 1, 21);
+  }
+
+  // Round turrets on the front corners, taller than the hall, with conical slate roofs.
+  for (const [cx, flip] of [[2, false], [W - 2, true]] as const) {
+    const tw = 26;
+    const tx = cx - tw / 2;
+    const th = FACE_H + 22;
+    stoneCourses(g, tx, -th, tw, th, flip ? 1 : 0);
+    g.fillStyle(STONE.faceLight).fillRect(tx, -th, 3, th);
+    g.fillStyle(STONE.faceDark).fillRect(tx + tw - 4, -th, 4, th);
+    g.fillStyle(STONE.faceDark).fillRect(tx - 1, -6, tw + 2, 6);
+    g.fillStyle(0x1a1714).fillRect(cx - 1, -th + 14, 3, 10).fillRect(cx - 1, -th + 36, 3, 10);
+    g.fillStyle(0xffc04d, 0.4).fillRect(cx, -th + 16, 1, 6);
+    g.fillStyle(slateDark).fillTriangle(tx - 4, -th + 2, tx + tw + 4, -th + 2, cx, -th - 30);
+    g.fillStyle(slate).fillTriangle(tx - 4, -th + 2, cx, -th + 2, cx, -th - 30);
+    g.fillStyle(0x56657a).fillRect(tx - 4, -th, tw + 8, 2);
+    waveFlag(scene, x0 + cx - 1, bottom - th - 28, k.banner, bottom + 0.1, 0.8);
+  }
+  waveFlag(scene, x0 + W / 2 - 1, bottom + donjonTop + 12, k.banner, bottom + 0.1, 1.3);
+}
+
+/** East-west planks over the moat: drawn under characters (they walk on it). */
+function drawbridge(scene: Phaser.Scene, d: Extract<Decor, { kind: "drawbridge" }>) {
+  const W = d.w * TILE_SIZE;
+  const H = d.h * TILE_SIZE;
+  const x0 = d.tx * TILE_SIZE;
+  const y0 = d.ty * TILE_SIZE;
+  const g = scene.add.graphics().setPosition(x0, y0).setDepth(y0 - 1);
+  g.fillStyle(0x000000, 0.3).fillRect(-2, H, W + 4, 5);
+  g.fillStyle(0x94643a).fillRect(-2, 0, W + 4, H);
+  for (let x = -2; x < W + 2; x += 4) {
+    g.fillStyle(0x4a2e16).fillRect(x + 3, 0, 1, H);
+    g.fillStyle(0xb07b48).fillRect(x, 0, 1, H);
+  }
+  for (const y of [6, H - 8]) {
+    g.fillStyle(0x2a2a30).fillRect(-2, y, W + 4, 2);
+    for (let x = 0; x < W; x += 6) g.fillStyle(0x6c707a).fillRect(x, y, 1, 1);
+  }
+  // Side beams with posts, and the chains up to the gatehouse.
+  for (const y of [-3, H]) {
+    g.fillStyle(0x4a2e16).fillRect(-2, y, W + 4, 3);
+    g.fillStyle(0x6b4423).fillRect(-2, y, W + 4, 1);
+    for (const x of [-3, W - 1]) {
+      g.fillStyle(0x2a1a0e).fillRect(x, y - 8, 4, 10);
+      g.fillStyle(0x7a4e2a).fillRect(x + 1, y - 8, 2, 9);
+    }
+  }
+  const chains = scene.add.graphics().setDepth(y0 + H);
+  for (const y of [y0 - 9, y0 + H - 8]) {
+    for (let i = 0; i < 9; i++) chains.fillStyle(i % 2 ? 0x6c707a : 0x3a3a40).fillRect(x0 - 2 - i * 2.2, y - i * 2.6, 2, 2);
+  }
+}
+
+function prop(scene: Phaser.Scene, p: Extract<Decor, { kind: "prop" }>) {
+  const size = p.prop === "well" ? 2 : 1;
+  const wide = p.prop === "well" || p.prop === "obelisk" ? 2 : 1;
+  const x = p.tx * TILE_SIZE + (wide * TILE_SIZE) / 2;
+  const bottom = (p.ty + size) * TILE_SIZE;
+  const g = scene.add.graphics().setPosition(x, bottom).setDepth(bottom);
+  g.fillStyle(0x000000, 0.25).fillEllipse(0, -1, size * 14, 4);
+  switch (p.prop) {
+    case "barrel":
+      g.fillStyle(0x6b4423).fillRoundedRect(-6, -15, 12, 14, 3);
+      g.fillStyle(0x8a5a2b).fillRect(-4, -15, 3, 14);
+      g.fillStyle(0x4a2e16).fillRect(1, -15, 1, 14).fillRect(4, -14, 1, 12);
+      g.fillStyle(0x3a3a40).fillRect(-6, -12, 12, 1).fillRect(-6, -5, 12, 1);
+      g.fillStyle(0x9a6a3c).fillEllipse(0, -15, 12, 4);
+      g.fillStyle(0x5b3a1e).fillEllipse(0, -15, 8, 2);
+      break;
+    case "crate":
+      g.fillStyle(0xb98a4e).fillRect(-7, -16, 14, 4);
+      g.fillStyle(0x9a6a3c).fillRect(-7, -12, 14, 11);
+      g.fillStyle(0x5b3a1e).lineStyle(1, 0x5b3a1e).strokeRect(-6.5, -11.5, 13, 10);
+      g.lineBetween(-6, -11, 6, -2).lineBetween(6, -11, -6, -2);
+      g.fillStyle(0xd6aa66).fillRect(-7, -16, 14, 1);
+      break;
+    case "hay":
+      g.fillStyle(0xb8902e).fillRoundedRect(-7, -11, 14, 10, 2);
+      g.fillStyle(0xd9b44a).fillRoundedRect(-7, -13, 14, 5, 2);
+      for (const sx of [-5, -1, 3]) g.fillStyle(0x8a6a1e).fillRect(sx, -9, 1, 7);
+      g.fillStyle(0x6b4423).fillRect(-7, -7, 14, 1);
+      g.fillStyle(0xf0d070).fillRect(-4, -12, 3, 1).fillRect(2, -13, 2, 1);
+      break;
+    case "cart":
+      g.fillStyle(0x6b4423).fillRect(-8, -14, 15, 7);
+      g.fillStyle(0x8a5a2b).fillRect(-8, -14, 15, 2);
+      g.fillStyle(0xd9b44a).fillRect(-6, -17, 11, 3);
+      g.fillStyle(0x4a2e16).fillRect(6, -10, 6, 1);
+      g.fillStyle(0x2a1a0e).fillCircle(-2, -5, 5);
+      g.fillStyle(0x7a4e2a).fillCircle(-2, -5, 4);
+      g.fillStyle(0x2a1a0e).fillCircle(-2, -5, 1).fillRect(-2, -9, 1, 8).fillRect(-6, -5, 8, 1);
+      break;
+    case "column": {
+      // A marble column with a broken top, on a square plinth.
+      g.fillStyle(0x6f695e).fillRect(-7, -5, 14, 5);
+      g.fillStyle(0xb3ac9c).fillRect(-7, -6, 14, 2);
+      g.fillStyle(0xe8e2d4).fillRect(-5, -30, 10, 25);
+      g.fillStyle(0xc4bdb0).fillRect(1, -30, 4, 25);
+      for (const fx of [-3, 0, 3]) g.fillStyle(0xa39d90).fillRect(fx, -29, 1, 23);
+      g.fillStyle(0xe8e2d4).fillTriangle(-5, -30, 5, -30, 2, -35);
+      g.fillStyle(0xc4bdb0).fillTriangle(1, -30, 5, -30, 2, -35);
+      g.fillStyle(0x5a7a3a).fillRect(-5, -9, 3, 3).fillRect(3, -14, 2, 2);
+      break;
+    }
+    case "obelisk": {
+      // A tall red-granite obelisk with gold runes.
+      g.fillStyle(0x000000, 0.3).fillEllipse(0, -1, 30, 6);
+      g.fillStyle(0x6f695e).fillRect(-12, -6, 24, 6);
+      g.fillStyle(0xb3ac9c).fillRect(-12, -7, 24, 2);
+      g.fillStyle(0x7a2420).fillPoints([new Phaser.Math.Vector2(-7, -7), new Phaser.Math.Vector2(7, -7), new Phaser.Math.Vector2(4, -48), new Phaser.Math.Vector2(-4, -48)], true);
+      g.fillStyle(0x5a1a16).fillPoints([new Phaser.Math.Vector2(2, -7), new Phaser.Math.Vector2(7, -7), new Phaser.Math.Vector2(4, -48), new Phaser.Math.Vector2(1, -48)], true);
+      g.fillStyle(0xe8c33a).fillTriangle(-4, -48, 4, -48, 0, -54);
+      for (let y = -42; y < -12; y += 7) g.fillStyle(0xe8c33a).fillRect(-2, y, 3, 1).fillRect(-1, y + 2, 1, 2);
+      break;
+    }
+    case "well": {
+      // Stone ring with dark water, two posts and a little shingled roof with a bucket.
+      g.fillStyle(STONE.faceDark).fillEllipse(0, -8, 24, 12);
+      g.fillStyle(STONE.face).fillRect(-12, -14, 24, 10);
+      for (const sx of [-12, -4, 4]) g.fillStyle(STONE.mortar).fillRect(sx + 7, -14, 1, 10);
+      g.fillStyle(STONE.mortar).fillRect(-12, -9, 24, 1);
+      g.fillStyle(STONE.merlonTop).fillEllipse(0, -14, 24, 8);
+      g.fillStyle(0x1f3a5c).fillEllipse(0, -14, 18, 5);
+      g.fillStyle(0x3b2414).fillRect(-11, -36, 2, 24).fillRect(9, -36, 2, 24);
+      g.fillStyle(0x5b3a1e).fillRect(-11, -30, 22, 2);
+      g.fillStyle(0x9c3b2e).fillTriangle(-15, -34, 15, -34, 0, -44);
+      g.fillStyle(0x7a2a20).fillTriangle(0, -44, 15, -34, 2, -34);
+      g.fillStyle(0x2a2a30).fillRect(0, -28, 1, 6);
+      g.fillStyle(0x6b4423).fillRect(-2, -22, 5, 4);
+      break;
     }
   }
 }
@@ -431,4 +827,320 @@ function torch(scene: Phaser.Scene, tx: number, ty: number) {
     .setDepth(bottom + 0.2);
   const glow = scene.add.circle(x + 0.5, bottom - 24, 20, 0xff9a3c, 0.18).setBlendMode(Phaser.BlendModes.ADD).setDepth(bottom + 0.1);
   scene.tweens.add({ targets: glow, alpha: 0.09, scale: 0.85, duration: 220 + Math.random() * 120, yoyo: true, repeat: -1 });
+}
+
+// ---- Harbour ------------------------------------------------------------------------
+
+/** Posts standing in the water along both sides of the deck, and its shadow. Under characters. */
+function pier(scene: Phaser.Scene, p: Extract<Decor, { kind: "pier" }>) {
+  const W = p.w * TILE_SIZE;
+  const H = p.h * TILE_SIZE;
+  const x0 = p.tx * TILE_SIZE;
+  const y0 = p.ty * TILE_SIZE;
+  const g = scene.add.graphics().setPosition(x0, y0).setDepth(y0 - 1);
+  g.fillStyle(0x000000, 0.28).fillRect(2, H, W, 5).fillRect(W, 4, 4, H);
+  g.fillStyle(0x4a2e16).fillRect(-1, 0, 1, H).fillRect(W, 0, 1, H).fillRect(-1, H - 1, W + 2, 2);
+  const posts: [number, number][] = [];
+  for (let y = 6; y < H; y += 24) posts.push([-2, y], [W - 2, y]);
+  for (let x = 6; x < W - 4; x += 24) posts.push([x, H - 2]);
+  for (const [x, y] of posts) {
+    g.fillStyle(0x2a1a0e).fillRect(x, y, 4, 7);
+    g.fillStyle(0x6b4423).fillRect(x + 1, y, 2, 5);
+    g.fillStyle(0xd0ecff, 0.6).fillRect(x - 1, y + 6, 6, 1);
+  }
+}
+
+function ship(scene: Phaser.Scene, s: Extract<Decor, { kind: "ship" }>) {
+  const W = s.w * TILE_SIZE;
+  const H = s.h * TILE_SIZE;
+  const x0 = s.tx * TILE_SIZE;
+  const bottom = (s.ty + s.h) * TILE_SIZE;
+  const ship = scene.add.container(x0, bottom).setDepth(bottom);
+  const g = scene.add.graphics();
+  ship.add(g);
+  const deckTop = -H + 6;
+  const deckBottom = -30;
+
+  g.fillStyle(0x0f2a4a, 0.45).fillEllipse(W / 2 - 4, -4, W + 6, 14);
+  // Deck seen from above, bow pointing east.
+  g.fillStyle(0x8a5a2b).fillPoints(
+    [
+      new Phaser.Math.Vector2(6, deckTop),
+      new Phaser.Math.Vector2(W - 34, deckTop),
+      new Phaser.Math.Vector2(W, (deckTop + deckBottom) / 2),
+      new Phaser.Math.Vector2(W - 34, deckBottom),
+      new Phaser.Math.Vector2(6, deckBottom),
+    ],
+    true,
+  );
+  for (let y = deckTop + 5; y < deckBottom; y += 5) g.fillStyle(0x6b4423).fillRect(8, y, W - 46, 1);
+  g.fillStyle(0xb07b48).fillRect(8, deckTop + 2, W - 46, 1);
+  // Hull side facing us: dark planks, a red stripe, the waterline.
+  g.fillStyle(0x4a2e16).fillPoints(
+    [
+      new Phaser.Math.Vector2(6, deckBottom),
+      new Phaser.Math.Vector2(W - 34, deckBottom),
+      new Phaser.Math.Vector2(W, (deckTop + deckBottom) / 2),
+      new Phaser.Math.Vector2(W - 22, -6),
+      new Phaser.Math.Vector2(14, -6),
+      new Phaser.Math.Vector2(4, -18),
+    ],
+    true,
+  );
+  g.fillStyle(0x9c2a2a).fillRect(8, deckBottom + 4, W - 46, 3);
+  g.fillStyle(0x3b2414).fillRect(10, deckBottom + 12, W - 44, 1).fillRect(12, deckBottom + 18, W - 46, 1);
+  for (let x = 22; x < W - 50; x += 18) g.fillStyle(0x1a1410).fillCircle(x, deckBottom + 10, 2);
+  g.fillStyle(0xd0ecff, 0.7).fillRect(14, -7, W - 36, 1);
+  // Stern cabin with a lit window.
+  g.fillStyle(0x6b4423).fillRect(8, deckTop - 6, 26, deckBottom - deckTop + 2);
+  g.fillStyle(0x4a2e16).fillRect(8, deckTop - 8, 26, 3);
+  g.fillStyle(0xf5d77a).fillRect(14, deckBottom - 10, 5, 4).fillRect(24, deckBottom - 10, 5, 4);
+  // Two masts with full sails and a pennant.
+  for (const [mx, mh] of [[W * 0.42, 74], [W * 0.68, 64]] as const) {
+    const base = (deckTop + deckBottom) / 2;
+    g.fillStyle(0x3b2414).fillRect(mx - 1, base - mh, 3, mh);
+    g.fillStyle(0x5b3a1e).fillRect(mx - 16, base - mh + 8, 33, 2).fillRect(mx - 14, base - mh + 40, 29, 2);
+    g.fillStyle(0xeee6d0).fillPoints(
+      [
+        new Phaser.Math.Vector2(mx - 15, base - mh + 10),
+        new Phaser.Math.Vector2(mx + 16, base - mh + 10),
+        new Phaser.Math.Vector2(mx + 18, base - mh + 40),
+        new Phaser.Math.Vector2(mx - 13, base - mh + 40),
+      ],
+      true,
+    );
+    g.fillStyle(0xc9bfa4).fillRect(mx + 8, base - mh + 11, 8, 29);
+    g.fillStyle(0x9c2a2a).fillRect(mx - 15, base - mh + 22, 31, 4);
+    g.fillStyle(0x9c2a2a).fillTriangle(mx + 1, base - mh - 6, mx + 1, base - mh, mx + 12, base - mh - 3);
+  }
+  // Bowsprit.
+  g.lineStyle(2, 0x3b2414).lineBetween(W - 6, (deckTop + deckBottom) / 2, W + 14, (deckTop + deckBottom) / 2 - 10);
+  scene.tweens.add({ targets: ship, y: bottom + 1.5, angle: 0.4, duration: 1800, yoyo: true, repeat: -1, ease: "Sine.easeInOut" });
+}
+
+function lighthouse(scene: Phaser.Scene, l: Extract<Decor, { kind: "lighthouse" }>) {
+  const W = l.w * TILE_SIZE;
+  const x0 = l.tx * TILE_SIZE;
+  const bottom = (l.ty + l.h) * TILE_SIZE;
+  const cx = W / 2;
+  const g = scene.add.graphics().setPosition(x0, bottom).setDepth(bottom);
+  // Rocks.
+  for (const [rx, ry, rw, rh, c] of [
+    [cx - 14, -6, 22, 12, 0x5e584f],
+    [cx + 10, -5, 18, 10, 0x6f695e],
+    [cx - 2, -10, 30, 14, 0x7d766a],
+    [cx - 20, -3, 14, 8, 0x6f695e],
+  ] as const) {
+    g.fillStyle(c).fillEllipse(rx, ry, rw, rh);
+    g.fillStyle(0x958e81).fillEllipse(rx - 2, ry - 3, rw / 2, 2);
+  }
+  // Tapered tower in red and white bands.
+  const baseW = 26;
+  const topW = 18;
+  const towerH = 76;
+  const towerTop = -10 - towerH;
+  for (let i = 0; i < 6; i++) {
+    const y1 = -10 - (towerH / 6) * i;
+    const y2 = y1 - towerH / 6;
+    const w1 = baseW - ((baseW - topW) * i) / 6;
+    const w2 = baseW - ((baseW - topW) * (i + 1)) / 6;
+    g.fillStyle(i % 2 === 0 ? 0xf2efe6 : 0xc92a2a).fillPoints(
+      [new Phaser.Math.Vector2(cx - w1 / 2, y1), new Phaser.Math.Vector2(cx + w1 / 2, y1), new Phaser.Math.Vector2(cx + w2 / 2, y2), new Phaser.Math.Vector2(cx - w2 / 2, y2)],
+      true,
+    );
+  }
+  g.fillStyle(0x000000, 0.18).fillRect(cx + 3, towerTop, 6, towerH);
+  g.fillStyle(0x3b2414).fillRect(cx - 3, -22, 6, 10);
+  g.fillStyle(0x1a1714).fillRect(cx - 1, -48, 3, 5);
+  // Gallery, lantern room and cap.
+  g.fillStyle(0x2a2a30).fillRect(cx - 13, towerTop - 2, 26, 3);
+  g.fillStyle(0x3a3a40).fillRect(cx - 7, towerTop - 15, 14, 13);
+  g.fillStyle(0xfff3c4).fillRect(cx - 5, towerTop - 13, 10, 9);
+  g.fillStyle(0x9c2a2a).fillTriangle(cx - 9, towerTop - 15, cx + 9, towerTop - 15, cx, towerTop - 25);
+  const lampY = bottom + towerTop - 8;
+  const glow = scene.add.circle(x0 + cx, lampY, 18, 0xffe08a, 0.3).setBlendMode(Phaser.BlendModes.ADD).setDepth(bottom + 0.1);
+  scene.tweens.add({ targets: glow, alpha: 0.12, scale: 0.8, duration: 1200, yoyo: true, repeat: -1, ease: "Sine.easeInOut" });
+  // The sweeping beam.
+  const beam = scene.add.graphics().setPosition(x0 + cx, lampY).setDepth(bottom + 0.2).setBlendMode(Phaser.BlendModes.ADD);
+  beam.fillStyle(0xfff3c4, 0.16).fillTriangle(0, 0, 150, -16, 150, 16);
+  scene.tweens.add({ targets: beam, angle: 360, duration: 7000, repeat: -1 });
+}
+
+// ---- Colosseum (the Blood Arena) ------------------------------------------------------
+// Painted pixel by pixel from the same rings the map is built from (COLOSSEUM): the marble
+// podium wall around the sand, seven tiers of stone stands with aisles and tunnel mouths,
+// the emperor's box in the north, the outer wall's top and, along the south, the arcaded
+// facade seen from outside. The crowd lives on two frames that swap so it seems to cheer.
+
+const COLOSSEUM_FACADE = 30;
+const COLOSSEUM_TIERS = 7;
+
+function colosseum(scene: Phaser.Scene) {
+  const { cx, cy, rx, ry, floor, podium, wall } = COLOSSEUM;
+  const T = TILE_SIZE;
+  const ox = (cx - rx - 1) * T;
+  const oy = (cy - ry - 1) * T;
+  const W = (rx * 2 + 2) * T;
+  const H = (ry * 2 + 2) * T + COLOSSEUM_FACADE;
+  const cxP = cx * T;
+  const cyP = cy * T;
+  const RX = rx * T;
+  const RY = ry * T;
+  const ring = (x: number, y: number) => Math.hypot((x - cxP) / RX, (y - cyP) / RY);
+  const angleOf = (x: number, y: number) => Math.atan2((y - cyP) / RY, (x - cxP) / RX);
+  const aisles = 12;
+  /** Within `width` pixels (along the ring at `k`) of one of `count` evenly spaced angles. */
+  const nearAngle = (a: number, count: number, offset: number, width: number, k: number) => {
+    const step = (Math.PI * 2) / count;
+    const d = Math.abs(((((a - offset) % step) + step * 1.5) % step) - step / 2);
+    return d * k * ((RX + RY) / 2) < width;
+  };
+  // The emperor's box, over the north stands.
+  const box = { x0: cxP - 44, x1: cxP + 44, y0: cyP - RY * wall + 6, y1: cyP - RY * podium - 4 };
+  const inBox = (x: number, y: number) => x >= box.x0 && x <= box.x1 && y >= box.y0 && y <= box.y1;
+
+  const base = scene.textures.createCanvas("colosseum-base", W, H)!;
+  const ctx = base.context;
+  const img = ctx.createImageData(W, H);
+  const put = (px: number, py: number, color: number) => {
+    const i = (py * W + px) * 4;
+    img.data[i] = (color >> 16) & 255;
+    img.data[i + 1] = (color >> 8) & 255;
+    img.data[i + 2] = color & 255;
+    img.data[i + 3] = 255;
+  };
+
+  for (let py = 0; py < H; py++) {
+    for (let px = 0; px < W; px++) {
+      const x = ox + px + 0.5;
+      const y = oy + py + 0.5;
+      const k = ring(x, y);
+      const dx = (x - cxP) / RX;
+      if (k < floor) {
+        // The north podium wall's face, seen across the sand.
+        if (y < cyP && Math.abs(dx) < floor) {
+          const edge = cyP - RY * floor * Math.sqrt(1 - (dx / floor) ** 2);
+          const d = y - edge;
+          if (d > 0 && d <= 9) put(px, py, d <= 1 ? 0xc45a4a : d >= 8 ? 0x2a0e0c : Math.round(d) === 5 ? 0xe8c33a : 0x7a2420);
+        }
+        continue;
+      }
+      if (k < podium) {
+        const outer = (k - floor) / (podium - floor);
+        put(px, py, outer > 0.75 ? 0xc45a4a : outer < 0.2 ? 0x4a1410 : 0x8b2a24);
+        continue;
+      }
+      if (k < wall) {
+        const a = angleOf(x, y);
+        const s = (k - podium) / (wall - podium);
+        const tier = Math.floor(s * COLOSSEUM_TIERS);
+        const f = s * COLOSSEUM_TIERS - tier;
+        if (nearAngle(a, 8, Math.PI / 8, 5, k) && s > 0.4 && s < 0.6) put(px, py, 0x1a1410);
+        else if (nearAngle(a, aisles, 0, 2.5, k)) put(px, py, f < 0.3 ? 0x8a8478 : 0xc4bdb0);
+        else put(px, py, f < 0.22 ? 0x5e584f : tier % 2 ? 0x958f83 : 0xa39d90);
+        continue;
+      }
+      if (k < 1) {
+        // The top of the outer wall, with posts for the awning ropes along its outer edge.
+        const post = k > 0.975 && nearAngle(angleOf(x, y), 64, 0, 1.6, k);
+        put(px, py, post ? 0x6f695e : k > 0.99 ? 0x8a8478 : 0xc4bdb0);
+        continue;
+      }
+      // South facade: two storeys of arches below the outer wall's edge.
+      if (y > cyP && Math.abs(dx) < 1) {
+        const edge = cyP + RY * Math.sqrt(1 - dx * dx);
+        const d = y - edge;
+        if (d <= 0 || d > COLOSSEUM_FACADE) continue;
+        const u = (((x - cxP) % 22) + 22) % 22;
+        const archLow = d > 15 && d < 29 && u > 5 && u < 17 && (d > 19 || Math.hypot(u - 11, d - 19) < 6);
+        const archHigh = d > 3 && d < 13 && u > 7 && u < 15 && (d > 6 || Math.hypot(u - 11, d - 6) < 4);
+        if (archLow || archHigh) put(px, py, d > 26 || d < 5 ? 0x1a1410 : 0x2a2420);
+        else if (d >= COLOSSEUM_FACADE - 1) put(px, py, 0x3a3631);
+        else if (Math.floor(d) % 7 === 0 || Math.floor(d) === 14) put(px, py, 0x6f695e);
+        else put(px, py, u < 2 || u > 20 ? 0xb3ac9c : 0xa39d90);
+      }
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+
+  // The emperor's box: a red and gold balcony under a striped awning, with the throne.
+  const bx = box.x0 - ox;
+  const by = box.y0 - oy;
+  const bw = box.x1 - box.x0;
+  const bh = box.y1 - box.y0;
+  ctx.fillStyle = "#4a1410";
+  ctx.fillRect(bx, by, bw, bh);
+  ctx.fillStyle = "#6b1f1a";
+  ctx.fillRect(bx + 4, by + 16, bw - 8, bh - 24);
+  ctx.fillStyle = "#e8c33a";
+  ctx.fillRect(bx, by + bh - 6, bw, 3);
+  for (let x = bx + 2; x < bx + bw - 2; x += 5) ctx.fillRect(x, by + bh - 10, 1, 4);
+  for (const x of [bx + 2, bx + bw - 5]) ctx.fillRect(x, by + 6, 3, bh - 6);
+  for (let i = 0; i < bw; i += 8) {
+    ctx.fillStyle = (i / 8) % 2 ? "#f1ece0" : "#b02020";
+    ctx.fillRect(bx + i, by, Math.min(8, bw - i), 12);
+    ctx.beginPath();
+    ctx.moveTo(bx + i, by + 12);
+    ctx.lineTo(bx + i + 8, by + 12);
+    ctx.lineTo(bx + i + 4, by + 16);
+    ctx.fill();
+  }
+  ctx.fillStyle = "#e8c33a";
+  ctx.fillRect(bx + bw / 2 - 6, by + 18, 12, 12);
+  ctx.fillStyle = "#9c1a1a";
+  ctx.fillRect(bx + bw / 2 - 4, by + 20, 8, 8);
+  base.refresh();
+  scene.add.image(ox, oy, "colosseum-base").setOrigin(0, 0).setDepth(-0.6);
+
+  // The crowd: a spectator every few pixels along each tier; in frame 1 some are on their feet.
+  const shirts = [0xc92a2a, 0x3b5bdb, 0x2f9e44, 0xe0a83f, 0x9b5bd9, 0xe8e2d4, 0x8a5a2b, 0x3fc2c2, 0xd95ba6];
+  const skins = [0xf0c49a, 0xd8a47a, 0xc68a5a, 0x9a6440];
+  const hairs = [0x2d2d2d, 0x5a3825, 0x8b4513, 0xc8a165, 0xb8b8b8];
+  const css = (c: number) => `#${c.toString(16).padStart(6, "0")}`;
+  const frames = [0, 1].map((f) => scene.textures.createCanvas(`colosseum-crowd-${f}`, W, H)!);
+  let seed = 7;
+  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  for (let tier = 0; tier < COLOSSEUM_TIERS; tier++) {
+    const k = podium + ((tier + 0.62) / COLOSSEUM_TIERS) * (wall - podium);
+    const count = Math.floor((Math.PI * 2 * k * ((RX + RY) / 2)) / 5);
+    for (let i = 0; i < count; i++) {
+      const a = (i / count) * Math.PI * 2 + tier * 0.11;
+      const x = Math.round(cxP + Math.cos(a) * RX * k);
+      const y = Math.round(cyP + Math.sin(a) * RY * k);
+      const empty = rnd() < 0.12;
+      const shirt = shirts[Math.floor(rnd() * shirts.length)];
+      const skin = skins[Math.floor(rnd() * skins.length)];
+      const hair = hairs[Math.floor(rnd() * hairs.length)];
+      const cheering = rnd() < 0.4;
+      if (empty || nearAngle(a, aisles, 0, 4, k) || (nearAngle(a, 8, Math.PI / 8, 7, k) && tier >= 2 && tier <= 4) || inBox(x, y)) continue;
+      // South of the centre they face north: we see the backs of their heads.
+      const head = y > cyP ? hair : skin;
+      frames.forEach((frame, f) => {
+        const c = frame.context;
+        const lift = f === 1 && cheering ? 1 : 0;
+        const px = x - ox - 1;
+        const py = y - oy - 3 - lift;
+        c.fillStyle = css(shirt);
+        c.fillRect(px, py + 2, 3, 2);
+        c.fillStyle = css(head);
+        c.fillRect(px + 1, py, 2, 2);
+        if (lift) {
+          c.fillStyle = css(skin);
+          c.fillRect(px - 1, py - 1, 1, 2);
+          c.fillRect(px + 3, py - 1, 1, 2);
+        }
+      });
+    }
+  }
+  frames.forEach((frame) => frame.refresh());
+  const crowd = [0, 1].map((f) => scene.add.image(ox, oy, `colosseum-crowd-${f}`).setOrigin(0, 0).setDepth(-0.55).setVisible(f === 0));
+  let shown = 0;
+  scene.time.addEvent({
+    delay: 420,
+    loop: true,
+    callback: () => {
+      shown = 1 - shown;
+      crowd.forEach((image, f) => image.setVisible(f === shown));
+    },
+  });
 }

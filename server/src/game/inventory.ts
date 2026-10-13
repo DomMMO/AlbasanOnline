@@ -9,6 +9,7 @@ import {
   MINOR_SOCKETS,
   PASSIVE_SOCKETS,
   rollAffixes,
+  STORAGE_SIZE,
   sanitizeAffixes,
   type Affix,
   type AffixRollOptions,
@@ -39,6 +40,9 @@ export interface InventoryData {
   slots: (ItemStack | null)[];
   equipment: Partial<Record<EquipSlot, ItemStack>>;
   passives: PassiveSocket[];
+  /** Kept at the Depocu: only reachable standing next to her. */
+  storage: (ItemStack | null)[];
+  storageGold: number;
 }
 
 export function emptyPassives(): PassiveSocket[] {
@@ -46,7 +50,7 @@ export function emptyPassives(): PassiveSocket[] {
 }
 
 /**
- * Database row shape. position = slot index for the inventory, slot name for equipment,
+ * Database row shape. position = slot index for the inventory and storage, slot name for equipment,
  * "<socket>" for a big passive socket and "<socket>.<minor>" for a small one.
  */
 export interface StoredItem {
@@ -55,7 +59,7 @@ export interface StoredItem {
   qty: number;
   enhance: number;
   affixes?: Affix[];
-  container: "inventory" | "equipment" | "passive";
+  container: "inventory" | "equipment" | "passive" | "storage";
   position: string;
 }
 
@@ -75,8 +79,9 @@ export function addItem(inv: InventoryData, defId: string, qty: number, enhance 
   const def = ITEMS[defId];
   if (!def) return qty;
   let left = qty;
+  const slots = inv.slots;
   if (def.maxStack > 1) {
-    for (const stack of inv.slots) {
+    for (const stack of slots) {
       if (left === 0) break;
       if (!canMerge(stack, defId, enhance)) continue;
       const take = Math.min(def.maxStack - stack!.qty, left);
@@ -85,13 +90,35 @@ export function addItem(inv: InventoryData, defId: string, qty: number, enhance 
     }
   }
   while (left > 0) {
-    const index = inv.slots.indexOf(null);
+    const index = slots.indexOf(null);
     if (index === -1) break;
     const take = Math.min(def.maxStack, left);
-    inv.slots[index] = newStack(defId, take, enhance, quality);
+    slots[index] = newStack(defId, take, enhance, quality);
     left -= take;
   }
   return left;
+}
+
+/**
+ * Moves a whole stack into a row of slots (bags, storage): merges into matching stacks first,
+ * the rest keeps its identity (uid, +N, modifiers) in a free slot. Returns false, changing
+ * nothing, if it doesn't all fit.
+ */
+export function placeStack(slots: (ItemStack | null)[], stack: ItemStack): boolean {
+  const def = ITEMS[stack.defId];
+  if (!def) return false;
+  const merges = def.maxStack > 1 ? slots.filter((s): s is ItemStack => canMerge(s, stack.defId, stack.enhance)) : [];
+  const room = merges.reduce((sum, s) => sum + def.maxStack - s.qty, 0);
+  const free = slots.indexOf(null);
+  if (room < stack.qty && free === -1) return false;
+  let left = stack.qty;
+  for (const target of merges) {
+    const take = Math.min(def.maxStack - target.qty, left);
+    target.qty += take;
+    left -= take;
+  }
+  if (left > 0) slots[free] = { ...stack, qty: left };
+  return true;
 }
 
 export function hasSpaceFor(inv: InventoryData, defId: string, qty: number): boolean {
@@ -199,6 +226,7 @@ export function toView(inv: InventoryData): {
   slots: (ItemView | null)[];
   equipment: Partial<Record<EquipSlot, ItemView>>;
   passives: PassiveSocketView[];
+  storage: { gold: number; slots: (ItemView | null)[] };
 } {
   const view = (stack: ItemStack | null) => (stack ? { ...stack } : null);
   return {
@@ -206,6 +234,7 @@ export function toView(inv: InventoryData): {
     slots: inv.slots.map(view),
     equipment: Object.fromEntries(EQUIP_SLOTS.filter((slot) => inv.equipment[slot]).map((slot) => [slot, { ...inv.equipment[slot]! }])),
     passives: inv.passives.map((socket) => ({ major: view(socket.major), minors: socket.minors.map(view) })),
+    storage: { gold: inv.storageGold, slots: inv.storage.map(view) },
   };
 }
 
@@ -226,9 +255,17 @@ function placeJewel(inv: InventoryData, position: string, stack: ItemStack): boo
   return true;
 }
 
-export function fromStored(gold: number, items: StoredItem[]): InventoryData {
-  const inv: InventoryData = { gold, slots: Array(INVENTORY_SIZE).fill(null), equipment: {}, passives: emptyPassives() };
+export function fromStored(gold: number, items: StoredItem[], storageGold = 0): InventoryData {
+  const inv: InventoryData = {
+    gold,
+    slots: Array(INVENTORY_SIZE).fill(null),
+    equipment: {},
+    passives: emptyPassives(),
+    storage: Array(STORAGE_SIZE).fill(null),
+    storageGold,
+  };
   const misplaced: ItemStack[] = [];
+  const misplacedInStorage: ItemStack[] = [];
   for (const item of items) {
     const def = ITEMS[item.defId];
     if (!def) continue; // item removed from the game
@@ -243,6 +280,10 @@ export function fromStored(gold: number, items: StoredItem[]): InventoryData {
       else misplaced.push(stack);
     } else if (item.container === "passive") {
       if (!placeJewel(inv, item.position, stack)) misplaced.push(stack);
+    } else if (item.container === "storage") {
+      const index = Number(item.position);
+      if (Number.isInteger(index) && index >= 0 && index < STORAGE_SIZE && !inv.storage[index]) inv.storage[index] = stack;
+      else misplacedInStorage.push(stack);
     } else {
       const index = Number(item.position);
       if (Number.isInteger(index) && index >= 0 && index < INVENTORY_SIZE && !inv.slots[index]) inv.slots[index] = stack;
@@ -252,6 +293,12 @@ export function fromStored(gold: number, items: StoredItem[]): InventoryData {
   for (const stack of misplaced) {
     const index = inv.slots.indexOf(null);
     if (index !== -1) inv.slots[index] = stack;
+    else misplacedInStorage.push(stack);
+  }
+  // What fits nowhere else waits in storage rather than being lost.
+  for (const stack of misplacedInStorage) {
+    const index = inv.storage.indexOf(null);
+    if (index !== -1) inv.storage[index] = stack;
   }
   return inv;
 }
@@ -265,6 +312,9 @@ export function toStored(inv: InventoryData): StoredItem[] {
     const stack = inv.equipment[slot];
     if (stack) items.push({ ...stack, container: "equipment", position: slot });
   }
+  inv.storage.forEach((stack, index) => {
+    if (stack) items.push({ ...stack, container: "storage", position: String(index) });
+  });
   inv.passives.forEach((socket, index) => {
     if (socket.major) items.push({ ...socket.major, container: "passive", position: String(index) });
     socket.minors.forEach((stack, minor) => {

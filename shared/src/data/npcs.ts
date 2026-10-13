@@ -1,4 +1,5 @@
 import { FOREST_SPOTS } from "../forest";
+import { HARBOR_SPOTS } from "../harbor";
 import { TOWN_SPOTS } from "../town";
 import type { Appearance } from "./appearance";
 
@@ -9,8 +10,8 @@ export interface NpcDef {
   x: number;
   y: number;
   appearance: Appearance;
-  /** quest = only gives quests and talks. */
-  role: "merchant" | "blacksmith" | "quest";
+  /** quest = only gives quests and talks. storage = keeps your items (depo). guard = only says its greeting. */
+  role: "merchant" | "blacksmith" | "quest" | "storage" | "guard";
   /** Item ids for sale; prices come from ItemDef.buyPrice. */
   shop: string[];
   /** First line of the conversation window. */
@@ -23,6 +24,19 @@ export interface NpcDef {
 const valley = (tx: number, ty: number) => ({ x: (tx + 0.5) * 16, y: (ty + 1) * 16 });
 
 // Which zone an NPC stands in is decided by ZoneDef.npcs.
+
+/** A town guard in mail with a helmet; talking to one only gets its line. */
+function guard(id: string, name: string, at: { x: number; y: number }, greeting: string): NpcDef {
+  return {
+    id,
+    name,
+    ...at,
+    appearance: { type: "humanoid", tunic: 0x6b1a1a, hair: 0x3a2a1a, skin: 0xd8a47a, gear: { head: "iron_helm", chest: "chainmail" } },
+    role: "guard",
+    shop: [],
+    greeting,
+  };
+}
 
 export const NPCS: Record<string, NpcDef> = {
   weaponsmith: {
@@ -131,6 +145,28 @@ export const NPCS: Record<string, NpcDef> = {
     shop: ["miners_pickaxe", "herb_sickle"],
     greeting: "Toprak altında cevher, toprak üstünde şifa var evlat. Kılıçla değil, kazma ve orakla da ekmek kazanılır. Madencilik mi, Botanik mi? İkisini de öğretirim.",
   },
+  storekeeper: {
+    id: "storekeeper",
+    name: "Depocu Hatice",
+    ...TOWN_SPOTS.storekeeper,
+    appearance: { type: "humanoid", tunic: 0x7a5c3a, hair: 0x4a3020, skin: 0xe0b088, headwear: { color: 0xc9b48a, style: "hood" } },
+    role: "storage",
+    shop: [],
+    greeting: "Ambarım kuru, kilidim sağlam. Ne bırakırsan bıraktığın gibi bulursun; hem de kuruşu kuruşuna.",
+  },
+  fisherman: {
+    id: "fisherman",
+    name: "Balıkçı Rıfat",
+    ...HARBOR_SPOTS.fisherman,
+    appearance: { type: "humanoid", tunic: 0x2f6b8a, hair: 0x9a9a9a, skin: 0xc68a5a, headwear: { color: 0xc9b48a, style: "hat" } },
+    role: "merchant",
+    shop: ["fishing_rod", "minor_hp_potion", "minor_mana_potion"],
+    greeting: "Olta al, iskelenin ucuna otur, gerisini deniz halleder. Şansın varsa ağına parşömen bile takılır; ben bir kere Altın Balık çıkardım, yemin ederim!",
+  },
+  guard_gate_north: guard("guard_gate_north", "Kapı Nöbetçisi Ali", TOWN_SPOTS.guardGateNorth, "Kapıdan geçen herkesi görürüm. Sen de temiz görünüyorsun, geç bakalım."),
+  guard_gate_south: guard("guard_gate_south", "Kapı Nöbetçisi Veli", TOWN_SPOTS.guardGateSouth, "Hendekte timsah yok... galiba. Ben olsam yine de yüzmezdim."),
+  guard_keep_west: guard("guard_keep_west", "Kale Muhafızı Emre", TOWN_SPOTS.guardKeepWest, "İç Kale'ye yalnızca Komutan'ın izniyle girilir. Mühür kırıldığından beri kapı hiç açılmadı."),
+  guard_keep_east: guard("guard_keep_east", "Kale Muhafızı Kaan", TOWN_SPOTS.guardKeepEast, "Surlarda gece nöbeti tutuyoruz. Ormandan gelen ışıkları gören olursa Komutan'a haber versin."),
   hunter: {
     id: "hunter",
     name: "Avcı Ayla",

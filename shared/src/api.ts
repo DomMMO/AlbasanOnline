@@ -1,5 +1,7 @@
 // HTTP API contract (accounts and characters) plus validation rules both sides apply.
 
+import type { CharacterLook } from "./data/appearance";
+
 export const MAX_CHARACTERS_PER_ACCOUNT = 3;
 
 export interface AuthRequest {
@@ -19,11 +21,21 @@ export interface CharacterSummary {
   level: number;
   /** Zone the character logged out in. */
   zone: string;
+  /** Tunic colour. */
+  color: number;
+  look: CharacterLook;
+  /** What they wear, so the character select screen can draw them (item def ids, "" = nothing). */
+  gear: { weapon: string; weaponPlus: number; head: string; chest: string; legs: string; feet: string };
+  /** Time spent in the world, in seconds. */
+  playSeconds: number;
 }
 
 export interface CreateCharacterRequest {
   name: string;
   classId: string;
+  look: CharacterLook;
+  /** One of TUNIC_COLORS. */
+  color: number;
 }
 
 export interface LeaderboardEntry {
