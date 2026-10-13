@@ -174,7 +174,7 @@ export interface MobRuntime {
 const MAX_QUEUED_INPUTS = 20;
 
 export class Game {
-  readonly map: WorldMap;
+  map: WorldMap;
   readonly playerRuntime = new Map<string, PlayerRuntime>();
   readonly mobRuntime = new Map<string, MobRuntime>();
   readonly lootContents = new Map<string, LootContents>();
@@ -402,6 +402,17 @@ export class Game {
     if (!player || !runtime || !this.zone.pvp) return;
     runtime.protectedUntil = this.time + SPAWN_PROTECTION_MS;
     player.protected = true;
+  }
+
+  /**
+   * The map editor saved this zone: switch to the new map. Anyone now standing inside a wall
+   * is moved to the spawn point. (Mob spawn areas change with the next room.)
+   */
+  reloadMap() {
+    this.map = zoneLayout(this.zone.id).map;
+    this.state.players.forEach((player) => {
+      if (collides(this.map, player.x, player.y)) this.placeAtSpawn(player);
+    });
   }
 
   placeAtSpawn(player: Player) {

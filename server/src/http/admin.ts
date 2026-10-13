@@ -15,7 +15,7 @@ import { clockInfo, setWorldClock } from "../game/worldClock";
 
 // GM tools. Every route requires an admin account; every change is written to admin_log.
 
-function requireAdmin(req: Request, res: Response, next: NextFunction) {
+export function requireAdmin(req: Request, res: Response, next: NextFunction) {
   if (!(req as AuthedRequest).account.isAdmin) return fail(res, 403, "Bu işlem için GM yetkisi gerekli");
   next();
 }

@@ -3,8 +3,10 @@ import { getStateCallbacks, type Room } from "colyseus.js";
 import {
   castSpot,
   benchSeats,
+  stallSpotProblem,
   HOME_ZONE,
   darkness,
+  lampLevel,
   TOWN_BENCHES,
   type Bench,
   horseSpeedBonus,
@@ -150,10 +152,10 @@ import { INTERPOLATION_DELAY_MS, SnapshotBuffer } from "../entities/SnapshotBuff
 import { floatingText } from "../fx/floatingText";
 import { ringEffect } from "../fx/slash";
 import { preloadImageSprites } from "../gfx/imageSprites";
-import { createTileset, renderTiles, TILESET_KEY } from "../gfx/textures";
-import { drawDecor } from "../gfx/decor";
-import { NightLayer, resetLights } from "../fx/nightLights";
+import { lightAt, NightLayer, setLampLevel } from "../fx/nightLights";
 import { setBossMusic } from "../audio/bossMusic";
+import { loadZoneEdits } from "../net/mapEdits";
+import { buildGround, destroyGround, type Ground } from "../gfx/ground";
 import {
   closeNpcDialog,
   dialogNpc,
@@ -296,6 +298,8 @@ export class WorldScene extends Phaser.Scene {
   private room!: Room;
   private zone!: ZoneDef;
   private map!: WorldMap;
+  /** The ground and the decor drawn on it; rebuilt when the map editor changes the zone. */
+  private ground: Ground | null = null;
   private onTransfer!: (event: TransferEvent) => void;
   private controls!: InputManager;
   private portals: { def: PortalDef; view: EntityView }[] = [];
@@ -375,21 +379,31 @@ export class WorldScene extends Phaser.Scene {
     preloadImageSprites(this);
   }
 
+  /** Builds (or rebuilds) the ground tiles and the decor from the zone's current layout. */
+  private buildGround() {
+    if (this.ground) destroyGround(this, this.ground);
+    const layout = zoneLayout(this.zone.id);
+    this.map = layout.map;
+    this.ground = buildGround(this, layout);
+    setMinimapZone(this.map, this.zone.name);
+    this.cameras.main.setBounds(0, 0, this.map.width * TILE_SIZE, this.map.height * TILE_SIZE);
+  }
+
+  /** The map editor saved this zone: fetch its edits and rebuild the ground under everyone. */
+  private async reloadMap() {
+    await loadZoneEdits(this.zone.id);
+    if (!this.sys.isActive()) return;
+    this.buildGround();
+    hud.showMessage("Harita güncellendi", "info");
+  }
+
   create() {
-    createTileset(this);
-    const tilemap = this.make.tilemap({ data: renderTiles(this.map.tiles), tileWidth: TILE_SIZE, tileHeight: TILE_SIZE });
-    const tileset = tilemap.addTilesetImage(TILESET_KEY, TILESET_KEY, TILE_SIZE, TILE_SIZE, 0, 0)!;
-    tilemap.createLayer(0, tileset, 0, 0)!.setDepth(-1);
-    const decor = zoneLayout(this.zone.id).decor;
-    resetLights(this);
-    if (decor) drawDecor(this, decor);
+    this.buildGround();
     this.nightLayer = new NightLayer(this);
     this.nightLayer.setDarkness(this.zone.dim ?? 0);
     this.fishingLines = new FishingLines(this);
-    setMinimapZone(this.map, this.zone.name);
 
     const camera = this.cameras.main;
-    camera.setBounds(0, 0, this.map.width * TILE_SIZE, this.map.height * TILE_SIZE);
     camera.setRoundPixels(true);
     this.fitZoom();
     const onResize = () => this.fitZoom();
@@ -415,16 +429,16 @@ export class WorldScene extends Phaser.Scene {
       view.sprite.setInteractive({ cursor: cursor("talk") });
       view.sprite.on("pointerdown", (pointer: Phaser.Input.Pointer) => !pointer.event.altKey && this.walkTo(() => npc, NPC_RANGE - 4, () => this.talkTo(npc)));
       const marker = this.add
-        .text(Math.round(npc.x), Math.round(view.headY) - 10, "", {
+        .text(Math.round(npc.x), Math.round(view.headY) - 7, "", {
           fontFamily: "Courier New, monospace",
-          fontSize: "12px",
+          fontSize: "8px",
           fontStyle: "bold",
           color: "#ffd34d",
           stroke: "#000000",
-          strokeThickness: 3,
+          strokeThickness: 2,
         })
         .setOrigin(0.5, 1)
-        .setResolution(4)
+        .setResolution(8)
         .setDepth(100001 + npc.y);
       this.tweens.add({ targets: marker, y: marker.y - 2, duration: 600, yoyo: true, repeat: -1, ease: "Sine.easeInOut" });
       this.npcMarkers.push({ npc, text: marker });
@@ -767,9 +781,13 @@ export class WorldScene extends Phaser.Scene {
     };
     syncPortals();
     $(this.room.state).listen("cleared", syncPortals);
+    let firstClock = true;
     $(this.room.state).listen("clock", (minute: number) => {
       hud.setClock(minute);
       this.nightLayer.setDarkness(Math.max(this.zone.outdoor ? darkness(minute) : 0, this.zone.dim ?? 0));
+      // Lamps outdoors follow the clock (lit 18:00-06:00, fading); indoors they always burn.
+      setLampLevel(this, this.zone.outdoor ? lampLevel(minute) : 1, firstClock);
+      firstClock = false;
     });
 
     $(this.room.state).loot.onAdd((loot: LootView, lootId: string) => {
@@ -938,6 +956,7 @@ export class WorldScene extends Phaser.Scene {
     );
     this.room.onMessage(Msg.SkillError, (event: SkillErrorEvent) => hud.showMessage(event.message));
     this.room.onMessage(Msg.Notice, (event: NoticeEvent) => hud.showMessage(event.message, "info", event.color));
+    this.room.onMessage(Msg.MapChanged, () => void this.reloadMap());
     this.room.onMessage(Msg.Inventory, (event: InventoryEvent) => {
       updateInventory(event);
       renderPotions();
@@ -1316,11 +1335,10 @@ export class WorldScene extends Phaser.Scene {
     this.stalls.delete(sessionId);
   }
 
-  /** Standing on the market square (in a market zone) lets us open a stall. */
+  /** Anywhere in a market zone (not in a doorway or on a townsperson) lets us open a stall. */
   private onMarketTile(local: LocalPlayer) {
-    if (!this.zone.market || local.state.dead) return false;
-    const tile = this.map.tiles[Math.floor((local.view.y - 1) / TILE_SIZE)]?.[Math.floor(local.view.x / TILE_SIZE)];
-    return tile === Tile.Market;
+    if (local.state.dead) return false;
+    return stallSpotProblem(this.zone.id, local.view.x, local.view.y) === null;
   }
 
   /**
@@ -1874,7 +1892,8 @@ export class WorldScene extends Phaser.Scene {
   update(time: number, delta: number) {
     this.updateGuide();
     if (time >= this.nextMinimapAt) {
-      this.nextMinimapAt = time + 100;
+      // Often enough that the ground glides under you as you walk.
+      this.nextMinimapAt = time + 40;
       this.refreshMinimap();
     }
     // Fixed-step simulation at the server's tick rate; clamp so a backgrounded tab doesn't burst.
@@ -1944,8 +1963,22 @@ export class WorldScene extends Phaser.Scene {
     const target = this.targetId ? (this.mobs.get(this.targetId) ?? this.players.get(this.targetId)) : undefined;
     this.targetRing.setVisible(!!target);
     if (target) this.targetRing.setPosition(Math.round(target.view.x), Math.round(target.view.y) - 1);
+    this.applyLampLight();
     // Last, once the camera has followed us this frame.
     this.nightLayer.update(time);
+  }
+
+  /** At night, lamp light falls on everyone near a lamp: warmer colours and a shadow cast away from it. */
+  private applyLampLight() {
+    const light = (view: EntityView) => {
+      const l = lightAt(this, view.x, view.y - 8);
+      view.setLighting(l.amount, l.dx, l.dy);
+    };
+    if (this.local) light(this.local.view);
+    for (const remote of this.players.values()) light(remote.view);
+    for (const remote of this.mobs.values()) light(remote.view);
+    for (const remote of this.minions.values()) light(remote.view);
+    for (const view of this.npcViews.values()) light(view);
   }
 
   private fixedTick() {

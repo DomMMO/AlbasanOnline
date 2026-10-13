@@ -1,6 +1,9 @@
 import { TILE_SIZE } from "./constants";
 import { buildGoblinCave, buildJackLair, buildPvpArena, type DungeonLayout, type SpawnZone } from "./dungeons";
 import { buildForest, FOREST_SPOTS } from "./forest";
+import { NODE_SPAWNS } from "./data/gathering";
+import { NPCS } from "./data/npcs";
+import { applyMapEdits, type MapEdits } from "./mapEdits";
 import { BIG_DUNGEON_IDS, BIG_DUNGEONS, bigDungeonEntrance, type BigDungeonId } from "./bigDungeons";
 import { CAVE_BRIDGE, CAVE_ENTRANCE_TILE, CAVE_TORCHES, generateWorldMap, type WorldMap } from "./map";
 import { buildTown, TOWN_SPOTS } from "./town";
@@ -314,13 +317,63 @@ const BUILDERS: Record<ZoneId, () => DungeonLayout> = {
 };
 
 /** Map, fixed mob placements and spawn points of a zone. Built once and cached. */
+/** Map editor changes per zone (see mapEdits.ts), laid over the generated maps. */
+const zoneEdits = new Map<ZoneId, MapEdits>();
+
 export function zoneLayout(zone: ZoneId): DungeonLayout & { map: WorldMap } {
   let layout = layouts.get(zone);
   if (!layout) {
-    layout = BUILDERS[zone]();
+    layout = applyMapEdits(BUILDERS[zone]() as DungeonLayout & { map: WorldMap }, zoneEdits.get(zone));
     layouts.set(zone, layout);
   }
-  return layout;
+  return layout as DungeonLayout & { map: WorldMap };
+}
+
+/** The zone as generated in code, without map editor changes (the editor draws its edits over this). */
+export function baseZoneLayout(zone: ZoneId): DungeonLayout & { map: WorldMap } {
+  return BUILDERS[zone]() as DungeonLayout & { map: WorldMap };
+}
+
+/**
+ * Sets (or clears, with null) a zone's map editor changes. The next zoneLayout() call builds
+ * a fresh layout; rooms already running keep the map they started with.
+ */
+export function setZoneEdits(zone: ZoneId, edits: MapEdits | null) {
+  if (edits && (edits.objects.length > 0 || edits.size)) zoneEdits.set(zone, edits);
+  else zoneEdits.delete(zone);
+  layouts.delete(zone);
+}
+
+/**
+ * Why a zone cannot be resized to width x height tiles (an NPC, portal or gathering area of the
+ * code would fall outside), or null when it can.
+ */
+export function zoneSizeProblem(zone: ZoneId, width: number, height: number): string | null {
+  const outside = (x: number, y: number) => x >= width * TILE_SIZE || y > height * TILE_SIZE;
+  for (const id of ZONES[zone].npcs) {
+    const npc = NPCS[id];
+    if (npc && outside(npc.x, npc.y)) return `${npc.name} haritanın dışında kalıyor (x ${Math.floor(npc.x / TILE_SIZE)}, y ${Math.floor(npc.y / TILE_SIZE)})`;
+  }
+  for (const portal of ZONES[zone].portals) {
+    if (outside(portal.x, portal.y)) return `"${portal.label}" portalı haritanın dışında kalıyor (x ${Math.floor(portal.x / TILE_SIZE)}, y ${Math.floor(portal.y / TILE_SIZE)})`;
+  }
+  for (const spawn of NODE_SPAWNS[zone] ?? []) {
+    if (spawn.tx >= width || spawn.ty >= height) return `Toplama alanı haritanın dışında kalıyor (x ${spawn.tx}, y ${spawn.ty})`;
+  }
+  return null;
+}
+
+/**
+ * Why a stall cannot be opened at (x, y) in this zone, or null when it can: anywhere in a
+ * market zone (Ana Merkez), only not in a doorway, a gate or on top of a townsperson.
+ */
+export function stallSpotProblem(zone: ZoneId, x: number, y: number): string | null {
+  const def = ZONES[zone];
+  if (!def.market) return "Pazar sadece Ana Merkez'de kurulabilir";
+  const near = (p: { x: number; y: number }) => Math.hypot(p.x - x, p.y - y) < TILE_SIZE * 2.5;
+  if (def.portals.some(near)) return "Kapının önüne tezgâh kurulmaz";
+  if (def.npcs.some((id) => NPCS[id] && near(NPCS[id]))) return "Burada biri duruyor; biraz öteye kur";
+  return null;
 }
 
 export function isZoneId(value: unknown): value is ZoneId {

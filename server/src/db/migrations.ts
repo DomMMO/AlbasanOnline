@@ -207,6 +207,50 @@ const MIGRATIONS: { version: number; name: string; sql: string }[] = [
       ALTER TABLE characters ADD COLUMN horse JSONB NOT NULL DEFAULT '{}';
     `,
   },
+  {
+    version: 16,
+    name: "map editor",
+    sql: `
+      -- GM map editor: objects laid over a zone's generated map (shared/src/mapEdits.ts)
+      CREATE TABLE map_edits (
+        zone       TEXT PRIMARY KEY,
+        data       JSONB NOT NULL,
+        updated_by INT REFERENCES accounts(id) ON DELETE SET NULL,
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+      );
+    `,
+  },
+  {
+    version: 17,
+    name: "tile art",
+    sql: `
+      -- GM uploaded tile images (shared/src/tileArt.ts), one square PNG per slot
+      CREATE TABLE tile_art (
+        key        TEXT PRIMARY KEY,
+        png        BYTEA NOT NULL,
+        size       INT NOT NULL,
+        updated_by INT REFERENCES accounts(id) ON DELETE SET NULL,
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+      );
+    `,
+  },
+  {
+    version: 18,
+    name: "tile art history",
+    sql: `
+      -- Earlier versions of each uploaded tile image, so a GM can go back to one
+      CREATE TABLE tile_art_history (
+        id          SERIAL PRIMARY KEY,
+        key         TEXT NOT NULL,
+        png         BYTEA NOT NULL,
+        size        INT NOT NULL,
+        uploaded_by INT REFERENCES accounts(id) ON DELETE SET NULL,
+        uploaded_at TIMESTAMPTZ NOT NULL,
+        replaced_at TIMESTAMPTZ NOT NULL DEFAULT now()
+      );
+      CREATE INDEX tile_art_history_key ON tile_art_history (key, replaced_at DESC);
+    `,
+  },
 ];
 
 export async function runMigrations() {

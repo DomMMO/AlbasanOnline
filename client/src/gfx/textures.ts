@@ -2,209 +2,32 @@ import Phaser from "phaser";
 import { ITEMS, mulberry32, Tile, TILE_COUNT, TILE_SIZE, type Appearance } from "../../../shared/src";
 import { ensureImageAnims, IMAGE_SPRITES, imageTextureKey } from "./imageSprites";
 import { humanoidFrames } from "./humanoid";
+import { tileArt, tileArtResolution } from "./tileArt";
+import { buildTileset } from "./tilePainter";
 
 // Placeholder pixel art drawn in code, so we need no asset files yet.
 // Swap these for real sprite sheets later; callers only see texture/animation keys.
 
 export const TILESET_KEY = "tiles";
 
+export { renderTiles, tileBaseColor, TOWN_WALL_FACE_TILE, WALL_FACE_TILE, WOOD_WALL_FACE_TILE } from "./tilePainter";
+
 /**
- * Render-only tile: a cave wall with floor below it, i.e. the rock face the camera
- * looks at. Collision still treats it as Tile.CaveWall.
+ * The ground of a scene: a tilemap layer of `tiles` (renderTiles indexes). With uploaded tile
+ * art bigger than TILE_SIZE the tileset is that many pixels per tile and the layer is scaled
+ * down, so the map keeps its world size.
  */
-export const WALL_FACE_TILE = TILE_COUNT;
-/** Render-only tile: the front face of the town wall. */
-export const TOWN_WALL_FACE_TILE = TILE_COUNT + 1;
-/** Render-only tile: the front of a timbered wall indoors (log courses, wainscot). */
-export const WOOD_WALL_FACE_TILE = TILE_COUNT + 2;
-const RENDER_TILE_COUNT = TILE_COUNT + 3;
-
-/** Tile indexes to draw for a map (adds wall faces, hides blockers under decor). */
-export function renderTiles(tiles: Tile[][]): number[][] {
-  return tiles.map((row, y) =>
-    row.map((tile, x) => {
-      if (tile === Tile.CaveWall && tiles[y + 1]?.[x] === Tile.CaveFloor) return WALL_FACE_TILE;
-      if (tile === Tile.Wall && tiles[y + 1]?.[x] !== undefined && tiles[y + 1][x] !== Tile.Wall) return TOWN_WALL_FACE_TILE;
-      if (tile === Tile.WoodWall && tiles[y + 1]?.[x] !== undefined && tiles[y + 1][x] !== Tile.WoodWall) return WOOD_WALL_FACE_TILE;
-      // Under buildings, lamps and the fountain: draw whatever ground surrounds it.
-      if (tile === Tile.Solid) return groundAround(tiles, x, y);
-      return tile;
-    }),
-  );
+export function createGroundLayer(scene: Phaser.Scene, tiles: number[][]) {
+  createTileset(scene);
+  const size = TILE_SIZE * tileArtResolution();
+  const tilemap = scene.make.tilemap({ data: tiles, tileWidth: size, tileHeight: size });
+  const layer = tilemap.createLayer(0, tilemap.addTilesetImage(TILESET_KEY, TILESET_KEY, size, size, 0, 0)!, 0, 0)!;
+  return layer.setScale(TILE_SIZE / size).setDepth(-1);
 }
-
-function groundAround(tiles: Tile[][], x: number, y: number): Tile {
-  // The market fence stands on the market's bricks, corners included.
-  for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (tiles[y + dy]?.[x + dx] === Tile.Market) return Tile.Market;
-  for (let r = 1; r < 6; r++) {
-    for (const [dx, dy] of [[0, r], [-r, 0], [r, 0], [0, -r]]) {
-      const t = tiles[y + dy]?.[x + dx];
-      if (t === Tile.Cobble || t === Tile.Plaza || t === Tile.Market || t === Tile.Grass || t === Tile.Path || t === Tile.DarkGrass || t === Tile.WoodFloor) return t;
-    }
-  }
-  return Tile.Cobble;
-}
-
-const TILE_COLORS: Record<Tile, { base: string; speckle: string[] }> = {
-  [Tile.Grass]: { base: "#4f8a3c", speckle: ["#5c9a47", "#447a33"] },
-  [Tile.GrassAlt]: { base: "#4a8238", speckle: ["#6aa852", "#3d6f2e"] },
-  [Tile.Path]: { base: "#b89a6a", speckle: ["#a88b5c", "#c7aa7a"] },
-  [Tile.Water]: { base: "#3466a8", speckle: ["#4a7fc0", "#2b5890"] },
-  [Tile.Tree]: { base: "#4f8a3c", speckle: ["#447a33"] },
-  [Tile.Flower]: { base: "#4f8a3c", speckle: ["#5c9a47"] },
-  [Tile.CaveFloor]: { base: "#3a332d", speckle: ["#453d36", "#2f2924", "#4d443c"] },
-  [Tile.CaveWall]: { base: "#141211", speckle: ["#1b1817", "#0e0d0c"] },
-  [Tile.Cobble]: { base: "#77716a", speckle: ["#837c74", "#6a645d"] },
-  [Tile.Plaza]: { base: "#b3aa98", speckle: ["#bfb6a4", "#a59c8a"] },
-  [Tile.Market]: { base: "#a5734a", speckle: ["#b07d52", "#956641"] },
-  [Tile.Wall]: { base: "#8a8478", speckle: ["#958f83", "#7c766b"] },
-  [Tile.Solid]: { base: "#77716a", speckle: ["#837c74"] },
-  [Tile.DarkGrass]: { base: "#2f5a2c", speckle: ["#386a33", "#264a24", "#3f5a2a"] },
-  [Tile.Bridge]: { base: "#94643a", speckle: ["#a0703f", "#86592f"] },
-  [Tile.WoodFloor]: { base: "#7a5233", speckle: ["#845a38", "#6e4a2d"] },
-  [Tile.WoodWall]: { base: "#3e2a1a", speckle: ["#46301e", "#352416"] },
-};
-/** A tile's main colour (the minimap paints one pixel of it per tile). */
-export function tileBaseColor(tile: Tile): string {
-  return TILE_COLORS[tile].base;
-}
-
-const WALL_FACE_COLORS = { base: "#3b3430", speckle: ["#4a423d", "#2c2724"] };
-const TOWN_WALL_FACE_COLORS = { base: "#6b655b", speckle: ["#746e64", "#625c53"] };
-const WOOD_WALL_FACE_COLORS = { base: "#5a3c24", speckle: ["#64432a", "#4e341f"] };
 
 export function createTileset(scene: Phaser.Scene) {
   if (scene.textures.exists(TILESET_KEY)) return;
-  const canvas = scene.textures.createCanvas(TILESET_KEY, TILE_SIZE * RENDER_TILE_COUNT, TILE_SIZE)!;
-  const ctx = canvas.context;
-  const rand = mulberry32(42);
-  const px = (x: number, y: number, color: string, w = 1, h = 1) => {
-    ctx.fillStyle = color;
-    ctx.fillRect(x, y, w, h);
-  };
-
-  for (let t = 0; t < RENDER_TILE_COUNT; t++) {
-    const ox = t * TILE_SIZE;
-    const { base, speckle } =
-      t === WALL_FACE_TILE ? WALL_FACE_COLORS : t === TOWN_WALL_FACE_TILE ? TOWN_WALL_FACE_COLORS : t === WOOD_WALL_FACE_TILE ? WOOD_WALL_FACE_COLORS : TILE_COLORS[t as Tile];
-    px(ox, 0, base, TILE_SIZE, TILE_SIZE);
-    for (let i = 0; i < 14; i++) {
-      px(ox + Math.floor(rand() * TILE_SIZE), Math.floor(rand() * TILE_SIZE), speckle[i % speckle.length]);
-    }
-
-    if (t === Tile.Water) {
-      px(ox + 3, 4, "#8fb8e8", 4, 1);
-      px(ox + 9, 10, "#8fb8e8", 4, 1);
-    } else if (t === Tile.Tree) {
-      px(ox + 7, 11, "#5b3a1e", 2, 4); // trunk
-      px(ox + 2, 2, "#1f4d1f", 12, 9); // canopy shadow
-      px(ox + 3, 1, "#2e6b2a", 10, 9);
-      px(ox + 4, 2, "#3b8236", 5, 4);
-      px(ox + 5, 3, "#4f9a46", 2, 2);
-      px(ox + 4, 15, "#00000033", 8, 1);
-    } else if (t === WALL_FACE_TILE) {
-      // Rock face seen from the front: lit lip at the top, cracks, dark foot where it meets the floor.
-      px(ox, 0, "#5a514a", TILE_SIZE, 2);
-      px(ox, 2, "#463e39", TILE_SIZE, 1);
-      px(ox + 4, 5, "#1f1b19", 1, 5);
-      px(ox + 5, 9, "#1f1b19", 3, 1);
-      px(ox + 11, 4, "#1f1b19", 1, 4);
-      px(ox + 9, 11, "#1f1b19", 4, 1);
-      px(ox, 14, "#221e1c", TILE_SIZE, 2);
-    } else if (t === Tile.Bridge) {
-      // Planks lying across the deck, with gaps and nails.
-      for (let y = 0; y < TILE_SIZE; y += 4) {
-        px(ox, y + 3, "#4a2e16", TILE_SIZE, 1);
-        px(ox, y, "#b07b48", TILE_SIZE, 1);
-        px(ox + ((y * 5) % 11) + 2, y + 1, "#6b4423", 3, 1);
-        px(ox + 1, y + 1, "#2a2a2a");
-        px(ox + 14, y + 1, "#2a2a2a");
-      }
-    } else if (t === Tile.Cobble || t === Tile.Solid) {
-      // Rounded cobbles in offset rows, dark mortar between them.
-      for (const [sx, sy, w] of [[0, 0, 5], [6, 0, 5], [12, 0, 4], [3, 5, 5], [9, 5, 6], [0, 10, 4], [5, 10, 5], [11, 10, 5]] as const) {
-        px(ox + sx, sy + 4, "#5d5852", w, 1);
-        px(ox + sx + w - 1, sy, "#5d5852", 1, 5);
-        px(ox + sx + 1, sy + 1, "#8d867d", Math.max(1, w - 3), 1);
-      }
-    } else if (t === Tile.Plaza) {
-      // Large square slabs.
-      px(ox, 7, "#968d7c", TILE_SIZE, 1);
-      px(ox + 7, 0, "#968d7c", 1, TILE_SIZE);
-      px(ox, 15, "#968d7c", TILE_SIZE, 1);
-      px(ox + 15, 0, "#968d7c", 1, TILE_SIZE);
-      px(ox + 1, 1, "#c9c0ae", 3, 1);
-      px(ox + 9, 9, "#c9c0ae", 3, 1);
-    } else if (t === Tile.Market) {
-      // Brick herringbone so the market square stands out.
-      for (let row = 0; row < 4; row++) {
-        const y0 = row * 4;
-        px(ox, y0 + 3, "#7e5333", TILE_SIZE, 1);
-        const shift = row % 2 === 0 ? 0 : 4;
-        px(ox + shift, y0, "#7e5333", 1, 3);
-        px(ox + shift + 8, y0, "#7e5333", 1, 3);
-        px(ox + shift + 1, y0, "#bd8a5e", 3, 1);
-      }
-    } else if (t === Tile.Wall) {
-      // Wall walk seen from above: stone blocks with a parapet edge.
-      px(ox, 0, "#a39d90", TILE_SIZE, 2);
-      px(ox, 7, "#6f695e", TILE_SIZE, 1);
-      px(ox + 5, 2, "#6f695e", 1, 5);
-      px(ox + 11, 8, "#6f695e", 1, 8);
-      px(ox, 15, "#6f695e", TILE_SIZE, 1);
-    } else if (t === TOWN_WALL_FACE_TILE) {
-      // Front of the town wall: brick courses and a lit top edge.
-      px(ox, 0, "#9b9588", TILE_SIZE, 2);
-      for (const y0 of [5, 9, 13]) px(ox, y0, "#4f4a43", TILE_SIZE, 1);
-      for (const [bx, by] of [[4, 2], [12, 2], [0, 6], [8, 6], [4, 10], [12, 10], [8, 14]]) px(ox + bx, by, "#4f4a43", 1, 3);
-      px(ox, 15, "#3a3631", TILE_SIZE, 1);
-    } else if (t === Tile.WoodFloor) {
-      // Long boards running left to right, joints staggered, a nail at each end.
-      for (let row = 0; row < 4; row++) {
-        const y0 = row * 4;
-        px(ox, y0 + 3, "#4e331f", TILE_SIZE, 1);
-        px(ox, y0, "#8e6440", TILE_SIZE, 1);
-        const joint = (row * 7 + 3) % TILE_SIZE;
-        px(ox + joint, y0, "#4e331f", 1, 3);
-        px(ox + ((joint + 2) % TILE_SIZE), y0 + 1, "#3a2616");
-        px(ox + ((row * 5 + 9) % 14) + 1, y0 + 2, "#6a472b", 3, 1);
-      }
-    } else if (t === Tile.WoodWall) {
-      // Top of a timbered wall: a thick beam with its end grain.
-      px(ox, 0, "#5a3c24", TILE_SIZE, 2);
-      px(ox, 7, "#2a1c10", TILE_SIZE, 1);
-      px(ox, 15, "#2a1c10", TILE_SIZE, 1);
-      px(ox + 4, 3, "#2a1c10", 1, 3);
-      px(ox + 11, 9, "#2a1c10", 1, 5);
-    } else if (t === WOOD_WALL_FACE_TILE) {
-      // Log courses with dark gaps, lit from above, a wainscot board at the foot.
-      px(ox, 0, "#7a5233", TILE_SIZE, 1);
-      for (const y0 of [4, 8]) {
-        px(ox, y0, "#2a1c10", TILE_SIZE, 1);
-        px(ox, y0 + 1, "#6e4a2d", TILE_SIZE, 1);
-      }
-      px(ox + 5, 1, "#3e2a1a", 1, 2);
-      px(ox + 12, 6, "#3e2a1a", 1, 1);
-      px(ox, 11, "#3a2616", TILE_SIZE, 1);
-      px(ox, 12, "#8e6440", TILE_SIZE, 1);
-      px(ox, 13, "#6e4a2d", TILE_SIZE, 2);
-      px(ox, 15, "#1f150c", TILE_SIZE, 1);
-    } else if (t === Tile.CaveFloor) {
-      px(ox + 3, 11, "#5a5047", 2, 1);
-      px(ox + 11, 5, "#5a5047", 1, 1);
-    } else if (t === Tile.Flower) {
-      for (const [fx, fy, c] of [
-        [3, 4, "#f2d14a"],
-        [10, 3, "#e86a8a"],
-        [6, 10, "#f0f0f0"],
-        [12, 12, "#f2d14a"],
-      ] as const) {
-        px(ox + fx, fy, c);
-        px(ox + fx, fy + 1, "#2f6a28");
-      }
-    }
-  }
-  canvas.refresh();
+  scene.textures.addCanvas(TILESET_KEY, buildTileset(tileArt, tileArtResolution()));
 }
 
 // ---- Sprite templates ------------------------------------------------------

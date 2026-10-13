@@ -130,7 +130,7 @@ Tuşlar **Esc → Menü → Tuş Atamaları** sayfasından değiştirilebilir: 1
 | T | Şehir portalı (bulunduğun yerde açılır) |
 | H | Ata bin / attan in (sağ alttaki at düğmesi de aynısını yapar) |
 | L | PvP sıralaması |
-| M | Mini harita aç/kapat (sağ üst: sarı sen, yeşil grup arkadaşların, beyaz diğer oyuncular, mavi NPC, mor portal) |
+| M | Mini harita aç/kapat (sağ üst: çevrendeki 10 kare, sen ortada; sarı sen, yeşil grup arkadaşların, beyaz diğer oyuncular, mavi NPC, mor portal. Muhafızın tarif ettiği yer, grup arkadaşların ve pingler görünüm dışındaysa kenarda o yöne bakan bir üçgen çıkar) |
 | /davet İsim, /p, /ayril | Grup |
 | /duello İsim | Yanındaki oyuncuyu düelloya davet et |
 | /takas İsim | Yanındaki oyuncuya takas teklif et (ya da hedef çerçevesindeki **Takas**) |
@@ -423,7 +423,11 @@ Kendinden **5 ya da daha çok seviye yüksek** bir oyuncuya yaratıklar saldırm
 
 ### Ana Merkez (şehir)
 
-Hendekle ve iki kat kalın, mazgallı surla çevrili bir kale şehri; mob yok, PvP yok. Köşelerde ve surların ortasında bayraklı burçlar var. Tek giriş doğudaki **kale kapısı**: iki burcun arasındaki geçitten ve hendeğin üstündeki asma köprüden geçilir (geçitte surun altından yürürsün). Kuzeyde taret ve bayraklarıyla **İç Kale** var; kapısında iki muhafız bekler. Ortada oval, çeşmeli bir meydan, güneyde pazar meydanı var. Dükkânlar sıraya dizilmez, kıvrılan sokaklara dağılmıştır: silahçı kapı caddesinde, iksirci arka sokakta, parşömenci İç Kale'nin yanında, demirci batıdaki demirci sokağında, kuyumcu pazara inen yolda, depo pazarın doğusunda. Aralarda evler, kışla, kuyu, fıçılar, sandıklar, saman balyaları ve fenerler var; kuzeydoğudaki kumlu meydanda Kan Arenası portalı durur.
+Bulutların üstünde **uçan bir adada** kurulu kale şehri; mob yok, PvP yok. Adanın kenarları yuvarlak ve düzensizdir; güneye bakan kenarların altında kayalık, adanın güneybatısındaki göletten akan derenin döküldüğü yerde şelale var, altında bulutlar süzülür (gökyüzü `Tile.Sky`, yürünemez). Şehri iki kat kalın, mazgallı, **yuvarlağa yakın ve dalgalı** bir sur çevirir (`CASTLE`, `shared/src/town.ts`); surun üstünde bayraklı burçlar, **doğu** ve **batı** kapılarında ikişer kule var. Doğu kapısından çıkan yol adanın doğu burnundaki Başlangıç Vadisi kapısına gider; ondan güneye ayrılan Arnavut kaldırımı yol surun dışından dolanıp güney burnundaki Liman kapısına iner. Sur içi eski şehrin iki katından büyüktür. Kuzeyde **İç Kale** (kapısında iki muhafız), ortada çeşmeli oval meydan ve bankları, güneydoğuda **at çiftliği** (Seyis Yusuf, sur içinde), kuzeybatıda Kan Arenası'nın kumlu avlusu var. Dükkânlar kıvrılan sokaklara dağılmıştır: silahçı ve kışla doğu kapısında, demirci batı kapısında, iksirci kuzeybatıda, parşömenci İç Kale'nin yanında, kuyumcu ve zanaatkâr güneybatıda, depo güneydoğuda. Ayrı bir pazar meydanı yok: **tezgâh şehrin her yerinde açılır** (kapı ağızlarında ve bir NPC'nin dibinde açılmaz). Sur dışı büyük, gölgeli ağaçlarla kaplı çayırlıktır. Kale avlusunun köşesinde antrenman kuklaları durur.
+
+Şehrin çizimleri kodla piksel piksel boyanır (`client/src/gfx/sprites.ts`, `pixelArt.ts`): ahşap karkaslı, kiremit çatılı evler (mahya yatay ya da önden arkaya: çatılar farklı yönlere bakar; derin evler iki katlı), kümeli taçlı büyük ağaçlar, çalılar, kuyu, kukla, fıçı, sandık ve saman; ışık sol üstten gelir, gölgeler sağ alta düşer, her şeyin koyu bir dış hattı vardır. Çimen karelerinin konuma göre seçilen varyantları vardır. Kaldırım ve meydan taşları kare kare değil, birkaç karelik dikişsiz bir taş deseninden kesilir (her taş ayrı biçimde, kare sınırlarını aşar). Çimen, kaldırım/meydan/toprak yol kenarlarında taşın üstüne düzensiz dillerle taşar (`grassFringe`, `client/src/gfx/ground.ts`). Kaldırımın meydana değdiği kenarda düzgün bir bordür (kenar taşı sırası) vardır. İç Kale masalsı, çok kuleli bir saraydır: arkada yüksek bir ana kule ve yanında iki kule, ortada mavi çatılı kale bloğu ve köşe kuleleri, önde mazgallı sur, kapı kuleleri ve büyük köşe kuleleri; hepsinin mavi sivri külahı ve bayrağı, kapıda fenerler, surda sancaklar vardır. Atlar (çiftlikte ve binekte) aynı tarzda piksel piksel boyanır.
+
+**Işıklar:** Fenerler, meşaleler ve evlerin pencereleri açık havada saate bağlıdır: 18:00'de yumuşakça yanmaya başlar (18:45'te tam), sabaha doğru söner, 06:00'da kapalıdır (`lampLevel`, `shared/src/daynight.ts`). Kapalı mekânlarda hep yanar, kamp ateşleri hep yanar. Gece bir fenerin yakınındaki karakterlere sıcak ışık düşer ve fenerin tersine uzanan bir gölgeleri olur (`lightAt`, `client/src/fx/nightLights.ts`).
 
 | NPC | Satar / yapar |
 | --- | --- |
@@ -433,8 +437,8 @@ Hendekle ve iki kat kalın, mazgallı surla çevrili bir kale şehri; mob yok, P
 | **İksirci Zehra** | Can ve mana iksirleri |
 | **Demirci Hasan** | Ekipman yükseltme (aşağıya bakın) |
 | **Kuyumcu Selin** | Bakır ve gümüş yüzük, kolye, küpe |
-| **Depocu Hatice** (pazarın doğusundaki ambar) | Depo: eşya ve altın saklama (aşağıya bakın) |
-| **Komutan Baran** (kale kapısının içi) | Görevler |
+| **Depocu Hatice** (güneydoğudaki ambar) | Depo: eşya ve altın saklama (aşağıya bakın) |
+| **Komutan Baran** (doğu kapısının içi, kışlanın önü) | Görevler |
 | **Bilge Ozan** (çeşmenin batısı) | Görevler, hikaye |
 
 - Her NPC'ye satış yapılabilir (dükkân açıkken envanterde sağ tık).
@@ -469,7 +473,7 @@ Kalın olanlar çıkınca tüm sunucuya duyurulur. Başkalarının oltasını, �
 
 ### Pazar (oyuncudan oyuncuya satış)
 
-Knight Online tarzı tezgâh. Şehrin güneyindeki **tuğla döşeli pazar meydanına** gir (etrafı çitle çevrili; girişler kuzeyde **PAZAR** tabelasının altında ve doğu/batı kenarlarının ortasında. Alan yerde altın çizgiyle de belli ve mini haritada altın renkte görünür; içine adım atınca ekranda haber verilir), ekranda çıkan **Pazar Kur** düğmesine bas.
+Knight Online tarzı tezgâh. Ana Merkez'in **istediğin yerinde** (kapı ağızlarında ve bir NPC'nin dibinde değil) ekranda çıkan **Pazar Kur** düğmesine bas.
 
 1. Tezgâha bir ad ver (boş bırakırsan "İsim'in Tezgâhı" olur).
 2. Envanterde item'a sağ tıkla ya da pencereye sürükle (en fazla 8 item), her birine **birim fiyat** yaz.
@@ -553,6 +557,34 @@ Jack'in görselleri hazır bir sprite paketinden gelir (`client/src/assets/`, ka
 - Sadece GM yetkili hesaplar kullanabilir. Yetki vermek/almak için: `npm run make-admin -w server -- <kullanıcı-adı>` (almak için sonuna `--remove`).
 - Oyuncu oyundaysa değişiklik anında oyuna yansır ve oyuncuya bildirim gider; değilse doğrudan veritabanına yazılır.
 - Her işlem `admin_log` tablosuna kaydedilir (kim, kime, ne zaman, ne yaptı) ve panelde karakterin altında görünür.
+
+### Harita editörü
+
+`http://localhost:5173/editor.html` (GM panelindeki **Harita Editörü** bağlantısı). Bölgenin kodda üretilen haritası altta çizilir; editörde konan objeler üç katmanda üstüne serilir: **Zemin** (çimen, yol, kaldırım…), **Engel** (duvar, ağaç, kaya, su, görünmez engel) ve **Doğuş** (oyuncu doğuşu, yaratık doğuşu: yaratık, adet, yarıçap).
+
+- Paletten sürükle-bırak ya da paletten seçip haritada sürükleyerek boya; 16/32/64 px ızgaraya oturur. `Q` farenin altındaki kareyi/objeyi paletten seçer (pipet). Tıkla seç, sürükle taşı; `Delete` sil, `R` döndür, `Ctrl+Z` geri al, `Ctrl+D` kopyala, oklar kaydır, `Ctrl+S` kaydet. Katmanlar gizlenebilir/kilitlenebilir; JSON olarak indirilip yüklenebilir.
+- Editör haritayı oyunun kendi koduyla (Phaser, `client/src/gfx/ground.ts`) ve düzenlemeler uygulanmış haliyle çizer: kale, kuleler ve binalar oyundaki gibi ayakta görünür. `Engeller` kutusu hareketi engelleyen kareleri tarar. Boyanan kare, tamamen örttüğü eski düzenlemelerin yerini alır.
+- **Kale:** Kale Duvarı kareleri birbirine bağlanır; köşe, mazgal ve ön yüz komşulara göre oyunda kendiliğinden çizilir. Köşelere 4×4 **Kule** konabilir. Boyamak hiçbir süsü silmez; bina, kule, çeşme gibi bir süsü kaldırmak için **Süs Kaldır** (`K`) alanı çizilir (kaldırılan kulenin yerinde kale duvarı kalır).
+- Kaydedince açık odalar haritayı hemen değiştirir (`Msg.MapChanged`); içerdekiler yeni zemini görür, duvarın içinde kalan doğuş noktasına alınır. Yaratık alanları bölge yeniden açılınca değişir.
+- **Süsler (level design):** "Süs" katmanında evler (3 boy; çatı rengi, mahya yönü, baca, ölçü ayarlanır), büyük ağaç, çalı, otlar ve çiçekler, fener, meşale, sancak, fıçı, sandık, çuval, saman, kuyu, kukla, araba, örs ve kamp ateşi konur, taşınır, silinir. Haritanın kendi süsleri (kodda tanımlı evler, otlar, fenerler...) tıklanınca seçilir: `Delete` ile kaldırılır, sürüklenince taşınır (aslı gizlenir, kopyası yeni yerine konur; eski yerindeki engel kalkar, zemin çevresine göre dolar). Ev, fener, ağaç gibi süslerin altı kendiliğinden engel olur; ot, çalı ve tabelanın içinden geçilir. Sunucu süs verisini sıkı doğrular (`sanitizeDecor`).
+- **Engeller:** Görünmez Engel (`B`) bütün kareyi, Yarım Engel (`H`) karenin farenin yakın olduğu kenardaki yarısını (üst, alt, sol ya da sağ; `R` ile döner), Küçük Engel (`V`) farenin olduğu çeyreği (8×8 px) kapatır; Engel Kaldır (`X`) görünmez engelleri açar (duvar, ağaç ve suya dokunmaz). Bunlar süsleri silmez. Çeyrekler `WorldMap.blockMask` ile tutulur ve sunucu ile istemci aynı `collides` fonksiyonunu kullanır.
+- **Harita boyutu:** sağ ve alt kenardan büyür/küçülür (kenarı sürükle ya da sağ paneldeki Harita boyutu); sol üst köşe sabit kalır, böylece koddaki NPC, portal ve yaratık konumları değişmez. Yeni alan seçilen dolguyla dolar. NPC, portal ya da toplama alanı dışarıda kalacaksa sunucu reddeder.
+- **Kare görselleri:** kodla çizilen karelerin yerine PNG yüklenebilir (sol panel, Kare görselleri). Zemin kareleri 16×16; kale parçaları kendi şeklinde: duvar üstü 16×16, duvar ön yüzü 16×24, kule 64×110 (hepsinin 2-4 katı da olur), en fazla 256 KB. Bir satırın üstüne gelince o parçanın haritada nerede çizildiği yanar; `tile_art` tablosunda tutulur, `/api/tiles` ile sunulur. Büyük görsel varsa tileset o çözünürlükte kurulur ve harita ölçeklenir. Oyunda sayfa yenilenince görünür. Her kare için şu anki görsel ve kodla çizilen orijinal indirilebilir; her yeni yüklemede öncekisi `tile_art_history`'de saklanır (kare başına son 20) ve geri yüklenebilir.
+- Güvenlik sunucudadır: `/api/admin/maps` her istekte oturum token'ını ve GM yetkisini kontrol eder (`requireAuth` + `requireAdmin`), gelen her obje `validateMapEdits` ile sıkı doğrulanır (tür, katman, harita sınırı, boyut, dönüş, tek oyuncu doğuşu, boss olmayan yaratık). Sayfanın kendini GM olmayanlara gizlemesi sadece görünüştür.
+- Kayıt `map_edits` tablosuna yazılır (bölge başına bir JSON). Aynı `applyMapEdits` sunucuda ve istemcide çalışır, böylece çarpışma iki tarafta aynıdır. Yeni kayıt, bölgede o andan sonra açılan odalara ve bölgeye yeniden giren oyunculara uygulanır.
+
+```json
+{
+  "version": 1,
+  "zone": "town",
+  "grid": 32,
+  "objects": [
+    { "id": "o1", "type": "wall", "layer": "collider", "x": 10, "y": 10, "z": 1, "w": 2, "h": 2, "rotation": 90 },
+    { "id": "o2", "type": "mob_spawn", "layer": "spawn", "x": 20, "y": 20, "z": 1, "w": 1, "h": 1, "rotation": 0,
+      "props": { "mob": "slime", "count": 3, "radius": 3 } }
+  ]
+}
+```
 
 ## Yapı
 

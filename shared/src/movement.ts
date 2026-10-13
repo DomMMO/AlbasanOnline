@@ -1,5 +1,5 @@
 import { GALLOP_SPEED_MULTIPLIER, MOUNT_SPEED_MULTIPLIER, PLAYER_SPEED, TILE_SIZE } from "./constants";
-import { isBlockedTile, type WorldMap } from "./map";
+import { blocksRect, type WorldMap } from "./map";
 import { Direction, type Axis } from "./protocol";
 
 // The single movement function used by both the server (authoritative) and the
@@ -10,13 +10,17 @@ import { Direction, type Axis } from "./protocol";
 export const PLAYER_HITBOX = { halfWidth: 5, height: 6 };
 
 export function collides(map: WorldMap, x: number, y: number): boolean {
-  const left = Math.floor((x - PLAYER_HITBOX.halfWidth) / TILE_SIZE);
-  const right = Math.floor((x + PLAYER_HITBOX.halfWidth - 0.001) / TILE_SIZE);
-  const top = Math.floor((y - PLAYER_HITBOX.height) / TILE_SIZE);
+  const x0 = x - PLAYER_HITBOX.halfWidth;
+  const x1 = x + PLAYER_HITBOX.halfWidth;
+  const y0 = y - PLAYER_HITBOX.height;
+  const left = Math.floor(x0 / TILE_SIZE);
+  const right = Math.floor((x1 - 0.001) / TILE_SIZE);
+  const top = Math.floor(y0 / TILE_SIZE);
   const bottom = Math.floor((y - 0.001) / TILE_SIZE);
   for (let ty = top; ty <= bottom; ty++) {
     for (let tx = left; tx <= right; tx++) {
-      if (isBlockedTile(map, tx, ty)) return true;
+      // Whole tiles, or only the blocked quarters of a tile the map editor split.
+      if (blocksRect(map, tx, ty, x0, y0, x1, y)) return true;
     }
   }
   return false;

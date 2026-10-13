@@ -27,4 +27,6 @@ export * from "./forest";
 export * from "./harbor";
 export * from "./keepHall";
 export * from "./zones";
+export * from "./mapEdits";
+export * from "./tileArt";
 export * from "./api";

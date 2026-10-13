@@ -61,16 +61,18 @@ export class EntityView {
     if (appearance.type === "slime") this.sprite.anims.play(`${this.set.key}-idle`);
 
     if (name) {
+      // Small and fine: the camera zooms the world 2-4x, so the text is drawn at a high
+      // resolution to stay sharp.
       this.label = scene.add
         .text(x, y, name, {
           fontFamily: '"Cloister Black TR", serif',
-          fontSize: "10px",
+          fontSize: "5px",
           color: nameColor,
           stroke: "#000000",
-          strokeThickness: 2,
+          strokeThickness: 1,
         })
         .setOrigin(0.5, 1)
-        .setResolution(4);
+        .setResolution(10);
     }
     this.hpBar = scene.add.graphics().setVisible(false);
     this.setPosition(x, y);
@@ -221,18 +223,18 @@ export class EntityView {
     const text = scene.add
       .text(0, 0, "GM", {
         fontFamily: '"Cloister Black TR", serif',
-        fontSize: "11px",
-        color: "#ffdd55",
-        stroke: "#7a0a0a",
-        strokeThickness: 3,
+        fontSize: "6px",
+        color: "#e6c46a",
+        stroke: "#3a1a0a",
+        strokeThickness: 1,
       })
       .setOrigin(0.5, 1)
-      .setResolution(4)
-      .setShadow(0, 0, "#ff3b3b", 6, true, true);
+      .setResolution(10);
+    // A steady little bounce, never far from the name.
     const bounce = { y: 0 };
     const tween = scene.tweens.add({
       targets: bounce,
-      y: -4,
+      y: -2,
       duration: 320,
       yoyo: true,
       repeat: -1,
@@ -254,7 +256,8 @@ export class EntityView {
       this.crown.sparkles.setPosition(px, y).setDepth(depth + 0.2);
       y -= 10;
     }
-    if (this.gmTag) this.gmTag.text.setPosition(px, y + this.gmTag.bounce.y).setDepth(depth + 0.3);
+    // Snug on top of the name.
+    if (this.gmTag) this.gmTag.text.setPosition(px, y + 2 + this.gmTag.bounce.y).setDepth(depth + 0.3);
   }
 
   setPosition(x: number, y: number) {
@@ -484,6 +487,40 @@ export class EntityView {
   }
 
   private baseTint: number | null = null;
+  /** Warm lamp light falling on it at night (a tint), and the shadow that light casts. */
+  private lightTint: number | null = null;
+  private lightShadow?: Phaser.GameObjects.Ellipse;
+
+  /**
+   * Night lighting: how much lamp light falls on it (0..1) and the way it falls (unit vector
+   * from the light): the more light, the warmer it looks and the longer its shadow, cast away
+   * from the lamp along the ground.
+   */
+  setLighting(amount: number, dx: number, dy: number) {
+    const lit = amount > 0.03;
+    const k = Math.min(1, amount);
+    const tint = lit ? mixColor(0xffffff, 0xffbe78, Math.min(1, k * 1.1)) : null;
+    if (tint !== this.lightTint) {
+      this.lightTint = tint;
+      this.restoreTint();
+    }
+    if (!lit || (dx === 0 && dy === 0)) {
+      this.lightShadow?.setVisible(false);
+      return;
+    }
+    const scene = this.sprite.scene;
+    this.lightShadow ??= scene.add.ellipse(0, 0, 14, 5, 0x000000, 1);
+    const len = 9 + 13 * k;
+    const feetX = Math.round(this.rawX);
+    const feetY = Math.round(this.rawY);
+    this.lightShadow
+      .setVisible(this.sprite.visible)
+      .setPosition(feetX + dx * len * 0.5, feetY - 1 + dy * len * 0.3)
+      .setSize(len, 5)
+      .setRotation(Math.atan2(dy * 0.6, dx))
+      .setAlpha(0.45 * k)
+      .setDepth(feetY - 0.05);
+  }
 
   /** Persistent colour tint (e.g. an enraged boss), restored after hit flashes. */
   setBaseTint(tint: number | null) {
@@ -493,8 +530,9 @@ export class EntityView {
 
   private restoreTint() {
     if (!this.sprite.active) return;
-    if (this.baseTint === null) this.sprite.clearTint();
-    else this.sprite.setTint(this.baseTint);
+    const tint = this.baseTint ?? this.lightTint;
+    if (tint === null) this.sprite.clearTint();
+    else this.sprite.setTint(tint);
   }
 
   /** Brief white flash when hit. */
@@ -540,6 +578,7 @@ export class EntityView {
   }
 
   destroy(fade = false) {
+    this.lightShadow?.destroy();
     this.gallopDust?.destroy();
     this.horse?.destroy();
     this.horse = undefined;
@@ -571,4 +610,10 @@ export class EntityView {
       onComplete: () => this.sprite.destroy(),
     });
   }
+}
+
+/** a mixed towards b by t (0..1), per colour channel. */
+function mixColor(a: number, b: number, t: number): number {
+  const ch = (shift: number) => Math.round(((a >> shift) & 255) + ((((b >> shift) & 255) - ((a >> shift) & 255)) * t));
+  return (ch(16) << 16) | (ch(8) << 8) | ch(0);
 }

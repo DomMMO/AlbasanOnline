@@ -1,8 +1,8 @@
 import Phaser from "phaser";
-import { classOf, CLASSES, Direction, MAX_CHARACTERS_PER_ACCOUNT, TILE_SIZE, zoneLayout, type Appearance, type CharacterSummary, type ClassId, type CharacterLook } from "../../../shared/src";
+import { classOf, CLASSES, Direction, MAX_CHARACTERS_PER_ACCOUNT, TILE_SIZE, TOWN_LOBBY, zoneLayout, type Appearance, type CharacterSummary, type ClassId, type CharacterLook } from "../../../shared/src";
 import { EntityView } from "../entities/EntityView";
 import { drawDecor } from "../gfx/decor";
-import { createTileset, renderTiles, TILESET_KEY } from "../gfx/textures";
+import { createGroundLayer, renderTiles } from "../gfx/textures";
 
 // The login / character select / character creation backdrop: the keep's forecourt in Ana
 // Merkez, drawn with the real town map. The DOM panels (ui/lobby.ts) sit on top; this scene
@@ -10,12 +10,8 @@ import { createTileset, renderTiles, TILESET_KEY } from "../gfx/textures";
 // rotating preview while a new character is being made.
 
 /** Where the characters stand (tile coordinates), left to right: the keep's forecourt, between the lamps. */
-const SLOTS = [
-  { tx: 28, ty: 20.5 },
-  { tx: 32.5, ty: 20.5 },
-  { tx: 37, ty: 20.5 },
-];
-const PREVIEW = { tx: 32.5, ty: 20.8 };
+const SLOTS = TOWN_LOBBY.slots;
+const PREVIEW = TOWN_LOBBY.preview;
 const TURN_ORDER = [Direction.Down, Direction.Left, Direction.Up, Direction.Right];
 const TURN_MS = 1800;
 
@@ -67,10 +63,8 @@ export class LobbyScene extends Phaser.Scene {
   }
 
   create() {
-    createTileset(this);
     const layout = zoneLayout("town");
-    const tilemap = this.make.tilemap({ data: renderTiles(layout.map.tiles), tileWidth: TILE_SIZE, tileHeight: TILE_SIZE });
-    tilemap.createLayer(0, tilemap.addTilesetImage(TILESET_KEY, TILESET_KEY, TILE_SIZE, TILE_SIZE, 0, 0)!, 0, 0)!.setDepth(-1);
+    createGroundLayer(this, renderTiles(layout.map.tiles));
     if (layout.decor) drawDecor(this, layout.decor);
     // Dusk over the castle: a warm-to-dark wash so the characters stand out.
     const dusk = this.add.graphics().setScrollFactor(0).setDepth(200000);

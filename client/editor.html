@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Harita Editörü · RuneBreaker</title>
+    <link rel="stylesheet" href="/src/style.css" />
+    <link rel="stylesheet" href="/src/editor/editor.css" />
+  </head>
+  <body class="editor">
+    <header class="ed-header">
+      <h1>Harita Editörü</h1>
+      <label>Bölge <select id="ed-zone"></select></label>
+      <label>Izgara
+        <select id="ed-grid">
+          <option value="1">16 × 16 (1 kare)</option>
+          <option value="2">32 × 32 (2 kare)</option>
+          <option value="4">64 × 64 (4 kare)</option>
+        </select>
+      </label>
+      <button type="button" id="ed-load" class="secondary" title="Kayıtlı haritayı veritabanından yeniden yükle">Yükle</button>
+      <button type="button" id="ed-save" title="Ctrl+S">Kaydet</button>
+      <button type="button" id="ed-reset" class="secondary" title="Bu bölgenin bütün düzenlemelerini sil">Sıfırla</button>
+      <button type="button" id="ed-export" class="secondary">JSON indir</button>
+      <label class="ed-file secondary">JSON yükle<input type="file" id="ed-import" accept="application/json,.json" hidden /></label>
+      <label title="Hareketi engelleyen kareleri tara"><input type="checkbox" id="ed-blocking" /> Engeller</label>
+      <span id="ed-status" class="muted"></span>
+      <span class="ed-spacer"></span>
+      <span id="ed-user" class="muted"></span>
+      <a href="/admin.html">GM Paneli</a>
+      <a href="/">Oyuna dön</a>
+    </header>
+
+    <p id="ed-error" class="ed-error" hidden></p>
+
+    <main id="ed-main" class="ed-main" hidden>
+      <aside class="ed-panel" id="ed-palette-panel">
+        <h2>Objeler</h2>
+        <p class="muted small">Sahneye sürükle, ya da tıklayıp seç ve haritada sürükleyerek boya (Esc: bırak).</p>
+        <div id="ed-palette"></div>
+
+        <h2>Kare görselleri</h2>
+        <p class="muted small">Kodla çizilen kareler yerine kendi çizimin: PNG; her yuvanın kendi boyutu var (satırda yazar, 2-4 katı da olur; en fazla 256 KB). Oyunda sayfa yenilenince görünür. Bir satırın üstüne gelince haritada nerede kullanıldığı yanar; ⤓ indirir, ⟲ orijinali, boyutu ve eski sürümleri gösterir.</p>
+        <div id="ed-art"></div>
+        <button type="button" id="ed-art-tileset" class="secondary" title="Bütün kareler tek PNG'de, oyundaki sırayla">Tüm kareleri indir</button>
+      </aside>
+
+      <section class="ed-stage">
+        <div id="ed-phaser" class="ed-phaser"></div>
+        <canvas id="ed-canvas"></canvas>
+        <div class="ed-hint muted">
+          Sol tık: seç / taşı · boş yerde sürükle: kaydır · tekerlek: yakınlaştır · Q: farenin altındakini seç · B / H / V / X: engel / yarım / çeyrek / engel kaldır · K: süs kaldır · Delete: sil · R: döndür · Ctrl+Z: geri al · Ctrl+D: kopyala · oklar: kaydır · harita kenarını sürükle: boyutlandır
+        </div>
+        <div id="ed-cursor" class="ed-cursor muted"></div>
+      </section>
+
+      <aside class="ed-panel" id="ed-side">
+        <h2>Harita boyutu</h2>
+        <div id="ed-size"></div>
+
+        <h2>Katmanlar</h2>
+        <div id="ed-layers"></div>
+
+        <h2>Seçili obje</h2>
+        <div id="ed-inspector"><p class="muted">Bir obje seç.</p></div>
+
+        <h2>Bilgi</h2>
+        <div id="ed-info" class="muted small"></div>
+      </aside>
+    </main>
+
+    <dialog id="ed-art-dialog" class="ed-dialog"></dialog>
+
+    <script type="module" src="/src/editor/main.ts"></script>
+  </body>
+</html>
