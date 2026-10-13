@@ -164,6 +164,14 @@ const MIGRATIONS: { version: number; name: string; sql: string }[] = [
       ALTER TABLE characters ADD COLUMN play_seconds INT NOT NULL DEFAULT 0;
     `,
   },
+  {
+    version: 12,
+    name: "life skills",
+    sql: `
+      -- { "mining": { "level": 3, "xp": 20 }, "herbalism": { ... } }; {} = everything at 1
+      ALTER TABLE characters ADD COLUMN life_skills JSONB NOT NULL DEFAULT '{}';
+    `,
+  },
 ];
 
 export async function runMigrations() {

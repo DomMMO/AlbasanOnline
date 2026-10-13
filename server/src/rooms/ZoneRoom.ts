@@ -12,6 +12,8 @@ import {
   type UsePortalMessage,
   type UseTownPortalMessage,
   type SkillRankMessage,
+  type GatherMessage,
+  type MapPingMessage,
   type ZoneDef,
   isAxis,
   Msg,
@@ -61,6 +63,9 @@ import { consumeTicket, issueTicket } from "../game/tickets";
 import { onlineCharacters } from "../game/registry";
 import { TownPortal, WorldState } from "./schema/WorldState";
 import { changeRank, resetRanks } from "../game/talents";
+import { startGather } from "../game/gathering";
+import { isPingKind, sendPing } from "../game/pings";
+import { sortBags } from "../game/items";
 import { readFortune } from "../game/fortune";
 import { quickStorage, storageGold } from "../game/storage";
 import { stopFishing, toggleFishing } from "../game/fishing";
@@ -234,6 +239,18 @@ export class ZoneRoom extends Room<WorldState> {
       if (typeof message?.id === "string" && (message.delta === 1 || message.delta === -1)) changeRank(this.game, client.sessionId, message.id, message.delta);
     });
     this.onMessage(Msg.SkillReset, (client) => resetRanks(this.game, client.sessionId));
+    this.onMessage(Msg.Gather, (client, message: Partial<GatherMessage>) => {
+      if (stallLocked(this.game, client.sessionId)) return;
+      if (typeof message?.nodeId === "string") startGather(this.game, client.sessionId, message.nodeId);
+    });
+    this.onMessage(Msg.SortInventory, (client) => {
+      if (stallLocked(this.game, client.sessionId)) return;
+      sortBags(this.game, client.sessionId);
+    });
+    this.onMessage(Msg.MapPing, (client, message: Partial<MapPingMessage>) => {
+      if (!isPingKind(message?.kind) || !Number.isFinite(message.x) || !Number.isFinite(message.y)) return;
+      sendPing(this.game, client.sessionId, message.kind, Number(message.x), Number(message.y), typeof message.targetId === "string" ? message.targetId : undefined);
+    });
     this.onMessage(Msg.ReadFortune, (client, message: { npcId?: unknown }) => {
       if (typeof message?.npcId === "string") readFortune(this.game, client.sessionId, message.npcId);
     });

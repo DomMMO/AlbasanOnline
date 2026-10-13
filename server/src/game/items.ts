@@ -31,7 +31,7 @@ import { Loot } from "../rooms/schema/WorldState";
 import { broadcastCombat } from "./combat";
 import { broadcastSystem } from "./chat";
 import type { Game } from "./Game";
-import { addItem, equippedItems, hasSpaceFor, indexOfItem, newStack, removeAt, socketedJewels, toView, type ItemStack } from "./inventory";
+import { addItem, equippedItems, hasSpaceFor, indexOfItem, newStack, removeAt, socketedJewels, sortInventory, toView, type ItemStack } from "./inventory";
 import { autoSocket, socketJewel, unsocketJewel } from "./passives";
 import { moveWithStorage } from "./storage";
 import { toggleFishing } from "./fishing";
@@ -295,6 +295,14 @@ export function pickupLoot(game: Game, sessionId: string, lootId: string) {
   contents.items = leftovers;
   if (leftovers.length > 0) notice(game, sessionId, "Envanter dolu");
   else removeLoot(game, lootId);
+  changed(game, sessionId);
+}
+
+/** The bags' "Düzenle" button. */
+export function sortBags(game: Game, sessionId: string) {
+  const ctx = context(game, sessionId);
+  if (!ctx) return;
+  sortInventory(ctx.inv);
   changed(game, sessionId);
 }
 

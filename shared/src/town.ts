@@ -73,6 +73,8 @@ export const TOWN_SPOTS = {
   guardGateSouth: px(54, 31),
   guardKeepWest: px(28, 18),
   guardKeepEast: px(36, 18),
+  /** Zanaatkâr Murat (life skills), next to the jeweler. */
+  craftsman: px(18, 38),
 };
 
 type Building = Extract<Decor, { kind: "building" }>;

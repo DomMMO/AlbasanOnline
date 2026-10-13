@@ -42,6 +42,7 @@ import type { Mob, Player } from "../rooms/schema/WorldState";
 import type { ActiveBuff, Game, MobRuntime, PlayerRuntime } from "./Game";
 import { sendSkillRanks } from "./talents";
 import { syncAuras } from "./auras";
+import { cancelGather } from "./gathering";
 import { bossDamaged, bossDefeated } from "./boss";
 import { dropLoot, refreshStats } from "./items";
 import { questKill } from "./quests";
@@ -655,6 +656,8 @@ export function hitPlayer(game: Game, sourceId: string, sessionId: string, playe
   const guard = game.now() < runtime.guardUntil ? 1 - runtime.guardReduction : 1;
   const buffed = 1 - Math.min(0.6, buffTotals(runtime, game.now()).reductionPct);
   amount = Math.max(1, Math.round(amount * (classOf(player.cls).damageTaken ?? 1) * guard * buffed * (1 - runtime.stats.damageReduction)));
+  // Getting hit breaks a gather in progress.
+  if (runtime.gathering) cancelGather(game, sessionId, "Toplama yarıda kaldı");
   const absorbed = Math.min(player.shield, amount);
   player.shield -= absorbed;
   const taken = amount - absorbed;

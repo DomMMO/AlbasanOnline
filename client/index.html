@@ -199,6 +199,7 @@
         <span class="globe-text" id="hp-globe-text"></span>
       </div>
       <div id="potion-slots"></div>
+      <div id="ping-wheel" hidden></div>
       <button id="mount-button" type="button" tabindex="-1" title="Ata bin (H)" hidden><img alt="" /><span class="slot-key">H</span></button>
       <div id="resource-globe" class="globe rage">
         <div class="globe-orb">
@@ -231,7 +232,10 @@
         </div>
         <div id="stats"></div>
         <div id="inventory-grid"></div>
-        <div class="gold-row"><span class="coin"></span><span id="gold">0</span></div>
+        <div class="gold-row">
+          <span class="coin"></span><span id="gold">0</span>
+          <button type="button" id="inventory-sort" class="secondary" tabindex="-1" title="Eşyaları türüne göre sıralar, yarım yığınları birleştirir">Düzenle</button>
+        </div>
       </div>
 
       <div id="upgrade-window" class="window" hidden>

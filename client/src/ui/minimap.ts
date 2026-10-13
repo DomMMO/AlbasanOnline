@@ -23,7 +23,7 @@ const MINIMAP_COLORS: Partial<Record<Tile, string>> = {
   [Tile.Market]: "#d9a441",
 };
 
-export type MinimapDotKind = "self" | "party" | "player" | "enemy" | "npc" | "portal";
+export type MinimapDotKind = "self" | "party" | "player" | "enemy" | "npc" | "portal" | "ping";
 
 export interface MinimapDot {
   /** World position in pixels. */
@@ -40,6 +40,7 @@ const DOT_STYLE: Record<MinimapDotKind, { color: string; radius: number; order: 
   enemy: { color: "#ff5a5a", radius: 2.5, order: 3 },
   party: { color: "#4cd964", radius: 3, order: 4 },
   self: { color: "#ffe14d", radius: 3, order: 5 },
+  ping: { color: "#ff922b", radius: 4.5, order: 6 },
 };
 
 let ground: HTMLCanvasElement | null = null;

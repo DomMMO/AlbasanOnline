@@ -12,6 +12,7 @@ import {
   sanitizeRanks,
   sanitizeLook,
   type FortuneState,
+  type LifeSkills,
   type SkillRanks,
   type CombatStats,
   type InputMessage,
@@ -37,6 +38,7 @@ import { nightChanged, spawnInitialMobs, updateMobs } from "./mobs";
 import { dismissMinions, updateMinions, type MinionRuntime } from "./minions";
 import { sendSkillRanks } from "./talents";
 import { sendFortuneState } from "./fortune";
+import { cancelGather, sanitizeLifeSkills, sendLifeSkills, spawnGatherNodes, updateGathering } from "./gathering";
 import { loseDuel, updateDuels, type DuelInvite, type DuelState } from "./duel";
 import { cancelTrade, updateTrades, type TradeInvite, type TradeSession } from "./trade";
 import { stopFishing, updateFishing, type FishingState } from "./fishing";
@@ -108,6 +110,12 @@ export interface PlayerRuntime {
   fortune: FortuneState | null;
   /** Last aura list sent to the client (see auras.ts). */
   auraSignature: string;
+  /** Madencilik and Botanik. */
+  lifeSkills: LifeSkills;
+  /** Gathering a vein or herb in progress (moving or getting hit breaks it). */
+  gathering: { nodeId: string; endsAt: number } | null;
+  /** Recent map pings (rate limit). */
+  pingTimes: number[];
   /** The duel we are in (counting down or fighting). */
   duel: DuelState | null;
   /** A duel challenge waiting for our answer. */
@@ -187,6 +195,7 @@ export class Game {
     state.clock = Math.floor(worldMinute());
     this.night = !!zone.outdoor && isNight(state.clock);
     spawnInitialMobs(this);
+    spawnGatherNodes(this);
   }
 
   /** Game time in ms since the room started. All cooldowns/timers use this clock. */
@@ -209,6 +218,7 @@ export class Game {
     this.state.players.forEach((player, sessionId) => this.applyQueuedInputs(sessionId, player, this.playerRuntime.get(sessionId)!));
     updateMobs(this);
     updateMinions(this);
+    updateGathering(this);
     updatePlayerCombat(this);
     updateDuels(this);
     updateTrades(this);
@@ -279,6 +289,9 @@ export class Game {
       buffs: [],
       fortune: character.fortune ?? null,
       auraSignature: "",
+      lifeSkills: sanitizeLifeSkills(character.lifeSkills),
+      gathering: null,
+      pingTimes: [],
       duel: null,
       duelInvite: null,
       trade: null,
@@ -300,6 +313,7 @@ export class Game {
     sendQuestLog(this, sessionId);
     sendSkillRanks(this, sessionId);
     sendFortuneState(this, sessionId);
+    sendLifeSkills(this, sessionId);
     return player;
   }
 
@@ -325,6 +339,7 @@ export class Game {
         pvpDeaths: player.pvpDeaths,
         skillRanks: runtime.skillRanks,
         fortune: runtime.fortune,
+        lifeSkills: runtime.lifeSkills,
         playSeconds: runtime.playSecondsBefore + Math.floor((Date.now() - runtime.joinedAt) / 1000),
       },
       gold: runtime.inventory.gold,
@@ -413,8 +428,9 @@ export class Game {
       runtime.inputBudget--;
     }
     player.moving = processed > 0;
-    // Moving interrupts spells with a cast time, and reels the fishing line in.
+    // Moving interrupts spells with a cast time, gathering, and reels the fishing line in.
     if (processed > 0 && runtime.casting) cancelCast(this, sessionId, "Büyü iptal edildi");
+    if (processed > 0 && runtime.gathering) cancelGather(this, sessionId, "Toplama yarıda kaldı");
     if (processed > 0 && runtime.fishing) stopFishing(this, sessionId, "Oltayı topladın");
   }
 

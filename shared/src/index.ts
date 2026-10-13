@@ -14,6 +14,7 @@ export * from "./data/affixes";
 export * from "./data/passives";
 export * from "./data/talents";
 export * from "./data/fortune";
+export * from "./data/gathering";
 export * from "./data/fishing";
 export * from "./daynight";
 export * from "./data/quests";

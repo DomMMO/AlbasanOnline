@@ -338,6 +338,25 @@ Ekranın sol altında **can**, sağ altında **öfke / mana / enerji** küresi d
 - **İksir slotları:** can küresinin sağında 2 slot (**Q** ve **R**, ya da tıkla). Varsayılan olarak sınıfın iksirleri; envanterden bir iksiri ya da yemeği slota sürükleyerek değiştirilir, sağ tık boşaltır. Adet ve bekleme süresi slotta görünür.
 - **Buff / debuff çubuğu:** hotbar'ın hemen üstünde, solda üzerindeki güçlendirmeler (buff skill'leri, Kalkan Duvarı, Koruyucu Kalkan, doğuş koruması, iyi fal), sağda zayıflatmalar (sersemleme, donma). Kalan süre ikonun üstünde geri sayar; üzerine gelince ne olduğu yazar.
 
+### Meslekler: Madencilik ve Botanik
+
+Şehirdeki **Zanaatkâr Murat** (kuyumcunun yanında) meslekleri öğretir: ilk görevi **Madenci Kazması** ile **Bitki Orağı** verir (dükkânından da alınır). Alet envanterde durduğu sürece vadide ve Kara Orman'da **maden damarlarına** ve **bitkilere** tıklayınca karakter yanına yürür ve 2,2 sn toplar (kazma / orak imleci çıkar; yürümek ya da hasar almak toplamayı bozar). Her toplama meslek XP'si verir; seviye yükseldikçe daha zor damarlar açılır ve bazen fazladan çıkar. Toplanan damar bir süre sonra aynı yerde yeniden belirir.
+
+| Meslek | Sv 1 | Sv 12 | Sv 25 | Sv 40 |
+| --- | --- | --- | --- | --- |
+| Madencilik | Bakır (vadi) | Demir (goblinler, haydut kampı) | Gümüş (ork oyuğu, kurtlar) | Mithril (ayı ini) |
+| Botanik | Şifalı Ot (vadi) | Lavanta (kurtlar) | Gece Sefası (bataklık, **sadece gece**) | Ejder Dikeni (mezarlık) |
+
+Zanaatkâr'ın "Meslekler" görev zinciri her cevher ve bitki için bir görev verir (ödül: altın, XP, parşömen, yüzük, Koruma Tılsımı); "Zanaatkârın Siparişi" tekrarlanabilir. Seviyeler Yetenekler (K) sayfasının **Meslekler** bölümünde görünür. Kod: `shared/src/data/gathering.ts`, `server/src/game/gathering.ts`.
+
+### Ping (Alt + tık)
+
+Dünyada bir yere **Alt + tık**: imlecin yanında bir ping çarkı açılır: **Dikkat!**, **Saldır!**, **Yardım lazım!**, **Buraya gel!**. Bir düşmana Alt + tık doğrudan "Saldır!" pingi atar. Grup arkadaşların aynı bölgedeyse noktada dalgalanan bir işaret, mini haritada turuncu bir nokta ve grup sohbetinde bir satır görür; başka bölgedeyseler grup sohbetine düşer. Grupsuzken ping sadece sana görünür. 5 saniyede en çok 4 ping.
+
+### Envanteri düzenle
+
+Envanter penceresindeki **Düzenle** düğmesi eşyaları türüne göre (ekipman slot ve nadirliğe göre, mücevherler, iksirler, görev eşyaları, materyaller) boşluksuz dizer ve yarım kalan yığınları birleştirir.
+
 ### Ayşe Teyze'nin falı
 
 Ayşe Teyze ile konuşunca görevlerin yanında **Falıma bak** seçeneği çıkar. Fal günde bir kez bakılır (Türkiye saatiyle gün); aynı gün tekrar sorarsan aynı şeyi söyler, oyundan çıkıp girmek falı değiştirmez. **İyi fal** (%45) çıkarsa o gün bütün +N yükseltmelerin başarı şansı **%10 artar** (demirci penceresinde "(+%10 fal)" yazar); **kötü fal** çıkarsa hiçbir şey değişmez. Kod: `shared/src/data/fortune.ts`, `server/src/game/fortune.ts`.

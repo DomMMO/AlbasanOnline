@@ -4,6 +4,7 @@ import {
   fitsBigSocket,
   hasAffixes,
   INVENTORY_SIZE,
+  itemRarity,
   ITEMS,
   MINOR_SOCKETS,
   PASSIVE_SOCKETS,
@@ -162,6 +163,53 @@ export function removeAt(inv: InventoryData, index: number, qty: number) {
   if (!stack) return;
   stack.qty -= qty;
   if (stack.qty <= 0) inv.slots[index] = null;
+}
+
+/** Sort order of a stack in the bags: gear by slot, then jewels, consumables, quest items, materials. */
+function sortKey(stack: ItemStack): (string | number)[] {
+  const def = ITEMS[stack.defId];
+  const rarityRank = ["legendary", "epic", "rare", "uncommon", "common"];
+  if (def.slot) {
+    const rarity = itemRarity(def, stack.affixes);
+    return [0, EQUIP_SLOTS.indexOf(def.slot), rarityRank.indexOf(rarity), -def.level, -stack.enhance, def.name];
+  }
+  if (def.jewel) return [1, ["greater", "major", "minor"].indexOf(def.jewel), -(stack.affixes[0]?.tier ?? 0), def.name];
+  if (def.heal || def.mana || def.recall) return [2, def.mana ? 1 : def.recall ? 2 : 0, -def.level, def.name];
+  if (def.questItem) return [3, def.name];
+  return [4, rarityRank.indexOf(def.rarity), def.name];
+}
+
+function compareKeys(a: (string | number)[], b: (string | number)[]): number {
+  for (let i = 0; i < Math.max(a.length, b.length); i++) {
+    const x = a[i];
+    const y = b[i];
+    if (x === y) continue;
+    if (typeof x === "number" && typeof y === "number") return x - y;
+    return String(x).localeCompare(String(y), "tr");
+  }
+  return 0;
+}
+
+/** "Düzenle": merges partial stacks, then lays everything out from the first slot without gaps. */
+export function sortInventory(inv: InventoryData) {
+  const stacks = inv.slots.filter((s): s is ItemStack => s !== null);
+  const merged: ItemStack[] = [];
+  for (const stack of stacks) {
+    const def = ITEMS[stack.defId];
+    let left = stack.qty;
+    if (def.maxStack > 1) {
+      for (const into of merged) {
+        if (left === 0) break;
+        if (into.defId !== stack.defId || into.enhance !== stack.enhance || into.qty >= def.maxStack) continue;
+        const take = Math.min(def.maxStack - into.qty, left);
+        into.qty += take;
+        left -= take;
+      }
+    }
+    if (left > 0) merged.push({ ...stack, qty: left });
+  }
+  merged.sort((a, b) => compareKeys(sortKey(a), sortKey(b)));
+  inv.slots = Array.from({ length: inv.slots.length }, (_, i) => merged[i] ?? null);
 }
 
 export function equippedItems(inv: InventoryData): ItemStack[] {

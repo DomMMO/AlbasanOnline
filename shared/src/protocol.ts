@@ -34,6 +34,12 @@ export const Msg = {
   QuestAccept: "questAccept",
   QuestTurnIn: "questTurnIn",
   QuestAbandon: "questAbandon",
+  /** Life skills: start gathering a vein or herb. */
+  Gather: "gather",
+  /** Inventory: stack and sort the bags. */
+  SortInventory: "sortInventory",
+  /** Party ping on the map (Alt+click). */
+  MapPing: "mapPing",
   /** Skill page: add (+1) or take back (-1) a rank; or reset all. */
   SkillRank: "skillRank",
   SkillReset: "skillReset",
@@ -95,6 +101,13 @@ export const Msg = {
   Fortune: "fortune",
   /** Your buffs and debuffs (sent when they change). */
   Auras: "auras",
+  /** Your life skill levels (on join and when they change). */
+  LifeSkills: "lifeSkills",
+  /** Gathering started (cast bar) or ended. */
+  GatherStart: "gatherStart",
+  GatherEnd: "gatherEnd",
+  /** A party member pinged the map. */
+  PingEvent: "pingEvent",
   TradeInvite: "tradeInvite",
   /** A party member nearby just went into a dungeon: join them? */
   DungeonInvite: "dungeonInvite",
@@ -145,6 +158,44 @@ export interface SkillRanksEvent {
   ranks: Record<string, number>;
   /** Points not spent yet. */
   points: number;
+}
+
+export interface GatherMessage {
+  nodeId: string;
+}
+
+export interface GatherStartEvent {
+  name: string;
+  skill: string;
+  ms: number;
+}
+
+export interface GatherEndEvent {
+  interrupted: boolean;
+}
+
+export interface LifeSkillsEvent {
+  skills: Record<string, { level: number; xp: number; next: number }>;
+}
+
+export type PingKind = "alert" | "attack" | "help" | "move";
+
+export interface MapPingMessage {
+  kind: PingKind;
+  x: number;
+  y: number;
+  /** Mob pinged (attack). */
+  targetId?: string;
+}
+
+export interface PingEvent {
+  from: string;
+  kind: PingKind;
+  x: number;
+  y: number;
+  zone: string;
+  /** What was pinged (a mob's name), if anything. */
+  target?: string;
 }
 
 /** A buff or debuff on you. `icon` is a skill id, or an "aura_*" icon for effects that aren't skills. */
@@ -648,6 +699,13 @@ export interface MinionView {
   y: number;
   dir: Direction;
   moving: boolean;
+}
+
+/** A mining vein or herb (life skills). */
+export interface GatherNodeView {
+  kind: string;
+  x: number;
+  y: number;
 }
 
 export interface LootView {
