@@ -161,7 +161,8 @@ ${opts.detail}`;
 
 function render() {
   const cls = actions.playerClass();
-  pointsEl.textContent = `Boş puan: ${state.points}`;
+  // A novice has no skills to spend points on yet.
+  pointsEl.textContent = cls === "novice" ? "" : `Boş puan: ${state.points}`;
   const section = (title: string) => Object.assign(document.createElement("h3"), { className: "skills-section", textContent: title });
 
   const active = classOf(cls).skills.map((id) => {

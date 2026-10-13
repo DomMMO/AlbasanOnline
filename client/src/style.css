@@ -3290,22 +3290,21 @@ body.touch .dm-title {
   top: 50px;
   left: 50%;
   transform: translateX(-50%);
-  width: min(820px, calc(100vw - 16px));
+  width: min(960px, calc(100vw - 16px));
+  /* Fits without scrolling on a normal screen; a short one scrolls rather than cutting it off. */
+  max-height: calc(100vh - 70px);
+  overflow-y: auto;
 }
 
-/* Two columns so the page fits without a scrollbar; short screens and phones still scroll. */
+/* Two columns so the page fits without a scrollbar; short screens and phones still scroll.
+   minmax(0, 1fr): a long line of text must not stretch its column past the window. */
 .skills-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0 6px;
 }
 
 @media (max-width: 700px), (max-height: 640px) {
-  #skills-window {
-    max-height: calc(100vh - 80px);
-    overflow-y: auto;
-  }
-
   .skills-grid {
     grid-template-columns: 1fr;
   }
@@ -3389,11 +3388,14 @@ body.touch .dm-title {
   font-style: italic;
 }
 
+/* At most two lines; the hover tooltip has the whole text. */
 .skill-desc {
   color: #d8cba8;
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .skill-detail {

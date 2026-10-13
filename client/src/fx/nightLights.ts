@@ -47,20 +47,43 @@ function ensureGradient(scene: Phaser.Scene) {
   texture.refresh();
 }
 
+/**
+ * The part of the world the camera will show this frame. Camera.worldView is only refreshed
+ * when the camera renders, so read in update() it still describes the previous frame: the
+ * layer would trail one frame behind a moving camera and leave an unlit strip at the edge.
+ * This repeats Phaser's own calculation (Camera.preRender) from the current scroll.
+ */
+function viewNow(camera: Phaser.Cameras.Scene2D.Camera) {
+  let sx = camera.scrollX;
+  let sy = camera.scrollY;
+  if (camera.roundPixels) {
+    sx = Math.floor(sx);
+    sy = Math.floor(sy);
+  }
+  if (camera.useBounds) {
+    sx = camera.clampX(sx);
+    sy = camera.clampY(sy);
+  }
+  const width = Math.floor(camera.width / camera.zoomX + 0.5);
+  const height = Math.floor(camera.height / camera.zoomY + 0.5);
+  const x = Math.floor(sx + camera.width * 0.5 - width / 2 + 0.5);
+  const y = Math.floor(sy + camera.height * 0.5 - height / 2 + 0.5);
+  return { x, y, width, height, right: x + width, bottom: y + height };
+}
+
 export class NightLayer {
-  private readonly rt: Phaser.GameObjects.RenderTexture;
+  /**
+   * Made at the size of the view and made again when that changes (zoom, window size).
+   * Never resized: a RenderTexture that has been resized still takes fill(), but everything
+   * drawn or erased on it afterwards is lost (Phaser 3.90), which is what kept the light
+   * pools from ever showing.
+   */
+  private rt: Phaser.GameObjects.RenderTexture | null = null;
   private readonly stamp: Phaser.GameObjects.Image;
   private darkness = 0;
 
   constructor(private readonly scene: Phaser.Scene) {
     ensureGradient(scene);
-    const camera = scene.cameras.main;
-    this.rt = scene.add
-      .renderTexture(0, 0, Math.ceil(camera.worldView.width) || 1, Math.ceil(camera.worldView.height) || 1)
-      .setOrigin(0, 0)
-      .setDepth(1e7)
-      .setBlendMode(Phaser.BlendModes.MULTIPLY)
-      .setVisible(false);
     this.stamp = scene.make.image({ key: GRADIENT_KEY, add: false });
   }
 
@@ -69,20 +92,27 @@ export class NightLayer {
     this.darkness = value;
   }
 
+  /** Call at the end of the scene's update, after the camera has moved. */
   update(time: number) {
     const d = this.darkness;
-    this.rt.setVisible(d > 0.01);
-    if (d <= 0.01) return;
-    const view = this.scene.cameras.main.worldView;
-    const w = Math.ceil(view.width);
-    const h = Math.ceil(view.height);
-    if (this.rt.width !== w || this.rt.height !== h) this.rt.resize(w, h);
-    this.rt.setPosition(view.x, view.y);
+    if (d <= 0.01) {
+      this.rt?.setVisible(false);
+      return;
+    }
+    const view = viewNow(this.scene.cameras.main);
+    if (view.width <= 0 || view.height <= 0) return;
+    // Textures are kept at even sizes; one pixel too big is fine.
+    const w = view.width + (view.width % 2);
+    const h = view.height + (view.height % 2);
+    if (!this.rt || this.rt.width !== w || this.rt.height !== h) {
+      this.rt?.destroy();
+      this.rt = this.scene.add.renderTexture(0, 0, w, h).setOrigin(0, 0).setDepth(1e7).setBlendMode(Phaser.BlendModes.MULTIPLY);
+    }
+    const rt = this.rt.setVisible(true).setPosition(view.x, view.y);
 
     const strength = d * 0.72;
     const mix = (c: number) => Math.round(255 + (c - 255) * strength);
-    const dark = Phaser.Display.Color.GetColor(mix(NIGHT_COLOR.r), mix(NIGHT_COLOR.g), mix(NIGHT_COLOR.b));
-    this.rt.clear().fill(dark, 1);
+    rt.clear().fill(Phaser.Display.Color.GetColor(mix(NIGHT_COLOR.r), mix(NIGHT_COLOR.g), mix(NIGHT_COLOR.b)), 1);
 
     const list = lights.get(this.scene);
     if (!list) return;
@@ -95,9 +125,9 @@ export class NightLayer {
       const ly = light.y - view.y;
       // Cut the darkness away, then lay a warm tint over the lit pool.
       this.stamp.setScale(scale).setTint(0xffffff).setAlpha(Math.min(1, d * 1.1));
-      this.rt.erase(this.stamp, lx, ly);
+      rt.erase(this.stamp, lx, ly);
       this.stamp.setScale(scale * 0.8).setTint(light.color).setAlpha(0.55 * d);
-      this.rt.draw(this.stamp, lx, ly);
+      rt.draw(this.stamp, lx, ly);
     }
   }
 }

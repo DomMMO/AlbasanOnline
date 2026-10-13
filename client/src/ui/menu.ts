@@ -13,6 +13,7 @@ const checkboxes = {
   speechBubbles: $<HTMLInputElement>("setting-bubbles"),
   helpText: $<HTMLInputElement>("setting-help"),
   damageMeter: $<HTMLInputElement>("setting-meter"),
+  bossMusic: $<HTMLInputElement>("setting-boss-music"),
 };
 
 export interface MenuActions {

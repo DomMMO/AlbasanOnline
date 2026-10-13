@@ -616,6 +616,7 @@ client/
 | 7.16 | Gece fenerlerin ışık havuzları, atta Shift ile dörtnala, Liman yolu, iki sütunlu yetenek sayfası, arkadaş sistemi (O) | ✅ |
 | 7.17 | İç Kale'ye girilebilir: ahşap büyük salon, ateş başında oturan 6 sınıf ustası (öğüt verir), muhafızlara yol sorma (yön oku + harita işareti) | ✅ |
 | 7.18 | Acemi başlangıç + Ustaların Ateşi görevi, 7 usta (Alp, Kam, Börü, Tigin, Erşek, Ak Ana, Erlik Ruh Eğitmeni), yeni sınıflar Şaman, Okçu, Druid (Büyücü ve Muhafız kalktı), onaylı sınıf seçimi, Ayşe Teyze'de altınla yol sıfırlama | ✅ |
+| 7.19 | Boss müziği: Kadim Ejder Azhdar'ın savaşında kendi şarkısı çalar (Esc → Ayarlar → Boss müziği); müzik `client/src/assets/music/`, eşleme `client/src/audio/bossMusic.ts` | ✅ |
 | 8 | Optimizasyon, anti-cheat, yedekleme, alfa testi | ⏳ |
 
 Faz 2 bitince oyun oynanabilir hale gelir. Sonraki fazlar bunun üzerine eklenir.

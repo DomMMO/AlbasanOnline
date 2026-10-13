@@ -225,7 +225,7 @@ export const ZONES: Record<ZoneId, ZoneDef> = {
     name: "İç Kale",
     instanced: false,
     persistent: true,
-    dim: 0.45,
+    dim: 0.6,
     npcs: [
       "master_warrior",
       "master_shaman",
