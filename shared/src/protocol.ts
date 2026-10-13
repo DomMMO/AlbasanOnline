@@ -50,6 +50,10 @@ export const Msg = {
   SkillRank: "skillRank",
   /** Ayşe Teyze: read today's fortune. */
   ReadFortune: "readFortune",
+  /** A novice asks a master in the keep to take them on (their class). */
+  ChooseClass: "chooseClass",
+  /** Ayşe Teyze: undo the class choice for gold (back to novice). */
+  ResetClass: "resetClass",
   /** T: open a town portal where you stand. */
   OpenTownPortal: "openTownPortal",
   UseTownPortal: "useTownPortal",

@@ -68,6 +68,7 @@ export type IconShape =
   | "herb"
   | "pickaxe"
   | "sickle"
+  | "bow"
   | "fish"
   | "rod"
   | "shell";
@@ -119,13 +120,15 @@ export interface ItemDef {
 export const POTION_COOLDOWN_MS = 10_000;
 
 const def = (item: ItemDef) => item;
-const MELEE: ClassId[] = ["warrior", "guardian", "rogue"];
-const CASTERS: ClassId[] = ["mage", "priest", "necromancer"];
+/** Swords, axes and clubs; a novice gets by with them too. */
+const MELEE: ClassId[] = ["novice", "warrior", "rogue"];
+const CASTERS: ClassId[] = ["shaman", "druid", "priest", "necromancer"];
+const BOWS: ClassId[] = ["archer"];
 
 export const ITEMS: Record<string, ItemDef> = Object.fromEntries(
   [
     // ---- Weapons
-    def({ id: "rusty_sword", classes: MELEE, name: "Paslı Kılıç", rarity: "common", level: 1, slot: "weapon", stats: { attack: 3 }, attackSpeedMs: 2000, maxStack: 1, sellPrice: 2, icon: { shape: "sword", color: 0xa07850 } }),
+    def({ id: "rusty_sword", classes: MELEE, name: "Paslı Kılıç", rarity: "common", level: 1, slot: "weapon", stats: { attack: 3 }, attackSpeedMs: 2000, maxStack: 1, buyPrice: 10, sellPrice: 2, icon: { shape: "sword", color: 0xa07850 } }),
     def({ id: "iron_sword", classes: MELEE, name: "Demir Kılıç", rarity: "common", level: 3, slot: "weapon", stats: { attack: 7 }, attackSpeedMs: 2000, maxStack: 1, buyPrice: 60, sellPrice: 12, icon: { shape: "sword", color: 0xc8ccd4 } }),
     def({ id: "wolf_fang_blade", classes: MELEE, name: "Kurt Dişi Kılıcı", rarity: "uncommon", level: 3, slot: "weapon", stats: { attack: 10 }, attackSpeedMs: 1900, maxStack: 1, sellPrice: 25, icon: { shape: "sword", color: 0xe8e2c8 } }),
     def({ id: "war_axe", classes: MELEE, name: "Savaş Baltası", rarity: "common", level: 5, slot: "weapon", stats: { attack: 14 }, attackSpeedMs: 2400, maxStack: 1, buyPrice: 200, sellPrice: 40, icon: { shape: "axe", color: 0xb0b4bc } }),
@@ -144,7 +147,11 @@ export const ITEMS: Record<string, ItemDef> = Object.fromEntries(
     def({ id: "steel_sword", classes: MELEE, name: "Çelik Kılıç", rarity: "uncommon", level: 6, slot: "weapon", stats: { attack: 16 }, attackSpeedMs: 2000, maxStack: 1, buyPrice: 450, sellPrice: 90, icon: { shape: "sword", color: 0xe0e6f0 } }),
     def({ id: "goblin_cleaver", classes: MELEE, name: "Goblin Satırı", rarity: "rare", level: 5, slot: "weapon", stats: { attack: 17, maxHp: 10 }, attackSpeedMs: 2200, maxStack: 1, sellPrice: 70, icon: { shape: "axe", color: 0x7cb342 } }),
 
-    def({ id: "apprentice_staff", classes: CASTERS, name: "Çırak Asası", rarity: "common", level: 1, slot: "weapon", stats: { attack: 3 }, attackSpeedMs: 1800, maxStack: 1, sellPrice: 2, icon: { shape: "staff", color: 0x8b5a2b } }),
+    def({ id: "short_bow", classes: BOWS, name: "Kısa Yay", rarity: "common", level: 1, slot: "weapon", stats: { attack: 3 }, attackSpeedMs: 1700, maxStack: 1, buyPrice: 10, sellPrice: 2, icon: { shape: "bow", color: 0x8b5a2b } }),
+    def({ id: "hunting_bow", classes: BOWS, name: "Av Yayı", rarity: "common", level: 3, slot: "weapon", stats: { attack: 7 }, attackSpeedMs: 1700, maxStack: 1, buyPrice: 60, sellPrice: 12, icon: { shape: "bow", color: 0x6b8e23 } }),
+    def({ id: "yew_bow", classes: BOWS, name: "Porsuk Yayı", rarity: "uncommon", level: 6, slot: "weapon", stats: { attack: 15 }, attackSpeedMs: 1700, maxStack: 1, buyPrice: 450, sellPrice: 90, icon: { shape: "bow", color: 0xa0522d } }),
+    def({ id: "wolf_bow", classes: BOWS, name: "Kurt Kemiği Yay", rarity: "rare", level: 5, slot: "weapon", stats: { attack: 15, maxHp: 10 }, attackSpeedMs: 1650, maxStack: 1, sellPrice: 70, icon: { shape: "bow", color: 0xe8e2c8 }, description: "Kirişi kurt bağırsağından; gerildiğinde uluyormuş gibi ses çıkarır." }),
+    def({ id: "apprentice_staff", classes: CASTERS, name: "Çırak Asası", rarity: "common", level: 1, slot: "weapon", stats: { attack: 3 }, attackSpeedMs: 1800, maxStack: 1, buyPrice: 10, sellPrice: 2, icon: { shape: "staff", color: 0x8b5a2b } }),
     def({ id: "oak_staff", classes: CASTERS, name: "Meşe Asa", rarity: "common", level: 3, slot: "weapon", stats: { attack: 7 }, attackSpeedMs: 1800, maxStack: 1, buyPrice: 60, sellPrice: 12, icon: { shape: "staff", color: 0x6b8e23 } }),
     def({ id: "ash_staff", classes: CASTERS, name: "Dişbudak Asa", rarity: "uncommon", level: 6, slot: "weapon", stats: { attack: 15 }, attackSpeedMs: 1800, maxStack: 1, buyPrice: 450, sellPrice: 90, icon: { shape: "staff", color: 0xc9a66b } }),
     def({ id: "seer_staff", classes: CASTERS, name: "Kahin Asası", rarity: "rare", level: 5, slot: "weapon", stats: { attack: 15, maxHp: 10 }, attackSpeedMs: 1800, maxStack: 1, sellPrice: 70, icon: { shape: "staff", color: 0x7950f2 }, description: "Ucundaki taş hafifçe parlıyor." }),

@@ -189,6 +189,16 @@ const MIGRATIONS: { version: number; name: string; sql: string }[] = [
       CREATE INDEX friendships_friend ON friendships (friend_id);
     `,
   },
+  {
+    version: 14,
+    name: "novices and the seven masters",
+    sql: `
+      -- New characters start as novices and choose a class from a master in the keep.
+      ALTER TABLE characters ALTER COLUMN class SET DEFAULT 'novice';
+      -- Mage and Guardian are gone: those characters choose again (Şaman, Okçu, Druid are new).
+      UPDATE characters SET class = 'novice', skill_ranks = '{}' WHERE class IN ('mage', 'guardian');
+    `,
+  },
 ];
 
 export async function runMigrations() {

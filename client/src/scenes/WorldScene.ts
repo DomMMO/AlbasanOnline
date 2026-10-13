@@ -108,7 +108,23 @@ import { drawMinimap, setMinimapZone, toggleMinimap, type MinimapDot } from "../
 import { isMenuOpen, menuBack, openMenu } from "../ui/menu";
 import { closeTopWindow, registerWindow } from "../ui/windows";
 import { getSettings, onSettingsChange } from "../settings";
-import { boneBurst, burst, castingGlow, frostRing, healSparkles, holyBeam, lightning, projectile, stunStars } from "../fx/spells";
+import {
+  arrowShot,
+  arrowVolley,
+  boneBurst,
+  burst,
+  castingGlow,
+  frostRing,
+  healSparkles,
+  holyBeam,
+  leafBurst,
+  lightning,
+  projectile,
+  rootsRing,
+  spiritWisps,
+  stormRing,
+  stunStars,
+} from "../fx/spells";
 import { initPassives, togglePassives, updatePassives } from "../ui/passives";
 import { cursor } from "../gfx/cursors";
 import { nodeTexture } from "../gfx/nodeTextures";
@@ -136,6 +152,7 @@ import {
   initQuests,
   npcMarker,
   openNpcDialog,
+  refreshNpcDialog,
   refreshQuests,
   setQuestLog,
   showFortune,
@@ -201,6 +218,8 @@ const HOSTILE_COLOR = 0xffe14d;
 const ENEMY_PLAYER_COLOR = 0xff5a5a;
 /** A correction bigger than this is a teleport (respawn), not a prediction error: don't blend. */
 const TELEPORT_DISTANCE = 32;
+/** Plain ranged attacks of the casters: the colour of the little bolt from their staff. */
+const CASTER_BOLT: Record<string, number> = { priest: 0xffe066, necromancer: 0x69db7c, shaman: 0x74c0fc, druid: 0x8ce99a };
 /** NpcDef.facing to a sprite direction. */
 const FACING = { up: Direction.Up, down: Direction.Down, left: Direction.Left, right: Direction.Right } as const;
 
@@ -571,6 +590,8 @@ export class WorldScene extends Phaser.Scene {
       openUpgrade: (npc) => this.openNpcWindow(npc),
       readFortune: (npcId) => this.room.send(Msg.ReadFortune, { npcId }),
       showWay: (place) => this.showWay(place),
+      chooseClass: (npcId) => this.room.send(Msg.ChooseClass, { npcId }),
+      resetClass: (npcId) => this.room.send(Msg.ResetClass, { npcId }),
       playerLevel,
       playerClass: () => this.local?.state.cls ?? "warrior",
       changed: () => this.refreshNpcMarkers(),
@@ -623,6 +644,20 @@ export class WorldScene extends Phaser.Scene {
         if (this.arrived) teleportIn(this, start);
         this.syncStall(sessionId, player);
         $(player).listen("stall", () => this.syncStall(sessionId, player));
+        // Choosing a class at a master (or Ayşe Teyze undoing it) swaps the whole kit.
+        let lastClass = player.cls;
+        $(player).listen("cls", (cls: string) => {
+          if (cls === lastClass) return;
+          lastClass = cls;
+          setDollLook(player.color, cls, lookAppearance(player));
+          this.rebuildHotbar(cls);
+          initPotions(player.name, cls, {
+            use: (defId) => this.room.send(Msg.UseItem, { defId }),
+            playerLevel: () => this.local?.state.level ?? 1,
+          });
+          refreshQuests();
+          refreshNpcDialog();
+        });
       } else {
         const remote = { state: player, view, buffer: new SnapshotBuffer() };
         this.players.set(sessionId, remote);
@@ -1455,10 +1490,11 @@ export class WorldScene extends Phaser.Scene {
     if (skill && skill.visual !== "melee" && skill.visual !== "spin") {
       this.showSpell(skill, source, target);
     } else if (!skill && caster && classOf(caster.cls).autoAttack.ranged && target) {
-      // Casters' plain attacks: a small bolt from the staff.
-      projectile(this, source, target, caster.cls === "priest" ? 0xffe066 : caster.cls === "necromancer" ? 0x69db7c : 0xb197fc, 2);
+      // Archers loose an arrow; casters' plain attacks are a small bolt from the staff.
+      if (caster.cls === "archer") arrowShot(this, source, target);
+      else projectile(this, source, target, CASTER_BOLT[caster.cls] ?? 0xb197fc, 2);
     } else {
-      const kind: SwingKind = event.skill === "whirlwind" ? "spin" : event.skill === "heroicStrike" || event.skill === "shieldSlam" ? "heavy" : "normal";
+      const kind: SwingKind = event.skill === "whirlwind" ? "spin" : event.skill === "heroicStrike" ? "heavy" : "normal";
       source.playAttack(kind, target);
     }
     // Our own character turns to face what it hits when standing still.
@@ -1547,6 +1583,32 @@ export class WorldScene extends Phaser.Scene {
         break;
       case "guard":
         burst(this, source, 0x74c0fc, 12);
+        break;
+      case "arrow":
+        if (target) arrowShot(this, source, target, () => skill.effect.type === "stun" && stunStars(this, target));
+        break;
+      case "volley":
+        if (target) arrowVolley(this, target, skill.effect.type === "blast" ? skill.effect.radius : 40);
+        break;
+      case "storm":
+        stormRing(this, source, skill.effect.type === "whirlwind" ? skill.effect.radius : 40);
+        break;
+      case "spirit":
+        spiritWisps(this, at);
+        if (skill.effect.type === "stun") stunStars(this, at);
+        break;
+      case "nature":
+        if (skill.effect.type === "radiance") {
+          ringEffect(this, source.x, source.y - 2, 0x40c057, skill.effect.radius);
+          leafBurst(this, source, skill.effect.radius);
+          healSparkles(this, source);
+        } else if (target) {
+          leafBurst(this, target, 16);
+          burst(this, target, 0x2f9e44, 8);
+        }
+        break;
+      case "roots":
+        rootsRing(this, source, skill.effect.type === "nova" ? skill.effect.radius : 40);
         break;
     }
   }

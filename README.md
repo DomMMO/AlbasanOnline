@@ -33,35 +33,36 @@ Giriş yapınca **Ana Merkez'in iç kalesinin önüne** gelirsin (Metin2 tarzı)
 
 | Seçenek | Seçenekler |
 | --- | --- |
-| Sınıf | 6 sınıf (aşağıda); başlangıç silahı önizlemede elinde görünür |
 | Cinsiyet | Erkek, Kadın (kadın karakterde ince bel ve dudak) |
 | Saç modeli | Kısa, Diken, Uzun, At Kuyruğu, Topuz, Kel |
 | Saç rengi | 10 renk |
 | Ten rengi | 7 ton |
 | Kıyafet rengi | 10 renk |
 
-**Rastgele** hepsini rastgele seçer. Görünüm oyunda herkese aynı görünür (senkronize). Miğfer saçı, Büyücü şapkası ve kapüşonlar saçın üstünü örter; uzun saç ve at kuyruğu arkadan ve yandan görünür. Veriler `characters.look` (JSON) ve `characters.play_seconds` sütunlarında; seçenekler `shared/src/data/appearance.ts`, piksel şablonları `client/src/gfx/humanoid.ts`, lobi sahnesi `client/src/scenes/LobbyScene.ts`.
+**Rastgele** hepsini rastgele seçer. Görünüm oyunda herkese aynı görünür (senkronize). Miğfer saçı, Şaman şapkası ve kapüşonlar saçın üstünü örter; uzun saç ve at kuyruğu arkadan ve yandan görünür. Veriler `characters.look` (JSON) ve `characters.play_seconds` sütunlarında; seçenekler `shared/src/data/appearance.ts`, piksel şablonları `client/src/gfx/humanoid.ts`, lobi sahnesi `client/src/scenes/LobbyScene.ts`.
 
 ### Sınıflar
 
-Karakter oluştururken sınıf seçilir:
+Karakter oluştururken sınıf **seçilmez**: herkes **Acemi** başlar (yeteneği yok, paslı kılıçla idare eder). Komutan Baran'ın ilk görevi **Ustaların Ateşi** seni İç Kale'nin büyük salonuna gönderir; ateşin başında oturan yedi ustadan birine konuşup **Yolunu seç**'e basarsın. Hemen seçmez: "Emin misin?" sayfası açılır, **Eminim, seç** ile kesinleşir. Sonra Komutan'a dönünce görev biter, ödülü sınıfına göre başlangıç silahıdır (yay ya da asa).
 
-| Sınıf | Kaynak | 1 | 2 | 3 |
-| --- | --- | --- | --- | --- |
-| **Savaşçı** (yakın dövüş, ileride tank) | Öfke: vurdukça ve hasar aldıkça dolar | Ağır Darbe | Girdap (çevreye) | İkinci Nefes (can) |
-| **Büyücü** (uzaktan hasar) | Mana | Ateş Topu (1,5 sn büyü) | Buz Halkası (çevredekileri 4 sn dondurur) | Yıldırım (anında) |
-| **Şifacı** (iyileştirici) | Mana | Kutsal Işık (1,2 sn büyü) | Şifa (1,5 sn büyü; hedef oyuncu ya da kendin) | Koruyucu Kalkan (hasar emer) |
-| **Muhafız** (tank) | Öfke | Kalkan Darbesi (güçlü tek hedef) | Meydan Okuma (çevreye vurur, hepsinin dikkatini çeker) | Kalkan Duvarı (8 sn %50 az hasar, öfke istemez) |
-| **Suikastçı** (hızlı yakın dövüş) | Enerji (hızla dolar) | Sinsi Darbe | Bıçak Yelpazesi (çevreye) | İç Parçalama (ağır son vuruş) |
-| **Nekromant** (çağırıcı) | Mana | Ruh Emme (1,3 sn büyü; hasarın %40'ı kadar can emer) | İskelet Çağır (25 sn, hedefine saldırır) | Kemik Patlaması (çevreye) |
+| Usta | Sınıf | Kaynak | 1 | 2 | 3 |
+| --- | --- | --- | --- | --- | --- |
+| **Alp** | **Savaşçı** (yakın dövüş, tank) | Öfke: vurdukça ve hasar aldıkça dolar | Ağır Darbe | Girdap (çevreye) | İkinci Nefes (can) |
+| **Kam** | **Şaman** (gök ve ruhlar) | Mana | Gök Kamçısı (1,3 sn büyü) | Gök Davulu (çevreye) | Ata Ruhu (iyileştirir) |
+| **Börü** | **Suikastçı** (hızlı yakın dövüş) | Enerji (hızla dolar) | Sinsi Darbe | Bıçak Yelpazesi (çevreye) | İç Parçalama (ağır son vuruş) |
+| **Tigin** | **Okçu** (yay ve ok) | Enerji | Nişanlı Atış (1 sn nişan) | Ok Yağmuru (hedefin çevresine) | Seri Atış (anında) |
+| **Erşek** | **Druid** (orman ve hayvanlar) | Mana | Diken Kırbacı (1,2 sn büyü) | Sarmaşık (çevredekileri köklere bağlar) | Yaprak Şifası (iyileştirir) |
+| **Ak Ana** | **Şifacı** (arındırma ve kutsama) | Mana | Kutsal Işık (1,2 sn büyü) | Şifa (hedef oyuncu ya da kendin) | Koruyucu Kalkan (hasar emer) |
+| **Erlik Ruh Eğitmeni** | **Nekromant** (çağırıcı) | Mana | Ruh Emme (hasarın %40'ı kadar can emer) | Kemik Patlaması (çevreye) | İskelet Çağır (25 sn) |
 
-- Muhafız vurduğu her düşmanın dikkatini (aggro) anında diğer oyunculardan alır ve her hasarı %10 az yer. Savaşçı'nın kılıç, balta ve plaka zırhlarını kuşanır; görevlerde Savaşçı ödüllerini alır.
-- Nekromant asa (Büyücü asaları dahil) ve cübbe kuşanır; görevlerde Büyücü'nün sınıf ödüllerini alır. İskelet sahibinin saldırdığı hedefe, yoksa sahibine saldıran yaratığa vurur; sahibi ölünce ya da bölge değiştirince kaybolur. Yaratıklar iskelete saldırmaz.
+- **Yolu sıfırlamak:** Ayşe Teyze'de **Yolumu sıfırla** (seviye × 100 altın), yine "emin misin?" sorulur. Yeniden Acemi olursun; seviye ve eşyalar kalır, yalnızca o sınıfa ait giydiklerin çantaya döner (yer yoksa önce yer açman istenir). Sonra kaleye dönüp yeni bir usta seçersin.
+- Büyücü ve Muhafız sınıfları kaldırıldı; o sınıftaki karakterler Acemi oldu (migration 14) ve kaleden yeniden seçer.
+- Nekromant ve Druid görevlerde Şaman'ın sınıf ödüllerini (asa, cübbe), Suikastçı ve Okçu Savaşçı'nın zırh ödüllerini alır; Okçu silah ödülü olarak yay alır. İskelet sahibinin saldırdığı hedefe, yoksa sahibine saldıran yaratığa vurur; yaratıklar iskelete saldırmaz.
 - Tabloda her sınıfın ilk üç skill'i var; tam liste aşağıda **Yetenekler** bölümünde.
 - Büyü süresi olan skill'lerde büyü barı dolar; **yürürsen büyü iptal olur**.
 - Uzak saldırılar ağaç ve duvarların arkasına yapılamaz (görüş hattı).
 - Başka bir oyuncuya tıklamak onu dost hedef yapar (Şifa ve Kalkan için).
-- Kılıç, balta ve tırpanları sadece Savaşçı; asaları sadece Büyücü ve Şifacı kuşanabilir. 4 ve 5 numaralı slotlarda Savaşçı'nın iki can iksiri, diğerlerinin can ve mana iksiri vardır.
+- Kılıç, balta ve tırpanları Savaşçı, Suikastçı ve Acemi; yayları Okçu; asaları Şaman, Druid, Şifacı ve Nekromant; plaka zırhı Savaşçı, Suikastçı ve Okçu; cübbeleri büyü kullananlar kuşanır.
 - Sınıf verileri `shared/src/data/classes.ts`, skill'ler `shared/src/data/skills.ts` içindedir.
 
 ### Grup (parti)
@@ -265,8 +266,8 @@ Yeni malzemeler: Satir Boynuzu, Golem Çekirdeği (tüccara satılır).
 Knight Online ve Metin2'den esinlenen 88 yeni item (Sv 3-22), çoğu `shared/src/data/gear.ts` içinde formülle üretilir:
 
 - **Yeni slotlar:** Kolye (can), Yüzük (saldırı), Küpe (savunma). Her biri 5 kademe: Bakır → Gümüş/İnci → Yakut/Altın/Zümrüt → Ejder Gözü/Safir/Ay Taşı → Mühürlü Kolye, Kudret Yüzüğü, Kızıl Ejder Küpesi. Bakır ve gümüş takılar **Kuyumcu Selin**'de (demircinin altında) satılır.
-- **Silah serileri** (her biri 5 kademe, Sv 9-22): Savaşçı kılıçları (Hilal → Dolunay → Zehirli → Aslan → Ejderha), Savaşçı baltaları (Kemik → Savaş Teberi → Kara Ay → Gök Gürültüsü → Kızıl Ejder Teberi), Büyücü asaları (Kristal → Ateş → Buzul → Yıldırım → Anka), **Şifacı topuzları** (Kutsal → Şafak → Güneş → Melek → Nur).
-- **Sınıf zırh setleri** (baş, gövde, bacak, ayak; 5 kademe, Sv 8-20): Savaşçı plakaları (Tunç, Demir Pul, Kara Çelik, Kartal, Ejder Pulu) ve Büyücü/Şifacı cübbeleri (Çırak, Bilgin, Mistik, Yıldız, Kadim; daha az savunma, artı büyü gücü).
+- **Silah serileri** (her biri 5 kademe, Sv 9-22): Savaşçı kılıçları (Hilal → Dolunay → Zehirli → Aslan → Ejderha), Savaşçı baltaları (Kemik → Savaş Teberi → Kara Ay → Gök Gürültüsü → Kızıl Ejder Teberi), Şaman/Druid/Nekromant asaları (Kristal → Ateş → Buzul → Yıldırım → Anka), **Okçu yayları** (Boynuz → Bozkır → Akdoğan → Gökkuşağı → Tigin'in Yayı), **Şifacı topuzları** (Kutsal → Şafak → Güneş → Melek → Nur).
+- **Sınıf zırh setleri** (baş, gövde, bacak, ayak; 5 kademe, Sv 8-20): Savaşçı/Suikastçı/Okçu plakaları (Tunç, Demir Pul, Kara Çelik, Kartal, Ejder Pulu) ve büyücü sınıfların cübbeleri (Çırak, Bilgin, Mistik, Yıldız, Kadim; daha az savunma, artı büyü gücü).
 - İlk kademe silah ve zırhlar Silahçı ve Zırhçı'da satılır; üst kademeler Kara Orman'dan düşer ve görev ödülüdür.
 - **İksirler:** Büyük ve Süper Can/Mana İksiri. **Geri Dönüş Parşömeni:** savaşta değilken seni Ana Merkez'e ışınlar.
 - **Materyaller:** Kara Kurt Postu, Zehir Kesesi, Haydut Nişanı, Kemik Tozu, Ork Dişi, Ayı Pençesi, nadir **Ruh Taşı** (pahalı satılır, tekrarlanabilir görevde Yüksek parşömene dönüşür). **Mühür Parçası** görev eşyasıdır, satılamaz.
@@ -312,16 +313,17 @@ Her sınıfın kendine has en az bir **tek hedef**, bir **alan (AoE)**, bir **ki
 | Sınıf | Tek hedef | Alan | CC | Atılma | Buff | Diğer |
 | --- | --- | --- | --- | --- | --- | --- |
 | Savaşçı | Ağır Darbe (1) | Girdap (2) | Sarsıcı Darbe, 2 sn sersemletme (4) | **Sıçrayış**: hedefe sıçrar, inişte çevreye vurur (6) | Savaş Çığlığı, +%25 saldırı (8) | İkinci Nefes (3) |
-| Muhafız | Kalkan Darbesi (1) | Meydan Okuma (2) | Sersemletici Vuruş, 3 sn (4) | **Kalkan Hücumu**: hedefe koşar, 1,5 sn sersemletir (6) | Kalkan Duvarı, %50 az hasar (3) | |
-| Büyücü | Ateş Topu (1), Yıldırım (3) | Alev Patlaması (4) | Buz Halkası, dondurma (2) | **Işınlanma**: 6 kare blink (6) | Arkana Gücü, +%30 büyü (8) | |
+| Şaman | Gök Kamçısı (1) | Gök Davulu (2) | Ruh Bağı, 3 sn (4) | **Yel Yürüyüşü**: 6 kare (6) | Tengri'nin Lütfu: grup +%15 güç ve hız (8) | Ata Ruhu (3) |
+| Suikastçı | Sinsi Darbe (1), İç Parçalama (3) | Bıçak Yelpazesi (2) | Kör Edici Toz, 3 sn (4) | **Gölge Adımı**: hedefin arkasında belirir (6) | Adrenalin: %40 hızlı saldırı (8) | |
+| Okçu | Nişanlı Atış (1), Seri Atış (3) | Ok Yağmuru (2) | Çivileyen Ok, 2,5 sn (4) | **Doğan Sıçrayışı**: 5 kare (6) | Kartal Gözü: +%20 güç ve hız (8) | |
+| Druid | Diken Kırbacı (1) | Bahar Dalgası: vurur + grubu iyileştirir (8) | Sarmaşık: çevreyi 3,5 sn köklere bağlar (2) | **Bozkurt Hücumu**: hedefe atılır, 1,5 sn sersemletir (6) | Ağaç Kabuğu: %35 az hasar (4) | Yaprak Şifası (3) |
 | Şifacı | Kutsal Işık (1) | Kutsal Nova: vurur + grubu iyileştirir (4) | Kutsal Zincir, 3 sn (5) | **Işık Adımı**: süzülür + kalkan (6) | Kutsal Ruh: grup +%15 (8) | Şifa (2), Koruyucu Kalkan (3) |
 | Nekromant | Ruh Emme (1) | Kemik Patlaması (2) | Dehşet, 3 sn (4) | **Ruh Göçü**: gölgeden geçer + can (6) | Karanlık Pakt: %10 can → +%35 hasar (8) | İskelet Çağır (3) |
-| Suikastçı | Sinsi Darbe (1), İç Parçalama (3) | Bıçak Yelpazesi (2) | Kör Edici Toz, 3 sn (4) | **Gölge Adımı**: hedefin arkasında belirir (6) | Adrenalin: %40 hızlı saldırı (8) | |
 
 - **Sersemletme:** hedef ne yürüyebilir ne vurabilir (sarı görünür). Boss'lar etkilenmez; oyunculara (PvP) yarı süre.
-- **Yetenek puanı:** her seviye 1 puan (toplam seviye + 1). **K** ile açılan **Yetenekler** sayfasında aktif skill'lere (en çok 5 derece; derece 1 öğretir, sonraki her derece etkisini %12 artırır) ve sınıfın 3 **pasif** yeteneğine (5'er derece) puan verilir; **−** ile tek tek, **Sıfırla** ile hepsi geri alınır. Yeni karakterler ve eski karakterler, açık olan her skill'de 1 dereceyle başlar.
+- **Yetenek puanı:** her seviye 1 puan (toplam seviye + 1). **K** ile açılan **Yetenekler** sayfasında aktif skill'lere (en çok 5 derece; derece 1 öğretir, sonraki her derece etkisini %12 artırır) ve sınıfın 3 **pasif** yeteneğine (5'er derece) puan verilir; **−** ile tek tek geri alınır. Yeni karakterler ve eski karakterler, açık olan her skill'de 1 dereceyle başlar.
 - **Hotbar 10 slot** (1-9, 0), sadece skill'ler: başta sınıfın skill'leri sırayla. Yetenekler sayfasından bir skill ikonunu istediğin slota **sürükle**, slotlar arasında sürükleyerek yer değiştir, **sağ tıkla** slotu boşalt. Düzen her karakter için bu tarayıcıda saklanır. İksirler envanterden (sağ tık) içilir. Puan verilmemiş skill gri görünür.
-- **Serbest atılmalar** (Işınlanma, Ruh Göçü, Işık Adımı) **farenin olduğu yere doğru** gider (en çok skill'in mesafesi kadar; fare daha yakındaysa orada durur), karakter oraya kısa bir süzülmeyle geçer. Telefonda baktığın yöne gider.
+- **Serbest atılmalar** (Yel Yürüyüşü, Doğan Sıçrayışı, Ruh Göçü, Işık Adımı) **farenin olduğu yere doğru** gider (en çok skill'in mesafesi kadar; fare daha yakındaysa orada durur), karakter oraya kısa bir süzülmeyle geçer. Telefonda baktığın yöne gider.
 - Her skill'in ne yaptığını anlatan kodla çizilmiş bir **ikonu** var (`client/src/gfx/skillIcons.ts`). Hotbar'da ya da Yetenekler sayfasında üzerine gelince ayrıntılı bir panel açılır: bedel, büyü süresi, bekleme, menzil, karakterin şu anki gücüyle hesaplanmış hasar / iyileştirme / süre değerleri, derece ve sonraki derecenin getirisi.
 - Kurallar `shared/src/data/skills.ts` ve `shared/src/data/talents.ts`, sunucu tarafı `server/src/game/talents.ts`; dereceler `characters.skill_ranks` kolonunda saklanır.
 
@@ -613,6 +615,7 @@ client/
 | 7.15 | Kan Arenası kolezyum oldu: tribünler, seyirciler, imparator locası, kemerli cephe, sütunlar | ✅ |
 | 7.16 | Gece fenerlerin ışık havuzları, atta Shift ile dörtnala, Liman yolu, iki sütunlu yetenek sayfası, arkadaş sistemi (O) | ✅ |
 | 7.17 | İç Kale'ye girilebilir: ahşap büyük salon, ateş başında oturan 6 sınıf ustası (öğüt verir), muhafızlara yol sorma (yön oku + harita işareti) | ✅ |
+| 7.18 | Acemi başlangıç + Ustaların Ateşi görevi, 7 usta (Alp, Kam, Börü, Tigin, Erşek, Ak Ana, Erlik Ruh Eğitmeni), yeni sınıflar Şaman, Okçu, Druid (Büyücü ve Muhafız kalktı), onaylı sınıf seçimi, Ayşe Teyze'de altınla yol sıfırlama | ✅ |
 | 8 | Optimizasyon, anti-cheat, yedekleme, alfa testi | ⏳ |
 
 Faz 2 bitince oyun oynanabilir hale gelir. Sonraki fazlar bunun üzerine eklenir.

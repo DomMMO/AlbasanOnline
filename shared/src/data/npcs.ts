@@ -3,6 +3,7 @@ import { HARBOR_SPOTS } from "../harbor";
 import { KEEP_HALL_SPOTS } from "../keepHall";
 import { TOWN_SPOTS } from "../town";
 import type { Appearance } from "./appearance";
+import type { ClassId } from "./classes";
 
 export interface NpcDef {
   id: string;
@@ -28,6 +29,8 @@ export interface NpcDef {
   facing?: "up" | "down" | "left" | "right";
   /** Masters: words of advice, one picked at random each time you ask. */
   advice?: string[];
+  /** Masters: the class a novice can choose from them. */
+  teaches?: ClassId;
 }
 
 /** Feet position of an NPC in the hunting grounds (valley map tiles). */
@@ -48,7 +51,7 @@ function guard(id: string, name: string, at: { x: number; y: number }, greeting:
   };
 }
 
-/** A class master sitting by the fire in the keep's great hall. */
+/** A class master sitting by the fire in the keep's great hall; novices choose their class here. */
 function master(
   cls: keyof typeof KEEP_HALL_SPOTS.seats,
   name: string,
@@ -57,7 +60,7 @@ function master(
   advice: string[],
 ): NpcDef {
   const { x, y, facing } = KEEP_HALL_SPOTS.seats[cls];
-  return { id: `master_${cls}`, name, x, y, facing, seated: true, appearance, role: "master", shop: [], greeting, advice };
+  return { id: `master_${cls}`, name, x, y, facing, seated: true, appearance, role: "master", shop: [], greeting, advice, teaches: cls };
 }
 
 export const NPCS: Record<string, NpcDef> = {
@@ -67,7 +70,7 @@ export const NPCS: Record<string, NpcDef> = {
     ...TOWN_SPOTS.weaponsmith,
     appearance: { type: "humanoid", tunic: 0x8a2e2e, hair: 0x2d2d2d, skin: 0xd8a47a },
     role: "merchant",
-    shop: ["iron_sword", "war_axe", "steel_sword", "sword_1", "axe_1", "oak_staff", "ash_staff", "staff_1", "mace_1"],
+    shop: ["rusty_sword", "short_bow", "apprentice_staff", "iron_sword", "war_axe", "steel_sword", "sword_1", "axe_1", "hunting_bow", "yew_bow", "bow_1", "oak_staff", "ash_staff", "staff_1", "mace_1"],
     greeting: "Kılıç mı, balta mı, asa mı? Bende hepsinden var. Ucuz değil ama sağlam.",
   },
   armorer: {
@@ -187,63 +190,40 @@ export const NPCS: Record<string, NpcDef> = {
   },
   guard_gate_north: guard("guard_gate_north", "Kapı Nöbetçisi Ali", TOWN_SPOTS.guardGateNorth, "Kapıdan geçen herkesi görürüm. Sen de temiz görünüyorsun, geç bakalım."),
   guard_gate_south: guard("guard_gate_south", "Kapı Nöbetçisi Veli", TOWN_SPOTS.guardGateSouth, "Hendekte timsah yok... galiba. Ben olsam yine de yüzmezdim."),
-  guard_keep_west: guard("guard_keep_west", "Kale Muhafızı Emre", TOWN_SPOTS.guardKeepWest, "Kalenin kapısı artık herkese açık; ustalar içeride, ateşin başında. Bir yer arıyorsan sor, tarif edeyim."),
+  guard_keep_west: guard("guard_keep_west", "Kale Muhafızı Emre", TOWN_SPOTS.guardKeepWest, "Kalenin kapısı herkese açık; yedi usta içeride, ateşin başında. Yolunu seçmediysen önce onlara git. Bir yer arıyorsan sor, tarif edeyim."),
   guard_keep_east: guard("guard_keep_east", "Kale Muhafızı Kaan", TOWN_SPOTS.guardKeepEast, "Surlarda gece nöbeti tutuyoruz. Ormandan gelen ışıkları gören olursa Komutan'a haber versin."),
   guard_hall_west: guard("guard_hall_west", "Salon Muhafızı Oğuz", KEEP_HALL_SPOTS.guardWest, "Ustaların sözü dinlenir, sesi yükseltilmez. Şehirde bir yer arıyorsan bana sor."),
   guard_hall_east: guard("guard_hall_east", "Salon Muhafızı Selim", KEEP_HALL_SPOTS.guardEast, "Ateş hiç sönmez burada. Sönerse kale düşer derler. Nereye gideceksin?"),
 
   master_warrior: master(
     "warrior",
-    "Savaş Ustası Tuğrul",
+    "Alp",
     { type: "humanoid", tunic: 0x8a2e2e, hair: 0x6b6b6b, skin: 0xd8a47a, gear: { chest: "chainmail" } },
-    "Otur bakalım. Kılıcı tutmak kolay; asıl iş, düştüğünde yeniden kaldırmaktır.",
+    "Otur bakalım. Kılıcı tutmak kolay; asıl iş, düştüğünde yeniden kaldırmaktır. Alplerin yolu öndedir, kalkanın arkası değil.",
     [
       "Öfken boş kalmasın: vurdukça dolar, dolunca harca. Saklanan öfke bir işe yaramaz.",
-      "Kalabalığa dalacaksan önce kalkanını, sonra baltanı düşün.",
+      "Kalabalığa dalacaksan önce Girdap'ı, sonra Sıçrayış'ı düşün.",
       "Silahını demirciye götür, ama parşömenini esirgeme. +7'den sonrası yürek ister.",
-      "Gece yaratıkları daha güçlüdür ama daha çok da verir. Korkak savaşçının cebi boş kalır.",
+      "Gece yaratıkları daha güçlüdür ama daha çok da verir. Korkak alpin cebi boş kalır.",
     ],
   ),
-  master_mage: master(
-    "mage",
-    "Büyü Ustası Nilüfer",
-    { type: "humanoid", tunic: 0x5f3dc4, hair: 0xe9ecef, skin: 0xe8b48a, headwear: { color: 0x5f3dc4, style: "hat" } },
-    "Ateş ısıtır, ateş yakar. Büyü de öyledir evlat; hangisi olacağını sen seçersin.",
+  master_shaman: master(
+    "shaman",
+    "Kam",
+    { type: "humanoid", tunic: 0x1c4a7a, hair: 0x2d2d2d, skin: 0xc68a5a, headwear: { color: 0x5a3825, style: "hat" } },
+    "Davulumu duydun mu? Gök Tengri konuşuyor evlat. Kamın yolu göğe ve atalara açılır; şimşeği indirir, ruhu çağırır.",
     [
-      "Büyü sürerken kıpırdama; adım attığın an sözcükler dağılır.",
-      "Manan bitmeden geri çekil. Boş bir büyücü, kılıçsız bir savaşçıdan da çaresizdir.",
-      "Düşmanı dondur, sonra uzaklaş. Mesafe büyücünün en sağlam zırhıdır.",
-      "Zeka taşlarını pasif ağaca yerleştir; her soket büyüne bir kıvılcım daha katar.",
-    ],
-  ),
-  master_guardian: master(
-    "guardian",
-    "Muhafız Ustası Bora",
-    { type: "humanoid", tunic: 0x2b5f8a, hair: 0x3a2a1a, skin: 0xc68a5a, gear: { head: "iron_helm", chest: "chainmail" } },
-    "Herkes saldırmayı öğrenir. Durmayı, beklemeyi, arkadakileri korumayı öğrenen azdır.",
-    [
-      "Grupta düşmanın gözü senin üstünde olmalı. Şifacına dönen yaratık, senin hatandır.",
-      "Dayanıklılık can verir, can da zaman. Zaman ise grubunun en büyük silahıdır.",
-      "Önce kalkanını kaldır, sonra çekil. Kalkansız geri çekilmek kaçmaktır.",
-    ],
-  ),
-  master_priest: master(
-    "priest",
-    "Şifa Ustası Derviş Yunus",
-    { type: "humanoid", tunic: 0xf1f3f5, hair: 0xf8f9fa, skin: 0xd9a07a, headwear: { color: 0xe9ecef, style: "hood" } },
-    "Gel, ısın. Yaralı olan yalnız beden değildir; dinlen, ateş ikisini de sarar.",
-    [
-      "Herkesi iyileştirmeye çalışma; önce düşmanın vurduğunu iyileştir.",
-      "Kalkan büyüsü bir iyileştirmeden ucuzdur. Darbeyi gelmeden karşıla.",
-      "Şifacı ölürse grup da ölür. Kendi canını unutma.",
-      "Manan azaldıysa savaştan önce iç; ortasında içmeye fırsat bulamazsın.",
+      "Gök Kamçısı büyü ister; adım attığın an sözcükler dağılır.",
+      "Davulunu kalabalığın ortasında döv, gök gürlesin.",
+      "Ata Ruhu yalnız seni değil, yanındakini de iyileştirir. Grubunu unutma.",
+      "Rüzgâr senin atındır: Yel Yürüyüşü ile kaçarsın, Yel Yürüyüşü ile yetişirsin.",
     ],
   ),
   master_rogue: master(
     "rogue",
-    "Suikast Ustası Gölge",
-    { type: "humanoid", tunic: 0x2b2b33, hair: 0x1a1a1a, skin: 0xc68a5a, headwear: { color: 0x2b2b33, style: "hood" } },
-    "...Beni fark ettin demek. Fena değil. Çoğu kişi ateşi görür, gölgeyi görmez.",
+    "Börü",
+    { type: "humanoid", tunic: 0x2b2b33, hair: 0x6b6b6b, skin: 0xc68a5a, headwear: { color: 0x495057, style: "hood" } },
+    "...Beni fark ettin demek. Fena değil. Çoğu kişi ateşi görür, kurdu görmez. Börünün yolu gölgededir.",
     [
       "İlk darbe her şeydir. Arkasından vur, yüzleşme.",
       "Enerjin dolarken bekle; aceleyle vurulan bıçak kınına erken döner.",
@@ -251,15 +231,51 @@ export const NPCS: Record<string, NpcDef> = {
       "Kara Orman'da Kara Murat'ın adamları gece dolaşır. Onları sen görmeden onlar seni görmesin.",
     ],
   ),
+  master_archer: master(
+    "archer",
+    "Tigin",
+    { type: "humanoid", tunic: 0x2b5422, hair: 0x8b4513, skin: 0xd9a07a, gear: { chest: "leather_vest" }, headwear: { color: 0x2b5422, style: "hood" } },
+    "Bozkırda büyüdüm; at sırtında yayı germeyi yürümeden önce öğrendim. Tiginin yolu uzaktan vurmaktır, yakına gelmeden bitirmek.",
+    [
+      "Nişanlı Atış'ı düşman sana ulaşmadan at; ikinci oku Seri Atış'la gönder.",
+      "Ok Yağmuru'nu sürünün ortasına bırak, kenarına değil.",
+      "Biri sana çok yaklaştıysa Çivileyen Ok ile yere çivile, sonra Doğan Sıçrayışı ile uzaklaş.",
+      "Yayının kirişini demirciye de götürebilirsin. Güçlü yay, güçlü ok demektir.",
+    ],
+  ),
+  master_druid: master(
+    "druid",
+    "Erşek",
+    { type: "humanoid", tunic: 0x5c4a2a, hair: 0xd8d8d8, skin: 0xc68a5a, headwear: { color: 0x2f6b3a, style: "hood" } },
+    "Ağaçların dilini bilir misin? Bilmezsin elbet. Ben de bilmezdim; sonra orman benimle konuştu. Erşeğin yolu yeşildir.",
+    [
+      "Sarmaşık seni kuşatanları yerinde tutar; sonra Diken Kırbacı'nı rahatça savurursun.",
+      "Ağaç Kabuğu'nu darbeler gelmeden giy; geldikten sonra geç kalırsın.",
+      "Bahar Dalgası hem vurur hem iyileştirir. Grubun ortasında patlat.",
+      "Orman seni korur ama gece Kara Orman'ın kendisi bile korkar.",
+    ],
+  ),
+  master_priest: master(
+    "priest",
+    "Ak Ana",
+    { type: "humanoid", tunic: 0xf1f3f5, hair: 0xf8f9fa, skin: 0xe8b48a, gender: "female", hairStyle: "long", headwear: { color: 0xe9ecef, style: "hood" } },
+    "Gel yavrum, ısın. Ak Ana'nın yolu arındırmak ve kutsamaktır: yarayı sarar, kötülüğü ışıkla yakar.",
+    [
+      "Herkesi iyileştirmeye çalışma; önce düşmanın vurduğunu iyileştir.",
+      "Koruyucu Kalkan bir şifadan ucuzdur. Darbeyi gelmeden karşıla.",
+      "Şifacı ölürse grup da ölür. Kendi canını unutma.",
+      "Manan azaldıysa savaştan önce iç; ortasında içmeye fırsat bulamazsın.",
+    ],
+  ),
   master_necromancer: master(
     "necromancer",
-    "Kara Usta Morgul",
-    { type: "humanoid", tunic: 0x1f3b2a, hair: 0x2d2d2d, skin: 0xb8b8a0, headwear: { color: 0x1f3b2a, style: "hood" } },
-    "Diğerleri bana tuhaf bakar. Oysa ölüm de hayat kadar eski bir öğretmendir.",
+    "Erlik Ruh Eğitmeni",
+    { type: "humanoid", tunic: 0x1f2b22, hair: 0x2d2d2d, skin: 0xb8b8a0, headwear: { color: 0x1f2b22, style: "hood" } },
+    "Diğerleri bana tuhaf bakar. Oysa yeraltı da gök kadar eskidir; Erlik'in ruhları da ataların kadar konuşur. Dinlemeye hazır mısın?",
     [
-      "Kölelerin senin kalkanındır. Önlerine geç, arkalarında dur.",
-      "Düşen her düşman bir fırsattır; cesetleri boşa harcama.",
-      "Lanetini önce en güçlüsüne sal. Zayıflar zaten düşer.",
+      "İskeletlerin senin kalkanındır. Önlerine geç, arkalarında dur.",
+      "Ruh Emme ile vur, canın azaldıkça daha çok em.",
+      "Dehşet'i önce en güçlüsüne sal. Zayıflar zaten düşer.",
     ],
   ),
 

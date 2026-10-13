@@ -31,20 +31,26 @@ export interface PassiveDef {
 const passive = (def: PassiveDef) => def;
 
 export const CLASS_PASSIVES: Record<ClassId, PassiveDef[]> = {
+  novice: [],
   warrior: [
     passive({ id: "w_strength", name: "Kas Gücü", level: 2, affix: "attackPct", perRank: 3, description: "Saldırın her derecede %3 artar." }),
     passive({ id: "w_ironSkin", name: "Demir Deri", level: 5, affix: "hpPct", perRank: 3, description: "Canın her derecede %3 artar." }),
     passive({ id: "w_fury", name: "Öfkeli Ruh", level: 10, affix: "critChance", perRank: 1, description: "Kritik şansın her derecede %1 artar." }),
   ],
-  guardian: [
-    passive({ id: "g_bulwark", name: "Kalkan Ustalığı", level: 2, affix: "defense", perRank: 3, description: "Savunman her derecede 3 artar." }),
-    passive({ id: "g_heart", name: "Dev Yürek", level: 5, affix: "hpPct", perRank: 4, description: "Canın her derecede %4 artar." }),
-    passive({ id: "g_unyielding", name: "Sarsılmaz", level: 10, affix: "damageReduction", perRank: 2, description: "Aldığın hasar her derecede %2 azalır." }),
+  shaman: [
+    passive({ id: "s_sky", name: "Gök Bilgisi", level: 2, affix: "attackPct", perRank: 3, description: "Gök gücün her derecede %3 artar." }),
+    passive({ id: "s_ancestors", name: "Ataların Sesi", level: 5, affix: "int", perRank: 2, description: "Her derecede +2 Zeka." }),
+    passive({ id: "s_drum", name: "Davulun Ritmi", level: 10, affix: "attackSpeed", perRank: 2, description: "Saldırı hızın her derecede %2 artar." }),
   ],
-  mage: [
-    passive({ id: "m_mastery", name: "Büyü Ustalığı", level: 2, affix: "attackPct", perRank: 3, description: "Büyü gücün her derecede %3 artar." }),
-    passive({ id: "m_mind", name: "Berrak Zihin", level: 5, affix: "int", perRank: 2, description: "Her derecede +2 Zeka." }),
-    passive({ id: "m_focus", name: "Odak", level: 10, affix: "critChance", perRank: 1, description: "Kritik şansın her derecede %1 artar." }),
+  archer: [
+    passive({ id: "a_eye", name: "Keskin Göz", level: 2, affix: "critChance", perRank: 1, description: "Kritik şansın her derecede %1 artar." }),
+    passive({ id: "a_draw", name: "Gergin Kiriş", level: 5, affix: "attackPct", perRank: 3, description: "Saldırın her derecede %3 artar." }),
+    passive({ id: "a_nimble", name: "Çevik Parmaklar", level: 10, affix: "dex", perRank: 2, description: "Her derecede +2 Çeviklik." }),
+  ],
+  druid: [
+    passive({ id: "d_roots", name: "Derin Kökler", level: 2, affix: "hpPct", perRank: 3, description: "Canın her derecede %3 artar." }),
+    passive({ id: "d_growth", name: "Filizlenme", level: 5, affix: "attackPct", perRank: 3, description: "Doğanın gücü (hasar ve iyileştirme) her derecede %3 artar." }),
+    passive({ id: "d_oak", name: "Meşe Yüreği", level: 10, affix: "damageReduction", perRank: 2, description: "Aldığın hasar her derecede %2 azalır." }),
   ],
   priest: [
     passive({ id: "p_faith", name: "İnanç", level: 2, affix: "attackPct", perRank: 3, description: "Kutsal gücün (hasar ve iyileştirme) her derecede %3 artar." }),

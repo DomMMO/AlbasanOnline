@@ -4581,3 +4581,42 @@ body.touch #chat {
   border-color: var(--gold-dark);
   background: #2a1d0f;
 }
+
+/* ---- Masters: the class on offer, choosing it ---- */
+
+.path-info {
+  margin: 4px 0 8px;
+  padding: 6px 8px;
+  background: #0007;
+  border: 1px solid #6e532077;
+  border-radius: 3px;
+}
+
+.path-title {
+  font-family: var(--font-title);
+  font-size: 17px;
+  color: var(--gold-light);
+}
+
+.path-desc {
+  margin: 2px 0 0;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: #d8cba8;
+}
+
+.path-note {
+  margin-top: 4px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-style: italic;
+  color: var(--muted);
+}
+
+.npc-buttons button.path-choose {
+  color: #1a1009;
+  background: linear-gradient(180deg, #ffe08a, #d4a017);
+  border-color: #8a6a10;
+  text-shadow: none;
+  font-weight: bold;
+}

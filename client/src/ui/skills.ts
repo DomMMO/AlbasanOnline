@@ -205,6 +205,15 @@ function render() {
     el.append(...rows);
     return el;
   };
+  if (cls === "novice") {
+    // No class yet: point the way to the masters.
+    const hint = Object.assign(document.createElement("p"), {
+      className: "muted life-hint",
+      textContent: "Henüz bir yolun yok. İç Kale'nin büyük salonunda ateşin başında oturan yedi ustadan birini seçince yeteneklerin burada görünür.",
+    });
+    bodyEl.replaceChildren(section("Yolun"), hint, section("Meslekler"), wrap(lifeSkillRows()), lifeHint);
+    return;
+  }
   bodyEl.replaceChildren(section("Aktif Yetenekler"), wrap(active), section("Pasif Yetenekler"), wrap(passives), section("Meslekler"), wrap(lifeSkillRows()), lifeHint);
 }
 

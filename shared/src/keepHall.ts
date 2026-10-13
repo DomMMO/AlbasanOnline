@@ -3,7 +3,8 @@ import type { Decor, DungeonLayout } from "./dungeons";
 import { Tile } from "./map";
 
 // Inside the keep (İç Kale): a timbered great hall entered through the keep's front door
-// in town. The class masters sit round a fire pit in the middle; long tables, bookshelves,
+// in town. The seven class masters sit round a fire pit in the middle, and a novice picks
+// one of them to learn from; long tables, bookshelves,
 // weapon racks and banners line the walls. Dim even by day, so the fire and torches glow.
 // No mobs and no PvP.
 
@@ -25,12 +26,13 @@ export const KEEP_HALL_SPOTS = {
   spawn: px(14, 17),
   /** The class masters' seats round the fire (feet positions) and which way they face. */
   seats: {
-    warrior: { ...px(13, 8), facing: "down" },
-    mage: { ...px(16, 8), facing: "down" },
-    guardian: { ...px(11, 11), facing: "right" },
-    priest: { ...px(18, 11), facing: "left" },
-    rogue: { ...px(13, 13), facing: "up" },
-    necromancer: { ...px(16, 13), facing: "up" },
+    warrior: { ...px(14, 7), facing: "down" },
+    shaman: { ...px(18, 8), facing: "left" },
+    rogue: { ...px(19, 11), facing: "left" },
+    archer: { ...px(17, 14), facing: "up" },
+    druid: { ...px(12, 14), facing: "up" },
+    priest: { ...px(10, 11), facing: "right" },
+    necromancer: { ...px(11, 8), facing: "right" },
   },
   guardWest: px(12, 19),
   guardEast: px(17, 19),

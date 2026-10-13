@@ -60,6 +60,7 @@ import { abandonQuest, acceptQuest, turnInQuest } from "../game/quests";
 import { handleChat } from "../game/chat";
 import { respondDuel } from "../game/duel";
 import { notice, sendInventory } from "../game/items";
+import { chooseClass, resetClass } from "../game/classPath";
 import { friendJoined, friendLeft, removeFriend, requestFriend, respondFriend } from "../game/friends";
 import { forgetInstance, instanceFor, refreshFor, registerInstance, respond, sameParty } from "../game/party";
 import { claimCharacter } from "../game/presence";
@@ -268,6 +269,10 @@ export class ZoneRoom extends Room<WorldState> {
     });
     this.onMessage(Msg.ReadFortune, (client, message: { npcId?: unknown }) => {
       if (typeof message?.npcId === "string") readFortune(this.game, client.sessionId, message.npcId);
+    });
+    this.onMessage(Msg.ChooseClass, (client, message: { npcId?: unknown }) => chooseClass(this.game, client.sessionId, message?.npcId));
+    this.onMessage(Msg.ResetClass, (client, message: { npcId?: unknown }) => {
+      if (!this.itemsLocked(client.sessionId)) resetClass(this.game, client.sessionId, message?.npcId);
     });
     this.onMessage(Msg.StorageGold, (client, message: Partial<StorageGoldMessage>) => {
       if (this.itemsLocked(client.sessionId)) return;

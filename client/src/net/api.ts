@@ -73,8 +73,8 @@ export const api = {
   },
   me: () => request<{ username: string; isAdmin: boolean }>("GET", "/me"),
   listCharacters: () => request<CharacterSummary[]>("GET", "/characters"),
-  createCharacter: (name: string, classId: string, look: CharacterLook, color: number) =>
-    request<CharacterSummary>("POST", "/characters", { name, classId, look, color } satisfies CreateCharacterRequest),
+  createCharacter: (name: string, look: CharacterLook, color: number) =>
+    request<CharacterSummary>("POST", "/characters", { name, look, color } satisfies CreateCharacterRequest),
   /** `name` must match the character's name (confirmation). */
   deleteCharacter: (id: number, name: string) => request<{ ok: true }>("DELETE", `/characters/${id}`, { name }),
 };

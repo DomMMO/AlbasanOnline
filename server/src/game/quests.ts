@@ -95,7 +95,7 @@ export function turnInQuest(game: Game, sessionId: string, questId: string, npcI
   if (!player || !runtime || !quest || entry?.status !== "active" || player.dead) return;
   if (quest.turnIn !== npcId || !nearNpc(game, sessionId, npcId)) return;
   const inv = runtime.inventory;
-  if (!questReady(quest, entry, (defId) => countOf(inv, defId))) return notice(game, sessionId, "Görev henüz tamamlanmadı");
+  if (!questReady(quest, entry, (defId) => countOf(inv, defId), player.cls)) return notice(game, sessionId, "Görev henüz tamamlanmadı");
   if (!rewardsFit(inv, quest, player.cls)) return notice(game, sessionId, "Ödüller için envanterinde yer aç");
 
   for (const objective of quest.objectives) if (objective.type === "collect") takeItems(inv, objective.item, objective.count);

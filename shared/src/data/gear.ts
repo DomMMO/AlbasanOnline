@@ -7,12 +7,15 @@ import type { EquipSlot, IconShape, ItemDef, Rarity } from "./items";
 // Dark Forest mobs. Stats follow a formula per tier so the lines stay balanced;
 // hand-written items live in items.ts.
 
-/** Swords, axes and plate: warriors and guardians. */
-const WARRIOR: ClassId[] = ["warrior", "guardian", "rogue"];
-const CASTERS: ClassId[] = ["mage", "priest", "necromancer"];
+/** Swords and axes: warriors and assassins. */
+const WARRIOR: ClassId[] = ["warrior", "rogue"];
+/** Plate: everyone who fights with steel or the bow. */
+const PLATE: ClassId[] = ["warrior", "rogue", "archer"];
+const CASTERS: ClassId[] = ["shaman", "druid", "priest", "necromancer"];
 const PRIEST: ClassId[] = ["priest"];
-/** Staves: mages and necromancers. */
-const MAGE: ClassId[] = ["mage", "necromancer"];
+/** Staves: shamans, druids and necromancers. */
+const MAGE: ClassId[] = ["shaman", "druid", "necromancer"];
+const ARCHER: ClassId[] = ["archer"];
 
 /** Rarity by tier index (0 = first tier of a line). */
 const TIER_RARITY: Rarity[] = ["uncommon", "uncommon", "rare", "rare", "epic"];
@@ -74,6 +77,20 @@ const WEAPON_LINES: WeaponLine[] = [
     ],
   },
   {
+    idPrefix: "bow",
+    classes: ARCHER,
+    shape: "bow",
+    speedMs: 1700,
+    attackPerLevel: 2.05,
+    tiers: [
+      { name: "Boynuz Yay", level: 9, color: 0xd8c8a8 },
+      { name: "Bozkır Yayı", level: 12, color: 0xb5835a },
+      { name: "Akdoğan Yayı", level: 15, color: 0xf1f3f5 },
+      { name: "Gökkuşağı Yayı", level: 18, color: 0x74c0fc, maxHp: 15 },
+      { name: "Tigin'in Yayı", level: 21, color: 0xe8b84a, maxHp: 30, description: "Bozkırın en büyük okçusunun yayı. Kirişi altınla örülmüş." },
+    ],
+  },
+  {
     idPrefix: "mace",
     classes: PRIEST,
     shape: "mace",
@@ -132,7 +149,7 @@ const PIECE_SHAPE: Record<keyof typeof PIECE_WEIGHT, IconShape> = { head: "helm"
 const ARMOUR_SETS: ArmourSet[] = [
   {
     idPrefix: "plate",
-    classes: WARRIOR,
+    classes: PLATE,
     look: "plate",
     defense: 1,
     health: 1,

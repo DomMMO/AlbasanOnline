@@ -274,6 +274,21 @@ const SHAPES: Record<IconShape, string[]> = {
     "....kkhk....",
     "...kmkk.....",
   ],
+  // A short recurve bow standing upright: string on the left, limbs bowing out to the right.
+  bow: [
+    "....kk......",
+    "....kmk.....",
+    "....kwlk....",
+    "....kw.mk...",
+    "....kw..mk..",
+    "....kw..khk.",
+    "....kw..khk.",
+    "....kw..mk..",
+    "....kw.dk...",
+    "....kwdk....",
+    "....kdk.....",
+    "....kk......",
+  ],
   staff: [
     "........kkk.",
     ".......kwlmk",

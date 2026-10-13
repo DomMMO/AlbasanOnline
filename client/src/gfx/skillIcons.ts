@@ -417,6 +417,77 @@ function hood(ctx: Ctx) {
   for (const x of [-3, 3]) ctx.fillRect(x - 1.5, -4, 3, 2);
 }
 
+/** An arrow pointing right, centred on the origin. */
+function arrowShape(ctx: Ctx, length = 36) {
+  const half = length / 2;
+  line(ctx, [[-half, 0], [half - 6, 0]], "#c9a66b", 2.5);
+  ctx.beginPath();
+  ctx.moveTo(half, 0);
+  ctx.lineTo(half - 8, -4.5);
+  ctx.lineTo(half - 8, 4.5);
+  ctx.closePath();
+  ink(ctx, "#ced4da", OUTLINE, 1.5);
+  for (const dy of [-4, 4]) {
+    ctx.beginPath();
+    ctx.moveTo(-half, 0);
+    ctx.lineTo(-half + 7, 0);
+    ctx.lineTo(-half + 3, dy);
+    ctx.lineTo(-half - 3, dy);
+    ctx.closePath();
+    ink(ctx, "#ff8787", OUTLINE, 1.2);
+  }
+}
+
+/** A bow standing upright, string on the left. */
+function bowShape(ctx: Ctx) {
+  ctx.beginPath();
+  ctx.moveTo(-8, -24);
+  ctx.quadraticCurveTo(18, 0, -8, 24);
+  ctx.strokeStyle = OUTLINE;
+  ctx.lineWidth = 7;
+  ctx.stroke();
+  ctx.strokeStyle = "#a0522d";
+  ctx.lineWidth = 4;
+  ctx.stroke();
+  line(ctx, [[-8, -24], [-8, 24]], "#f1f3f5", 1.2);
+}
+
+function leaf(ctx: Ctx, x: number, y: number, angle: number, size: number, fill = "#69db7c") {
+  at(ctx, x, y, angle, 1, () => {
+    ctx.beginPath();
+    ctx.moveTo(-size, 0);
+    ctx.quadraticCurveTo(0, -size * 0.7, size, 0);
+    ctx.quadraticCurveTo(0, size * 0.7, -size, 0);
+    ink(ctx, fill, OUTLINE, 1.8);
+    line(ctx, [[-size * 0.8, 0], [size * 0.8, 0]], "#2b8a3e", 1.2);
+  });
+}
+
+/** A shaman's frame drum with a beater. */
+function drum(ctx: Ctx) {
+  ctx.beginPath();
+  ctx.ellipse(0, 0, 14, 16, 0, 0, Math.PI * 2);
+  ink(ctx, "#e9d8a6", OUTLINE, 2.5);
+  ctx.beginPath();
+  ctx.ellipse(0, 0, 10, 12, 0, 0, Math.PI * 2);
+  ctx.strokeStyle = "#c92a2a";
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+  star(ctx, 0, 0, 5, "#c92a2a", 4);
+  line(ctx, [[10, 14], [22, 24]], "#8a5a2b", 3);
+}
+
+function paw(ctx: Ctx, x: number, y: number) {
+  ctx.beginPath();
+  ctx.ellipse(x, y + 4, 6, 5, 0, 0, Math.PI * 2);
+  ink(ctx, "#ced4da", OUTLINE, 1.5);
+  for (const [dx, dy] of [[-6, -3], [-2, -6], [3, -6], [7, -3]] as const) {
+    ctx.beginPath();
+    ctx.arc(x + dx, y + dy, 2.2, 0, Math.PI * 2);
+    ink(ctx, "#ced4da", OUTLINE, 1.2);
+  }
+}
+
 function fallback(ctx: Ctx) {
   star(ctx, 0, 0, 16, INK);
 }
@@ -478,75 +549,131 @@ const GLYPHS: Record<string, (ctx: Ctx, color: string) => void> = {
     }
   },
 
-  // Guardian
-  shieldSlam: (ctx) => {
-    at(ctx, -3, 2, -0.25, 0.95, () => shieldShape(ctx, 1, "#4dabf7"));
-    star(ctx, 15, -15, 8, "#ffe066", 8);
-  },
-  challengingShout: (ctx) => {
-    for (const r of [10, 16, 22]) ring(ctx, r, "#ffa8a8", 2);
-    ctx.beginPath();
-    ctx.rect(-3, -11, 6, 14);
-    ctx.rect(-3, 6, 6, 5);
-    ink(ctx, "#ff6b6b");
-  },
-  shieldWall: (ctx) => {
-    shieldShape(ctx, 1.15, "#74c0fc");
-    ctx.strokeStyle = "#1c3d5a";
-    ctx.lineWidth = 1.5;
-    for (const y of [-10, -2, 6]) {
-      ctx.beginPath();
-      ctx.moveTo(-14, y);
-      ctx.lineTo(14, y);
-      ctx.stroke();
-    }
-  },
-  concussiveBlow: (ctx) => {
-    at(ctx, -4, 4, 0.3, 0.85, () => shieldShape(ctx, 1, "#4dabf7"));
-    star(ctx, 12, -16, 6);
-    star(ctx, 20, -4, 5);
-    star(ctx, 4, -22, 4.5);
-  },
-  shieldCharge: (ctx) => {
-    at(ctx, 6, 0, 0, 0.9, () => shieldShape(ctx, 1, "#1c7ed6"));
-    speedLines(ctx, -10, [-10, 0, 10], 14);
-  },
-
-  // Mage
-  fireball: (ctx) => {
-    for (let i = 0; i < 3; i++) line(ctx, [[-4 - i * 5, 6 + i * 4], [-20 - i * 2, 18]], "#ffa94d", 2);
-    ctx.beginPath();
-    ctx.arc(4, -4, 13, 0, Math.PI * 2);
-    ink(ctx, "#ff922b");
-    flame(ctx, 4, -2, 12, "#ffd43b", "#fff3bf");
-  },
-  frostNova: (ctx) => {
-    ring(ctx, 22, "#a5d8ff", 2);
-    snowflake(ctx, 17);
-  },
-  lightning: (ctx) => {
+  // Shaman (Kam)
+  skyLash: (ctx) => {
     ctx.beginPath();
     ctx.ellipse(0, -18, 18, 6, 0, 0, Math.PI * 2);
     ink(ctx, "#495057", OUTLINE, 1.5);
     bolt(ctx, 0.95);
   },
-  flameBurst: (ctx) => {
-    burst(ctx, 22, "#ff6b00", 12);
-    flame(ctx, 0, 4, 14, "#ffd43b", "#fff3bf");
+  thunderDrum: (ctx) => {
+    for (const r of [18, 24]) ring(ctx, r, "#a5d8ff", 1.5);
+    drum(ctx);
+    at(ctx, 15, -15, 0.3, 0.35, () => bolt(ctx, 1));
   },
-  blink: (ctx) => {
-    at(ctx, -8, 0, 0, 0.75, () => swirl(ctx, 16, "#d0bfff"));
-    ctx.setLineDash([3, 4]);
-    line(ctx, [[2, 0], [16, 0]], "#e5dbff", 2.5);
-    ctx.setLineDash([]);
-    star(ctx, 18, 0, 6, "#e5dbff", 4);
+  ancestorSpirit: (ctx) => {
+    at(ctx, -3, 2, 0, 0.95, () => ghost(ctx, "#c3fae8"));
+    at(ctx, 13, -13, 0, 0.45, () => cross(ctx, 16, "#63e6be"));
   },
-  arcanePower: (ctx) => {
-    ring(ctx, 21, "#e599f7", 2.5);
-    star(ctx, 0, 0, 16, "#f3d9fa", 8);
+  spiritBind: (ctx) => {
+    at(ctx, 0, -2, 0, 0.85, () => ghost(ctx, "#96f2d7"));
+    for (const [x, y, a] of [[-14, 12, 0.4], [-2, 16, 0], [11, 12, -0.4]] as const) chainLink(ctx, x, y, a, "#38d9a9");
+  },
+  windWalk: (ctx) => {
+    at(ctx, -8, 0, 0, 0.75, () => swirl(ctx, 16, "#d0ebff"));
+    for (const y of [-8, 0, 8]) line(ctx, [[2, y], [20, y - 3]], "#a5d8ff", 2.5);
+  },
+  skyBlessing: (ctx) => {
+    ring(ctx, 21, "#74c0fc", 2.5);
+    star(ctx, 0, 0, 16, "#d0ebff", 8);
+    at(ctx, 0, 0, 0, 0.45, () => bolt(ctx, 1));
+  },
+
+  // Archer (Tigin)
+  aimedShot: (ctx) => {
+    bowShape(ctx);
+    at(ctx, 0, 0, 0, 1, () => arrowShape(ctx, 38));
+    ring(ctx, 5, "#ff8787", 1.5);
+  },
+  arrowRain: (ctx) => {
+    for (const [x, y] of [[-12, -6], [0, -12], [12, -4], [-4, 6], [8, 10]] as const) at(ctx, x, y, Math.PI / 2 + 0.2, 0.5, () => arrowShape(ctx, 30));
     ctx.beginPath();
-    ctx.arc(0, 0, 4, 0, Math.PI * 2);
-    ink(ctx, "#cc5de8", OUTLINE, 1.5);
+    ctx.ellipse(0, 20, 20, 4, 0, 0, Math.PI * 2);
+    ink(ctx, "#e67700", OUTLINE, 1.5);
+  },
+  quickShot: (ctx) => {
+    for (const y of [-7, 7]) at(ctx, 4, y, 0, 0.8, () => arrowShape(ctx, 34));
+    speedLines(ctx, -16, [-12, 0, 12], 10);
+  },
+  pinningShot: (ctx) => {
+    at(ctx, 0, -4, Math.PI / 2 - 0.35, 0.85, () => arrowShape(ctx, 36));
+    ctx.beginPath();
+    ctx.ellipse(4, 16, 16, 5, 0, 0, Math.PI * 2);
+    ink(ctx, "#a61e4d", OUTLINE, 1.5);
+    star(ctx, -14, 6, 5);
+    star(ctx, 18, 4, 4.5);
+  },
+  hawkLeap: (ctx) => {
+    wing(ctx, 1, "#ffe8cc");
+    wing(ctx, -1, "#ffe8cc");
+    speedLines(ctx, -6, [14, 20], 12);
+  },
+  eagleEye: (ctx) => {
+    eye(ctx, "#fff9db", "#f08c00");
+    for (const a of [-2.4, -1.57, -0.74]) line(ctx, [[Math.cos(a) * 18, Math.sin(a) * 18], [Math.cos(a) * 24, Math.sin(a) * 24]], "#ffd43b", 2);
+  },
+
+  // Druid (Erşek)
+  thornLash: (ctx) => {
+    ctx.beginPath();
+    ctx.moveTo(-20, 18);
+    ctx.bezierCurveTo(-18, -6, 6, 10, 18, -18);
+    ctx.strokeStyle = OUTLINE;
+    ctx.lineWidth = 7;
+    ctx.stroke();
+    ctx.strokeStyle = "#5c940d";
+    ctx.lineWidth = 4;
+    ctx.stroke();
+    for (const [x, y, a] of [[-16, 8, -2.2], [-8, 2, 0.6], [2, 4, -2.4], [10, -6, 0.4], [14, -12, -2]] as const) {
+      at(ctx, x, y, a, 1, () => {
+        ctx.beginPath();
+        ctx.moveTo(0, -2);
+        ctx.lineTo(7, 0);
+        ctx.lineTo(0, 2);
+        ink(ctx, "#d8f5a2", OUTLINE, 1.2);
+      });
+    }
+  },
+  entangle: (ctx) => {
+    ring(ctx, 21, "#94d82d", 2);
+    for (let i = 0; i < 5; i++) {
+      const a = (i / 5) * Math.PI * 2 - Math.PI / 2;
+      ctx.beginPath();
+      ctx.moveTo(Math.cos(a) * 20, Math.sin(a) * 20);
+      ctx.quadraticCurveTo(Math.cos(a + 0.9) * 10, Math.sin(a + 0.9) * 10, 0, 0);
+      ctx.strokeStyle = OUTLINE;
+      ctx.lineWidth = 5.5;
+      ctx.stroke();
+      ctx.strokeStyle = "#8a5a2b";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+    }
+    leaf(ctx, 0, 0, 0.6, 9, "#69db7c");
+  },
+  rejuvenate: (ctx) => {
+    leaf(ctx, -4, 4, -0.6, 18, "#69db7c");
+    leaf(ctx, 8, -6, 0.5, 12, "#8ce99a");
+    at(ctx, 14, 12, 0, 0.4, () => cross(ctx, 16, "#d3f9d8"));
+  },
+  barkskin: (ctx) => {
+    shieldShape(ctx, 1.1, "#8a5a2b");
+    ctx.strokeStyle = "#4a2e16";
+    ctx.lineWidth = 1.8;
+    for (const x of [-7, 0, 7]) {
+      ctx.beginPath();
+      ctx.moveTo(x, -14);
+      ctx.bezierCurveTo(x + 3, -4, x - 3, 4, x, 14);
+      ctx.stroke();
+    }
+    leaf(ctx, 12, -16, 0.6, 7, "#69db7c");
+  },
+  wildCharge: (ctx) => {
+    for (const [x, y] of [[-10, 8], [6, -6]] as const) paw(ctx, x, y);
+    speedLines(ctx, -16, [-14, -4], 10);
+  },
+  springTide: (ctx) => {
+    for (const r of [12, 18, 24]) ring(ctx, r, "#8ce99a", 1.5);
+    leaf(ctx, 0, 0, -0.4, 15, "#40c057");
   },
 
   // Priest
