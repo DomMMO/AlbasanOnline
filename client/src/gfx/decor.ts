@@ -3,6 +3,7 @@ import { COLOSSEUM, TILE_SIZE, type Decor, type IconShape } from "../../../share
 import { addLight } from "../fx/nightLights";
 import { ICON_SIZE, paintIcon } from "./icons";
 import { bench, firepit, rack, rug, shelf, stool, table } from "./interior";
+import { ensureHorse, HorseFrame } from "./horse";
 
 // Town decor drawn in code on top of the tiles: buildings, the fountain, lamps…
 // Each piece is depth-sorted by its bottom edge like characters, so players walking
@@ -119,6 +120,15 @@ export function drawDecor(scene: Phaser.Scene, decor: Decor[]) {
         break;
       case "bench":
         bench(scene, piece);
+        break;
+      case "horse":
+        farmHorse(scene, piece);
+        break;
+      case "trough":
+        trough(scene, piece.tx, piece.ty);
+        break;
+      case "parkBench":
+        parkBench(scene, piece);
         break;
       case "colosseum":
         colosseum(scene);
@@ -828,6 +838,78 @@ function bridge(scene: Phaser.Scene, b: Extract<Decor, { kind: "bridge" }>) {
       }
     },
   });
+}
+
+/** A horse standing in the paddock; now and then it takes a few steps and turns round. */
+function farmHorse(scene: Phaser.Scene, h: Extract<Decor, { kind: "horse" }>) {
+  const key = ensureHorse(scene, h.look);
+  const x = (h.tx + 0.5) * TILE_SIZE;
+  const bottom = (h.ty + 1) * TILE_SIZE;
+  scene.add.ellipse(x, bottom - 1, 26, 5, 0x000000, 0.25).setDepth(bottom - 0.1);
+  const side = h.facing !== "down";
+  const sprite = scene.add
+    .sprite(x, bottom, key, side ? HorseFrame.Side : HorseFrame.Down)
+    .setOrigin(0.5, 1)
+    .setDepth(bottom)
+    .setFlipX(h.facing === "left");
+  scene.time.addEvent({
+    delay: 2500 + Math.random() * 3000,
+    loop: true,
+    callback: () => {
+      if (!side || Math.random() < 0.5) return;
+      sprite.anims.play(`${key}-side`, true);
+      scene.time.delayedCall(500 + Math.random() * 400, () => {
+        sprite.anims.stop();
+        sprite.setFrame(HorseFrame.Side);
+        if (Math.random() < 0.4) sprite.setFlipX(!sprite.flipX);
+      });
+    },
+  });
+}
+
+/**
+ * A park bench: wooden slats on cast-iron legs with a backrest. Sitters face `facing`; the
+ * backrest is on the far side, so for a bench looking north (at the fountain from the south)
+ * it stands in front of whoever sits there and is drawn over them.
+ */
+function parkBench(scene: Phaser.Scene, b: Extract<Decor, { kind: "parkBench" }>) {
+  const x0 = b.tx * TILE_SIZE;
+  const W = b.w * TILE_SIZE;
+  const bottom = (b.ty + 1) * TILE_SIZE;
+  const IRON = 0x2a2a30;
+  const WOOD = 0x8a5a2b;
+  const WOOD_LIGHT = 0xb07b48;
+  const WOOD_DARK = 0x5b3a1e;
+  // Shadow, legs and seat sit just under the sitter.
+  const seat = scene.add.graphics().setPosition(x0, bottom).setDepth(bottom - 0.5);
+  seat.fillStyle(0x000000, 0.25).fillEllipse(W / 2, -1, W, 4);
+  for (const lx of [3, W - 5]) seat.fillStyle(IRON).fillRect(lx, -6, 2, 6).fillRect(lx - 1, -1, 4, 1);
+  seat.fillStyle(WOOD_DARK).fillRect(1, -8, W - 2, 3);
+  seat.fillStyle(WOOD).fillRect(1, -9, W - 2, 2).fillRect(1, -6, W - 2, 1);
+  seat.fillStyle(WOOD_LIGHT).fillRect(1, -9, W - 2, 1);
+  // Backrest: two slats on iron posts.
+  const behind = b.facing === "down";
+  const back = scene.add.graphics().setPosition(x0, bottom).setDepth(behind ? bottom - 0.6 : bottom + 0.5);
+  const top = behind ? -18 : -6;
+  for (const lx of [3, W - 5]) back.fillStyle(IRON).fillRect(lx, top, 2, behind ? 10 : 6);
+  for (const [dy, color] of [[0, WOOD_LIGHT], [1, WOOD], [4, WOOD_LIGHT], [5, WOOD]] as const) back.fillStyle(color).fillRect(0, top + 1 + dy, W, 1);
+  back.fillStyle(WOOD_DARK).fillRect(0, top + 3, W, 1).fillRect(0, top + 7, W, 1);
+  for (const lx of [0, W - 1]) back.fillStyle(IRON).fillRect(lx, top, 1, 8);
+}
+
+/** A long wooden water trough (two tiles wide). */
+function trough(scene: Phaser.Scene, tx: number, ty: number) {
+  const x0 = tx * TILE_SIZE;
+  const bottom = (ty + 1) * TILE_SIZE;
+  const W = TILE_SIZE * 2;
+  const g = scene.add.graphics().setPosition(x0, bottom).setDepth(bottom);
+  g.fillStyle(0x000000, 0.25).fillEllipse(W / 2, -1, W + 2, 4);
+  g.fillStyle(0x4a2e16).fillRect(2, -4, 3, 4).fillRect(W - 5, -4, 3, 4);
+  g.fillStyle(0x6b4423).fillRect(1, -11, W - 2, 8);
+  g.fillStyle(0x8a5a2b).fillRect(1, -11, W - 2, 2);
+  g.fillStyle(0x3466a8).fillRect(3, -10, W - 6, 2);
+  g.fillStyle(0x8fb8e8).fillRect(6, -10, 4, 1).fillRect(W - 12, -10, 3, 1);
+  g.fillStyle(0x4a2e16).fillRect(1, -7, W - 2, 1);
 }
 
 function torch(scene: Phaser.Scene, tx: number, ty: number) {

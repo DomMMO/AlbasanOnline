@@ -39,7 +39,10 @@ const logBody = $("quest-log-body");
 
 export interface QuestActions {
   accept(npcId: string, questId: string): void;
-  turnIn(npcId: string, questId: string): void;
+  /** `answer`: the option chosen, for a quest with a quiz. */
+  turnIn(npcId: string, questId: string, answer?: string): void;
+  /** Ask this NPC the question a "talk" objective needs. */
+  talk(npcId: string, questId: string): void;
   abandon(questId: string): void;
   openShop(npc: NpcDef): void;
   openUpgrade(npc: NpcDef): void;
@@ -72,6 +75,8 @@ let fortune: { text: string; good: boolean } | null = null;
 let answer: string | null = null;
 /** "Are you sure?" before choosing or resetting a class. */
 let confirming: "choose" | "reset" | null = null;
+/** A quiz's options as shown (shuffled once per visit to the quest page). */
+let quizOptions: { questId: string; options: string[] } | null = null;
 let initialised = false;
 
 export function initQuests(questActions: QuestActions) {
@@ -88,12 +93,21 @@ export function initQuests(questActions: QuestActions) {
 
 export function setQuestLog(event: QuestLogEvent) {
   log = new Map(event.quests.map((q) => [q.id, q]));
+  // A wrong answer resets the quest: next time the options come in a new order.
+  quizOptions = null;
   if (completing && log.get(completing)?.status !== "active") {
     const quest = QUESTS[completing];
     completing = null;
     if (npc && quest) showCompletion(quest);
-  } else if (!showingCompletion) {
-    renderDialog();
+  } else {
+    // Still active after "turn in": a quiz answered wrong. The NPC says so; go and ask again.
+    const quiz = completing ? QUESTS[completing]?.quiz : undefined;
+    completing = null;
+    if (quiz) {
+      viewing = null;
+      answer = quiz.wrongText;
+    }
+    if (!showingCompletion) renderDialog();
   }
   refreshQuests();
 }
@@ -111,6 +125,8 @@ const ready = (quest: QuestDef, entry: QuestProgress) => questReady(quest, entry
 /** Marker over an NPC: "!" quest to give, "?" quest to turn in (grey while unfinished). */
 export function npcMarker(npcId: string): { text: string; color: string } | null {
   let marker: { text: string; color: string } | null = null;
+  // Someone a quest sends you to ask something.
+  if (pendingTalks(npcId).length > 0) marker = { text: "?", color: "#9ad5ff" };
   for (const quest of questsOfNpc(npcId)) {
     const entry = log.get(quest.id);
     if (quest.turnIn === npcId && entry?.status === "active") {
@@ -126,7 +142,7 @@ export function npcMarker(npcId: string): { text: string; color: string } | null
 
 /** NPCs with quests open the conversation window first; returns false if this one has none. */
 export function openNpcDialog(target: NpcDef): boolean {
-  const talks = target.role === "guard" || target.role === "master";
+  const talks = target.role === "guard" || target.role === "master" || questTalks(target.id).length > 0;
   if (questsOfNpc(target.id).length === 0 && !target.fortuneTeller && !talks) return false;
   npc = target;
   fortune = null;
@@ -209,6 +225,16 @@ function renderDialog() {
   if (fortune) nodes.push(el("p", `npc-fortune ${fortune.good ? "good" : "bad"}`, fortune.text));
   if (answer) nodes.push(el("p", "npc-answer", answer));
   if (target.role === "guard") nodes.push(el("div", "npc-ways-title", "Yol sor"), wayButtons(target));
+  // Questions other NPCs sent us to ask this one.
+  for (const { quest, objective } of questTalks(target.id)) {
+    nodes.push(
+      button(`${objective.ask} (${quest.title})`, () => {
+        answer = objective.reply;
+        actions.talk(target.id, quest.id);
+        renderDialog();
+      }, "npc-quest active quest-ask"),
+    );
+  }
   const rows = questRows(target);
   if (rows.length > 0) {
     const list = el("div", "npc-quests");
@@ -329,12 +355,61 @@ function giveAdvice(master: NpcDef) {
   renderDialog();
 }
 
+type TalkObjective = Extract<QuestDef["objectives"][number], { type: "talk" }>;
+
+/** Active quests with a question for this NPC (asked or not: asking again repeats the answer). */
+function questTalks(npcId: string): { quest: QuestDef; objective: TalkObjective; index: number }[] {
+  return [...log.values()].flatMap((entry) => {
+    const quest = QUESTS[entry.id];
+    if (entry.status !== "active" || !quest) return [];
+    return quest.objectives.flatMap((objective, index) => (objective.type === "talk" && objective.npc === npcId ? [{ quest, objective, index }] : []));
+  });
+}
+
+/** The questions for this NPC not asked yet. */
+function pendingTalks(npcId: string) {
+  return questTalks(npcId).filter(({ quest, index }) => (log.get(quest.id)?.kills[index] ?? 0) < 1);
+}
+
+/** Fisher-Yates, so the right answer moves around. */
+function shuffled<T>(items: T[]): T[] {
+  const copy = [...items];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+/** The question and four options (the right one and three wrong ones, in a random order). */
+function quizBlock(target: NpcDef, quest: QuestDef): HTMLElement {
+  const quiz = quest.quiz!;
+  if (quizOptions?.questId !== quest.id) {
+    quizOptions = { questId: quest.id, options: shuffled([quiz.correct, ...shuffled(quiz.wrong).slice(0, 3)]) };
+  }
+  const block = el("div", "quest-quiz");
+  block.append(el("p", "npc-greeting", quiz.question));
+  quizOptions.options.forEach((option, i) => {
+    const row = button("", () => {
+      completing = quest.id;
+      actions.turnIn(target.id, quest.id, option);
+    }, "quiz-option");
+    row.append(el("span", "quiz-letter", `${"abcd"[i]})`), el("span", "", option));
+    block.append(row);
+  });
+  return block;
+}
+
 function objectiveLines(quest: QuestDef, entry: QuestProgress | undefined): HTMLElement[] {
   if (quest.objectives.length === 0) return [el("div", "objective", `${NPCS[quest.turnIn]?.name} ile konuş`)];
   return quest.objectives.map((objective, i) => {
     if (objective.type === "path") {
       const chosen = actions.playerClass() !== "novice";
       return el("div", `objective${chosen ? " done" : ""}`, chosen ? `Yolunu seçtin: ${classOf(actions.playerClass()).name}` : "Kaledeki ustalardan birini seç");
+    }
+    if (objective.type === "talk") {
+      const asked = (entry?.kills[i] ?? 0) >= 1;
+      return el("div", `objective${asked ? " done" : ""}`, objective.label);
     }
     const have = objective.type === "kill" ? (entry?.kills[i] ?? 0) : countItem(objective.item);
     const name = objective.type === "kill" ? objective.label : ITEMS[objective.item]?.name ?? objective.item;
@@ -382,7 +457,7 @@ function renderQuest(quest: QuestDef | undefined) {
   const turnInHere = quest.turnIn === target.id;
   let text = quest.text;
   if (active && turnInHere && !isReady) text = quest.progressText ?? quest.text;
-  if (active && turnInHere && isReady) text = quest.objectives.length === 0 ? quest.completeText : "İşini bitirmişsin. Gel, karşılığını vereyim.";
+  if (active && turnInHere && isReady) text = quest.objectives.length === 0 ? quest.completeText : quest.quiz ? "Döndün mü? Anlat bakalım!" : "İşini bitirmişsin. Gel, karşılığını vereyim.";
   if (active && !turnInHere) text = `${quest.progressText ?? quest.text}\n\nİş bitince ${NPCS[quest.turnIn]?.name} ile konuş.`;
 
   const nodes: HTMLElement[] = [
@@ -397,7 +472,10 @@ function renderQuest(quest: QuestDef | undefined) {
   if (!active && quest.giver === target.id && questAvailable(quest, actions.playerLevel(), log)) {
     buttons.append(button("Kabul Et", () => actions.accept(target.id, quest.id)));
   }
-  if (isReady && turnInHere) {
+  if (isReady && turnInHere && quest.quiz) {
+    // Instead of "Tamamla", the turn-in NPC asks what we found out.
+    nodes.push(quizBlock(target, quest));
+  } else if (isReady && turnInHere) {
     buttons.append(
       button("Tamamla", () => {
         completing = quest.id;

@@ -33,6 +33,7 @@ export function toggleMount(game: Game, sessionId: string) {
   if (runtime.stall) return notice(game, sessionId, "Pazar açıkken ata binemezsin");
   if (runtime.casting) return notice(game, sessionId, "Büyü yaparken ata binemezsin");
   stopFishing(game, sessionId, "Oltayı topladın");
+  player.seated = false;
   player.mounted = true;
   runtime.mountToggledAt = game.now();
 }

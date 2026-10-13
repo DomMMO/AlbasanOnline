@@ -1,10 +1,10 @@
 import Phaser from "phaser";
+import { DEFAULT_HORSE, encodeHorseLook, HORSE_BREEDS, type HorseLook } from "../../../shared/src";
 
-// The riding horse, drawn in code like the rest of the pixel art: a brown horse with a dark
-// mane, a blue blanket and a red saddle. Frames (39x30, feet at the bottom centre):
+// The riding horse, drawn in code like the rest of the pixel art. Its coat, mane, blanket and
+// saddle colours come from the breed (or a restyle at the stable, data/horses.ts); each look
+// gets its own texture and animations. Frames (39x30, feet at the bottom centre):
 // side (facing right) 0 idle + 1-4 walk, front 5-7, back 8-10 (idle + two walk frames).
-
-export const HORSE_KEY = "horse";
 /** The templates below are laid out on a 26x20 grid and drawn this much bigger. */
 const SCALE = 1.5;
 export const HORSE_W = Math.round(26 * SCALE);
@@ -13,18 +13,39 @@ export const HORSE_H = Math.round(20 * SCALE);
 export const HORSE_RIDER_LIFT = 14;
 export const HorseFrame = { Side: 0, Down: 5, Up: 8 } as const;
 
+const css = (color: number, factor = 1) => {
+  const c = Phaser.Display.Color.IntegerToColor(color);
+  const f = (v: number) => Math.max(0, Math.min(255, Math.round(v * factor)));
+  return `rgb(${f(c.red)},${f(c.green)},${f(c.blue)})`;
+};
+
+/** The palette the templates paint with; set from a look before each horse is drawn. */
 const C = {
   k: "#1a1420",
-  hide: "#8b5a2b",
-  dark: "#6b4423",
-  light: "#a87040",
-  mane: "#2a1a10",
+  hide: "",
+  dark: "",
+  light: "",
+  mane: "",
   hoof: "#2a2a2a",
   blaze: "#f0e6d0",
-  blanket: "#3b5f8a",
-  saddle: "#9c2a2a",
+  blanket: "",
+  saddle: "",
   gold: "#e8c33a",
 };
+
+function usePalette(look: HorseLook) {
+  C.hide = css(look.coat);
+  C.dark = css(look.coat, 0.77);
+  C.light = css(look.coat, 1.2);
+  C.mane = css(look.mane);
+  C.blanket = css(look.blanket);
+  C.saddle = css(look.saddle);
+}
+
+const defaultLook = () => HORSE_BREEDS[DEFAULT_HORSE].look;
+
+/** Texture key of a horse with this look (its animations are `${key}-side` and so on). */
+export const horseKey = (look: HorseLook = defaultLook()) => `horse-${encodeHorseLook(look)}`;
 
 type Paint = (x: number, y: number, w: number, h: number, color: string) => void;
 
@@ -109,9 +130,11 @@ function back(rect: Paint, phase: number) {
   rect(12, 9, 2, 7, C.mane);
 }
 
-/** Builds the horse texture and its animations once per game. */
-export function ensureHorse(scene: Phaser.Scene) {
-  if (scene.textures.exists(HORSE_KEY)) return;
+/** Builds the texture and animations for a horse of this look (once per look); returns its key. */
+export function ensureHorse(scene: Phaser.Scene, look: HorseLook = defaultLook()): string {
+  const key = horseKey(look);
+  if (scene.textures.exists(key)) return key;
+  usePalette(look);
   const draws: ((rect: Paint) => void)[] = [
     (r) => side(r, -1),
     (r) => side(r, 0),
@@ -125,7 +148,7 @@ export function ensureHorse(scene: Phaser.Scene) {
     (r) => back(r, 0),
     (r) => back(r, 1),
   ];
-  const texture = scene.textures.createCanvas(HORSE_KEY, HORSE_W * draws.length, HORSE_H)!;
+  const texture = scene.textures.createCanvas(key, HORSE_W * draws.length, HORSE_H)!;
   const ctx = texture.context;
   draws.forEach((draw, frame) => {
     const ox = frame * HORSE_W;
@@ -139,16 +162,19 @@ export function ensureHorse(scene: Phaser.Scene) {
     texture.add(frame, 0, ox, 0, HORSE_W, HORSE_H);
   });
   texture.refresh();
-  const anim = (key: string, frames: number[], rate: number) => {
-    if (!scene.anims.exists(key)) scene.anims.create({ key, frames: frames.map((frame) => ({ key: HORSE_KEY, frame })), frameRate: rate, repeat: -1 });
+  const anim = (name: string, frames: number[], rate: number) => {
+    const animKey = `${key}-${name}`;
+    if (!scene.anims.exists(animKey)) scene.anims.create({ key: animKey, frames: frames.map((frame) => ({ key, frame })), frameRate: rate, repeat: -1 });
   };
-  anim("horse-side", [1, 2, 3, 4], 10);
-  anim("horse-down", [6, 7], 7);
-  anim("horse-up", [9, 10], 7);
+  anim("side", [1, 2, 3, 4], 10);
+  anim("down", [6, 7], 7);
+  anim("up", [9, 10], 7);
+  return key;
 }
 
-/** A small horse picture for the HUD button (side view, standing). */
-export function horseIconUrl(scale = 2): string {
+/** A small horse picture (side view, standing): the HUD button and the stable window. */
+export function horseIconUrl(scale = 2, look: HorseLook = defaultLook()): string {
+  usePalette(look);
   const canvas = document.createElement("canvas");
   canvas.width = 26 * scale;
   canvas.height = 20 * scale;

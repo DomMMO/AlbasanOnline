@@ -30,6 +30,7 @@ export const TOWN_PLACES: TownPlace[] = [
   { id: "sage", name: "Bilge Ozan", ...TOWN_SPOTS.sage, hint: "Çeşmenin batı kenarında oturur. Hikâyeyi ondan dinle." },
   { id: "cook", name: "Ayşe Teyze", ...TOWN_SPOTS.cook, hint: "Pembe çatılı evinin önünde. Fal da bakar, yemek de ister." },
   { id: "keep", name: "Ustalar", ...TOWN_SPOTS.fromKeep, hint: "İç Kale'nin büyük kapısından gir; yedi usta salonun ortasında, ateşin başında oturur. Yolunu orada seçersin." },
+  { id: "stable", name: "At Çiftliği", ...TOWN_SPOTS.stableMaster, hint: "Doğu kapısından çıkıp asma köprüyü geçince yolun kuzeyinde, çitle çevrili otlak. Seyis Yusuf at satar." },
   { id: "arena", name: "Kan Arenası", ...TOWN_SPOTS.pvpPortal, hint: "Kalenin doğusundaki avluda, kırmızı portal. 5. seviyeden önce içeri alınmazsın." },
   { id: "field", name: "Vadi kapısı", ...TOWN_SPOTS.fieldGate, hint: "Doğu kapısından çık, asma köprüyü geç; yolun sonundaki ışınlanma kapısı Başlangıç Vadisi'ne açılır." },
   { id: "harbor", name: "Liman", ...TOWN_SPOTS.harborGate, hint: "Doğu kapısından çıkınca güneye sapan Arnavut kaldırımı yolu izle; sonundaki kapı Liman'a çıkar." },

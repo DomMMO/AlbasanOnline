@@ -60,6 +60,11 @@ export class Player extends Schema {
   @type("boolean") mounted = false;
   /** Galloping this tick (Shift on horseback): faster legs and dust for everyone watching. */
   @type("boolean") galloping = false;
+  /** Sitting on a bench (moving gets you up). */
+  @type("boolean") seated = false;
+  /** Breed of the horse they ride (data/horses.ts) and its colours (encodeHorseLook). */
+  @type("string") horse = "village";
+  @type("string") horseLook = "";
   /** Fishing: the float lies on the water at (fishX, fishY). */
   @type("boolean") fishing = false;
   @type("number") fishX = 0;

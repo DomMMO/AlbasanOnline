@@ -199,6 +199,14 @@ const MIGRATIONS: { version: number; name: string; sql: string }[] = [
       UPDATE characters SET class = 'novice', skill_ranks = '{}' WHERE class IN ('mage', 'guardian');
     `,
   },
+  {
+    version: 15,
+    name: "horses",
+    sql: `
+      -- { "owned": ["village", "arabian"], "active": "arabian", "looks": { "arabian": { "coat": ..., ... } } }; {} = village horse only
+      ALTER TABLE characters ADD COLUMN horse JSONB NOT NULL DEFAULT '{}';
+    `,
+  },
 ];
 
 export async function runMigrations() {

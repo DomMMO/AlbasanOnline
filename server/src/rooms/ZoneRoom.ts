@@ -56,11 +56,13 @@ import { Game } from "../game/Game";
 import { buy, moveItem, pickupLoot, sell, unequip, useItem } from "../game/items";
 import { upgradeItem } from "../game/upgrade";
 import { browseStall, buyFromStall, closeStall, openStall, stallLocked } from "../game/market";
-import { abandonQuest, acceptQuest, turnInQuest } from "../game/quests";
+import { abandonQuest, acceptQuest, talkForQuest, turnInQuest } from "../game/quests";
 import { handleChat } from "../game/chat";
 import { respondDuel } from "../game/duel";
 import { notice, sendInventory } from "../game/items";
 import { chooseClass, resetClass } from "../game/classPath";
+import { buyHorse, selectHorse, styleHorse } from "../game/stable";
+import { sitOnBench } from "../game/benches";
 import { friendJoined, friendLeft, removeFriend, requestFriend, respondFriend } from "../game/friends";
 import { forgetInstance, instanceFor, refreshFor, registerInstance, respond, sameParty } from "../game/party";
 import { claimCharacter } from "../game/presence";
@@ -243,7 +245,10 @@ export class ZoneRoom extends Room<WorldState> {
     });
     this.onMessage(Msg.QuestTurnIn, (client, message: Partial<QuestMessage>) => {
       if (this.itemsLocked(client.sessionId)) return;
-      if (typeof message?.questId === "string") turnInQuest(this.game, client.sessionId, message.questId, message.npcId);
+      if (typeof message?.questId === "string") turnInQuest(this.game, client.sessionId, message.questId, message.npcId, message.answer);
+    });
+    this.onMessage(Msg.QuestTalk, (client, message: Partial<QuestMessage>) => {
+      if (typeof message?.questId === "string") talkForQuest(this.game, client.sessionId, message.questId, message.npcId);
     });
     this.onMessage(Msg.QuestAbandon, (client, message: Partial<QuestMessage>) => {
       if (typeof message?.questId === "string") abandonQuest(this.game, client.sessionId, message.questId);
@@ -270,6 +275,13 @@ export class ZoneRoom extends Room<WorldState> {
     this.onMessage(Msg.ReadFortune, (client, message: { npcId?: unknown }) => {
       if (typeof message?.npcId === "string") readFortune(this.game, client.sessionId, message.npcId);
     });
+    this.onMessage(Msg.HorseBuy, (client, message: { npcId?: unknown; breed?: unknown }) => {
+      if (!this.itemsLocked(client.sessionId)) buyHorse(this.game, client.sessionId, message?.npcId, message?.breed);
+    });
+    this.onMessage(Msg.HorseSelect, (client, message: { npcId?: unknown; breed?: unknown }) => selectHorse(this.game, client.sessionId, message?.npcId, message?.breed));
+    this.onMessage(Msg.HorseStyle, (client, message: { npcId?: unknown; look?: unknown }) => {
+      if (!this.itemsLocked(client.sessionId)) styleHorse(this.game, client.sessionId, message?.npcId, message?.look);
+    });
     this.onMessage(Msg.ChooseClass, (client, message: { npcId?: unknown }) => chooseClass(this.game, client.sessionId, message?.npcId));
     this.onMessage(Msg.ResetClass, (client, message: { npcId?: unknown }) => {
       if (!this.itemsLocked(client.sessionId)) resetClass(this.game, client.sessionId, message?.npcId);
@@ -293,6 +305,7 @@ export class ZoneRoom extends Room<WorldState> {
     });
     this.onMessage(Msg.Fish, (client) => toggleFishing(this.game, client.sessionId));
     this.onMessage(Msg.Mount, (client) => toggleMount(this.game, client.sessionId));
+    this.onMessage(Msg.Sit, (client, message: { bench?: unknown }) => sitOnBench(this.game, client.sessionId, message?.bench));
     this.onMessage(Msg.TradeRespond, (client, message: { accept?: unknown }) => respondTrade(this.game, client.sessionId, message?.accept === true));
     this.onMessage(Msg.TradeOffer, (client, message: Partial<TradeOfferMessage>) => setOffer(this.game, client.sessionId, message?.items, message?.gold));
     this.onMessage(Msg.TradeLock, (client) => lockOffer(this.game, client.sessionId));

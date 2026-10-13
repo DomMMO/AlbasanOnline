@@ -11,6 +11,9 @@ import {
   statsWithEquipment,
   sanitizeRanks,
   sanitizeLook,
+  sanitizeHorse,
+  horseSpeedBonus,
+  type HorseState,
   type FortuneState,
   type LifeSkills,
   type SkillRanks,
@@ -31,6 +34,7 @@ import { Player, type WorldState } from "../rooms/schema/WorldState";
 import { cancelCast, forgetPlayer, updatePlayerCombat } from "./combat";
 import { fromStored, toStored, type InventoryData, type StoredItem } from "./inventory";
 import { refreshStats, sendInventory, type LootContents } from "./items";
+import { sendHorseState, syncHorse } from "./stable";
 import type { BossState } from "./boss";
 import { closeStall, type StallState } from "./market";
 import { questsFromStored, sendQuestLog } from "./quests";
@@ -128,6 +132,8 @@ export interface PlayerRuntime {
   fishing: FishingState | null;
   /** Game time of the last mount / dismount (toggle cooldown). */
   mountToggledAt: number;
+  /** Owned breeds, the ridden one and restyled colours (stable.ts). */
+  horse: HorseState;
   /** Play time stored before this session, and when this session began (wall clock). */
   playSecondsBefore: number;
   joinedAt: number;
@@ -298,11 +304,13 @@ export class Game {
       tradeInvite: null,
       fishing: null,
       mountToggledAt: -Infinity,
+      horse: sanitizeHorse(character.horse),
       playSecondsBefore: character.playSeconds,
       joinedAt: Date.now(),
     });
 
     refreshStats(this, sessionId);
+    syncHorse(this, sessionId);
     // Characters that logged out dead come back at spawn with full health, as if they respawned.
     player.hp = character.hp !== null && character.hp > 0 ? Math.min(character.hp, player.maxHp) : player.maxHp;
     // Rage starts empty, mana full.
@@ -314,6 +322,7 @@ export class Game {
     sendSkillRanks(this, sessionId);
     sendFortuneState(this, sessionId);
     sendLifeSkills(this, sessionId);
+    sendHorseState(this, sessionId);
     return player;
   }
 
@@ -341,6 +350,7 @@ export class Game {
         skillRanks: runtime.skillRanks,
         fortune: runtime.fortune,
         lifeSkills: runtime.lifeSkills,
+        horse: runtime.horse,
         playSeconds: runtime.playSecondsBefore + Math.floor((Date.now() - runtime.joinedAt) / 1000),
       },
       gold: runtime.inventory.gold,
@@ -421,7 +431,7 @@ export class Game {
       // Dead, rooted or stall-keeping players' inputs are still acknowledged so the client's pending list drains.
       if (!player.dead && !player.rooted && !player.stall) {
         const gallop = player.mounted && input.sprint === true;
-        const next = stepMovement(this.map, player.x, player.y, input.dx, input.dy, dt, player.mounted, gallop);
+        const next = stepMovement(this.map, player.x, player.y, input.dx, input.dy, dt, player.mounted, gallop, horseSpeedBonus(player.horse));
         galloped ||= gallop;
         player.x = next.x;
         player.y = next.y;
@@ -432,6 +442,7 @@ export class Game {
       runtime.inputBudget--;
     }
     player.moving = processed > 0;
+    if (processed > 0) player.seated = false;
     player.galloping = galloped;
     // Moving interrupts spells with a cast time, gathering, and reels the fishing line in.
     if (processed > 0 && runtime.casting) cancelCast(this, sessionId, "Büyü iptal edildi");

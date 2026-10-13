@@ -39,6 +39,8 @@ export const Msg = {
   StallBuy: "stallBuy",
   QuestAccept: "questAccept",
   QuestTurnIn: "questTurnIn",
+  /** Ask an NPC the question a "talk" quest objective needs. */
+  QuestTalk: "questTalk",
   QuestAbandon: "questAbandon",
   /** Life skills: start gathering a vein or herb. */
   Gather: "gather",
@@ -50,6 +52,12 @@ export const Msg = {
   SkillRank: "skillRank",
   /** Ayşe Teyze: read today's fortune. */
   ReadFortune: "readFortune",
+  /** Sit on a bench (town): the nearest free seat of it. Moving gets you up. */
+  Sit: "sit",
+  /** Stable: buy a breed, ride another of yours, or restyle the ridden one. */
+  HorseBuy: "horseBuy",
+  HorseSelect: "horseSelect",
+  HorseStyle: "horseStyle",
   /** A novice asks a master in the keep to take them on (their class). */
   ChooseClass: "chooseClass",
   /** Ayşe Teyze: undo the class choice for gold (back to novice). */
@@ -118,6 +126,8 @@ export const Msg = {
   /** A party member pinged the map. */
   PingEvent: "pingEvent",
   TradeInvite: "tradeInvite",
+  /** Your horses (on join and whenever they change). */
+  HorseState: "horseState",
   /** Your friend list and requests (on join and whenever they or a friend's status change). */
   FriendList: "friendList",
   /** A party member nearby just went into a dungeon: join them? */
@@ -132,6 +142,8 @@ export interface QuestMessage {
   questId: string;
   /** NPC you are talking to (accept / turn in). */
   npcId?: string;
+  /** Turn-in of a quest with a quiz: the option chosen. */
+  answer?: string;
 }
 
 export interface QuestLogEvent {
@@ -354,6 +366,12 @@ export interface PartyUpdateEvent {
 
 export interface PartyInviteEvent {
   from: string;
+}
+
+export interface HorseStateEvent {
+  owned: string[];
+  active: string;
+  looks: Record<string, { coat: number; mane: number; blanket: number; saddle: number }>;
 }
 
 export interface FriendView {
@@ -711,6 +729,12 @@ export interface PlayerView {
   mounted: boolean;
   /** Galloping (Shift on horseback) this tick. */
   galloping: boolean;
+  /** Sitting on a bench. */
+  seated: boolean;
+  /** Breed of the horse they ride (data/horses.ts): sets riding speed. */
+  horse: string;
+  /** Its colours, encodeHorseLook(). */
+  horseLook: string;
   /** Fishing: the float lies on the water at (fishX, fishY). */
   fishing: boolean;
   fishX: number;
