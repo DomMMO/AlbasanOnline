@@ -327,6 +327,7 @@ export class Game {
     return {
       characterId: runtime.characterId,
       progress: {
+        cls: player.cls,
         level: player.level,
         xp: player.xp,
         hp: player.dead ? 0 : player.hp,
