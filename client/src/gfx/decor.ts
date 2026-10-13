@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { TILE_SIZE, type Decor, type IconShape } from "../../../shared/src";
+import { COLOSSEUM, TILE_SIZE, type Decor, type IconShape } from "../../../shared/src";
 import { ICON_SIZE, paintIcon } from "./icons";
 
 // Town decor drawn in code on top of the tiles: buildings, the fountain, lamps…
@@ -96,6 +96,9 @@ export function drawDecor(scene: Phaser.Scene, decor: Decor[]) {
         break;
       case "lighthouse":
         lighthouse(scene, piece);
+        break;
+      case "colosseum":
+        colosseum(scene);
         break;
     }
   }
@@ -388,7 +391,8 @@ function drawbridge(scene: Phaser.Scene, d: Extract<Decor, { kind: "drawbridge" 
 
 function prop(scene: Phaser.Scene, p: Extract<Decor, { kind: "prop" }>) {
   const size = p.prop === "well" ? 2 : 1;
-  const x = p.tx * TILE_SIZE + (size * TILE_SIZE) / 2;
+  const wide = p.prop === "well" || p.prop === "obelisk" ? 2 : 1;
+  const x = p.tx * TILE_SIZE + (wide * TILE_SIZE) / 2;
   const bottom = (p.ty + size) * TILE_SIZE;
   const g = scene.add.graphics().setPosition(x, bottom).setDepth(bottom);
   g.fillStyle(0x000000, 0.25).fillEllipse(0, -1, size * 14, 4);
@@ -424,6 +428,29 @@ function prop(scene: Phaser.Scene, p: Extract<Decor, { kind: "prop" }>) {
       g.fillStyle(0x7a4e2a).fillCircle(-2, -5, 4);
       g.fillStyle(0x2a1a0e).fillCircle(-2, -5, 1).fillRect(-2, -9, 1, 8).fillRect(-6, -5, 8, 1);
       break;
+    case "column": {
+      // A marble column with a broken top, on a square plinth.
+      g.fillStyle(0x6f695e).fillRect(-7, -5, 14, 5);
+      g.fillStyle(0xb3ac9c).fillRect(-7, -6, 14, 2);
+      g.fillStyle(0xe8e2d4).fillRect(-5, -30, 10, 25);
+      g.fillStyle(0xc4bdb0).fillRect(1, -30, 4, 25);
+      for (const fx of [-3, 0, 3]) g.fillStyle(0xa39d90).fillRect(fx, -29, 1, 23);
+      g.fillStyle(0xe8e2d4).fillTriangle(-5, -30, 5, -30, 2, -35);
+      g.fillStyle(0xc4bdb0).fillTriangle(1, -30, 5, -30, 2, -35);
+      g.fillStyle(0x5a7a3a).fillRect(-5, -9, 3, 3).fillRect(3, -14, 2, 2);
+      break;
+    }
+    case "obelisk": {
+      // A tall red-granite obelisk with gold runes.
+      g.fillStyle(0x000000, 0.3).fillEllipse(0, -1, 30, 6);
+      g.fillStyle(0x6f695e).fillRect(-12, -6, 24, 6);
+      g.fillStyle(0xb3ac9c).fillRect(-12, -7, 24, 2);
+      g.fillStyle(0x7a2420).fillPoints([new Phaser.Math.Vector2(-7, -7), new Phaser.Math.Vector2(7, -7), new Phaser.Math.Vector2(4, -48), new Phaser.Math.Vector2(-4, -48)], true);
+      g.fillStyle(0x5a1a16).fillPoints([new Phaser.Math.Vector2(2, -7), new Phaser.Math.Vector2(7, -7), new Phaser.Math.Vector2(4, -48), new Phaser.Math.Vector2(1, -48)], true);
+      g.fillStyle(0xe8c33a).fillTriangle(-4, -48, 4, -48, 0, -54);
+      for (let y = -42; y < -12; y += 7) g.fillStyle(0xe8c33a).fillRect(-2, y, 3, 1).fillRect(-1, y + 2, 1, 2);
+      break;
+    }
     case "well": {
       // Stone ring with dark water, two posts and a little shingled roof with a bucket.
       g.fillStyle(STONE.faceDark).fillEllipse(0, -8, 24, 12);
@@ -937,4 +964,183 @@ function lighthouse(scene: Phaser.Scene, l: Extract<Decor, { kind: "lighthouse" 
   const beam = scene.add.graphics().setPosition(x0 + cx, lampY).setDepth(bottom + 0.2).setBlendMode(Phaser.BlendModes.ADD);
   beam.fillStyle(0xfff3c4, 0.16).fillTriangle(0, 0, 150, -16, 150, 16);
   scene.tweens.add({ targets: beam, angle: 360, duration: 7000, repeat: -1 });
+}
+
+// ---- Colosseum (the Blood Arena) ------------------------------------------------------
+// Painted pixel by pixel from the same rings the map is built from (COLOSSEUM): the marble
+// podium wall around the sand, seven tiers of stone stands with aisles and tunnel mouths,
+// the emperor's box in the north, the outer wall's top and, along the south, the arcaded
+// facade seen from outside. The crowd lives on two frames that swap so it seems to cheer.
+
+const COLOSSEUM_FACADE = 30;
+const COLOSSEUM_TIERS = 7;
+
+function colosseum(scene: Phaser.Scene) {
+  const { cx, cy, rx, ry, floor, podium, wall } = COLOSSEUM;
+  const T = TILE_SIZE;
+  const ox = (cx - rx - 1) * T;
+  const oy = (cy - ry - 1) * T;
+  const W = (rx * 2 + 2) * T;
+  const H = (ry * 2 + 2) * T + COLOSSEUM_FACADE;
+  const cxP = cx * T;
+  const cyP = cy * T;
+  const RX = rx * T;
+  const RY = ry * T;
+  const ring = (x: number, y: number) => Math.hypot((x - cxP) / RX, (y - cyP) / RY);
+  const angleOf = (x: number, y: number) => Math.atan2((y - cyP) / RY, (x - cxP) / RX);
+  const aisles = 12;
+  /** Within `width` pixels (along the ring at `k`) of one of `count` evenly spaced angles. */
+  const nearAngle = (a: number, count: number, offset: number, width: number, k: number) => {
+    const step = (Math.PI * 2) / count;
+    const d = Math.abs(((((a - offset) % step) + step * 1.5) % step) - step / 2);
+    return d * k * ((RX + RY) / 2) < width;
+  };
+  // The emperor's box, over the north stands.
+  const box = { x0: cxP - 44, x1: cxP + 44, y0: cyP - RY * wall + 6, y1: cyP - RY * podium - 4 };
+  const inBox = (x: number, y: number) => x >= box.x0 && x <= box.x1 && y >= box.y0 && y <= box.y1;
+
+  const base = scene.textures.createCanvas("colosseum-base", W, H)!;
+  const ctx = base.context;
+  const img = ctx.createImageData(W, H);
+  const put = (px: number, py: number, color: number) => {
+    const i = (py * W + px) * 4;
+    img.data[i] = (color >> 16) & 255;
+    img.data[i + 1] = (color >> 8) & 255;
+    img.data[i + 2] = color & 255;
+    img.data[i + 3] = 255;
+  };
+
+  for (let py = 0; py < H; py++) {
+    for (let px = 0; px < W; px++) {
+      const x = ox + px + 0.5;
+      const y = oy + py + 0.5;
+      const k = ring(x, y);
+      const dx = (x - cxP) / RX;
+      if (k < floor) {
+        // The north podium wall's face, seen across the sand.
+        if (y < cyP && Math.abs(dx) < floor) {
+          const edge = cyP - RY * floor * Math.sqrt(1 - (dx / floor) ** 2);
+          const d = y - edge;
+          if (d > 0 && d <= 9) put(px, py, d <= 1 ? 0xc45a4a : d >= 8 ? 0x2a0e0c : Math.round(d) === 5 ? 0xe8c33a : 0x7a2420);
+        }
+        continue;
+      }
+      if (k < podium) {
+        const outer = (k - floor) / (podium - floor);
+        put(px, py, outer > 0.75 ? 0xc45a4a : outer < 0.2 ? 0x4a1410 : 0x8b2a24);
+        continue;
+      }
+      if (k < wall) {
+        const a = angleOf(x, y);
+        const s = (k - podium) / (wall - podium);
+        const tier = Math.floor(s * COLOSSEUM_TIERS);
+        const f = s * COLOSSEUM_TIERS - tier;
+        if (nearAngle(a, 8, Math.PI / 8, 5, k) && s > 0.4 && s < 0.6) put(px, py, 0x1a1410);
+        else if (nearAngle(a, aisles, 0, 2.5, k)) put(px, py, f < 0.3 ? 0x8a8478 : 0xc4bdb0);
+        else put(px, py, f < 0.22 ? 0x5e584f : tier % 2 ? 0x958f83 : 0xa39d90);
+        continue;
+      }
+      if (k < 1) {
+        // The top of the outer wall, with posts for the awning ropes along its outer edge.
+        const post = k > 0.975 && nearAngle(angleOf(x, y), 64, 0, 1.6, k);
+        put(px, py, post ? 0x6f695e : k > 0.99 ? 0x8a8478 : 0xc4bdb0);
+        continue;
+      }
+      // South facade: two storeys of arches below the outer wall's edge.
+      if (y > cyP && Math.abs(dx) < 1) {
+        const edge = cyP + RY * Math.sqrt(1 - dx * dx);
+        const d = y - edge;
+        if (d <= 0 || d > COLOSSEUM_FACADE) continue;
+        const u = (((x - cxP) % 22) + 22) % 22;
+        const archLow = d > 15 && d < 29 && u > 5 && u < 17 && (d > 19 || Math.hypot(u - 11, d - 19) < 6);
+        const archHigh = d > 3 && d < 13 && u > 7 && u < 15 && (d > 6 || Math.hypot(u - 11, d - 6) < 4);
+        if (archLow || archHigh) put(px, py, d > 26 || d < 5 ? 0x1a1410 : 0x2a2420);
+        else if (d >= COLOSSEUM_FACADE - 1) put(px, py, 0x3a3631);
+        else if (Math.floor(d) % 7 === 0 || Math.floor(d) === 14) put(px, py, 0x6f695e);
+        else put(px, py, u < 2 || u > 20 ? 0xb3ac9c : 0xa39d90);
+      }
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+
+  // The emperor's box: a red and gold balcony under a striped awning, with the throne.
+  const bx = box.x0 - ox;
+  const by = box.y0 - oy;
+  const bw = box.x1 - box.x0;
+  const bh = box.y1 - box.y0;
+  ctx.fillStyle = "#4a1410";
+  ctx.fillRect(bx, by, bw, bh);
+  ctx.fillStyle = "#6b1f1a";
+  ctx.fillRect(bx + 4, by + 16, bw - 8, bh - 24);
+  ctx.fillStyle = "#e8c33a";
+  ctx.fillRect(bx, by + bh - 6, bw, 3);
+  for (let x = bx + 2; x < bx + bw - 2; x += 5) ctx.fillRect(x, by + bh - 10, 1, 4);
+  for (const x of [bx + 2, bx + bw - 5]) ctx.fillRect(x, by + 6, 3, bh - 6);
+  for (let i = 0; i < bw; i += 8) {
+    ctx.fillStyle = (i / 8) % 2 ? "#f1ece0" : "#b02020";
+    ctx.fillRect(bx + i, by, Math.min(8, bw - i), 12);
+    ctx.beginPath();
+    ctx.moveTo(bx + i, by + 12);
+    ctx.lineTo(bx + i + 8, by + 12);
+    ctx.lineTo(bx + i + 4, by + 16);
+    ctx.fill();
+  }
+  ctx.fillStyle = "#e8c33a";
+  ctx.fillRect(bx + bw / 2 - 6, by + 18, 12, 12);
+  ctx.fillStyle = "#9c1a1a";
+  ctx.fillRect(bx + bw / 2 - 4, by + 20, 8, 8);
+  base.refresh();
+  scene.add.image(ox, oy, "colosseum-base").setOrigin(0, 0).setDepth(-0.6);
+
+  // The crowd: a spectator every few pixels along each tier; in frame 1 some are on their feet.
+  const shirts = [0xc92a2a, 0x3b5bdb, 0x2f9e44, 0xe0a83f, 0x9b5bd9, 0xe8e2d4, 0x8a5a2b, 0x3fc2c2, 0xd95ba6];
+  const skins = [0xf0c49a, 0xd8a47a, 0xc68a5a, 0x9a6440];
+  const hairs = [0x2d2d2d, 0x5a3825, 0x8b4513, 0xc8a165, 0xb8b8b8];
+  const css = (c: number) => `#${c.toString(16).padStart(6, "0")}`;
+  const frames = [0, 1].map((f) => scene.textures.createCanvas(`colosseum-crowd-${f}`, W, H)!);
+  let seed = 7;
+  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  for (let tier = 0; tier < COLOSSEUM_TIERS; tier++) {
+    const k = podium + ((tier + 0.62) / COLOSSEUM_TIERS) * (wall - podium);
+    const count = Math.floor((Math.PI * 2 * k * ((RX + RY) / 2)) / 5);
+    for (let i = 0; i < count; i++) {
+      const a = (i / count) * Math.PI * 2 + tier * 0.11;
+      const x = Math.round(cxP + Math.cos(a) * RX * k);
+      const y = Math.round(cyP + Math.sin(a) * RY * k);
+      const empty = rnd() < 0.12;
+      const shirt = shirts[Math.floor(rnd() * shirts.length)];
+      const skin = skins[Math.floor(rnd() * skins.length)];
+      const hair = hairs[Math.floor(rnd() * hairs.length)];
+      const cheering = rnd() < 0.4;
+      if (empty || nearAngle(a, aisles, 0, 4, k) || (nearAngle(a, 8, Math.PI / 8, 7, k) && tier >= 2 && tier <= 4) || inBox(x, y)) continue;
+      // South of the centre they face north: we see the backs of their heads.
+      const head = y > cyP ? hair : skin;
+      frames.forEach((frame, f) => {
+        const c = frame.context;
+        const lift = f === 1 && cheering ? 1 : 0;
+        const px = x - ox - 1;
+        const py = y - oy - 3 - lift;
+        c.fillStyle = css(shirt);
+        c.fillRect(px, py + 2, 3, 2);
+        c.fillStyle = css(head);
+        c.fillRect(px + 1, py, 2, 2);
+        if (lift) {
+          c.fillStyle = css(skin);
+          c.fillRect(px - 1, py - 1, 1, 2);
+          c.fillRect(px + 3, py - 1, 1, 2);
+        }
+      });
+    }
+  }
+  frames.forEach((frame) => frame.refresh());
+  const crowd = [0, 1].map((f) => scene.add.image(ox, oy, `colosseum-crowd-${f}`).setOrigin(0, 0).setDepth(-0.55).setVisible(f === 0));
+  let shown = 0;
+  scene.time.addEvent({
+    delay: 420,
+    loop: true,
+    callback: () => {
+      shown = 1 - shown;
+      crowd.forEach((image, f) => image.setVisible(f === shown));
+    },
+  });
 }

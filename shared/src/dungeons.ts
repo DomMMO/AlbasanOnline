@@ -47,7 +47,9 @@ export type Decor =
   /** A drawbridge running east-west over the moat (deck tiles are Tile.Bridge). */
   | { kind: "drawbridge"; tx: number; ty: number; w: number; h: number }
   /** Small street clutter on a solid tile (well is 2x2). */
-  | { kind: "prop"; tx: number; ty: number; prop: "barrel" | "crate" | "hay" | "well" | "cart" }
+  | { kind: "prop"; tx: number; ty: number; prop: "barrel" | "crate" | "hay" | "well" | "cart" | "column" | "obelisk" }
+  /** The arena's colosseum (stands, crowd, walls), drawn from COLOSSEUM. */
+  | { kind: "colosseum" }
   /** A wooden pier over the water (deck tiles are Tile.Bridge): posts and shadow, no rails. */
   | { kind: "pier"; tx: number; ty: number; w: number; h: number }
   /** A sailing ship moored in the water, bow to the east. */
@@ -128,33 +130,68 @@ export function buildGoblinCave(): DungeonLayout {
 }
 
 /** PvP arena: an open meadow with tree clusters to break line of sight and a pond in the middle. */
+/**
+ * The Blood Arena as a colosseum: an oval of sand ringed by a marble podium wall, tiers of
+ * stands full of spectators, an arcaded outer wall and the emperor's box in the north.
+ * Rings are fractions of the outer ellipse (rx x ry tiles around cx, cy): the client draws
+ * the same rings, so what you see matches where you can walk.
+ */
+export const COLOSSEUM = { cx: 32, cy: 23, rx: 28, ry: 21, floor: 0.607, podium: 0.64, wall: 0.93 };
+
+/** Normalised elliptical distance from the colosseum centre (1 = the outer wall's edge), in pixels. */
+export function colosseumRing(x: number, y: number): number {
+  const { cx, cy, rx, ry } = COLOSSEUM;
+  return Math.hypot((x - cx * TILE_SIZE) / (rx * TILE_SIZE), (y - cy * TILE_SIZE) / (ry * TILE_SIZE));
+}
+
 export function buildPvpArena(): DungeonLayout {
-  const width = 46;
-  const height = 34;
+  const width = 64;
+  const height = 48;
+  const { cx, cy } = COLOSSEUM;
   const rand = mulberry32(4242);
   const tiles: Tile[][] = Array.from({ length: height }, (_, y) =>
     Array.from({ length: width }, (_, x) => {
-      if (x < 2 || y < 2 || x >= width - 2 || y >= height - 2) return Tile.Tree;
-      const r = rand();
-      return r < 0.05 ? Tile.Flower : r < 0.3 ? Tile.GrassAlt : Tile.Grass;
+      const ring = colosseumRing((x + 0.5) * TILE_SIZE, (y + 0.5) * TILE_SIZE);
+      // Sand inside (with a little margin so feet stay off the podium), stands and walls solid.
+      if (ring < COLOSSEUM.floor - 0.015) return Tile.Path;
+      if (ring <= 1.02) return Tile.Solid;
+      if (x < 1 || y < 1 || x >= width - 1 || y >= height - 1) return Tile.Tree;
+      return rand() < 0.08 ? Tile.Tree : Tile.Cobble;
     }),
   );
-  // Tree clusters (cover) placed symmetrically so no corner is favoured.
-  const cluster = (cx: number, cy: number) => {
-    for (const [dx, dy] of [[0, 0], [1, 0], [0, 1], [-1, 0], [1, 1]]) tiles[cy + dy][cx + dx] = Tile.Tree;
-  };
-  for (const [cx, cy] of [[12, 9], [33, 9], [12, 24], [33, 24], [22, 6], [22, 27], [7, 16], [38, 16]]) cluster(cx, cy);
-  for (let y = 15; y <= 18; y++) for (let x = 20; x <= 25; x++) tiles[y][x] = Tile.Water;
 
-  const spawns = [px(5, 5), px(40, 5), px(5, 29), px(40, 29)];
-  for (const s of spawns) {
-    const tx = Math.floor(s.x / TILE_SIZE);
-    const ty = Math.floor(s.y / TILE_SIZE) - 1;
-    for (let y = ty - 1; y <= ty + 1; y++) for (let x = tx - 1; x <= tx + 1; x++) tiles[y][x] = Tile.Grass;
+  const decor: Decor[] = [{ kind: "colosseum" }];
+  const solid = (tx: number, ty: number) => (tiles[ty][tx] = Tile.Solid);
+  // Marble columns and an obelisk in the middle: cover to break line of sight.
+  for (const [tx, ty, prop] of [
+    [cx - 7, cy - 3, "column"],
+    [cx + 6, cy - 3, "column"],
+    [cx - 7, cy + 4, "column"],
+    [cx + 6, cy + 4, "column"],
+    [cx - 1, cy, "obelisk"],
+  ] as const) {
+    solid(tx, ty);
+    if (prop === "obelisk") solid(tx + 1, ty);
+    decor.push({ kind: "prop", tx, ty, prop });
   }
-  for (let y = 29; y <= 31; y++) for (let x = 21; x <= 24; x++) tiles[y][x] = Tile.Path; // exit portal pad
+  // Torches on the podium wall all the way round.
+  for (let i = 0; i < 16; i++) {
+    const angle = (i / 16) * Math.PI * 2 + Math.PI / 16;
+    const r = (COLOSSEUM.floor + COLOSSEUM.podium) / 2;
+    const tx = Math.floor(cx + Math.cos(angle) * COLOSSEUM.rx * r);
+    const ty = Math.floor(cy + Math.sin(angle) * COLOSSEUM.ry * r);
+    if (Math.abs(Math.sin(angle)) > 0.97 && Math.sin(angle) > 0) continue; // keep the south gate clear
+    decor.push({ kind: "torch", tx, ty });
+  }
+  // Banners along the top of the outer wall (north half, where you can see them).
+  for (let i = 0; i <= 8; i++) {
+    const angle = Math.PI + (i / 8) * Math.PI;
+    const r = (COLOSSEUM.wall + 1) / 2;
+    decor.push({ kind: "banner", tx: Math.floor(cx + Math.cos(angle) * COLOSSEUM.rx * r), ty: Math.floor(cy + Math.sin(angle) * COLOSSEUM.ry * r), color: 0x9c1a1a });
+  }
 
-  return { map: { width, height, tiles, spawn: px(22, 30) }, mobs: [], spawns };
+  const spawns = [px(cx - 14, cy + 1), px(cx + 14, cy + 1), px(cx - 7, cy - 9), px(cx + 7, cy - 9)];
+  return { map: { width, height, tiles, spawn: px(cx, cy + 10) }, mobs: [], spawns, decor };
 }
 
 /** Jack's Cellar: a round arena reached through a short tunnel. */

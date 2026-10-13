@@ -214,7 +214,7 @@ export const ZONES: Record<ZoneId, ZoneDef> = {
     pvp: true,
     npcs: [],
     respawnText: "Arenada yeniden doğacaksın.",
-    portals: [{ id: "pvp_exit", x: 22.5 * TILE_SIZE, y: 31 * TILE_SIZE, to: "town", label: "Çıkış", style: "exit" }],
+    portals: [{ id: "pvp_exit", x: 32 * TILE_SIZE, y: 35 * TILE_SIZE, to: "town", label: "Çıkış", style: "exit" }],
   },
   goblin_cave: {
     id: "goblin_cave",

@@ -40,6 +40,7 @@ import { sendFortuneState } from "./fortune";
 import { loseDuel, updateDuels, type DuelInvite, type DuelState } from "./duel";
 import { cancelTrade, updateTrades, type TradeInvite, type TradeSession } from "./trade";
 import { stopFishing, updateFishing, type FishingState } from "./fishing";
+import { updateMounts } from "./mount";
 import { worldMinute } from "./worldClock";
 import type { SpawnZone } from "../../../shared/src";
 
@@ -117,6 +118,8 @@ export interface PlayerRuntime {
   tradeInvite: TradeInvite | null;
   /** Our line is in the water (harbour). */
   fishing: FishingState | null;
+  /** Game time of the last mount / dismount (toggle cooldown). */
+  mountToggledAt: number;
   /** Play time stored before this session, and when this session began (wall clock). */
   playSecondsBefore: number;
   joinedAt: number;
@@ -210,6 +213,7 @@ export class Game {
     updateDuels(this);
     updateTrades(this);
     updateFishing(this);
+    updateMounts(this);
   }
 
   /**
@@ -280,6 +284,7 @@ export class Game {
       trade: null,
       tradeInvite: null,
       fishing: null,
+      mountToggledAt: -Infinity,
       playSecondsBefore: character.playSeconds,
       joinedAt: Date.now(),
     });
@@ -398,7 +403,7 @@ export class Game {
       const input = runtime.inputQueue.shift()!;
       // Dead, rooted or stall-keeping players' inputs are still acknowledged so the client's pending list drains.
       if (!player.dead && !player.rooted && !player.stall) {
-        const next = stepMovement(this.map, player.x, player.y, input.dx, input.dy, dt);
+        const next = stepMovement(this.map, player.x, player.y, input.dx, input.dy, dt, player.mounted);
         player.x = next.x;
         player.y = next.y;
         player.dir = directionFrom(input.dx, input.dy, player.dir);

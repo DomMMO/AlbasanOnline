@@ -13,6 +13,7 @@ import { broadcastSystem } from "./chat";
 import type { Game } from "./Game";
 import { addItem, hasSpaceFor } from "./inventory";
 import { notice, sendInventory } from "./items";
+import { dismount } from "./mount";
 
 // Fishing (see shared/src/data/fishing.ts). Casting checks the zone, the rod and the water;
 // after that a catch arrives on a timer until the player moves, dies, opens a trade or a
@@ -58,6 +59,7 @@ export function toggleFishing(game: Game, sessionId: string) {
   const spot = castSpot(game.map, player.x, player.y, FACING[player.dir as Direction]);
   if (!spot) return notice(game, sessionId, "Balık tutmak için suyun kenarına ya da iskeleye git");
 
+  dismount(game, sessionId);
   runtime.fishing = { nextCatchAt: game.now() + nextDelay(game) };
   runtime.targetId = null;
   runtime.attacking = false;
