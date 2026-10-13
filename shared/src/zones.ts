@@ -106,6 +106,7 @@ export const ZONES: Record<ZoneId, ZoneDef> = {
       "sage",
       "cook",
       "craftsman",
+      "stable_master",
       "guard_gate_north",
       "guard_gate_south",
       "guard_keep_west",

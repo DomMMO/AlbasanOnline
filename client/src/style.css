@@ -4616,3 +4616,199 @@ body.touch #chat {
   text-shadow: none;
   font-weight: bold;
 }
+
+/* ---- Horse farm (Seyis Yusuf) ---- */
+
+#stable-window {
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(560px, calc(100vw - 16px));
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
+}
+
+.stable-tabs {
+  display: flex;
+  gap: 4px;
+  margin: 2px 0 6px;
+}
+
+.stable-tabs button {
+  padding: 3px 14px;
+  font-size: 13px;
+}
+
+.stable-purse {
+  margin-bottom: 6px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--gold-light);
+}
+
+.stable-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  margin-bottom: 5px;
+  background: #0006;
+  border: 1px solid #6e532055;
+  border-radius: 3px;
+}
+
+.stable-row.riding {
+  border-color: #c9a24a;
+  box-shadow: inset 0 0 12px #c9a24a33;
+}
+
+.stable-horse {
+  flex: none;
+  width: 78px;
+  height: 60px;
+  image-rendering: pixelated;
+}
+
+.stable-text {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-body);
+}
+
+.stable-name {
+  font-family: var(--font-title);
+  font-size: 17px;
+  color: var(--gold-light);
+}
+
+.stable-speed {
+  font-size: 12px;
+  color: #8ce99a;
+}
+
+.stable-desc {
+  font-size: 12px;
+  color: #d8cba8;
+}
+
+.stable-side {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  min-width: 112px;
+  font-family: var(--font-body);
+}
+
+.stable-price {
+  font-size: 13px;
+  color: #ffd43b;
+}
+
+.stable-ask {
+  font-size: 12px;
+  color: #ffd8a8;
+  text-align: right;
+}
+
+.stable-badge {
+  font-size: 12px;
+  font-style: italic;
+  color: var(--gold-light);
+}
+
+.stable-side button,
+.stable-actions button {
+  padding: 3px 10px;
+  font-size: 12px;
+}
+
+.stable-style {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.stable-preview {
+  width: 130px;
+  height: 100px;
+  image-rendering: pixelated;
+  background: radial-gradient(ellipse at 50% 80%, #4f8a3c55, transparent 70%);
+}
+
+.stable-swatches {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.stable-part {
+  width: 44px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--gold-light);
+}
+
+.stable-swatches .swatch {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 1px solid #000;
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 1px #ffffff33;
+}
+
+.stable-swatches .swatch.active {
+  outline: 2px solid var(--gold-light);
+  outline-offset: 1px;
+}
+
+.stable-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+/* Stable and friends windows use the same gold / dark buttons as the rest of the UI. */
+#stable-window button:not(.swatch):not(.close),
+#friends-add button,
+.friend-row button {
+  font-family: var(--font-body);
+  font-weight: bold;
+  color: #2a1a08;
+  background: linear-gradient(180deg, #f2d58c 0%, #c9a24a 45%, #8a6a28 100%);
+  border: 1px solid #2a1a08;
+  border-radius: 3px;
+  box-shadow: inset 0 1px 0 #fff6, 0 2px 0 #000;
+  text-shadow: 0 1px 0 #fff4;
+  cursor: pointer;
+}
+
+#stable-window button.secondary:not(.swatch),
+.friend-row button.remove {
+  color: var(--gold-light);
+  background: linear-gradient(180deg, #3a2a18, #1f150c);
+  border-color: var(--gold-dark);
+  text-shadow: 0 1px 0 #000;
+}
+
+#stable-window button:not(.swatch):not(.close):hover:not(:disabled),
+#friends-add button:hover,
+.friend-row button:hover {
+  filter: brightness(1.12);
+}
+
+#stable-window button:not(.swatch):not(.close):disabled {
+  filter: grayscale(1) brightness(0.6);
+  cursor: default;
+}
+
+.stable-swatches .swatch {
+  cursor: pointer;
+}

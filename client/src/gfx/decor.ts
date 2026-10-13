@@ -3,6 +3,7 @@ import { COLOSSEUM, TILE_SIZE, type Decor, type IconShape } from "../../../share
 import { addLight } from "../fx/nightLights";
 import { ICON_SIZE, paintIcon } from "./icons";
 import { bench, firepit, rack, rug, shelf, stool, table } from "./interior";
+import { ensureHorse, HorseFrame } from "./horse";
 
 // Town decor drawn in code on top of the tiles: buildings, the fountain, lamps…
 // Each piece is depth-sorted by its bottom edge like characters, so players walking
@@ -119,6 +120,12 @@ export function drawDecor(scene: Phaser.Scene, decor: Decor[]) {
         break;
       case "bench":
         bench(scene, piece);
+        break;
+      case "horse":
+        farmHorse(scene, piece);
+        break;
+      case "trough":
+        trough(scene, piece.tx, piece.ty);
         break;
       case "colosseum":
         colosseum(scene);
@@ -828,6 +835,48 @@ function bridge(scene: Phaser.Scene, b: Extract<Decor, { kind: "bridge" }>) {
       }
     },
   });
+}
+
+/** A horse standing in the paddock; now and then it takes a few steps and turns round. */
+function farmHorse(scene: Phaser.Scene, h: Extract<Decor, { kind: "horse" }>) {
+  const key = ensureHorse(scene, h.look);
+  const x = (h.tx + 0.5) * TILE_SIZE;
+  const bottom = (h.ty + 1) * TILE_SIZE;
+  scene.add.ellipse(x, bottom - 1, 26, 5, 0x000000, 0.25).setDepth(bottom - 0.1);
+  const side = h.facing !== "down";
+  const sprite = scene.add
+    .sprite(x, bottom, key, side ? HorseFrame.Side : HorseFrame.Down)
+    .setOrigin(0.5, 1)
+    .setDepth(bottom)
+    .setFlipX(h.facing === "left");
+  scene.time.addEvent({
+    delay: 2500 + Math.random() * 3000,
+    loop: true,
+    callback: () => {
+      if (!side || Math.random() < 0.5) return;
+      sprite.anims.play(`${key}-side`, true);
+      scene.time.delayedCall(500 + Math.random() * 400, () => {
+        sprite.anims.stop();
+        sprite.setFrame(HorseFrame.Side);
+        if (Math.random() < 0.4) sprite.setFlipX(!sprite.flipX);
+      });
+    },
+  });
+}
+
+/** A long wooden water trough (two tiles wide). */
+function trough(scene: Phaser.Scene, tx: number, ty: number) {
+  const x0 = tx * TILE_SIZE;
+  const bottom = (ty + 1) * TILE_SIZE;
+  const W = TILE_SIZE * 2;
+  const g = scene.add.graphics().setPosition(x0, bottom).setDepth(bottom);
+  g.fillStyle(0x000000, 0.25).fillEllipse(W / 2, -1, W + 2, 4);
+  g.fillStyle(0x4a2e16).fillRect(2, -4, 3, 4).fillRect(W - 5, -4, 3, 4);
+  g.fillStyle(0x6b4423).fillRect(1, -11, W - 2, 8);
+  g.fillStyle(0x8a5a2b).fillRect(1, -11, W - 2, 2);
+  g.fillStyle(0x3466a8).fillRect(3, -10, W - 6, 2);
+  g.fillStyle(0x8fb8e8).fillRect(6, -10, 4, 1).fillRect(W - 12, -10, 3, 1);
+  g.fillStyle(0x4a2e16).fillRect(1, -7, W - 2, 1);
 }
 
 function torch(scene: Phaser.Scene, tx: number, ty: number) {

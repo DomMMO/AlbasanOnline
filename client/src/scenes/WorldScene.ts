@@ -3,6 +3,7 @@ import { getStateCallbacks, type Room } from "colyseus.js";
 import {
   castSpot,
   darkness,
+  horseSpeedBonus,
   type TownPlace,
   sanitizeLook,
   Direction,
@@ -41,6 +42,7 @@ import {
   type PvpKillEvent,
   type PartyInviteEvent,
   type FriendListEvent,
+  type HorseStateEvent,
   type FriendRemoveMessage,
   type FriendRequestMessage,
   type FriendRespondMessage,
@@ -99,7 +101,7 @@ import { initParty, renderParty, showInvite } from "../ui/party";
 import { initDuel, showDuelInvite } from "../ui/duel";
 import { initDungeonInvite, showDungeonInvite } from "../ui/dungeonInvite";
 import { initFishButton, setFishButton } from "../ui/fishButton";
-import { initMountButton, setMountButton } from "../ui/mountButton";
+import { initMountButton, setMountButton, setMountIcon } from "../ui/mountButton";
 import { dustPuff } from "../fx/dust";
 import { FishingLines, fishSplash } from "../fx/fishing";
 import { closeStorage, initStorage, openStorage, storageNpc, updateStorage } from "../ui/storage";
@@ -136,6 +138,7 @@ import { initPotions, refreshPotionKeys, render as renderPotions, startPotionCoo
 import { isTouchDevice } from "../ui/touch";
 import { initSkills, setSkillRanks, skillRank, toggleSkills } from "../ui/skills";
 import { initFriends, isFriendOrPending, onFriendsChange, setFriendList, toggleFriends } from "../ui/friends";
+import { activeHorseLook, closeStable, initStable, openStable, refreshStable, setHorseState, stableNpc } from "../ui/stable";
 import { hideSkillTooltip, showSkillTooltip } from "../ui/skillTooltip";
 import { hideTooltip, showItemTooltip } from "../ui/tooltip";
 import { initDamageMeter, recordCombat } from "../ui/damageMeter";
@@ -476,6 +479,7 @@ export class WorldScene extends Phaser.Scene {
     registerWindow("passive-window", () => togglePassives(false));
     registerWindow("skills-window", () => toggleSkills(false));
     registerWindow("friends-window", () => toggleFriends(false));
+    registerWindow("stable-window", closeStable);
     registerWindow("leaderboard", () => void toggleLeaderboard(false));
     registerWindow("stall-browse", closeBrowse);
     registerWindow("storage-window", closeStorage);
@@ -502,6 +506,11 @@ export class WorldScene extends Phaser.Scene {
     HOTBAR_ACTIONS.forEach((action, index) => this.controls.onPressed(action, () => this.useHotbar(index)));
 
     initChat((text) => this.room.send(Msg.Chat, { text }));
+    initStable({
+      buy: (npcId, breed) => this.room.send(Msg.HorseBuy, { npcId, breed }),
+      select: (npcId, breed) => this.room.send(Msg.HorseSelect, { npcId, breed }),
+      style: (npcId, look) => this.room.send(Msg.HorseStyle, { npcId, look }),
+    });
     initFriends({
       request: (name) => this.room.send(Msg.FriendRequest, { name } satisfies FriendRequestMessage),
       respond: (characterId, accept) => this.room.send(Msg.FriendRespond, { characterId, accept } satisfies FriendRespondMessage),
@@ -684,7 +693,7 @@ export class WorldScene extends Phaser.Scene {
           view.setBaseTint(player.stunned ? 0xffe066 : player.rooted ? 0x9ad5ff : player.buffed ? 0xffe8a8 : null);
           view.setWeapon(player.weapon, player.weaponPlus);
           view.setLook(playerAppearance(player));
-          this.syncMount(view, player.mounted);
+          this.syncMount(view, player.mounted, player.horseLook);
           view.setGallop(player.galloping && player.moving);
           view.setGmTag(player.gm);
           this.syncStall(sessionId, player);
@@ -894,6 +903,10 @@ export class WorldScene extends Phaser.Scene {
     this.room.onMessage(Msg.PvpKill, (event: PvpKillEvent) => addKillFeed(event, this.local?.state.name ?? ""));
     this.room.onMessage(Msg.PartyInvite, (event: PartyInviteEvent) => showInvite(event.from));
     this.room.onMessage(Msg.FriendList, (event: FriendListEvent) => setFriendList(event));
+    this.room.onMessage(Msg.HorseState, (event: HorseStateEvent) => {
+      setHorseState(event);
+      setMountIcon(activeHorseLook());
+    });
     this.room.onMessage(Msg.PartyUpdate, (event: PartyUpdateEvent) => this.onPartyUpdate(event));
     this.room.onMessage(Msg.DuelInvite, (event: DuelInviteEvent) => showDuelInvite(event.from));
     this.room.onMessage(Msg.DungeonInvite, (event: DungeonInviteEvent) => showDungeonInvite(event.from, event.dungeon));
@@ -917,6 +930,7 @@ export class WorldScene extends Phaser.Scene {
       updatePassives(event);
       updateDoll(event.equipment);
       updateStorage(event);
+      refreshStable();
       refreshShop();
       refreshUpgrade();
       refreshMarket();
@@ -1088,6 +1102,7 @@ export class WorldScene extends Phaser.Scene {
     if (npc.role === "merchant") openShop(npc);
     else if (npc.role === "blacksmith") openUpgrade(npc);
     else if (npc.role === "storage") openStorage(npc);
+    else if (npc.role === "stable") openStable(npc);
     else return;
     toggleInventory(true);
   }
@@ -1400,7 +1415,7 @@ export class WorldScene extends Phaser.Scene {
     local.view.setHealth(p.hp, p.maxHp, p.hp < p.maxHp && !p.dead);
     local.view.setWeapon(p.weapon, p.weaponPlus);
     local.view.setLook(playerAppearance(p));
-    this.syncMount(local.view, p.mounted);
+    this.syncMount(local.view, p.mounted, p.horseLook);
     local.view.setGmTag(p.gm);
     setMountButton(this.zone.instanced || this.zone.pvp ? null : { mounted: p.mounted });
     if (p.dead && this.targetId) this.selectTarget(null, false, false);
@@ -1666,10 +1681,10 @@ export class WorldScene extends Phaser.Scene {
   }
 
   /** Puts a character on (or off) their horse, with a puff of dust when it changes. */
-  private syncMount(view: EntityView, mounted: boolean) {
-    if (view.mounted === mounted) return;
-    view.setMounted(mounted);
-    dustPuff(this, view.x, view.y);
+  private syncMount(view: EntityView, mounted: boolean, look: string) {
+    const changed = view.mounted !== mounted;
+    view.setMounted(mounted, look);
+    if (changed) dustPuff(this, view.x, view.y);
   }
 
   /** Fishing lines for everyone, and the Balık Tut button for us. */
@@ -1774,7 +1789,7 @@ export class WorldScene extends Phaser.Scene {
     this.pendingInputs = this.pendingInputs.filter((input) => input.seq > server.lastSeq);
     let pos: Point = { x: server.x, y: server.y };
     for (const input of this.pendingInputs) {
-      pos = stepMovement(this.map, pos.x, pos.y, input.dx, input.dy, TICK_MS / 1000, server.mounted, input.sprint === true);
+      pos = stepMovement(this.map, pos.x, pos.y, input.dx, input.dy, TICK_MS / 1000, server.mounted, input.sprint === true, horseSpeedBonus(server.horse));
     }
     if (distance(pos, local.curr) > TELEPORT_DISTANCE) local.prev = { ...pos };
     local.curr = pos;
@@ -1883,6 +1898,8 @@ export class WorldScene extends Phaser.Scene {
     if (keeper && local && distance(local.view, keeper) > NPC_RANGE + TILE_SIZE) closeStorage();
     const smith = openUpgradeNpc();
     if (smith && local && distance(local.view, smith) > NPC_RANGE + TILE_SIZE) closeUpgrade();
+    const stableman = stableNpc();
+    if (stableman && local && distance(local.view, stableman) > NPC_RANGE + TILE_SIZE) closeStable();
     const speaker = dialogNpc();
     if (speaker && local && distance(local.view, speaker) > NPC_RANGE + TILE_SIZE) closeNpcDialog();
 
@@ -1921,7 +1938,7 @@ export class WorldScene extends Phaser.Scene {
 
     const sprint = local.state.mounted && this.controls.isDown(Action.Sprint);
     const input: InputMessage = sprint ? { seq: this.nextSeq++, dx, dy, sprint } : { seq: this.nextSeq++, dx, dy };
-    local.curr = stepMovement(this.map, local.curr.x, local.curr.y, dx, dy, TICK_MS / 1000, local.state.mounted, sprint);
+    local.curr = stepMovement(this.map, local.curr.x, local.curr.y, dx, dy, TICK_MS / 1000, local.state.mounted, sprint, horseSpeedBonus(local.state.horse));
     local.view.setGallop(sprint);
     local.dir = directionFrom(dx, dy, local.dir);
     local.moving = true;

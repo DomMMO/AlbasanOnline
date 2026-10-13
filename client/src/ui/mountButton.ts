@@ -1,3 +1,4 @@
+import type { HorseLook } from "../../../shared/src";
 import { horseIconUrl } from "../gfx/horse";
 import { getBindings } from "../input/keybindings";
 import { Action } from "../input/InputManager";
@@ -17,6 +18,11 @@ export function initMountButton(click: () => void) {
   (button.querySelector("img") as HTMLImageElement).src = horseIconUrl(2);
   button.addEventListener("mousedown", (event) => event.preventDefault());
   button.addEventListener("click", () => onClick());
+}
+
+/** The button shows the horse we ride, in its colours. */
+export function setMountIcon(look: HorseLook) {
+  (button.querySelector("img") as HTMLImageElement).src = horseIconUrl(2, look);
 }
 
 /** null hides it (dungeons, arena); otherwise whether we are riding. */

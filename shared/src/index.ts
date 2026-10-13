@@ -17,6 +17,7 @@ export * from "./data/fortune";
 export * from "./data/gathering";
 export * from "./data/fishing";
 export * from "./data/directions";
+export * from "./data/horses";
 export * from "./daynight";
 export * from "./data/quests";
 export * from "./dungeons";

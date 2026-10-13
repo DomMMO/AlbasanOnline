@@ -26,6 +26,8 @@ const GATE_ROWS = [28, 29, 30];
 const MARKET_AREA = { tx: 20, ty: 40, w: 24, h: 9 };
 /** The market's north entrance, under its signboard (tiles). */
 const MARKET_GATE = { tx: 30, w: 5 };
+/** The horse farm's paddock (fence tiles, inclusive) and its two-tile gate in the south side. */
+const HORSE_FARM = { x0: 62, y0: 15, x1: 72, y1: 24, gateX: 66 };
 /** The cobbled lane from the east road down to the harbour gate (centre line, tiles). */
 const HARBOR_ROAD: [number, number][] = [[66, 31], [66, 34], [68, 37], [68, 41], [65, 44], [65, 46], [66, 48], [66, 52]];
 /** The meadow the road runs through (columns cleared of trees). */
@@ -66,6 +68,8 @@ export const TOWN_SPOTS = {
   fromKeep: px(32, 20),
   /** The market square's north entrance. */
   market: px(32, 40),
+  /** Seyis Yusuf, at the gate of the horse farm north of the east road. */
+  stableMaster: px(64, 26),
   pvpPortal: px(49, 15),
   pvpReturn: px(49, 18),
   spawn: px(32, 34),
@@ -167,6 +171,12 @@ export function buildTown(): DungeonLayout {
   }
   street(HARBOR_ROAD, Tile.Cobble, 1);
 
+  // The horse farm north of the east road, outside the moat: the woods are cleared for it.
+  for (let y = HORSE_FARM.y0 - 2; y <= GATE_ROWS[0] - 2; y++) {
+    for (let x = HORSE_FARM.x0 - 1; x <= HORSE_FARM.x1 + 1; x++) if (tiles[y][x] === Tile.Tree) tiles[y][x] = Tile.Grass;
+  }
+  fill(HORSE_FARM.gateX, HORSE_FARM.y1, HORSE_FARM.gateX + 1, GATE_ROWS[0] - 1, Tile.Path);
+
   // ---- Open spaces ----
   // Fountain square: an oval of paving.
   for (let y = INNER.y0; y <= INNER.y1; y++) {
@@ -263,6 +273,40 @@ export function buildTown(): DungeonLayout {
     decor.push({ kind: "lamp", tx, ty });
   }
   decor.push({ kind: "signboard", tx: 64, ty: 33, w: 5, text: "LİMAN" });
+
+  // ---- The horse farm ----
+  // A red barn, a fenced paddock with horses grazing in it, hay and a water trough;
+  // Seyis Yusuf waits at the paddock gate by the road.
+  building(HORSE_FARM.x0 + 1, HORSE_FARM.y0 - 6, 6, 4, 0x8a2a1a, undefined, true);
+  const paddock: { tx: number; ty: number }[] = [];
+  for (let y = HORSE_FARM.y0; y <= HORSE_FARM.y1; y++) {
+    for (let x = HORSE_FARM.x0; x <= HORSE_FARM.x1; x++) {
+      const edge = x === HORSE_FARM.x0 || x === HORSE_FARM.x1 || y === HORSE_FARM.y0 || y === HORSE_FARM.y1;
+      const gate = y === HORSE_FARM.y1 && (x === HORSE_FARM.gateX || x === HORSE_FARM.gateX + 1);
+      if (edge && !gate) paddock.push({ tx: x, ty: y });
+    }
+  }
+  for (const { tx, ty } of paddock) solid(tx, ty, 1, 1);
+  decor.push({ kind: "fence", tiles: paddock });
+  decor.push({ kind: "signboard", tx: HORSE_FARM.gateX - 1, ty: HORSE_FARM.y1 + 1, w: 4, text: "AT ÇİFTLİĞİ" });
+  const farmHorses: Extract<Decor, { kind: "horse" }>[] = [
+    { kind: "horse", tx: 64, ty: 17, look: { coat: 0xd8d4cc, mane: 0xf1f3f5, blanket: 0x1c7ed6, saddle: 0x8a5a2b }, facing: "right" },
+    { kind: "horse", tx: 69, ty: 18, look: { coat: 0xd4a017, mane: 0x8a6a10, blanket: 0x2b8a3e, saddle: 0x6b1a1a }, facing: "left" },
+    { kind: "horse", tx: 66, ty: 21, look: { coat: 0x26232a, mane: 0x0f0d12, blanket: 0x9c2a2a, saddle: 0x111111 }, facing: "down" },
+    { kind: "horse", tx: 70, ty: 22, look: { coat: 0xb08850, mane: 0x3a2a1a, blanket: 0x7a2a2a, saddle: 0x5b3a1e }, facing: "left" },
+  ];
+  for (const horse of farmHorses) {
+    solid(horse.tx, horse.ty, 1, 1);
+    decor.push(horse);
+  }
+  solid(HORSE_FARM.x0 + 1, HORSE_FARM.y0 + 5, 2, 1);
+  decor.push({ kind: "trough", tx: HORSE_FARM.x0 + 1, ty: HORSE_FARM.y0 + 5 });
+  for (const [tx, ty] of [[HORSE_FARM.x1 - 1, HORSE_FARM.y0 + 1], [HORSE_FARM.x1 - 2, HORSE_FARM.y0 + 1], [HORSE_FARM.x0 + 1, HORSE_FARM.y1 - 1]] as const) prop(tx, ty, "hay");
+  prop(HORSE_FARM.x0 + 7, HORSE_FARM.y0 - 3, "cart");
+  for (const [tx, ty] of [[HORSE_FARM.gateX - 3, HORSE_FARM.y1 + 1], [HORSE_FARM.gateX + 4, HORSE_FARM.y1 + 1]] as const) {
+    solid(tx, ty, 1, 1);
+    decor.push({ kind: "lamp", tx, ty });
+  }
 
   // ---- The harbour road ----
   // An avenue of trees two tiles off the lane, lamps between them on alternate sides and

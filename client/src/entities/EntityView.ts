@@ -4,7 +4,8 @@ import { ringEffect, slashEffect } from "../fx/slash";
 import { ensureSpriteSet, HumanoidFrame, type SpriteSet } from "../gfx/textures";
 import { BODY_PART_Y, ensureItemTexture } from "../gfx/weapons";
 import { hasImageAnim, IMAGE_SPRITES, withFallback } from "../gfx/imageSprites";
-import { ensureHorse, HORSE_KEY, HORSE_RIDER_LIFT, HorseFrame } from "../gfx/horse";
+import { ensureHorse, HORSE_RIDER_LIFT, HorseFrame } from "../gfx/horse";
+import { decodeHorseLook } from "../../../shared/src";
 import { CROWN_KEY, ensureCrown } from "../gfx/overhead";
 import { DOT_KEY, ensureDot } from "../gfx/decor";
 import { WeaponView } from "./WeaponView";
@@ -112,18 +113,22 @@ export class EntityView {
     this.setPosition(this.rawX, this.rawY);
   }
 
-  /** Puts the character on a horse (or takes them off). */
-  setMounted(mounted: boolean) {
-    if (mounted === !!this.horse) return;
+  /** Texture key of the horse being ridden (its look). */
+  private horseKey = "";
+
+  /** Puts the character on a horse of this look (encodeHorseLook; "" = the village horse), or takes them off. */
+  setMounted(mounted: boolean, look = "") {
+    const scene = this.sprite.scene;
+    const key = mounted ? ensureHorse(scene, look ? decodeHorseLook(look) : undefined) : "";
+    if (key === this.horseKey && mounted === !!this.horse) return;
+    // Getting off, or a different horse (bought or restyled at the stable while riding).
+    this.setGallop(false);
+    this.horse?.destroy();
+    this.horse = undefined;
+    this.horseKey = key;
     if (mounted) {
-      const scene = this.sprite.scene;
-      ensureHorse(scene);
-      this.horse = scene.add.sprite(this.rawX, this.rawY, HORSE_KEY, HorseFrame.Side).setOrigin(0.5, 1);
+      this.horse = scene.add.sprite(this.rawX, this.rawY, key, HorseFrame.Side).setOrigin(0.5, 1);
       this.horse.setAlpha(this.sprite.alpha);
-    } else {
-      this.setGallop(false);
-      this.horse?.destroy();
-      this.horse = undefined;
     }
     this.setAnimation(this.facing, this.moving);
   }
@@ -449,7 +454,7 @@ export class EntityView {
     if (this.horse) {
       // The horse walks; the rider just sits.
       this.horse.setFlipX(dir === Direction.Left);
-      if (moving) this.horse.anims.play(`horse-${name}`, true);
+      if (moving) this.horse.anims.play(`${this.horseKey}-${name}`, true);
       else {
         this.horse.anims.stop();
         this.horse.setFrame(name === "up" ? HorseFrame.Up : name === "down" ? HorseFrame.Down : HorseFrame.Side);

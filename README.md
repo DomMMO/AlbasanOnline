@@ -618,6 +618,7 @@ client/
 | 7.18 | Acemi başlangıç + Ustaların Ateşi görevi, 7 usta (Alp, Kam, Börü, Tigin, Erşek, Ak Ana, Erlik Ruh Eğitmeni), yeni sınıflar Şaman, Okçu, Druid (Büyücü ve Muhafız kalktı), onaylı sınıf seçimi, Ayşe Teyze'de altınla yol sıfırlama | ✅ |
 | 7.19 | Boss müziği: Kadim Ejder Azhdar'ın savaşında kendi şarkısı çalar (Esc → Ayarlar → Boss müziği); müzik `client/src/assets/licensed/music/<mob id>.weba`, eşleme `client/src/audio/bossMusic.ts` | ✅ |
 | 7.20 | Telifli varlıklar (şarkı, CraftPix ve Kabak Jack çizimleri, Cloister Black) depodan çıktı; `client/src/assets/licensed/` yalnızca yerelde, yoksa oyun kodla çizilen benzerlerini kullanır | ✅ |
+| 7.21 | At çiftliği ve Seyis Yusuf (doğu kapısının dışında): Bozkır Atı 25.000, Arap Atı 75.000, Ahal-Teke 200.000, Kara Yel 500.000 altın (%10-40 daha hızlı); bindiğin atın donu, yelesi, örtüsü ve eyeri 1.000.000 altına düzenlenir | ✅ |
 | 8 | Optimizasyon, anti-cheat, yedekleme, alfa testi | ⏳ |
 
 Faz 2 bitince oyun oynanabilir hale gelir. Sonraki fazlar bunun üzerine eklenir.

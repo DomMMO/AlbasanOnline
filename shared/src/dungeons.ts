@@ -69,7 +69,11 @@ export type Decor =
   /** Indoors: a three-legged stool someone sits on. */
   | { kind: "stool"; tx: number; ty: number }
   /** Indoors: a plank bench along a table. */
-  | { kind: "bench"; tx: number; ty: number; w: number };
+  | { kind: "bench"; tx: number; ty: number; w: number }
+  /** A horse standing about (the horse farm): colours as in data/horses.ts. */
+  | { kind: "horse"; tx: number; ty: number; look: { coat: number; mane: number; blanket: number; saddle: number }; facing: "left" | "right" | "down" }
+  /** A wooden water trough (1x2 tiles wide). */
+  | { kind: "trough"; tx: number; ty: number };
 
 /** An area where a kind of mob lives and respawns (tile coordinates). */
 export interface SpawnZone {

@@ -50,6 +50,8 @@ export function stepMovement(
   mounted = false,
   /** Galloping (Shift on horseback); ignored on foot. */
   gallop = false,
+  /** The ridden breed's extra speed (data/horses.ts); ignored on foot. */
+  horseBonus = 0,
 ): { x: number; y: number } {
   let vx: number = dx;
   let vy: number = dy;
@@ -57,7 +59,7 @@ export function stepMovement(
     vx *= Math.SQRT1_2;
     vy *= Math.SQRT1_2;
   }
-  const speed = mounted ? PLAYER_SPEED * MOUNT_SPEED_MULTIPLIER * (gallop ? GALLOP_SPEED_MULTIPLIER : 1) : PLAYER_SPEED;
+  const speed = mounted ? PLAYER_SPEED * MOUNT_SPEED_MULTIPLIER * (1 + horseBonus) * (gallop ? GALLOP_SPEED_MULTIPLIER : 1) : PLAYER_SPEED;
   return moveWithCollision(map, x, y, vx, vy, speed * dtSeconds);
 }
 
