@@ -3,7 +3,7 @@ import { Direction, directionToward, glowTier, ITEMS, type Appearance, type Huma
 import { ringEffect, slashEffect } from "../fx/slash";
 import { ensureSpriteSet, HumanoidFrame, type SpriteSet } from "../gfx/textures";
 import { BODY_PART_Y, ensureItemTexture } from "../gfx/weapons";
-import { IMAGE_SPRITES } from "../gfx/imageSprites";
+import { hasImageAnim, IMAGE_SPRITES } from "../gfx/imageSprites";
 import { WeaponView } from "./WeaponView";
 
 const HP_BAR_WIDTH = 16;
@@ -45,6 +45,8 @@ export class EntityView {
       const meta = IMAGE_SPRITES[appearance.key].meta;
       this.sprite.setOrigin(meta.originX, meta.originY);
       this.sprite.anims.play(`${this.set.key}-idle`);
+      // Recoloured variants (a fiery golem from the earth one).
+      if (appearance.tint !== undefined) this.setBaseTint(appearance.tint);
     }
     if (appearance.type === "slime") this.sprite.anims.play(`${this.set.key}-idle`);
 
@@ -178,6 +180,10 @@ export class EntityView {
 
     if (this.weapon) {
       this.weapon.swingOnce(kind === "heavy");
+    } else if (this.set.appearance.type === "image" && hasImageAnim(this.set.appearance.key, "attack")) {
+      // Art sheets swing their own weapon; face the target first.
+      if (dx !== 0) this.setAnimation(dx < 0 ? Direction.Left : Direction.Right, false);
+      this.playAction("attack", 520);
     } else {
       this.lunge(dx, dy);
     }
@@ -206,7 +212,7 @@ export class EntityView {
   private actionUntil = 0;
 
   playAction(name: string, durationMs: number) {
-    if (this.set.appearance.type !== "image") return;
+    if (this.set.appearance.type !== "image" || !hasImageAnim(this.set.appearance.key, name)) return;
     this.sprite.anims.play(`${this.set.key}-${name}`);
     this.actionUntil = this.sprite.scene.time.now + durationMs;
   }
@@ -301,6 +307,9 @@ export class EntityView {
 
   /** Brief white flash when hit. */
   flash() {
+    // Art sheets flinch (unless busy with an attack or the like).
+    const { appearance } = this.set;
+    if (appearance.type === "image" && hasImageAnim(appearance.key, "hurt") && this.sprite.scene.time.now >= this.actionUntil) this.playAction("hurt", 260);
     this.sprite.setTintFill(0xffffff);
     this.sprite.scene.time.delayedCall(70, () => this.restoreTint());
   }

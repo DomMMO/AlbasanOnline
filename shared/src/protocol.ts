@@ -603,6 +603,11 @@ export interface PlayerView {
   gearFeet: string;
   /** Market stall title ("" = no stall open). */
   stall: string;
+  /** Chosen at character creation. */
+  gender: string;
+  hairStyle: string;
+  hairColor: number;
+  skin: number;
   /** Fishing: the float lies on the water at (fishX, fishY). */
   fishing: boolean;
   fishX: number;

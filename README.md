@@ -21,6 +21,27 @@ Kayıt olun, bir karakter oluşturun ve oyuna girin. Yeni karakterler **Ana Merk
 
 > **Windows notu:** PostgreSQL, yolunda ASCII dışı karakter olan klasörlerde (ör. `Masaüstü`) çalışamıyor. Proje böyle bir klasördeyse PostgreSQL programı ve veriler `%LOCALAPPDATA%\mmo-creation` altında tutulur. Veritabanını sıfırlamak için `npm run dev` kapalıyken o klasördeki `data` klasörünü silin. Yayında `DATABASE_URL` ile gerçek bir PostgreSQL kullanılır.
 
+### Karakter seçme ve yaratma
+
+Giriş yapınca **Ana Merkez'in iç kalesinin önüne** gelirsin (Metin2 tarzı): karakterlerin (en fazla 3) avluda yan yana, giydikleri zırh ve silahlarıyla durur. Birine **tıklayınca seçilir**: ayağının altında altın halka belirir ve kendi etrafında döner, diğerleri gölgede kalır. Soldaki panelde ismi, sınıfı, seviyesi, en son bulunduğu bölge ve **oyun süresi** yazar.
+
+- **Başla** (ya da Enter): seçili karakterle oyuna gir.
+- **Yeni Karakter** ya da avludaki **Boş** yere tıkla: karakter yaratma ekranı. Hiç karakteri olmayan hesap doğrudan buraya gelir.
+- **Sil**: karakteri kalıcı olarak siler; onay için adını yazman gerekir. Oyundaki bir karakter silinemez.
+
+**Karakter yaratma:** ortada karakterin büyük haliyle döner (⟲ ⟳ ile elle de çevrilir); soldan seçilir:
+
+| Seçenek | Seçenekler |
+| --- | --- |
+| Sınıf | 6 sınıf (aşağıda); başlangıç silahı önizlemede elinde görünür |
+| Cinsiyet | Erkek, Kadın (kadın karakterde ince bel ve dudak) |
+| Saç modeli | Kısa, Diken, Uzun, At Kuyruğu, Topuz, Kel |
+| Saç rengi | 10 renk |
+| Ten rengi | 7 ton |
+| Kıyafet rengi | 10 renk |
+
+**Rastgele** hepsini rastgele seçer. Görünüm oyunda herkese aynı görünür (senkronize). Miğfer saçı, Büyücü şapkası ve kapüşonlar saçın üstünü örter; uzun saç ve at kuyruğu arkadan ve yandan görünür. Veriler `characters.look` (JSON) ve `characters.play_seconds` sütunlarında; seçenekler `shared/src/data/appearance.ts`, piksel şablonları `client/src/gfx/humanoid.ts`, lobi sahnesi `client/src/scenes/LobbyScene.ts`.
+
 ### Sınıflar
 
 Karakter oluştururken sınıf seçilir:
@@ -196,10 +217,45 @@ Başlangıç Vadisi'nin kuzey ucundaki ışınlanma kapısından (Sv 8+) girilir
 | Kuzeydoğu, haydut kampı | Haydut | 12 |
 | Kuzeybatı, eski mezarlık | İskelet Savaşçı | 14 |
 | Güneybatı, ork oyuğu | Ork Yağmacı | 16 |
+| Doğu, **Satir Korusu** | Satir Savaşçı, Satir Mızrakçı | 12-13 |
+| Satir Korusu'nun ortası | **Satir Reisi** (elit) | 15 |
+| Bataklığın güneyindeki açıklık | **Yosun Golemi** (elit) | 17 |
 | Doğu, ayı ini | Boz Ayı (elit) | 18 |
 | Haydut kampının kuzeyi | **Haydut Reisi Kara Murat** (saha boss'u, 5 dk'da yeniden doğar) | 20 |
 
 Kara Murat yere vurur (kızıl halka), önündeki şeritte koşar ve %60/%30 canda haydut çağırır. Her zaman Mühür Parçası düşürür; Kabak Jack de öyle.
+
+### Canavar çizimleri ve canavar silahları
+
+Satirlar, golemler, minotorlar ve hortlaklar gerçek sprite çizimleriyle (CraftPix "tiny style" paketleri) oynar: bekler, yürür, saldırırken silahını savurur, vurulunca sarsılır, ölünce yere yığılır.
+
+| Mob | Yer | Çizim |
+| --- | --- | --- |
+| Satir Savaşçı / Mızrakçı / Reisi, Yosun Golemi | Kara Orman | Satir 1-3, toprak golem |
+| Gece Hortlağı | Kara Orman (gece) | turkuaz hortlak |
+| Minotor Gözcü (eski Kobold Gözcü), **Ustabaşı Dorak**, **Maden Kralı Gırtlak** | Terk Edilmiş Maden | minotorlar |
+| **Kristal Golem** | Terk Edilmiş Maden | taş golem, kristal mavisi |
+| Boğulmuş Rahip, **Taş Muhafız** | Batık Tapınak | kapüşonlu hortlak, yosunlu golem |
+| Mezar Hortlağı, **Lich Azgor** | Kemik Mahzeni | mor hortlak (Lich büyük) |
+| **Lav Devi** | Ejder İni | toprak golem, ateş renginde |
+
+Yeni silahlar bu canavarların kendi silahları; envanterde ve karakterin elinde kendi çizimleriyle görünür:
+
+| Silah | Sv | Kimden düşer |
+| --- | --- | --- |
+| Minotor Gürzü (Şifacı) | 10 | Ustabaşı Dorak (%25) |
+| Minotor Sopası | 11 | Minotor Gözcü (%2) |
+| Taş Kılıç | 11 | Kristal Golem (%25) |
+| Satir Sopası | 12 | Satir Savaşçı (%1,2) |
+| Maden Kralı'nın Çekici (destansı) | 12 | Maden Kralı Gırtlak (%20) |
+| Satir Mızrağı | 13 | Satir Mızrakçı (%1,2) |
+| Golem Baltası | 13 | Taş Muhafız (%25) |
+| Satir Reisi'nin Baltası | 15 | Satir Reisi (%6) |
+| Kütük Gürz | 17 | Yosun Golemi (%4) |
+
+Yeni malzemeler: Satir Boynuzu, Golem Çekirdeği (tüccara satılır).
+
+**Çizimleri yeniden üretmek / yeni paket eklemek:** `pip install pillow`, sonra `python tools/build_sprites.py "C:/Users/<sen>/Downloads"`. Araç paketlerin PNG karelerini ortak bir kutuya kırpar, oyun boyutuna küçültür, kenarları piksel-art gibi keskinleştirir ve `client/src/assets/mobs/<ad>.png/.json` (sprite sheet + ayak noktası + animasyon kareleri) ile `client/src/assets/items/<ad>.png` (36 px ikon, `_held` el çizimi, `items.json` tutma noktası) üretir. Yeni bir sheet otomatik yüklenir; bir moba `appearance: { type: "image", key: "<ad>" }` (isteğe bağlı `tint`), bir item'a `image: "<ad>"` vermek yeterli. Lisans notu `client/src/assets/CREDITS.md` içinde.
 
 ### Item'lar
 
@@ -518,6 +574,8 @@ client/
 | 7.8 | Nekromant sınıfı, mücevherli pasif ağaç, Güç/Çeviklik/Zeka/Dayanıklılık, seviye farkında yaratıkların çekinmesi | ✅ |
 | 7.9 | Depo (Depocu), oyuncular arası takas, kale şehri: hendek, mazgallı surlar, burçlar, kale kapısı, İç Kale, dağınık sokaklar | ✅ |
 | 7.10 | Grupça zindana giriş daveti, gruptan çıkanın zindandan atılması, Liman bölgesi ve AFK balık tutma | ✅ |
+| 7.11 | Karakter yaratma (cinsiyet, saç modeli/rengi, ten, kıyafet rengi), iç kale önünde Metin2 tarzı karakter seçme, karakter silme, oyun süresi | ✅ |
+| 7.12 | CraftPix canavar çizimleri (satir, golem, minotor, hortlak), Satir Korusu ve Yosun Golemleri, 9 canavar silahı, sprite dönüştürme aracı | ✅ |
 | 8 | Optimizasyon, anti-cheat, yedekleme, alfa testi | ⏳ |
 
 Faz 2 bitince oyun oynanabilir hale gelir. Sonraki fazlar bunun üzerine eklenir.

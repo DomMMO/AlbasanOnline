@@ -24,19 +24,69 @@
       <p id="auth-error" class="error"></p>
     </form>
 
-    <div id="characters" class="panel" hidden>
+    <div id="characters" class="panel lobby-panel" hidden>
       <h1>Karakterler</h1>
       <p id="account-name" class="muted"></p>
-      <div id="character-list"></div>
-      <div id="class-picker"></div>
-      <form id="create-character" class="row" autocomplete="off">
-        <input id="character-name" maxlength="16" placeholder="Yeni karakter adı" />
-        <button type="submit">Oluştur</button>
-      </form>
+      <div id="character-info">
+        <div class="info-row"><span>İsim</span><b id="info-name"></b></div>
+        <div class="info-row"><span>Sınıf</span><b id="info-class"></b></div>
+        <div class="info-row"><span>Seviye</span><b id="info-level"></b></div>
+        <div class="info-row"><span>Bölge</span><b id="info-zone"></b></div>
+        <div class="info-row"><span>Oyun süresi</span><b id="info-time"></b></div>
+      </div>
+      <p id="no-characters" class="muted" hidden>Henüz karakterin yok. Boş yere tıkla ya da yeni bir karakter yarat.</p>
+      <p class="lobby-hint muted">Karakterine tıklayarak seç.</p>
+      <button type="button" id="play-btn">Başla</button>
+      <div class="row">
+        <button type="button" id="new-character-btn" class="secondary">Yeni Karakter</button>
+        <button type="button" id="delete-character-btn" class="secondary">Sil</button>
+      </div>
+      <div id="delete-confirm" hidden>
+        <p>Bu karakter <b>kalıcı olarak</b> silinecek. Onaylamak için adını yaz: <b id="delete-name"></b></p>
+        <input id="delete-input" maxlength="16" autocomplete="off" />
+        <div class="row">
+          <button type="button" id="delete-yes" class="danger">Sil</button>
+          <button type="button" id="delete-no" class="secondary">Vazgeç</button>
+        </div>
+      </div>
       <p id="characters-error" class="error"></p>
-      <a id="gm-link" href="/admin.html" class="gm-link" hidden>GM Paneli</a>
-      <button type="button" id="logout" class="link">Çıkış yap</button>
+      <div class="lobby-footer">
+        <a id="gm-link" href="/admin.html" class="gm-link" hidden>GM Paneli</a>
+        <button type="button" id="logout" class="link">Çıkış yap</button>
+      </div>
     </div>
+
+    <form id="create-panel" class="panel lobby-panel" autocomplete="off" hidden>
+      <h1>Karakter Yarat</h1>
+      <label for="character-name">İsim</label>
+      <input id="character-name" maxlength="16" placeholder="3-16 harf" />
+      <label>Sınıf</label>
+      <div id="class-picker"></div>
+      <label>Cinsiyet</label>
+      <div id="gender-picker" class="choice-row"></div>
+      <label>Saç modeli</label>
+      <div class="stepper">
+        <button type="button" id="hair-prev" class="secondary">‹</button>
+        <span id="hair-name"></span>
+        <button type="button" id="hair-next" class="secondary">›</button>
+      </div>
+      <label>Saç rengi</label>
+      <div id="hair-colors" class="swatches"></div>
+      <label>Ten rengi</label>
+      <div id="skin-colors" class="swatches"></div>
+      <label>Kıyafet rengi</label>
+      <div id="tunic-colors" class="swatches"></div>
+      <div class="row">
+        <button type="button" id="rotate-left" class="secondary" title="Sola döndür">⟲</button>
+        <button type="button" id="randomize" class="secondary">Rastgele</button>
+        <button type="button" id="rotate-right" class="secondary" title="Sağa döndür">⟳</button>
+      </div>
+      <div class="row">
+        <button type="submit" id="create-btn">Oluştur</button>
+        <button type="button" id="create-back" class="secondary">Geri</button>
+      </div>
+      <p id="create-error" class="error"></p>
+    </form>
 
     <div id="hud" hidden>
       <div id="player-frame" class="frame">

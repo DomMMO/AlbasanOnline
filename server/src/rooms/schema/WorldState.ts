@@ -49,6 +49,11 @@ export class Player extends Schema {
   @type("string") gearFeet = "";
   /** Market stall title ("" = no stall). */
   @type("string") stall = "";
+  /** Chosen at character creation: drawn for everyone. */
+  @type("string") gender = "male";
+  @type("string") hairStyle = "short";
+  @type("uint32") hairColor = 0x5a3825;
+  @type("uint32") skin = 0xf0c49a;
   /** Fishing: the float lies on the water at (fishX, fishY). */
   @type("boolean") fishing = false;
   @type("number") fishX = 0;

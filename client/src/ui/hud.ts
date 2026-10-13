@@ -1,5 +1,5 @@
 import { darkness, formatClock, isNight, POTION_COOLDOWN_MS, type ItemDef, type SkillDef } from "../../../shared/src";
-import { iconUrl } from "../gfx/icons";
+import { iconUrl, itemIconUrl } from "../gfx/icons";
 import { skillIconUrl } from "../gfx/skillIcons";
 import { installGlobeFrame } from "./globeFrame";
 import { actionKeyLabel } from "../input/keybindings";
@@ -317,7 +317,7 @@ export function initHotbar(
       const { item } = entry;
       element.classList.add("item");
       element.title = `${item.name}\n${item.description ?? ""}`;
-      const img = Object.assign(document.createElement("img"), { src: iconUrl(item.icon.shape, item.icon.color), draggable: false });
+      const img = Object.assign(document.createElement("img"), { src: itemIconUrl(item), draggable: false });
       count = Object.assign(document.createElement("span"), { className: "slot-count" });
       element.prepend(img);
       element.append(count);

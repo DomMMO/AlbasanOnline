@@ -1,6 +1,8 @@
 import express, { type NextFunction, type Request, type Response } from "express";
 import {
   isClassId,
+  sanitizeLook,
+  TUNIC_COLORS,
   MAX_CHARACTERS_PER_ACCOUNT,
   validateCharacterName,
   validatePassword,
@@ -10,10 +12,8 @@ import {
   type LeaderboardEntry,
 } from "../../../shared/src";
 import { accountForToken, createAccount, createSession, deleteSession, verifyLogin, type Account } from "../db/accounts";
-import { countCharacters, createCharacter, listCharacters, pvpLeaderboard } from "../db/characters";
+import { countCharacters, createCharacter, deleteCharacter, listCharacters, pvpLeaderboard } from "../db/characters";
 import { onlineCharacters } from "../game/registry";
-
-const PLAYER_COLORS = [0xd94141, 0x3f7fd9, 0x3fae5a, 0xd9a13f, 0x9b5bd9, 0x3fc2c2, 0xd95ba6, 0xe0e0e0];
 
 export type AuthedRequest = Request & { account: Account; token: string };
 
@@ -85,10 +85,25 @@ export function createApiRouter() {
     if ((await countCharacters(account.id)) >= MAX_CHARACTERS_PER_ACCOUNT) {
       return fail(res, 400, `En fazla ${MAX_CHARACTERS_PER_ACCOUNT} karakterin olabilir`);
     }
-    const color = PLAYER_COLORS[Math.floor(Math.random() * PLAYER_COLORS.length)];
-    const character = await createCharacter(account.id, name, color, classId);
-    if (!character) return fail(res, 409, "Bu karakter adı alınmış");
+    const color = TUNIC_COLORS.includes(req.body?.color) ? (req.body.color as number) : TUNIC_COLORS[0];
+    const id = await createCharacter(account.id, name, color, classId, sanitizeLook(req.body?.look));
+    if (id === null) return fail(res, 409, "Bu karakter adı alınmış");
+    const character = (await listCharacters(account.id)).find((c) => c.id === id)!;
     res.status(201).json(character satisfies CharacterSummary);
+  });
+
+  router.delete("/characters/:id", requireAuth, async (req, res) => {
+    const { account } = req as AuthedRequest;
+    const id = Number(req.params.id);
+    if (!Number.isSafeInteger(id)) return fail(res, 400, "Geçersiz karakter");
+    // A character in the world would be written back by its next save: they must log out first.
+    if (onlineCharacters.get(id)) return fail(res, 409, "Bu karakter şu an oyunda");
+    const name = typeof req.body?.name === "string" ? req.body.name : "";
+    const character = (await listCharacters(account.id)).find((c) => c.id === id);
+    if (!character) return fail(res, 404, "Karakter bulunamadı");
+    if (name.toLocaleLowerCase("tr-TR") !== character.name.toLocaleLowerCase("tr-TR")) return fail(res, 400, "Silmek için karakterin adını doğru yaz");
+    await deleteCharacter(account.id, id);
+    res.json({ ok: true });
   });
 
   router.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {

@@ -1,9 +1,15 @@
 import Phaser from "phaser";
 import { Direction, type IconShape, type ItemDef } from "../../../shared/src";
 import { ICON_SIZE, paintIcon } from "./icons";
+import { itemImage } from "./itemImages";
 
 // In-world item sprites (held weapons, armour falling off) reuse the inventory icon
 // art. Each texture has two frames: 0 = as drawn (blade up-right), 1 = mirrored.
+
+/** Where the hand grips an item's in-hand sprite: art assets carry their own grip point. */
+export function weaponGripFor(def: ItemDef): { x: number; y: number } {
+  return itemImage(def.image)?.grip ?? weaponGrip(def.icon.shape);
+}
 
 /** Where the hand grips each weapon icon (low on the handle), as a normalised origin. */
 export function weaponGrip(shape: IconShape): { x: number; y: number } {
@@ -32,6 +38,24 @@ export const SPARK_KEY = "spark";
 export function ensureItemTexture(scene: Phaser.Scene, def: ItemDef): string {
   const key = `item-${def.id}`;
   if (scene.textures.exists(key)) return key;
+  const picture = itemImage(def.image);
+  if (picture?.heldImage.complete && picture.heldImage.naturalWidth > 0) {
+    // Frame 0 as drawn, frame 1 mirrored, like the code-drawn icons.
+    const { heldImage } = picture;
+    const w = heldImage.naturalWidth;
+    const h = heldImage.naturalHeight;
+    const texture = scene.textures.createCanvas(key, w * 2, h)!;
+    texture.context.drawImage(heldImage, 0, 0);
+    texture.context.save();
+    texture.context.translate(w * 2, 0);
+    texture.context.scale(-1, 1);
+    texture.context.drawImage(heldImage, 0, 0);
+    texture.context.restore();
+    texture.add(0, 0, 0, 0, w, h);
+    texture.add(1, 0, w, 0, w, h);
+    texture.refresh();
+    return key;
+  }
   const texture = scene.textures.createCanvas(key, ICON_SIZE * 2, ICON_SIZE)!;
   paintIcon(texture.context, def.icon.shape, def.icon.color, 0, false);
   paintIcon(texture.context, def.icon.shape, def.icon.color, ICON_SIZE, true);

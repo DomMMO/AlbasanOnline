@@ -217,7 +217,7 @@ function renderCatalog() {
           const chip = document.createElement("button");
           chip.type = "button";
           chip.className = `chip${selectedItem?.id === def.id ? " active" : ""}`;
-          chip.innerHTML = `<img src="${iconUrl(def.icon.shape, def.icon.color)}" alt="" /><span></span>`;
+          chip.innerHTML = `<img src="${itemIconUrl(def)}" alt="" /><span></span>`;
           const label = chip.querySelector("span")!;
           label.textContent = def.name;
           label.style.color = RARITY_COLORS[def.rarity];

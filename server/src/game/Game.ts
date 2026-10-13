@@ -10,6 +10,7 @@ import {
   TICK_MS,
   statsWithEquipment,
   sanitizeRanks,
+  sanitizeLook,
   type FortuneState,
   type SkillRanks,
   type CombatStats,
@@ -116,6 +117,9 @@ export interface PlayerRuntime {
   tradeInvite: TradeInvite | null;
   /** Our line is in the water (harbour). */
   fishing: FishingState | null;
+  /** Play time stored before this session, and when this session began (wall clock). */
+  playSecondsBefore: number;
+  joinedAt: number;
 }
 
 export interface ActiveBuff {
@@ -222,6 +226,11 @@ export class Game {
     player.pvpRating = character.pvpRating;
     player.pvpKills = character.pvpKills;
     player.pvpDeaths = character.pvpDeaths;
+    const look = sanitizeLook(character.look);
+    player.gender = look.gender;
+    player.hairStyle = look.hairStyle;
+    player.hairColor = look.hairColor;
+    player.skin = look.skin;
     const savedSpot = this.zone.persistent && character.zone === this.zone.id && character.x !== null && character.y !== null;
     if (arriveAt && !collides(this.map, arriveAt.x, arriveAt.y)) {
       player.x = arriveAt.x;
@@ -271,6 +280,8 @@ export class Game {
       trade: null,
       tradeInvite: null,
       fishing: null,
+      playSecondsBefore: character.playSeconds,
+      joinedAt: Date.now(),
     });
 
     refreshStats(this, sessionId);
@@ -309,6 +320,7 @@ export class Game {
         pvpDeaths: player.pvpDeaths,
         skillRanks: runtime.skillRanks,
         fortune: runtime.fortune,
+        playSeconds: runtime.playSecondsBefore + Math.floor((Date.now() - runtime.joinedAt) / 1000),
       },
       gold: runtime.inventory.gold,
       storageGold: runtime.inventory.storageGold,

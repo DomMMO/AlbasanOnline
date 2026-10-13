@@ -1,5 +1,5 @@
 import { classOf, ITEMS, type SlotRef } from "../../../shared/src";
-import { iconUrl } from "../gfx/icons";
+import { iconUrl, itemIconUrl } from "../gfx/icons";
 import { countItem, DRAG_TYPE, inventoryState } from "./inventory";
 import { hideTooltip, showItemTooltip } from "./tooltip";
 import { Action } from "../input/InputManager";
@@ -122,7 +122,7 @@ export function render() {
     const def = ITEMS[defId];
     el.classList.toggle("empty", !def);
     img.hidden = !def;
-    if (def) img.src = iconUrl(def.icon.shape, def.icon.color);
+    if (def) img.src = itemIconUrl(def);
     const have = def ? countItem(defId) : 0;
     count.textContent = def ? String(have) : "";
     el.classList.toggle("no-resource", !!def && have === 0);

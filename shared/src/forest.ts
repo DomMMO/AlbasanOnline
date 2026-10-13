@@ -31,6 +31,8 @@ const AREAS = {
   bears: { tx: 52, ty: 35, r: 5 },
   wolves: { tx: 41, ty: 27, r: 5 },
   swamp: { tx: 21, ty: 22, r: 6 },
+  satyrs: { tx: 56, ty: 24, r: 4 },
+  golems: { tx: 27, ty: 30, r: 3 },
 };
 
 export const FOREST_SPAWN_ZONES: SpawnZone[] = [
@@ -40,6 +42,11 @@ export const FOREST_SPAWN_ZONES: SpawnZone[] = [
   { mob: "skeleton", tx: AREAS.graveyard.tx, ty: AREAS.graveyard.ty, radius: 6, count: 8 },
   { mob: "orc", tx: AREAS.orcs.tx, ty: AREAS.orcs.ty, radius: 6, count: 7 },
   { mob: "dire_bear", tx: AREAS.bears.tx, ty: AREAS.bears.ty, radius: 4, count: 3 },
+  // Satyr Grove in the east, moss golems in the clearing south of the swamp.
+  { mob: "satyr_warrior", tx: AREAS.satyrs.tx, ty: AREAS.satyrs.ty, radius: 4, count: 5 },
+  { mob: "satyr_spearman", tx: AREAS.satyrs.tx, ty: AREAS.satyrs.ty, radius: 4, count: 4 },
+  { mob: "satyr_chief", tx: AREAS.satyrs.tx, ty: AREAS.satyrs.ty, radius: 1, count: 1 },
+  { mob: "moss_golem", tx: AREAS.golems.tx, ty: AREAS.golems.ty, radius: 3, count: 3 },
   // Night only.
   { mob: "moon_wolf", tx: AREAS.wolves.tx, ty: AREAS.wolves.ty, radius: 6, count: 3 },
   { mob: "night_wraith", tx: AREAS.graveyard.tx, ty: AREAS.graveyard.ty, radius: 6, count: 4 },

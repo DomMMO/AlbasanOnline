@@ -2352,7 +2352,8 @@ body.touch .window-title {
 /* Menu and login buttons use the title font: they are big enough to read. */
 #game-menu button,
 #auth button,
-#create-character button,
+#create-panel button[type="submit"],
+#play-btn,
 #death button,
 #disconnected button {
   font-family: var(--font-title);
@@ -4019,4 +4020,225 @@ body.touch #chat {
 #target-trade {
   color: #2a1a08;
   background: linear-gradient(180deg, #f2d58c 0%, #c9a24a 45%, #8a6a28 100%);
+}
+
+/* ---- Character select & creation (lobby) ---- */
+
+/* Both panels sit on the left; the lobby scene shows the characters to their right. */
+#characters.lobby-panel,
+#create-panel.lobby-panel {
+  top: 50%;
+  left: 24px;
+  transform: translateY(-50%);
+  width: min(330px, calc(100vw - 48px));
+  text-align: left;
+  gap: 8px;
+}
+
+#create-panel.lobby-panel {
+  gap: 5px;
+  padding: 14px 18px;
+}
+
+#create-panel.lobby-panel h1 {
+  margin-bottom: 2px;
+  font-size: 30px;
+}
+
+#create-panel input {
+  padding: 5px 8px;
+}
+
+#create-panel .row > button,
+#create-panel .choice-row button {
+  padding: 5px;
+}
+
+#create-panel #create-btn,
+#create-panel #create-back {
+  font-size: 18px;
+}
+
+#characters.lobby-panel h1,
+#create-panel.lobby-panel h1 {
+  text-align: center;
+}
+
+#account-name {
+  margin: -8px 0 4px;
+  text-align: center;
+}
+
+#character-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  background: #0000004d;
+  border: 1px solid var(--gold-dark, #6b5228);
+}
+
+#character-info[hidden] {
+  display: none;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.info-row span {
+  color: var(--muted);
+}
+
+.info-row b {
+  min-width: 140px;
+  padding: 1px 8px;
+  text-align: center;
+  color: var(--gold-light);
+  background: #0b0806;
+  border: 1px solid #3a2a18;
+}
+
+.lobby-hint {
+  margin: 0;
+  font-size: 12px;
+  text-align: center;
+}
+
+#play-btn {
+  padding: 10px;
+  font-size: 18px;
+}
+
+.lobby-panel .row {
+  display: flex;
+  gap: 8px;
+}
+
+.lobby-panel .row > button {
+  flex: 1;
+}
+
+#delete-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  border: 1px solid #8a1f1a;
+  background: #3a0f0840;
+}
+
+#delete-confirm[hidden] {
+  display: none;
+}
+
+#delete-confirm p {
+  margin: 0;
+  font-size: 13px;
+}
+
+.panel button.danger,
+.panel button#delete-yes {
+  color: #fff;
+  background: linear-gradient(180deg, #d9534f, #8a1f1a);
+  text-shadow: 0 1px 0 #000;
+}
+
+.lobby-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#create-panel label {
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+#create-panel #class-picker {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+#create-panel .panel button.class-card span,
+#create-panel button.class-card span {
+  display: none;
+}
+
+#create-panel button.class-card {
+  align-items: center;
+  padding: 5px 4px;
+}
+
+#create-panel button.class-card b {
+  font-size: 16px;
+}
+
+.choice-row {
+  display: flex;
+  gap: 6px;
+}
+
+.choice-row button {
+  flex: 1;
+}
+
+.panel .choice-row button.active {
+  color: #2a1a08;
+  background: linear-gradient(180deg, #f2d58c 0%, #c9a24a 45%, #8a6a28 100%);
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stepper button {
+  width: 36px;
+  font-size: 18px;
+}
+
+.stepper span {
+  flex: 1;
+  text-align: center;
+  font-family: var(--font-title);
+  font-size: 19px;
+  color: var(--gold-light);
+}
+
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.panel .swatches button {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background: var(--swatch);
+  border: 2px solid #000;
+  border-radius: 50%;
+  box-shadow: inset 0 -3px 0 #0004;
+}
+
+.panel .swatches button.active {
+  border-color: var(--gold-light, #f2d58c);
+  box-shadow: 0 0 0 2px #000, 0 0 8px var(--gold, #c9a24a);
+  transform: scale(1.12);
+}
+
+@media (max-width: 760px) {
+  #characters.lobby-panel,
+#create-panel.lobby-panel {
+    left: 50%;
+    top: auto;
+    bottom: 8px;
+    transform: translateX(-50%);
+    max-height: 60vh;
+  }
 }

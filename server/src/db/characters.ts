@@ -1,5 +1,14 @@
 import type pg from "pg";
-import { CLASSES, type CharacterSummary, type ClassId, type FortuneState, type QuestProgress, type SkillRanks } from "../../../shared/src";
+import {
+  CLASSES,
+  sanitizeLook,
+  type CharacterLook,
+  type CharacterSummary,
+  type ClassId,
+  type FortuneState,
+  type QuestProgress,
+  type SkillRanks,
+} from "../../../shared/src";
 import { newStack, type StoredItem } from "../game/inventory";
 import { pool } from "./pool";
 
@@ -13,6 +22,9 @@ export interface CharacterRecord {
   xp: number;
   gold: number;
   storageGold: number;
+  /** Raw stored look; sanitized on load. */
+  look: unknown;
+  playSeconds: number;
   hp: number | null;
   /** Zone x/y belong to. */
   zone: string;
@@ -42,6 +54,7 @@ export interface CharacterProgress {
   pvpDeaths: number;
   skillRanks: SkillRanks;
   fortune: FortuneState | null;
+  playSeconds: number;
 }
 
 async function transaction<T>(fn: (client: pg.PoolClient) => Promise<T>): Promise<T> {
@@ -80,11 +93,34 @@ async function insertItems(client: pg.PoolClient, characterId: number, items: St
 }
 
 export async function listCharacters(accountId: number): Promise<CharacterSummary[]> {
-  const { rows } = await pool.query<CharacterSummary>(
-    "SELECT id, name, class, level, zone FROM characters WHERE account_id = $1 ORDER BY id",
+  const { rows } = await pool.query<Omit<CharacterSummary, "gear"> & { equipment: { position: string; defId: string; enhance: number }[] | null }>(
+    `SELECT c.id, c.name, c.class, c.level, c.zone, c.color, c.look, c.play_seconds AS "playSeconds",
+            (SELECT json_agg(json_build_object('position', i.position, 'defId', i.def_id, 'enhance', i.enhance))
+             FROM items i WHERE i.character_id = c.id AND i.container = 'equipment') AS equipment
+     FROM characters c WHERE c.account_id = $1 ORDER BY c.id`,
     [accountId],
   );
-  return rows;
+  return rows.map(({ equipment, ...row }) => {
+    const slot = (name: string) => equipment?.find((e) => e.position === name);
+    return {
+      ...row,
+      look: sanitizeLook(row.look),
+      gear: {
+        weapon: slot("weapon")?.defId ?? "",
+        weaponPlus: slot("weapon")?.enhance ?? 0,
+        head: slot("head")?.defId ?? "",
+        chest: slot("chest")?.defId ?? "",
+        legs: slot("legs")?.defId ?? "",
+        feet: slot("feet")?.defId ?? "",
+      },
+    };
+  });
+}
+
+/** Deletes a character of this account (items, quests and all). False if it isn't theirs. */
+export async function deleteCharacter(accountId: number, characterId: number): Promise<boolean> {
+  const { rowCount } = await pool.query("DELETE FROM characters WHERE id = $1 AND account_id = $2", [characterId, accountId]);
+  return (rowCount ?? 0) > 0;
 }
 
 export async function countCharacters(accountId: number): Promise<number> {
@@ -94,15 +130,15 @@ export async function countCharacters(accountId: number): Promise<number> {
   return Number(rows[0].count);
 }
 
-/** Creates a character with its class's starter gear. Returns null if the name is taken. */
-export async function createCharacter(accountId: number, name: string, color: number, classId: ClassId): Promise<CharacterSummary | null> {
+/** Creates a character with its class's starter gear. Returns its id, or null if the name is taken. */
+export async function createCharacter(accountId: number, name: string, color: number, classId: ClassId, look: CharacterLook): Promise<number | null> {
   const { starterEquipment, starterInventory } = CLASSES[classId];
   return transaction(async (client) => {
-    const { rows } = await client.query<CharacterSummary>(
-      `INSERT INTO characters (account_id, name, color, class) VALUES ($1, $2, $3, $4)
+    const { rows } = await client.query<{ id: number }>(
+      `INSERT INTO characters (account_id, name, color, class, look) VALUES ($1, $2, $3, $4, $5)
        ON CONFLICT DO NOTHING
-       RETURNING id, name, class, level, zone`,
-      [accountId, name, color, classId],
+       RETURNING id`,
+      [accountId, name, color, classId, JSON.stringify(look)],
     );
     const character = rows[0];
     if (!character) return null;
@@ -120,14 +156,15 @@ export async function createCharacter(accountId: number, name: string, color: nu
       })),
     ];
     await insertItems(client, character.id, starter);
-    return character;
+    return character.id;
   });
 }
 
 /** Loads a character only if it belongs to the account. */
 export async function loadCharacter(characterId: number, accountId: number): Promise<CharacterRecord | null> {
   const { rows } = await pool.query<Omit<CharacterRecord, "items" | "quests">>(
-    `SELECT id, account_id AS "accountId", name, class, color, level, xp, gold, storage_gold AS "storageGold", hp, zone, x, y,
+    `SELECT id, account_id AS "accountId", name, class, color, level, xp, gold, storage_gold AS "storageGold", look,
+            play_seconds AS "playSeconds", hp, zone, x, y,
             pvp_rating AS "pvpRating", pvp_kills AS "pvpKills", pvp_deaths AS "pvpDeaths",
             skill_ranks AS "skillRanks", fortune
      FROM characters WHERE id = $1 AND account_id = $2`,
@@ -192,7 +229,7 @@ export async function saveCharacters(saves: CharacterSave[]) {
       await client.query(
         `UPDATE characters SET level = $2, xp = $3, hp = $4, zone = COALESCE($5, zone), x = CASE WHEN $5::text IS NULL THEN x ELSE $6 END,
            y = CASE WHEN $5::text IS NULL THEN y ELSE $7 END, gold = $8, pvp_rating = $9, pvp_kills = $10, pvp_deaths = $11,
-           skill_ranks = $12, fortune = $13, storage_gold = $14, updated_at = now()
+           skill_ranks = $12, fortune = $13, storage_gold = $14, play_seconds = $15, updated_at = now()
          WHERE id = $1`,
         [
           characterId,
@@ -209,6 +246,7 @@ export async function saveCharacters(saves: CharacterSave[]) {
           JSON.stringify(progress.skillRanks),
           progress.fortune ? JSON.stringify(progress.fortune) : null,
           storageGold,
+          progress.playSeconds,
         ],
       );
     }
