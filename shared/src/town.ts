@@ -26,6 +26,11 @@ const GATE_ROWS = [28, 29, 30];
 const MARKET_AREA = { tx: 20, ty: 40, w: 24, h: 9 };
 /** The market's north entrance, under its signboard (tiles). */
 const MARKET_GATE = { tx: 30, w: 5 };
+/** The cobbled lane from the east road down to the harbour gate (centre line, tiles). */
+const HARBOR_ROAD: [number, number][] = [[66, 31], [66, 34], [68, 37], [68, 41], [65, 44], [65, 46], [66, 48], [66, 52]];
+/** The meadow the road runs through (columns cleared of trees). */
+const HARBOR_ROAD_X0 = 61;
+const HARBOR_ROAD_X1 = 72;
 /** The fountain square (an ellipse of paving). */
 const SQUARE = { cx: 32, cy: 30, rx: 7.5, ry: 5.5 };
 
@@ -137,11 +142,25 @@ export function buildTown(): DungeonLayout {
   fill(MOAT.x1 + 1, gateTop, width - 3, gateBottom, Tile.Path);
   fill(MOAT.x1 + 1, gateTop - 1, width - 3, gateTop - 1, Tile.Grass);
   fill(MOAT.x1 + 1, gateBottom + 1, width - 3, gateBottom + 1, Tile.Grass);
-  // The path south to the harbour gate, with a little clearing around the gate.
-  fill(64, gateBottom + 1, 68, height - 3, Tile.Grass);
-  fill(65, gateBottom + 1, 67, height - 4, Tile.Path);
-  fill(63, 49, 69, height - 3, Tile.Grass);
-  fill(65, 49, 67, height - 4, Tile.Path);
+  // The road south to the harbour gate: the woods are cleared back into a meadow and a
+  // cobbled lane winds down to a paved circle round the gate (trees, lamps and flower
+  // beds along it are placed with the rest of the decor below).
+  for (let y = gateBottom + 1; y <= height - 3; y++) {
+    for (let x = HARBOR_ROAD_X0; x <= HARBOR_ROAD_X1; x++) {
+      if (tiles[y][x] === Tile.Tree) tiles[y][x] = rand() < 0.5 ? Tile.GrassAlt : Tile.Grass;
+    }
+  }
+  for (let y = 48; y <= height - 3; y++) {
+    for (let x = 62; x <= 70; x++) if (((x - 66) / 3.6) ** 2 + ((y - 51) / 2.6) ** 2 <= 1) tiles[y][x] = Tile.Plaza;
+  }
+  const roadCentre = new Map<number, number>();
+  for (let i = 1; i < HARBOR_ROAD.length; i++) {
+    const [ax, ay] = HARBOR_ROAD[i - 1];
+    const [bx, by] = HARBOR_ROAD[i];
+    const steps = Math.max(Math.abs(bx - ax), Math.abs(by - ay));
+    for (let s = 0; s <= steps; s++) roadCentre.set(Math.round(ay + ((by - ay) * s) / steps), Math.round(ax + ((bx - ax) * s) / steps));
+  }
+  street(HARBOR_ROAD, Tile.Cobble, 1);
 
   // ---- Open spaces ----
   // Fountain square: an oval of paving.
@@ -239,6 +258,36 @@ export function buildTown(): DungeonLayout {
     decor.push({ kind: "lamp", tx, ty });
   }
   decor.push({ kind: "signboard", tx: 64, ty: 33, w: 5, text: "LİMAN" });
+
+  // ---- The harbour road ----
+  // An avenue of trees two tiles off the lane, lamps between them on alternate sides and
+  // flower beds along the kerb; banners and barrels by the gate.
+  const isFree = (x: number, y: number) => tiles[y]?.[x] === Tile.Grass || tiles[y]?.[x] === Tile.GrassAlt || tiles[y]?.[x] === Tile.Flower;
+  for (const [y, cx] of roadCentre) {
+    if (y < 35 || y > 47) continue;
+    if (y % 3 === 0) {
+      for (const x of [cx - 4, cx + 4]) if (isFree(x, y)) tree(x, y);
+    } else if (y % 3 === 1) {
+      const x = y % 6 === 1 ? cx - 3 : cx + 3;
+      if (isFree(x, y)) {
+        solid(x, y, 1, 1);
+        decor.push({ kind: "lamp", tx: x, ty: y });
+      }
+    } else {
+      for (const x of [cx - 2, cx + 2]) if (isFree(x, y) && rand() < 0.7) tiles[y][x] = Tile.Flower;
+    }
+  }
+  for (const [tx, ty, color] of [[62, 50, 0x2f6b8a], [70, 50, 0x2f6b8a]] as const) {
+    solid(tx, ty, 1, 1);
+    decor.push({ kind: "banner", tx, ty, color });
+  }
+  for (const [tx, ty] of [[63, 47], [69, 47]] as const) {
+    solid(tx, ty, 1, 1);
+    decor.push({ kind: "lamp", tx, ty });
+  }
+  for (const [tx, ty] of [[71, 37], [71, 38]] as const) prop(tx, ty, "hay");
+  prop(62, 41, "barrel");
+  prop(62, 42, "crate");
   // Torches either side of the drawbridge and in the arena yard.
   for (const [tx, ty] of [[MOAT.x1 + 1, gateTop - 1], [MOAT.x1 + 1, gateBottom + 1], [45, 17], [53, 17]] as const) {
     solid(tx, ty, 1, 1);
