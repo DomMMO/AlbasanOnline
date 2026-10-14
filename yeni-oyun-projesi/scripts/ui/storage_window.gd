@@ -1,7 +1,7 @@
 class_name StorageWindow
 extends GameWindow
 
-## Depo (client/src/ui/storage.ts): the character's storage at the Depocu. Right click or drag
+## Depo: the character's storage at the Depocu. Right click or drag
 ## between bag and storage; gold in and out.
 
 var ui: GameUi

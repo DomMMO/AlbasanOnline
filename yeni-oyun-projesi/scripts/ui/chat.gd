@@ -1,7 +1,7 @@
 class_name Chat
 extends VBoxContainer
 
-## Chat (client/src/ui/chat.ts): the log at the bottom left, Enter opens the input. Names are
+## Chat: the log at the bottom left, Enter opens the input. Names are
 ## clickable to whisper. Channels: global, party, whisper, system.
 
 signal sent(text: String)

@@ -1,7 +1,7 @@
 class_name Doll
 extends Control
 
-## The character preview in the inventory (client/src/ui/doll.ts): the character in what they
+## The character preview in the inventory: the character in what they
 ## wear, the weapon in hand, behind a red curtain; click to turn them round.
 
 const SIZE := 28

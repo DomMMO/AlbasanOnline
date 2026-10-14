@@ -1,7 +1,7 @@
 class_name World
 extends Node2D
 
-## One zone, live: client/src/scenes/WorldScene.ts. The ground and decor (baked), every player,
+## One zone, live. The ground and decor (baked), every player,
 ## mob, NPC, portal, chest and gathering node from the room state, our own movement predicted at
 ## the server's tick rate and reconciled, remote ones interpolated, targeting, skills, effects,
 ## and the wiring between the room's messages and the UI. A fresh World per zone.

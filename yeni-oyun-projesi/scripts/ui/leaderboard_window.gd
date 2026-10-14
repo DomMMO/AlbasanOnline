@@ -1,7 +1,7 @@
 class_name LeaderboardWindow
 extends GameWindow
 
-## PvP Sıralaması (client/src/ui/pvp.ts): the arena rating table from /api/leaderboard.
+## PvP Sıralaması: the arena rating table from /api/leaderboard.
 
 var ui: GameUi
 var _grid: GridContainer

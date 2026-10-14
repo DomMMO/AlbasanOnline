@@ -2,7 +2,7 @@ class_name ExtraWindows
 extends RefCounted
 
 ## Storage, stable, friends, trade, the market stall, the passive tree, the damage meter and
-## the PvP leaderboard. Each is ported from its client/src/ui/*.ts module.
+## the PvP leaderboard.
 
 var ui: GameUi
 var parent: Control

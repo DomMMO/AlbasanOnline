@@ -1,6 +1,6 @@
 extends Node
 
-## The game's flow (client/src/main.ts): lobby (login / character select), then into the world;
+## The game's flow: lobby (login / character select), then into the world;
 ## portals leave one zone's room and join the next with the server's ticket; switching
 ## character or logging out goes back to the lobby.
 

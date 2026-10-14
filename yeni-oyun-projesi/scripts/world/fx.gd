@@ -1,9 +1,9 @@
 class_name Fx
 extends RefCounted
 
-## Short-lived effects: client/src/fx/slash.ts, spells.ts, floatingText.ts, teleport.ts and
-## dust.ts, drawn the same way (vector shapes that scale with the camera zoom). Every function
-## takes the y-sorted world layer the effect goes into.
+## Short-lived effects (slashes, spells, floating text, teleports, dust): vector shapes that
+## scale with the camera zoom. Every function takes the y-sorted world layer the effect goes
+## into.
 
 const CHEST := 7.0
 const P := Depth.Painter

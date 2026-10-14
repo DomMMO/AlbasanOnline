@@ -1,7 +1,7 @@
 class_name StableWindow
 extends GameWindow
 
-## Seyis Yusuf · At Çiftliği (client/src/ui/stable.ts): buy a faster breed, ride another one,
+## Seyis Yusuf · At Çiftliği: buy a faster breed, ride another one,
 ## restyle the ridden horse's colours.
 
 const PART_NAMES := {"coat": "Don", "mane": "Yele", "blanket": "Örtü", "saddle": "Eyer"}

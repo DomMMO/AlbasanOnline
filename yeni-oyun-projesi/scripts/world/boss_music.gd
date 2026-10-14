@@ -1,10 +1,10 @@
 class_name BossMusic
 extends AudioStreamPlayer
 
-## Boss fight music (client/src/audio/bossMusic.ts): a boss with a theme starts it when its
+## Boss fight music: a boss with a theme starts it when its
 ## health bar comes up and it fades out when the fight ends. The songs are third-party and
 ## kept out of the repository: art/licensed/music/<mob id>.ogg (or .mp3). Godot does not play
-## the web client's .weba files; convert them (ffmpeg -i elder_dragon.weba elder_dragon.ogg).
+## .weba files; convert them (ffmpeg -i elder_dragon.weba elder_dragon.ogg).
 
 const VOLUME_DB := -5.2  # 0.55 linear
 const FADE := 1.5

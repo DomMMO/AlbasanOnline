@@ -1,7 +1,7 @@
 class_name Hud
 extends CanvasLayer
 
-## The in-game HUD (client/src/ui/hud.ts and its neighbours): player and target frames, the
+## The in-game HUD: player and target frames, the
 ## health and resource globes, potion slots, the hotbar with cooldown sweeps, buffs, the XP
 ## bar, cast and boss bars, messages, clock, network info, minimap, chat, help line and the
 ## death panel. The world pushes state in; clicks call back out.

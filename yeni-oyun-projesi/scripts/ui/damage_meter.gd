@@ -1,7 +1,7 @@
 class_name DamageMeter
 extends PanelContainer
 
-## The damage / healing meter (client/src/ui/damageMeter.ts, Details!-style): your group's
+## The damage / healing meter (Details!-style): your group's
 ## damage done, healing done or damage taken per fight, past fights and the overall total.
 
 const MODES := {"damage": ["Damage Done", "DPS"], "heal": ["Healing Done", "HPS"], "taken": ["Damage Taken", "DTPS"]}

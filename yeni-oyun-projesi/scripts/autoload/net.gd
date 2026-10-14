@@ -1,7 +1,7 @@
 extends Node
 
 ## Server access (autoload "Net"): the REST API for accounts and characters (client/src/net/api.ts)
-## and joining zone rooms (client/src/net/connection.ts).
+## and joining zone rooms.
 ##
 ## The server address: "--server=http://localhost:2567" on the command line (or
 ## user://settings.cfg [net] server=...), otherwise the live server.

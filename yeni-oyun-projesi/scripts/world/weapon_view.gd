@@ -1,7 +1,7 @@
 class_name WeaponView
 extends RefCounted
 
-## The weapon in a character's hand: client/src/entities/WeaponView.ts. Placement by facing,
+## The weapon in a character's hand. Placement by facing,
 ## the swing, and the +7..+10 purple glow with sparkles at +9 and +10.
 
 const GLOW_COLOR := Color(0.651, 0.302, 1.0)

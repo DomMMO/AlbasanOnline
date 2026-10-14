@@ -1,7 +1,7 @@
 class_name PassivesWindow
 extends GameWindow
 
-## Pasif Ağaç (client/src/ui/passives.ts): 20 big sockets on a ring that turns the selected
+## Pasif Ağaç: 20 big sockets on a ring that turns the selected
 ## one to the top, its five small sockets in the middle, the totals of everything socketed.
 
 const SOCKETS := 20

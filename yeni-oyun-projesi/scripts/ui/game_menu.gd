@@ -1,7 +1,7 @@
 class_name GameMenu
 extends PanelContainer
 
-## The Esc menu (client/src/ui/menu.ts + keybindMenu.ts): resume, settings, controls, key
+## The Esc menu: resume, settings, controls, key
 ## bindings, switch character, log out.
 
 var ui: GameUi

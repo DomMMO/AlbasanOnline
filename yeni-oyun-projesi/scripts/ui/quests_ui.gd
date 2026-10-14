@@ -1,7 +1,7 @@
 class_name QuestsUi
 extends RefCounted
 
-## NPC conversations, quests, the quest log and the tracker: client/src/ui/quests.ts.
+## NPC conversations, quests, the quest log and the tracker.
 
 const COMPASS := ["doğuda", "güneydoğuda", "güneyde", "güneybatıda", "batıda", "kuzeybatıda", "kuzeyde", "kuzeydoğuda"]
 

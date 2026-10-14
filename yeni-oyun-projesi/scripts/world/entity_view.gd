@@ -1,7 +1,7 @@
 class_name EntityView
 extends Node
 
-## One player, mob, NPC, portal or loot chest on screen: client/src/entities/EntityView.ts.
+## One player, mob, NPC, portal or loot chest on screen.
 ## Holds no game logic; it only shows what it is told. Position (x, y) is the feet.
 ##
 ## Hitboxes: `hurtbox` (Area2D, layer 1) covers the opaque pixels of the sprite and takes mouse

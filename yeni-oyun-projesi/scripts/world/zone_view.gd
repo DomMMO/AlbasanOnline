@@ -3,7 +3,7 @@ extends Node2D
 
 ## A zone's ground and decor, from the bake (data/zones/<id>.json + art/): the ground in
 ## 1024 px chunks under everything, standing decor in the shared y-sorted layer (so characters
-## walk behind and in front of it as in Phaser), drifting clouds under the sky island, and the
+## walk behind and in front of it), drifting clouds under the sky island, and the
 ## lights and lamp glows for the night layer.
 
 var map: ZoneMap

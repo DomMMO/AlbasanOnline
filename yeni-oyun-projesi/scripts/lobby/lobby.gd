@@ -1,9 +1,9 @@
 class_name Lobby
 extends Node2D
 
-## Login -> character select -> join: client/src/ui/lobby.ts and scenes/LobbyScene.ts. The
-## characters stand in front of the keep in Ana Merkez in full gear (Metin2 style); the panels
-## hold the details and the buttons. Emits `entered` with the joined room.
+## Login -> character select -> join. The characters stand in front of the keep in Ana Merkez
+## in full gear (Metin2 style); the panels hold the details and the buttons. Emits `entered`
+## with the joined room.
 
 signal entered(room: ColyseusRoom, character_id: int, zone: String)
 
