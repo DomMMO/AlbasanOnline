@@ -72,6 +72,19 @@ body {
   letter-spacing: 1px;
 }
 
+/* The logo's black eagle vanishes on dark wood, so it sits on a parchment disc. */
+.game-logo {
+  align-self: center;
+  width: 88px;
+  height: 88px;
+  padding: 12px;
+  box-sizing: border-box;
+  border-radius: 50%;
+  background: #f2f0ec;
+  border: 2px solid var(--gold);
+  box-shadow: 0 0 0 2px #000, 3px 3px 0 2px #000;
+}
+
 #characters {
   width: min(460px, calc(100vw - 32px));
 }
