@@ -79,4 +79,17 @@ export function initTouchControls() {
     event.preventDefault();
     openChat();
   });
+
+  // The menu buttons live behind ☰ and fold away again once one is used.
+  const menu = $("touch-menu");
+  const toggle = $("touch-menu-toggle");
+  const setMenuOpen = (open: boolean) => {
+    menu.classList.toggle("open", open);
+    toggle.setAttribute("aria-expanded", String(open));
+  };
+  toggle.addEventListener("pointerdown", (event) => {
+    event.preventDefault();
+    setMenuOpen(!menu.classList.contains("open"));
+  });
+  menu.addEventListener("pointerup", () => setMenuOpen(false));
 }
