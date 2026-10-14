@@ -590,7 +590,7 @@ Jack'in görselleri hazır bir sprite paketinden gelir (`client/src/assets/`, ka
 
 Tek VPS üzerinde Docker Compose: Postgres + oyun sunucusu + Caddy (otomatik HTTPS). Dosyalar: `docker-compose.yml`, `deploy/`.
 
-- İlk kurulum (bir kez): `ssh root@IP 'bash -s' < deploy/server-setup.sh`, sonra `/opt/mmo/.env` içinde `DOMAIN` ayarlanır (domain yoksa `1-2-3-4.sslip.io`).
+- İlk kurulum (bir kez): `ssh root@IP 'bash -s' < deploy/server-setup.sh`, sonra `/opt/mmo/.env` içinde `DOMAIN` ayarlanır (domain yoksa `1-2-3-4.sslip.io`). `REDIRECT_DOMAINS` (boşlukla ayrılmış) eski adresleri ana domain'e yönlendirir; `www.` her zaman yönlenir.
 - Güncelleme: `main`e her push GitHub Actions ile typecheck edilip otomatik deploy edilir (`.github/workflows/deploy.yml`). Elle (commitlenmemiş değişikliklerle): `deploy/deploy.sh root@IP` (Git Bash); bu, `client/src/assets/licensed/` klasörünü de sunucudaki `/opt/mmo/licensed` içine eşitler.
 - GM yetkisi: `ssh root@IP 'docker exec mmo-app-1 npm run make-admin -w server -- <kullanıcı-adı>'`
 - Loglar: `ssh root@IP 'docker logs -f mmo-app-1'`
