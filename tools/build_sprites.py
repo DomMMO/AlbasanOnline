@@ -40,6 +40,7 @@ MOBS = [
     ("wraith_hood", "Wraith", 2, 26),
     ("wraith_purple", "Wraith", 3, 26),
     ("wraith_purple_big", "Wraith", 3, 52),
+    ("golem_stone", "Golem", 1, 34),
     ("golem_stone_big", "Golem", 1, 56),
     ("golem_moss_big", "Golem", 2, 56),
     ("golem_earth", "Golem", 3, 34),
@@ -47,7 +48,9 @@ MOBS = [
     ("satyr_horned", "Satyr", 1, 28),
     ("satyr_spear", "Satyr", 2, 28),
     ("satyr_chief", "Satyr", 3, 34),
+    ("satyr_chief_big", "Satyr", 3, 48),
     ("minotaur_brown", "Minotaur", 1, 34),
+    ("minotaur_blue", "Minotaur", 2, 34),
     ("minotaur_blue_big", "Minotaur", 2, 56),
     ("minotaur_dark_big", "Minotaur", 3, 60),
 ]

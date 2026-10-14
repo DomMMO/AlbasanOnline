@@ -175,17 +175,17 @@ const list: MobDef[] = [
   boss({ id: "dragon_priest", name: "Ejder Rahibi Vael", level: 23, appearance: human(0x5c0a0a, 0xd9a07a, 0xf1f3f5), abilities: [leap(23), charge(23)], addMob: "dragonkin_guard", extraDrops: [{ item: "seal_necklace", chance: 0.15 }] }),
   boss({ id: "elder_dragon", name: "Kadim Ejder Azhdar", level: 24, final: true, scale: 3, appearance: { type: "wolf", fur: 0x8b0000 }, abilities: [slam(24), charge(24), leap(24, 15_000)], addMob: "drake", addsAt: [0.75, 0.5, 0.25], extraDrops: [{ item: "seal_fragment", chance: 1 }, { item: "might_ring", chance: 0.3 }, { item: "red_dragon_earring", chance: 0.3 }, { item: "seal_necklace", chance: 0.3 }] }),
   // ---- 6. Kızıl Mağaralar (Red Caves, Kızıl Kanyon), Sv 22-25
-  trash({ id: "gnoll_hunter", name: "Gnol Avcı", level: 22, appearance: { type: "humanoid", tunic: 0x6b4423, skin: 0xb08850, hair: 0x4a3420, hairStyle: "spiky", gear: { chest: "leather_vest" } }, material: "hyena_fang" }),
+  trash({ id: "gnoll_hunter", name: "Gnol Avcı", level: 22, appearance: { type: "image", key: "satyr_spear", tint: 0xd9b48a }, material: "hyena_fang" }),
   trash({ id: "cave_hyena", name: "Mağara Sırtlanı", level: 23, attack: 1.1, speed: 76, attackSpeedMs: 1600, appearance: { type: "wolf", fur: 0x9c7a4a }, material: "hyena_fang" }),
   trash({ id: "dust_slime", name: "Toz Balçığı", level: 23, hp: 1.3, speed: 32, appearance: { type: "slime", color: 0xd9a066 }, material: "sand_crystal" }),
-  trash({ id: "gnoll_seer", name: "Gnol Kâhini", level: 24, hp: 0.9, attack: 1.3, appearance: { type: "humanoid", tunic: 0x8a2a1a, skin: 0xb08850, hair: 0xe8e4d8, hairStyle: "long", headwear: { color: 0x8a2a1a, style: "hood" } }, material: "sand_crystal" }),
+  trash({ id: "gnoll_seer", name: "Gnol Kâhini", level: 24, hp: 0.9, attack: 1.3, appearance: { type: "image", key: "satyr_horned", tint: 0xe0a070 }, material: "sand_crystal" }),
   trash({ id: "red_minotaur", name: "Kızıl Minotor", level: 25, hp: 1.5, speed: 54, appearance: { type: "image", key: "minotaur_brown", tint: 0xc0583a }, material: "hyena_fang" }),
-  boss({ id: "gnoll_chief", name: "Gnol Şefi Kıkırgan", level: 23, appearance: { type: "humanoid", tunic: 0x4a2a12, skin: 0xb08850, hair: 0x2a1a0a, hairStyle: "spiky", gear: { head: "chieftain_helm", chest: "leather_vest" } }, abilities: [slam(23), charge(23)], addMob: "gnoll_hunter" }),
+  boss({ id: "gnoll_chief", name: "Gnol Şefi Kıkırgan", level: 23, scale: 1, appearance: { type: "image", key: "satyr_chief_big", tint: 0xd9b48a }, abilities: [slam(23), charge(23)], addMob: "gnoll_hunter" }),
   boss({ id: "hyena_matriarch", name: "Sırtlan Ana", level: 24, scale: 3, appearance: { type: "wolf", fur: 0x7a5a32 }, abilities: [charge(24), leap(24, 11_000)], addMob: "cave_hyena" }),
   boss({ id: "red_bull_tarhan", name: "Kızıl Boğa Tarhan", level: 25, final: true, scale: 1, appearance: { type: "image", key: "minotaur_dark_big", tint: 0xc0583a }, abilities: [charge(25), slam(25), leap(25, 15_000)], addMob: "red_minotaur", extraDrops: [{ item: "sand_crystal", chance: 1, min: 2, max: 4 }] }),
 
   // ---- 7. Gömülü Kervansaray (Buried Caravanserai, Kızıl Kanyon), Sv 26-29
-  trash({ id: "shrouded_dead", name: "Kefenli Ölü", level: 26, hp: 1.2, speed: 48, appearance: { type: "humanoid", tunic: 0xd8cfb8, skin: 0xc8bfa8, hair: 0xd8cfb8, hairStyle: "bald" }, material: "bone_dust" }),
+  trash({ id: "shrouded_dead", name: "Kefenli Ölü", level: 26, hp: 1.2, speed: 48, appearance: { type: "image", key: "wraith_hood", tint: 0xe8dfc8 }, material: "bone_dust" }),
   trash({ id: "tomb_jackal", name: "Mezar Çakalı", level: 27, attack: 1.1, speed: 78, attackSpeedMs: 1600, appearance: { type: "wolf", fur: 0x3a2a1a }, material: "hyena_fang" }),
   trash({ id: "cursed_merchant", name: "Lanetli Tüccar", level: 27, hp: 0.9, attack: 1.3, appearance: { type: "image", key: "wraith_hood", tint: 0xc9a227 }, material: "sand_crystal" }),
   trash({ id: "sand_shade", name: "Kum Gölgesi", level: 28, hp: 0.9, attack: 1.3, appearance: { type: "image", key: "wraith_teal", tint: 0xd9a066 }, material: "night_essence" }),
