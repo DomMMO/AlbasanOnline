@@ -25,6 +25,7 @@ const MINIMAP_COLORS: Partial<Record<Tile, string>> = {
   [Tile.Solid]: "#5a4636",
   [Tile.Wall]: "#4d483f",
   [Tile.Market]: "#d9a441",
+  [Tile.DeadTree]: "#2a221c",
 };
 
 export type MinimapDotKind = "self" | "party" | "player" | "enemy" | "npc" | "portal" | "ping" | "guide";

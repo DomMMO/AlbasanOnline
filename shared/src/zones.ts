@@ -8,6 +8,7 @@ import { BIG_DUNGEON_IDS, BIG_DUNGEONS, bigDungeonEntrance, dungeonsIn, type Big
 import { buildCanyon, CANYON_SPOTS } from "./canyon";
 import { buildFrost, FROST_SPOTS } from "./frost";
 import { buildVolcano, VOLCANO_SPOTS } from "./volcano";
+import { buildKurgan, KURGAN_SPOTS } from "./kurgan";
 import { CAVE_BRIDGE, CAVE_ENTRANCE_TILE, CAVE_TORCHES, generateWorldMap, type WorldMap } from "./map";
 import { buildTown, TOWN_SPOTS } from "./town";
 import { buildHarbor, HARBOR_SPOTS } from "./harbor";
@@ -19,7 +20,7 @@ import { buildKeepHall, KEEP_HALL_SPOTS } from "./keepHall";
 // there and you log back in where you left. Every other zone is entered through a portal
 // and leaving it puts you back at the portal you used.
 
-export type ZoneId = "town" | "world" | "forest" | "canyon" | "frost" | "volcano" | "harbor" | "keep_hall" | "goblin_cave" | "jack_lair" | "pvp_arena" | BigDungeonId;
+export type ZoneId = "town" | "world" | "forest" | "canyon" | "frost" | "volcano" | "kurgan" | "harbor" | "keep_hall" | "goblin_cave" | "jack_lair" | "pvp_arena" | BigDungeonId;
 
 /** New characters start here; the zone anyone can join without a portal ticket. */
 export const HOME_ZONE: ZoneId = "town";
@@ -314,6 +315,37 @@ export const ZONES: Record<ZoneId, ZoneDef> = {
         auto: true,
         arriveAt: { x: worldVolcanoGate.x, y: worldVolcanoGate.y - TILE_SIZE * 3 },
       },
+      {
+        id: "volcano_kurgan_gate",
+        ...VOLCANO_SPOTS.kurganGate,
+        to: "kurgan",
+        label: "Kurgan Ovası",
+        style: "gate",
+        auto: true,
+        minLevel: 50,
+        arriveAt: KURGAN_SPOTS.fromVolcano,
+      },
+    ],
+  },
+  kurgan: {
+    id: "kurgan",
+    outdoor: true,
+    name: "Kurgan Ovası",
+    instanced: false,
+    persistent: true,
+    npcs: ["barrow_trader", "old_kam"],
+    respawnText: "Yaşlı Kam'ın ocağında yeniden doğacaksın.",
+    portals: [
+      ...dungeonPortals("kurgan"),
+      {
+        id: "kurgan_volcano_gate",
+        ...KURGAN_SPOTS.volcanoGate,
+        to: "volcano",
+        label: "Kor Toprakları",
+        style: "gate",
+        auto: true,
+        arriveAt: VOLCANO_SPOTS.fromKurgan,
+      },
     ],
   },
   harbor: {
@@ -417,6 +449,7 @@ const BUILDERS: Record<ZoneId, () => DungeonLayout> = {
   canyon: buildCanyon,
   frost: buildFrost,
   volcano: buildVolcano,
+  kurgan: buildKurgan,
   harbor: buildHarbor,
   keep_hall: buildKeepHall,
   goblin_cave: buildGoblinCave,

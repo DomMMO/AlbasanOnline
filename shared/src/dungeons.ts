@@ -17,7 +17,8 @@ export interface MobPlacement {
  * The tiles underneath are Tile.Solid, so collision stays purely tile based.
  */
 export type Decor =
-  | { kind: "building"; tx: number; ty: number; w: number; h: number; roof: number; sign?: { shape: IconShape; color: number }; chimney?: boolean; ridge?: "h" | "v" }
+  /** `abandoned`: nobody lives there (dark, boarded-up windows, a cold chimney). */
+  | { kind: "building"; tx: number; ty: number; w: number; h: number; roof: number; sign?: { shape: IconShape; color: number }; chimney?: boolean; ridge?: "h" | "v"; abandoned?: boolean }
   | { kind: "fountain"; tx: number; ty: number; w: number; h: number }
   | { kind: "lamp"; tx: number; ty: number }
   | { kind: "anvil"; tx: number; ty: number }
@@ -48,7 +49,9 @@ export type Decor =
   /** A drawbridge running east-west over the moat (deck tiles are Tile.Bridge). */
   | { kind: "drawbridge"; tx: number; ty: number; w: number; h: number }
   /** Small street clutter on a solid tile (well is 2x2). */
-  | { kind: "prop"; tx: number; ty: number; prop: "barrel" | "crate" | "hay" | "well" | "cart" | "column" | "obelisk" | "dummy" | "sack" }
+  | { kind: "prop"; tx: number; ty: number; prop: "barrel" | "crate" | "hay" | "well" | "cart" | "column" | "obelisk" | "dummy" | "sack" | "balbal" }
+  /** A grassy burial mound (Kurgan Ovası) on these solid tiles, ringed with stones at its foot. */
+  | { kind: "kurgan"; tx: number; ty: number; w: number; h: number }
   /** The arena's colosseum (stands, crowd, walls), drawn from COLOSSEUM. */
   | { kind: "colosseum" }
   /** A wooden pier over the water (deck tiles are Tile.Bridge): posts and shadow, no rails. */

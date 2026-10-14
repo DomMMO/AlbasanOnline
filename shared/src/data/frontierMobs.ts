@@ -215,6 +215,28 @@ const list: MobDef[] = [
     addMob: "lava_golem",
     material: "ember_core",
   }),
+
+  // ---- Kurgan Ovası, Sv 50-58
+  field({ id: "plague_villager", name: "Veba Köylüsü", level: 50, hp: 1.1, speed: 44, appearance: { type: "image", key: "zombie_1" }, material: "cursed_bone" }),
+  field({ id: "pale_villager", name: "Solgun Köylü", level: 51, hp: 1.1, speed: 44, appearance: { type: "image", key: "zombie_3" }, material: "cursed_bone" }),
+  field({ id: "grave_sentry", name: "Mezar Nöbetçisi", level: 52, hp: 1.3, appearance: { type: "image", key: "skeleton_2", tint: 0xb8c0d8 }, material: "cursed_bone" }),
+  field({ id: "barrow_skeleton", name: "Kurgan İskeleti", level: 53, hp: 1.2, appearance: { type: "image", key: "skeleton_3" }, material: "barrow_gold" }),
+  field({ id: "dark_oracle", name: "Kara Kâhin", level: 55, hp: 0.9, attack: 1.4, appearance: { type: "image", key: "oracle_2" }, material: "barrow_gold" }),
+  field({ id: "fallen_knight", name: "Düşmüş Şövalye", level: 56, hp: 1.5, appearance: { type: "image", key: "knight_2" }, material: "barrow_gold" }),
+  field({ id: "black_guard", name: "Kara Muhafız", level: 57, hp: 1.6, attack: 1.1, appearance: { type: "image", key: "knight_1", tint: 0x8c8ca8 }, material: "barrow_gold" }),
+  // Night only.
+  field({ id: "night_walker", name: "Gece Yürüyeni", level: 54, hp: 1.2, speed: 52, nightOnly: true, appearance: { type: "image", key: "zombie_2" }, material: "cursed_bone" }),
+  field({ id: "barrow_wraith", name: "Kurgan Hortlağı", level: 56, hp: 1.0, attack: 1.4, nightOnly: true, appearance: { type: "image", key: "wraith_hood", tint: 0x9a9ab0 }, material: "night_essence" }),
+  fieldBoss({
+    id: "fallen_commander_karacor",
+    name: "Düşkün Başbuğ Karaçor",
+    level: 58,
+    scale: 1,
+    appearance: { type: "image", key: "knight_3_big", tint: 0xa0a0b4 },
+    abilities: [slam(58, 12_000), leap(58), charge(58, 14_000)],
+    addMob: "fallen_knight",
+    material: "barrow_gold",
+  }),
 ];
 
 export const FRONTIER_MOBS: Record<string, MobDef> = Object.fromEntries(list.map((mob) => [mob.id, mob]));

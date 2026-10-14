@@ -1,4 +1,5 @@
 import type { DungeonLayout, SpawnZone } from "./dungeons";
+import { TILE_SIZE } from "./constants";
 import { Tile } from "./map";
 import { Terrain, tilePx } from "./wilds";
 
@@ -20,6 +21,9 @@ export const VOLCANO_SPOTS = {
   spawn: tilePx(31, 7),
   trader: tilePx(28, 6),
   sentinel: tilePx(36, 6),
+  /** Teleport gate down to Kurgan Ovası, where the main road meets the south edge. */
+  kurganGate: { x: 33 * TILE_SIZE, y: 46 * TILE_SIZE },
+  fromKurgan: { x: 33 * TILE_SIZE, y: 42 * TILE_SIZE },
 };
 
 const AREAS = {

@@ -2,8 +2,8 @@ import { TILE_SIZE } from "./constants";
 import { buildDungeon, type BuiltDungeon, type DungeonRoom, type DungeonTheme } from "./dungeons";
 import { Tile } from "./map";
 
-// The big dungeons: five entered from the Dark Forest and two each from Kızıl Kanyon,
-// Ayaz Dağları and Kor Toprakları. Much longer than the Goblin Cave: 30-40 mobs in packs along a chain of rooms,
+// The big dungeons: five entered from the Dark Forest, two each from Kızıl Kanyon,
+// Ayaz Dağları and Kor Toprakları, and Han Kurganı in Kurgan Ovası. Much longer than the Goblin Cave: 30-40 mobs in packs along a chain of rooms,
 // and 3-4 bosses in their own rooms. The exit at the end opens only when every boss is down.
 
 export type BigDungeonId =
@@ -17,10 +17,11 @@ export type BigDungeonId =
   | "frost_cavern"
   | "frost_citadel"
   | "magma_forges"
-  | "ash_temple";
+  | "ash_temple"
+  | "khan_barrow";
 
 /** Open-world zones with big dungeon entrances. */
-export type DungeonHost = "forest" | "canyon" | "frost" | "volcano";
+export type DungeonHost = "forest" | "canyon" | "frost" | "volcano" | "kurgan";
 
 export interface BigDungeon {
   id: BigDungeonId;
@@ -330,6 +331,31 @@ const list: DungeonSource[] = [
       pack(["flame_guard", 2], ["cinder_wraith", 2]),
       pack(["salamander", 3], ["ash_priest", 3]),
       finalRoom("fire_dragon_kozhan", ["salamander", 2]),
+    ],
+  },
+  {
+    id: "khan_barrow",
+    name: "Han Kurganı",
+    minLevel: 55,
+    host: "kurgan",
+    entranceTile: { tx: 18, ty: 25 },
+    dim: 0.6,
+    seed: 512,
+    wall: Tile.Wall,
+    floor: Tile.Cobble,
+    theme: "crypt",
+    rooms: [
+      entrance,
+      pack(["barrow_warrior", 3], ["barrow_spirit", 2]),
+      pack(["tomb_oracle", 2], ["barrow_warrior", 3]),
+      bossRoom("bone_bey_sokmen", ["barrow_warrior", 2]),
+      pack(["barrow_spirit", 3], ["khan_guard", 2]),
+      pack(["tomb_oracle", 3], ["barrow_spirit", 2]),
+      bossRoom("oracle_albasti", ["tomb_oracle", 2]),
+      pack(["khan_guard", 3], ["barrow_warrior", 2]),
+      pack(["barrow_spirit", 3], ["tomb_oracle", 2]),
+      pack(["khan_guard", 3], ["barrow_spirit", 2]),
+      finalRoom("dead_khan_tolun", ["khan_guard", 2]),
     ],
   },
 ];

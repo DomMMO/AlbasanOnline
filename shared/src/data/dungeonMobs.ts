@@ -232,6 +232,15 @@ const list: MobDef[] = [
   boss({ id: "flame_warden_tufan", name: "Alev Muhafızı Tufan", level: 47, appearance: { type: "humanoid", tunic: 0x5c0a0a, skin: 0xd9a07a, hair: 0x1a1a1a, gear: { head: "plate_head_12", chest: "plate_chest_12", legs: "plate_legs_12", feet: "plate_feet_12" } }, abilities: [slam(47), charge(47)], addMob: "flame_guard" }),
   boss({ id: "ash_priestess_nevra", name: "Kül Rahibesi Nevra", level: 48, scale: 1, appearance: { type: "image", key: "oracle_3_big", tint: 0xff8a50 }, abilities: [leap(48), leap(48, 6000), slam(48, 14_000)], addMob: "ash_priest" }),
   boss({ id: "fire_dragon_kozhan", name: "Ateş Ejderi Közhan", level: 49, final: true, scale: 3, appearance: { type: "wolf", fur: 0xc92a2a }, abilities: [slam(49), charge(49), leap(49, 12_000)], addMob: "salamander", addsAt: [0.75, 0.5, 0.25], extraDrops: [{ item: "ember_core", chance: 1, min: 3, max: 5 }, { item: "upgrade_scroll_high", chance: 1, min: 1, max: 2 }] }),
+
+  // ---- 12. Han Kurganı (the Khan's Barrow, Kurgan Ovası), Sv 55-58
+  trash({ id: "barrow_warrior", name: "Kurgan Savaşçısı", level: 55, hp: 1.3, appearance: { type: "image", key: "skeleton_1", tint: 0xc9c2a8 }, material: "cursed_bone" }),
+  trash({ id: "tomb_oracle", name: "Mezar Kâhini", level: 56, hp: 0.9, attack: 1.4, appearance: { type: "image", key: "oracle_1", tint: 0xb197fc }, material: "barrow_gold" }),
+  trash({ id: "khan_guard", name: "Han Muhafızı", level: 57, hp: 1.6, appearance: { type: "image", key: "knight_2", tint: 0xd8c890 }, material: "barrow_gold" }),
+  trash({ id: "barrow_spirit", name: "Kurgan Ruhu", level: 56, hp: 1.0, attack: 1.4, appearance: { type: "image", key: "wraith_purple", tint: 0x9a9ab0 }, material: "night_essence" }),
+  boss({ id: "bone_bey_sokmen", name: "Kemik Bey Sökmen", level: 55, scale: 1, appearance: { type: "image", key: "skeleton_3_big" }, abilities: [slam(55), charge(55)], addMob: "barrow_warrior" }),
+  boss({ id: "oracle_albasti", name: "Kara Kâhin Albastı", level: 56, scale: 1, appearance: { type: "image", key: "oracle_3_big", tint: 0x9a7aff }, abilities: [leap(56), leap(56, 6000), slam(56, 14_000)], addMob: "tomb_oracle" }),
+  boss({ id: "dead_khan_tolun", name: "Ölü Han Tolun", level: 58, final: true, scale: 1, appearance: { type: "image", key: "knight_3_big" }, abilities: [slam(58), charge(58), leap(58, 12_000)], addMob: "khan_guard", addsAt: [0.75, 0.5, 0.25], extraDrops: [{ item: "barrow_gold", chance: 1, min: 3, max: 6 }, { item: "upgrade_scroll_high", chance: 1, min: 1, max: 2 }] }),
 ];
 
 export const DUNGEON_MOBS: Record<string, MobDef> = Object.fromEntries(list.map((mob) => [mob.id, mob]));
