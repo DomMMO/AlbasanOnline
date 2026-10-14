@@ -1,4 +1,4 @@
-# MMO Creation
+# Albasan Online
 
 Tarayıcıda çalışan, 2D pixel art bir online MMORPG. Savaş ve içerik yapısı WoW'dan, item basma (+N) sistemi Knight Online'dan esinleniyor.
 
