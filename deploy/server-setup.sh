@@ -8,6 +8,11 @@ if ! command -v docker >/dev/null; then
   curl -fsSL https://get.docker.com | sh
 fi
 
+# SSH: keys only. Root logs in with a key; nobody can log in with a password.
+printf '# Keys only: no passwords for anyone, root only with a key.\nPasswordAuthentication no\nKbdInteractiveAuthentication no\nPermitRootLogin prohibit-password\n' \
+  > /etc/ssh/sshd_config.d/00-hardening.conf
+sshd -t && systemctl reload ssh
+
 # Firewall: SSH + HTTP/HTTPS only. Postgres and the game port stay inside Docker.
 apt-get update -y
 apt-get install -y ufw
