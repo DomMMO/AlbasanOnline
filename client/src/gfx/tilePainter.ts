@@ -279,7 +279,7 @@ function groundAround(tiles: Tile[][], x: number, y: number): Tile {
   for (let r = 1; r < 6; r++) {
     for (const [dx, dy] of [[0, r], [-r, 0], [r, 0], [0, -r]]) {
       const t = tiles[y + dy]?.[x + dx];
-      if (t === Tile.Cobble || t === Tile.Plaza || t === Tile.Market || t === Tile.Grass || t === Tile.Path || t === Tile.DarkGrass || t === Tile.WoodFloor || t === Tile.Sand || t === Tile.Snow || t === Tile.Ash) return t;
+      if (t === Tile.Cobble || t === Tile.Plaza || t === Tile.Market || t === Tile.Grass || t === Tile.Path || t === Tile.DarkGrass || t === Tile.WoodFloor || t === Tile.Sand || t === Tile.Snow || t === Tile.Ash || t === Tile.Blight) return t;
     }
   }
   return Tile.Cobble;
@@ -311,6 +311,9 @@ const TILE_COLORS: Record<Tile, { base: string; speckle: string[] }> = {
   [Tile.SnowTree]: { base: "#e6edf3", speckle: ["#d5e0ea"] },
   [Tile.Lava]: { base: "#c2410c", speckle: ["#ea580c", "#9a3412", "#f59e0b"] },
   [Tile.Ash]: { base: "#3d3836", speckle: ["#47413e", "#332f2d", "#524b47"] },
+  [Tile.Blight]: { base: "#5e5a3e", speckle: ["#6a6546", "#524e35", "#736b4a"] },
+  [Tile.DeadTree]: { base: "#5e5a3e", speckle: ["#524e35"] },
+  [Tile.Bog]: { base: "#24301f", speckle: ["#2c3a26", "#1c2618", "#34442a"] },
 };
 /** A tile's main colour (the minimap paints one pixel of it per tile). */
 export function tileBaseColor(tile: Tile): string {
@@ -525,6 +528,30 @@ export function paintTileStrip(): HTMLCanvasElement {
       for (const [dx, dy, w] of [[2, 4, 5], [9, 10, 4]]) px(ox + dx, dy, "#5c5450", w, 1);
       px(ox + 5, 12, "#f97316");
       px(ox + 12, 3, "#fb923c");
+    } else if (t === Tile.Blight) {
+      // Tufts of dry, yellowed grass and a pale bone-white pebble.
+      for (const [dx, dy] of [[2, 3], [10, 6], [5, 11], [12, 13]]) {
+        px(ox + dx, dy, "#857b52", 1, 2);
+        px(ox + dx + 1, dy - 1, "#9a8f5e", 1, 3);
+        px(ox + dx + 2, dy, "#857b52", 1, 2);
+      }
+      px(ox + 8, 2, "#c9c2a8");
+    } else if (t === Tile.DeadTree) {
+      // A bare black tree: crooked trunk and twisted branches, no leaves.
+      px(ox + 7, 5, "#2a221c", 2, 10);
+      px(ox + 4, 6, "#2a221c", 3, 1);
+      px(ox + 3, 3, "#2a221c", 1, 3);
+      px(ox + 9, 4, "#2a221c", 3, 1);
+      px(ox + 11, 1, "#2a221c", 1, 3);
+      px(ox + 6, 2, "#2a221c", 1, 3);
+      px(ox + 8, 0, "#2a221c", 1, 5);
+      px(ox + 8, 6, "#46392e", 1, 8);
+      px(ox + 5, 15, "#00000033", 7, 1);
+    } else if (t === Tile.Bog) {
+      // Still green-black water: a scum of duckweed and a slow bubble.
+      for (const [dx, dy, w] of [[1, 3, 4], [9, 9, 5], [4, 13, 3]]) px(ox + dx, dy, "#3f5a2a", w, 1);
+      px(ox + 11, 3, "#5c7a3a", 2, 2);
+      px(ox + 6, 7, "#4a6a3a");
     } else if (t === Tile.Lava) {
       // Molten rock: a dark crust broken by bright glowing seams.
       px(ox + 1, 2, "#7c2d12", 5, 3);

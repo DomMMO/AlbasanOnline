@@ -1,5 +1,6 @@
 import Phaser from "phaser";
-import { CASTLE_MERLON_H, CASTLE_TOWER_H, CASTLE_WALL_H, COLOSSEUM, insideCastle, mulberry32, TILE_SIZE, type Decor, type IconShape } from "../../../shared/src";
+import { CASTLE_MERLON_H, CASTLE_TOWER_H, CASTLE_WALL_H, COLOSSEUM, DECOR_ART, insideCastle, mulberry32, TILE_SIZE, type Decor, type IconShape } from "../../../shared/src";
+import { decorArtKey } from "./decorArt";
 import { addGlow, addLight } from "../fx/nightLights";
 import { ICON_SIZE, paintIcon } from "./icons";
 import { bench, firepit, rack, rug, shelf, stool, table } from "./interior";
@@ -60,6 +61,12 @@ export function drawDecor(scene: Phaser.Scene, decor: Decor[]) {
         break;
       case "grave":
         grave(scene, piece.tx, piece.ty);
+        break;
+      case "kurgan":
+        kurgan(scene, piece);
+        break;
+      case "art":
+        art(scene, piece);
         break;
       case "bridge":
         bridge(scene, piece);
@@ -514,6 +521,16 @@ function prop(scene: Phaser.Scene, p: Extract<Decor, { kind: "prop" }>) {
       g.fillStyle(0x5a7a3a).fillRect(-5, -9, 3, 3).fillRect(3, -14, 2, 2);
       break;
     }
+    case "balbal": {
+      // An old Turkic grave stone: a rough grey pillar carved into a man holding a cup.
+      g.fillStyle(0x5a5850).fillRoundedRect(-5, -24, 10, 23, { tl: 4, tr: 4, bl: 1, br: 1 });
+      g.fillStyle(0x7c7a70).fillRoundedRect(-4, -23, 7, 21, { tl: 3, tr: 3, bl: 1, br: 1 });
+      g.fillStyle(0x3a3832).fillRect(-3, -19, 2, 1).fillRect(1, -19, 2, 1);
+      g.fillStyle(0x3a3832).fillRect(-1, -16, 2, 1).fillRect(-2, -14, 4, 1);
+      g.fillStyle(0x3a3832).fillRect(-3, -10, 2, 1).fillRect(-1, -9, 3, 1).fillRect(1, -11, 2, 2);
+      g.fillStyle(0x4f6a3a).fillRect(-5, -3, 3, 2).fillRect(3, -4, 2, 3);
+      break;
+    }
     case "obelisk": {
       // A tall red-granite obelisk with gold runes.
       g.fillStyle(0x000000, 0.3).fillEllipse(0, -1, 30, 6);
@@ -638,6 +655,18 @@ function building(scene: Phaser.Scene, b: Extract<Decor, { kind: "building" }>) 
     .fillTriangle(x0 + 2, bottom, x0 + 6, bottom, x0 + 6, bottom + 4);
   placeSprite(scene, sprite, left, bottom);
 
+  if (b.abandoned) {
+    // Dark panes with two planks nailed across each.
+    const g = scene.add.graphics().setDepth(bottom + 0.05);
+    for (const w of sprite.windows) {
+      const x = left + w.x;
+      const y = top + w.y;
+      g.fillStyle(0x15130f).fillRect(x, y, w.w, w.h);
+      g.fillStyle(0x6b4a2b).fillRect(x - 1, y + 1, w.w + 2, 2).fillRect(x - 1, y + w.h - 3, w.w + 2, 2);
+      g.fillStyle(0x3a2716).fillRect(x - 1, y + 2, w.w + 2, 1).fillRect(x - 1, y + w.h - 2, w.w + 2, 1);
+    }
+    return;
+  }
   if (sprite.chimney) {
     scene.add
       .particles(left + sprite.chimney.x, top + sprite.chimney.y, DOT_KEY, {
@@ -820,6 +849,75 @@ function tent(scene: Phaser.Scene, t: Extract<Decor, { kind: "tent" }>) {
   g.fillStyle(dark).fillTriangle(W / 2, -H - 10, W + 2, 0, W / 2 + 4, 0);
   g.fillStyle(0x1a1410).fillTriangle(W / 2 - 6, 0, W / 2 + 6, 0, W / 2, -14);
   g.fillStyle(0x5b3a1e).fillRect(W / 2 - 1, -H - 13, 2, 4);
+}
+
+/**
+ * Art decor (data/decorArt.ts): the image stands centred on the tiles it blocks, its bottom on
+ * theirs; flat pieces lie under characters. Without the art file, its code-drawn fallback.
+ */
+function art(scene: Phaser.Scene, a: Extract<Decor, { kind: "art" }>) {
+  const def = DECOR_ART[a.key];
+  const [w, h] = def.size ?? [1, 1];
+  const texture = decorArtKey(a.key);
+  if (!scene.textures.exists(texture)) {
+    if (def.fallback) drawDecor(scene, [artFallback(def.fallback, a.tx, a.ty, w, h)]);
+    return;
+  }
+  const x = (a.tx + w / 2) * TILE_SIZE;
+  const bottom = (a.ty + h) * TILE_SIZE;
+  // Loose scatter gets a little jitter so rows of it don't line up on the grid.
+  const jitter = def.size ? 0 : (hash01(a.tx, a.ty, 3) - 0.5) * 8;
+  scene.add
+    .image(Math.round(x + jitter), bottom, texture)
+    .setOrigin(0.5, 1)
+    .setDepth(def.flat ? -0.5 : bottom)
+    .setFlipX(!def.size && hash01(a.tx, a.ty, 5) < 0.5);
+}
+
+function artFallback(fallback: NonNullable<(typeof DECOR_ART)[string]["fallback"]>, tx: number, ty: number, w: number, h: number): Decor {
+  switch (fallback) {
+    case "grave":
+      return { kind: "grave", tx, ty };
+    case "banner":
+      return { kind: "banner", tx, ty, color: 0x9c2a2a };
+    case "rack":
+      return { kind: "rack", tx, ty, w };
+    case "shelf":
+      return { kind: "shelf", tx, ty, w };
+    case "table":
+      return { kind: "table", tx, ty, w, h };
+    case "tent":
+      return { kind: "tent", tx, ty, w, h, color: 0xc9a227 };
+    case "tree":
+      return { kind: "bigTree", tx, ty, variant: 0 };
+    default:
+      return { kind: "prop", tx, ty, prop: fallback };
+  }
+}
+
+/** A burial mound: a low hump of withered grass, darker on its shaded side, stones round its foot. */
+function kurgan(scene: Phaser.Scene, k: Extract<Decor, { kind: "kurgan" }>) {
+  const W = k.w * TILE_SIZE;
+  const H = k.h * TILE_SIZE;
+  const x = k.tx * TILE_SIZE + W / 2;
+  const bottom = (k.ty + k.h) * TILE_SIZE;
+  const g = scene.add.graphics().setPosition(x, bottom).setDepth(bottom);
+  const rise = H + 6;
+  g.fillStyle(0x000000, 0.3).fillEllipse(3, -4, W + 6, 12);
+  g.fillStyle(0x4a4630).fillEllipse(0, -rise / 2, W, rise + 4);
+  g.fillStyle(0x6a6546).fillEllipse(-W * 0.08, -rise / 2 - 2, W * 0.84, rise);
+  g.fillStyle(0x7d7652).fillEllipse(-W * 0.16, -rise / 2 - 5, W * 0.5, rise * 0.55);
+  const rand = mulberry32(k.tx * 131 + k.ty * 7);
+  for (let i = 0; i < W / 3; i++) {
+    const tx = (rand() - 0.5) * W * 0.8;
+    const ty = -4 - rand() * rise * 0.85;
+    g.fillStyle(rand() < 0.5 ? 0x9a8f5e : 0x524e35).fillRect(tx, ty, 1, 2);
+  }
+  // Stones round the foot.
+  for (let sx = -W / 2 + 4; sx < W / 2 - 2; sx += 6) {
+    g.fillStyle(0x5a5850).fillRoundedRect(sx, -6 + Math.abs(sx) * 0.08, 5, 4, 1);
+    g.fillStyle(0x8a877c).fillRect(sx + 1, -6 + Math.abs(sx) * 0.08, 3, 1);
+  }
 }
 
 function grave(scene: Phaser.Scene, tx: number, ty: number) {

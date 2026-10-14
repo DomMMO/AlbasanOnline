@@ -5,6 +5,7 @@ import { HARBOR_SPOTS } from "../harbor";
 import { KEEP_HALL_SPOTS } from "../keepHall";
 import { TOWN_SPOTS } from "../town";
 import { VOLCANO_SPOTS } from "../volcano";
+import { KURGAN_SPOTS } from "../kurgan";
 import type { Appearance } from "./appearance";
 import type { ClassId } from "./classes";
 
@@ -381,5 +382,26 @@ export const NPCS: Record<string, NpcDef> = {
     shop: [],
     greeting:
       "Lav nehrini üç köprüden geçebilirsin, başka yolu yok. Güneybatıdaki kor kazanında Kor Devi Ateşhan uyur; uyanırsa kaç. Doğudaki Magma Ocakları'nda cüceler hâlâ örs döver, batıdaki Kül Tapınağı'nda ise Ateş Ejderi Közhan'a tapıyorlar.",
+  },
+
+  // ---- Kurgan Ovası: the old kam's camp at the gate.
+  barrow_trader: {
+    id: "barrow_trader",
+    name: "Kemikçi Duran",
+    ...KURGAN_SPOTS.trader,
+    appearance: { type: "humanoid", tunic: 0x4a4630, hair: 0x868e96, skin: 0xd8a47a, gear: { chest: "leather_vest" }, headwear: { color: 0x343a40, style: "hood" } },
+    role: "merchant",
+    shop: ["super_hp_potion", "super_mana_potion", "return_scroll", "upgrade_scroll_low", "upgrade_scroll_mid"],
+    greeting: "Ölüler bir şey satın almaz, ben de onlardan bir şey almam. Ama sen Lanetli Kemik ya da Kurgan Altını getirirsen, iyi para veririm.",
+  },
+  old_kam: {
+    id: "old_kam",
+    name: "Yaşlı Kam Tutkun",
+    ...KURGAN_SPOTS.kam,
+    appearance: { type: "humanoid", tunic: 0xe8dfc8, hair: 0xf1f3f5, skin: 0xc68a5a, hairStyle: "long", headwear: { color: 0x1c7ed6, style: "hat" } },
+    role: "quest",
+    shop: [],
+    greeting:
+      "Bu ovada hanlar yatar, ama uykuları kaçtı. Kuzeydoğudaki köyün halkı vebadan öldü ve hâlâ yürüyor. Ortadaki mezarlığı iskeletler bekler. Batıdaki büyük kurgan Tolun Han'ındır, kapısı açıldı, içine girenin dönmesi zor. Güneydoğudaki yıkık kalede Düşkün Başbuğ Karaçor şövalyelerine hâlâ emir verir, güneybatıdaki bataklıkta ise kara kâhinler balbalların arasında ateş yakar. Gece olunca kurganlardan hortlaklar çıkar, ocağımdan uzaklaşma.",
   },
 };

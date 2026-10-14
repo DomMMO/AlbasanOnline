@@ -56,6 +56,13 @@ const FALLBACK_LOOKS: [prefix: string, look: Extract<Appearance, { type: "humano
   ["satyr", { type: "humanoid", tunic: 0x6b4423, skin: 0xc68a5a, hair: 0x3a2a1a, hairStyle: "spiky" }],
   ["wraith", { type: "humanoid", tunic: 0x3b2a5a, skin: 0x9a8fb0, hair: 0x1a1a1a, headwear: { color: 0x2b1f40, style: "hood" } }],
   ["jack", { type: "humanoid", tunic: 0x2b2b33, skin: 0xff922b, hair: 0x2f9e44, headwear: { color: 0x2f9e44, style: "hat" } }],
+  ["goblin", { type: "humanoid", tunic: 0x7a5a2e, skin: 0x7cb342, hair: 0x2d2d2d }],
+  ["orc", { type: "humanoid", tunic: 0x4a3a2a, skin: 0x5a7a3a, hair: 0x1a1a1a, gear: { head: "iron_helm", legs: "wolf_hide_leggings" } }],
+  ["ogre", { type: "humanoid", tunic: 0x2a1a0a, skin: 0x4a6a2a, hair: 0x1a1a1a, hairStyle: "bald", gear: { legs: "wolf_hide_leggings" } }],
+  ["skeleton", { type: "humanoid", tunic: 0x4a4a4a, skin: 0xe8e4d8, hair: 0xe8e4d8, hairStyle: "bald", gear: { chest: "chainmail" } }],
+  ["zombie", { type: "humanoid", tunic: 0x5a5a3a, skin: 0x8a9a6a, hair: 0x3a3a2a }],
+  ["oracle", { type: "humanoid", tunic: 0x212529, skin: 0xc8bfa8, hair: 0x1a1a1a, headwear: { color: 0x343a40, style: "hood" } }],
+  ["knight", { type: "humanoid", tunic: 0x495057, skin: 0xd9a07a, hair: 0x1a1a1a, gear: { head: "iron_helm", chest: "chainmail" } }],
 ];
 
 /** An image appearance whose sheet is missing becomes a drawn look-alike (the tint, if any, colours its clothes). */

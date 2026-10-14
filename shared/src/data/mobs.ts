@@ -124,7 +124,7 @@ export const MOBS: Record<string, MobDef> = {
     xp: 55,
     aggroRange: 72,
     respawnMs: 20_000,
-    appearance: { type: "humanoid", tunic: 0x7a5a2e, skin: 0x7cb342, hair: 0x2d2d2d },
+    appearance: { type: "image", key: "goblin" },
     loot: {
       gold: [6, 14],
       drops: [
@@ -243,7 +243,7 @@ export const MOBS: Record<string, MobDef> = {
     xp: 75,
     aggroRange: 72,
     respawnMs: 0,
-    appearance: { type: "humanoid", tunic: 0x8b2a2a, skin: 0x7cb342, hair: 0x2d2d2d, gear: { head: "iron_helm", chest: "chainmail" } },
+    appearance: { type: "image", key: "goblin", tint: 0xb8c0c8 },
     loot: {
       gold: [10, 20],
       drops: [
@@ -269,8 +269,8 @@ export const MOBS: Record<string, MobDef> = {
     xp: 400,
     aggroRange: 96,
     respawnMs: 0,
-    scale: 2,
-    appearance: { type: "humanoid", tunic: 0x6b1a1a, skin: 0x6fa33a, hair: 0x1a1a1a, gear: { head: "chieftain_helm", legs: "wolf_hide_leggings" } },
+    scale: 1,
+    appearance: { type: "image", key: "goblin_big" },
     loot: {
       gold: [80, 150],
       drops: [
@@ -429,7 +429,7 @@ export const MOBS: Record<string, MobDef> = {
     xp: 200,
     aggroRange: 72,
     respawnMs: 18_000,
-    appearance: { type: "humanoid", tunic: 0x4a4a4a, skin: 0xe8e4d8, hair: 0xe8e4d8, gear: { chest: "chainmail" } },
+    appearance: { type: "image", key: "skeleton_1" },
     loot: {
       gold: [18, 35],
       drops: [
@@ -457,7 +457,7 @@ export const MOBS: Record<string, MobDef> = {
     xp: 250,
     aggroRange: 80,
     respawnMs: 20_000,
-    appearance: { type: "humanoid", tunic: 0x4a3a2a, skin: 0x5a7a3a, hair: 0x1a1a1a, gear: { head: "iron_helm", legs: "wolf_hide_leggings" } },
+    appearance: { type: "image", key: "orc" },
     loot: {
       gold: [22, 42],
       drops: [

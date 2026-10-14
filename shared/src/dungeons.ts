@@ -1,6 +1,7 @@
 import { TILE_SIZE } from "./constants";
 import type { IconShape } from "./data/items";
 import { mulberry32, Tile, type WorldMap } from "./map";
+import { artKeys, DECOR_ART } from "./data/decorArt";
 
 // Dungeon layouts are carved in code from rooms and corridors: easier to keep
 // consistent than hand-aligned ASCII, and identical on server and client.
@@ -17,7 +18,8 @@ export interface MobPlacement {
  * The tiles underneath are Tile.Solid, so collision stays purely tile based.
  */
 export type Decor =
-  | { kind: "building"; tx: number; ty: number; w: number; h: number; roof: number; sign?: { shape: IconShape; color: number }; chimney?: boolean; ridge?: "h" | "v" }
+  /** `abandoned`: nobody lives there (dark, boarded-up windows, a cold chimney). */
+  | { kind: "building"; tx: number; ty: number; w: number; h: number; roof: number; sign?: { shape: IconShape; color: number }; chimney?: boolean; ridge?: "h" | "v"; abandoned?: boolean }
   | { kind: "fountain"; tx: number; ty: number; w: number; h: number }
   | { kind: "lamp"; tx: number; ty: number }
   | { kind: "anvil"; tx: number; ty: number }
@@ -48,7 +50,11 @@ export type Decor =
   /** A drawbridge running east-west over the moat (deck tiles are Tile.Bridge). */
   | { kind: "drawbridge"; tx: number; ty: number; w: number; h: number }
   /** Small street clutter on a solid tile (well is 2x2). */
-  | { kind: "prop"; tx: number; ty: number; prop: "barrel" | "crate" | "hay" | "well" | "cart" | "column" | "obelisk" | "dummy" | "sack" }
+  | { kind: "prop"; tx: number; ty: number; prop: "barrel" | "crate" | "hay" | "well" | "cart" | "column" | "obelisk" | "dummy" | "sack" | "balbal" }
+  /** A piece of art decor (data/decorArt.ts): its anchor tile is the top-left of the tiles it blocks. */
+  | { kind: "art"; key: string; tx: number; ty: number }
+  /** A grassy burial mound (Kurgan Ovası) on these solid tiles, ringed with stones at its foot. */
+  | { kind: "kurgan"; tx: number; ty: number; w: number; h: number }
   /** The arena's colosseum (stands, crowd, walls), drawn from COLOSSEUM. */
   | { kind: "colosseum" }
   /** A wooden pier over the water (deck tiles are Tile.Bridge): posts and shadow, no rails. */
@@ -123,6 +129,20 @@ export interface SpawnZone {
   /** Radius in tiles. */
   radius: number;
   count: number;
+}
+
+/**
+ * Places a piece of art decor: blocks its tiles (as Tile.Solid, or the tile its entry names)
+ * and adds it to `decor`. Returns false, placing nothing, if any of those tiles isn't `free`.
+ */
+export function placeArt(tiles: Tile[][], decor: Decor[], key: string, tx: number, ty: number, free: (tx: number, ty: number) => boolean = () => true): boolean {
+  const def = DECOR_ART[key];
+  if (!def) throw new Error(`unknown decor art ${key}`);
+  const [w, h] = def.size ?? [0, 0];
+  for (let y = ty; y < ty + h; y++) for (let x = tx; x < tx + w; x++) if (tiles[y]?.[x] === undefined || !free(x, y)) return false;
+  for (let y = ty; y < ty + h; y++) for (let x = tx; x < tx + w; x++) tiles[y][x] = def.tile ?? Tile.Solid;
+  decor.push({ kind: "art", key, tx, ty });
+  return true;
 }
 
 export interface DungeonLayout {
@@ -310,19 +330,23 @@ interface ThemeStyle {
   torches: boolean;
   /** Rooms per row of the grid. */
   cols: number;
+  /** Art decor (data/decorArt.ts): pieces standing along the walls, banners hung on the back wall, loose clutter on the floor. */
+  art?: string[];
+  banners?: string[];
+  scatter?: string[];
 }
 
 const THEMES: Record<DungeonTheme, ThemeStyle> = {
-  mine: { packShapes: ["cavern", "blocks", "cavern", "rect"], bossShapes: ["cavern", "pillars"], pool: Tile.Water, columns: false, props: ["crate", "barrel", "cart", "sack"], torches: true, cols: 4 },
-  temple: { packShapes: ["pools", "pillars", "cross", "pools"], bossShapes: ["pillars", "pools"], pool: Tile.Water, columns: true, props: ["obelisk", "column"], torches: true, cols: 4 },
-  crypt: { packShapes: ["rect", "cross", "pillars", "octagon"], bossShapes: ["octagon", "pillars"], pool: Tile.Water, columns: true, props: ["column", "sack"], graves: true, torches: true, cols: 3 },
-  fortress: { packShapes: ["rect", "blocks", "cross", "rect"], bossShapes: ["octagon", "blocks"], pool: Tile.Water, columns: false, props: ["barrel", "crate", "hay", "dummy"], camps: true, racks: true, torches: true, cols: 4 },
-  lair: { packShapes: ["cavern", "pools", "cavern", "blocks"], bossShapes: ["pools", "cavern"], pool: Tile.Lava, columns: false, props: ["obelisk"], torches: false, cols: 4 },
-  redcave: { packShapes: ["cavern", "blocks", "cavern", "cross"], bossShapes: ["cavern", "octagon"], pool: Tile.Water, columns: false, props: ["sack", "crate", "barrel"], camps: true, torches: true, cols: 3 },
-  ruins: { packShapes: ["pillars", "cross", "blocks", "octagon"], bossShapes: ["pillars", "octagon"], pool: Tile.Water, columns: true, props: ["column", "obelisk", "sack", "cart"], torches: true, cols: 5 },
-  ice: { packShapes: ["cavern", "pools", "pillars", "cavern"], bossShapes: ["cavern", "pools"], pool: Tile.Water, columns: false, props: ["obelisk"], torches: false, cols: 4 },
-  citadel: { packShapes: ["octagon", "pillars", "cross", "blocks"], bossShapes: ["pillars", "octagon"], pool: Tile.Ice, columns: true, props: ["barrel", "crate", "column"], racks: true, torches: true, cols: 4 },
-  ashtemple: { packShapes: ["pillars", "pools", "octagon", "pools"], bossShapes: ["pools", "pillars"], pool: Tile.Lava, columns: true, props: ["obelisk", "column"], torches: true, cols: 4 },
+  mine: { packShapes: ["cavern", "blocks", "cavern", "rect"], bossShapes: ["cavern", "pillars"], pool: Tile.Water, columns: false, props: ["crate", "barrel", "cart", "sack"], torches: true, cols: 4, art: [...artKeys("d_supplies"), ...artKeys("d_barrel")], scatter: ["u_rock_5", "u_bones_2"] },
+  temple: { packShapes: ["pools", "pillars", "cross", "pools"], bossShapes: ["pillars", "pools"], pool: Tile.Water, columns: true, props: ["obelisk", "column"], torches: true, cols: 4, art: artKeys("o_jar"), scatter: artKeys("u_fern") },
+  crypt: { packShapes: ["rect", "cross", "pillars", "octagon"], bossShapes: ["octagon", "pillars"], pool: Tile.Water, columns: true, props: ["column", "sack"], graves: true, torches: true, cols: 3, art: ["u_skull_pile", "d_skull_1", "d_skull_2", "u_ruin_5"], scatter: artKeys("u_bones") },
+  fortress: { packShapes: ["rect", "blocks", "cross", "rect"], bossShapes: ["octagon", "blocks"], pool: Tile.Water, columns: false, props: ["barrel", "crate", "hay", "dummy"], camps: true, racks: true, torches: true, cols: 4, art: [...artKeys("d_armor"), ...artKeys("d_rack"), ...artKeys("d_supplies"), ...artKeys("d_barrel")], banners: ["d_banner_red"] },
+  lair: { packShapes: ["cavern", "pools", "cavern", "blocks"], bossShapes: ["pools", "cavern"], pool: Tile.Lava, columns: false, props: ["obelisk"], torches: false, cols: 4, art: ["d_dragon_skull_1", "d_dragon_skull_2", ...artKeys("o_roots")], scatter: [...artKeys("u_bones"), "u_ribs_1", "u_ribs_2"] },
+  redcave: { packShapes: ["cavern", "blocks", "cavern", "cross"], bossShapes: ["cavern", "octagon"], pool: Tile.Water, columns: false, props: ["sack", "crate", "barrel"], camps: true, torches: true, cols: 3, art: [...artKeys("d_supplies"), "d_skull_1"], scatter: ["s_skull", "u_bones_1", "u_bones_4"] },
+  ruins: { packShapes: ["pillars", "cross", "blocks", "octagon"], bossShapes: ["pillars", "octagon"], pool: Tile.Water, columns: true, props: ["column", "obelisk", "sack", "cart"], torches: true, cols: 5, art: ["u_ruin_3", "u_ruin_4", "u_ruin_5", ...artKeys("d_supplies")], scatter: ["s_skull", "s_shrub_2", "u_bones_5"] },
+  ice: { packShapes: ["cavern", "pools", "pillars", "cavern"], bossShapes: ["cavern", "pools"], pool: Tile.Water, columns: false, props: ["obelisk"], torches: false, cols: 4, art: [...artKeys("o_cocoon"), ...artKeys("o_roots")] },
+  citadel: { packShapes: ["octagon", "pillars", "cross", "blocks"], bossShapes: ["pillars", "octagon"], pool: Tile.Ice, columns: true, props: ["barrel", "crate", "column"], racks: true, torches: true, cols: 4, art: [...artKeys("d_armor"), ...artKeys("d_rack"), ...artKeys("d_shelf")], banners: ["d_banner_blue"] },
+  ashtemple: { packShapes: ["pillars", "pools", "octagon", "pools"], bossShapes: ["pools", "pillars"], pool: Tile.Lava, columns: true, props: ["obelisk", "column"], torches: true, cols: 4, art: [...artKeys("o_alchemy"), ...artKeys("o_desk"), ...artKeys("o_jar"), "d_dragon_skull_1"], banners: ["d_banner_red"] },
 };
 
 export interface DungeonSpec {
@@ -519,6 +543,28 @@ export function buildDungeon(spec: DungeonSpec): BuiltDungeon {
       const [tx, ty] = take(free);
       solid(tx, ty);
       decor.push({ kind: "prop", tx, ty, prop: style.props[Math.floor(rand() * style.props.length)] });
+    }
+    // Art decor: a banner on the back wall between the torches, pieces along the walls, clutter on the floor.
+    const open = (x: number, y: number) => isFloor(x, y) && !inCross(r, x, y);
+    if (style.banners) {
+      const banner = style.banners[i % style.banners.length];
+      for (const tx of r.w > 14 ? [r.x + 6, r.x + r.w - 7] : [r.x + 6]) {
+        if (tiles[r.y - 1]?.[tx] === spec.wall) placeArt(tiles, decor, banner, tx, r.y, open);
+      }
+    }
+    if (style.art) {
+      const wallSpots = spots(r, againstWall);
+      for (let n = 1 + Math.floor(rand() * 3), tries = 0; n > 0 && wallSpots.length > 0 && tries < 12; tries++) {
+        const [tx, ty] = take(wallSpots);
+        if (placeArt(tiles, decor, style.art[Math.floor(rand() * style.art.length)], tx, ty, open)) n--;
+      }
+    }
+    if (style.scatter) {
+      const floor = spots(r, (x, y) => !againstWall(x, y));
+      for (let n = 3 + Math.floor(rand() * 4); n > 0 && floor.length > 0; n--) {
+        const [tx, ty] = take(floor);
+        decor.push({ kind: "art", key: style.scatter[Math.floor(rand() * style.scatter.length)], tx, ty });
+      }
     }
   });
 

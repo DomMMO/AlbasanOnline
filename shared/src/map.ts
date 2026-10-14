@@ -48,11 +48,17 @@ export enum Tile {
   Lava = 23,
   /** Kor Toprakları floor: grey volcanic ash with embers in it. */
   Ash = 24,
+  /** Kurgan Ovası floor: withered steppe grass, grey-olive. */
+  Blight = 25,
+  /** A bare, black dead tree (blocking). */
+  DeadTree = 26,
+  /** Murky bog water, green-black (blocking). */
+  Bog = 27,
 }
 
-export const TILE_COUNT = 25;
+export const TILE_COUNT = 28;
 
-const BLOCKING = new Set<Tile>([Tile.Water, Tile.Tree, Tile.CaveWall, Tile.Wall, Tile.Solid, Tile.WoodWall, Tile.Sky, Tile.RedRock, Tile.SnowTree, Tile.Lava]);
+const BLOCKING = new Set<Tile>([Tile.Water, Tile.Tree, Tile.CaveWall, Tile.Wall, Tile.Solid, Tile.WoodWall, Tile.Sky, Tile.RedRock, Tile.SnowTree, Tile.Lava, Tile.DeadTree, Tile.Bog]);
 
 /** Goblin Cave entrance in the world (tile coordinates); a path leads there from the centre. */
 export const CAVE_ENTRANCE_TILE = { tx: 10, ty: 43 };

@@ -3,7 +3,7 @@ import type { LootTable } from "./mobs";
 type Drop = LootTable["drops"][number];
 
 /** Gear tiers in gear.ts: tier t is item level 3t + 6. */
-export const MAX_GEAR_TIER = 13;
+export const MAX_GEAR_TIER = 17;
 
 /** The gear tier a mob of this level drops. */
 export const gearTierFor = (level: number) => Math.max(1, Math.min(MAX_GEAR_TIER, Math.floor((level - 6) / 3)));

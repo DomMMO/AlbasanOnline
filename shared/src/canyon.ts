@@ -1,5 +1,6 @@
 import type { DungeonLayout, SpawnZone } from "./dungeons";
 import { Tile } from "./map";
+import { artKeys } from "./data/decorArt";
 import { Terrain, tilePx } from "./wilds";
 
 // Kızıl Kanyon (Red Canyon), levels 20-30: west of the Starting Valley. Sand between red
@@ -84,6 +85,18 @@ export function buildCanyon(): DungeonLayout {
   for (const [tx, ty] of [[11, 33], [18, 33], [11, 39], [18, 39], [8, 36]]) t.prop(tx, ty, "obelisk");
   // Fallen columns round the way into the buried caravanserai.
   for (const [tx, ty] of [[29, 7], [35, 7], [28, 10], [36, 10]]) t.prop(tx, ty, "column");
+
+  // The caravan stop's wagon and watchtower, a signpost at the gate road.
+  t.artNear("s_wagon", 47, 27);
+  t.artNear("s_tower", 58, 16);
+  t.artNear("s_crates", 59, 22);
+  t.artNear("s_house", 44, 17);
+  // Red mesas and boulders standing out of the sand, cacti, dry shrubs and bleached skulls.
+  const keepOut = [...Object.values(AREAS).map(({ tx, ty, r }) => ({ tx, ty, r: r + 1 })), { tx: 33, ty: 31, r: 5 }];
+  for (const [key, tx, ty] of [["s_mesa_1", 5, 40], ["s_mesa_2", 50, 40], ["s_mesa_1", 22, 4], ["s_mesa_2", 46, 4], ["s_mesa_1", 36, 16]] as const) t.artNear(key, tx, ty, 8);
+  t.artAround(["s_rocks_1", "s_rocks_2", "s_rock_1"], 10, keepOut);
+  t.artAround(artKeys("s_cactus"), 22, keepOut.map((k) => ({ ...k, r: k.r - 3 })));
+  t.scatter(["s_shrub_1", "s_shrub_2", "s_skull"], 32, 24, 28, 30);
 
   return {
     map: { width: WIDTH, height: HEIGHT, tiles: t.tiles, spawn: CANYON_SPOTS.spawn },

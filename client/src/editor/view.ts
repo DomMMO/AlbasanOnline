@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import type { DungeonLayout } from "../../../shared/src";
 import { paintCastlePiece } from "../gfx/decor";
+import { preloadDecorArt } from "../gfx/decorArt";
 import { buildGround, destroyGround, type Ground } from "../gfx/ground";
 import { TILESET_KEY } from "../gfx/textures";
 import { setLampLevel } from "../fx/nightLights";
@@ -17,6 +18,10 @@ class ViewScene extends Phaser.Scene {
 
   constructor() {
     super("editor-view");
+  }
+
+  preload() {
+    preloadDecorArt(this);
   }
 
   create() {
