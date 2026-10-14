@@ -377,13 +377,7 @@ const BUILDERS: Record<ZoneId, () => DungeonLayout> = {
     map: generateWorldMap(),
     mobs: [],
     spawnZones: WORLD_SPAWN_ZONES,
-    decor: [
-      { kind: "bridge", ...CAVE_BRIDGE },
-      ...CAVE_TORCHES.map((t) => ({ kind: "torch" as const, ...t })),
-      // Signposts by the west and east gates (walk-through).
-      { kind: "signboard", tx: 5, ty: 22, w: 3, text: "Kanyon · Sv 20" },
-      { kind: "signboard", tx: 56, ty: 22, w: 3, text: "Ayaz · Sv 30" },
-    ],
+    decor: [{ kind: "bridge", ...CAVE_BRIDGE }, ...CAVE_TORCHES.map((t) => ({ kind: "torch" as const, ...t }))],
   }),
   forest: buildForest,
   canyon: buildCanyon,
