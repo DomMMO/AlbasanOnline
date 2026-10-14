@@ -13,6 +13,11 @@ if [ -d licensed ]; then
   mkdir -p app.new/client/src/assets/licensed
   cp -a licensed/. app.new/client/src/assets/licensed/
 fi
+# The Godot web build (deploy/deploy-godot.sh) is the game at the site root; with it in
+# public/, Vite builds only the GM pages (client/vite.config.ts).
+if [ -d godot-web ]; then
+  cp -a godot-web/. app.new/client/public/
+fi
 rm -rf app.old
 [ -d app ] && mv app app.old
 mv app.new app

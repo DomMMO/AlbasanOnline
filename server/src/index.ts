@@ -32,6 +32,8 @@ app.use("/api/admin/tiles", createTileArtAdminRouter());
 app.use("/api/tiles", createTileArtPublicRouter());
 app.use("/api/admin", createAdminRouter());
 app.use("/api", createApiRouter());
+// The game used to be tried out at /oyun/; it is at the root now.
+app.get(["/oyun", "/oyun/*splat"], (_req, res) => res.redirect(301, "/"));
 // In production the built client (game + GM panel) is served from the same origin.
 if (existsSync(CLIENT_DIST)) app.use(express.static(CLIENT_DIST));
 

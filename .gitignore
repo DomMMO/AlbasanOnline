@@ -8,3 +8,5 @@ dist/
 # Third-party art, fonts and music: kept on this machine only, never in the repo (licences).
 # The game falls back to code-drawn look-alikes when they are missing. See client/src/assets/CREDITS.md.
 client/src/assets/licensed/
+# The Godot web build, copied in by deploy/update.sh on the server.
+client/public/index.*
