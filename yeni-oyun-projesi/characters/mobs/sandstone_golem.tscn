@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="SpriteFrames" path="res://characters/mobs/sandstone_golem.tres" id="1_w72sc"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_lqyse"]
+size = Vector2(45, 37)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_8i1vb"]
+size = Vector2(10, 6)
+
+[node name="SandstoneGolem" type="Node2D" unique_id=1495110478]
+
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=741419351]
+sprite_frames = ExtResource("1_w72sc")
+animation = &"idle"
+autoplay = "idle"
+centered = false
+offset = Vector2(-25.1503, -42.936398)
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=992607917]
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=2030652783]
+position = Vector2(6.3497005, -17.4364)
+shape = SubResource("RectangleShape2D_lqyse")
+debug_color = Color(0.2, 0.6, 1, 0.35)
+
+[node name="Feet" type="Area2D" parent="." unique_id=1096992300]
+collision_layer = 2
+collision_mask = 0
+input_pickable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1299868471]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_8i1vb")
+debug_color = Color(1, 0.3, 0.2, 0.45)

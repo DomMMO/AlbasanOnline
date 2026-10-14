@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="SpriteFrames" path="res://characters/mobs/moon_wolf.tres" id="1_20v6t"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_rp3f2"]
+size = Vector2(53, 27)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_8eh32"]
+size = Vector2(10, 6)
+
+[node name="MoonWolf" type="Node2D" unique_id=513583544]
+
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=532622584]
+sprite_frames = ExtResource("1_20v6t")
+animation = &"idle"
+autoplay = "idle"
+centered = false
+offset = Vector2(-28.656, -24.8859)
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=527772141]
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=308109778]
+position = Vector2(-1.1560001, -11.3859005)
+shape = SubResource("RectangleShape2D_rp3f2")
+debug_color = Color(0.2, 0.6, 1, 0.35)
+
+[node name="Feet" type="Area2D" parent="." unique_id=316519788]
+collision_layer = 2
+collision_mask = 0
+input_pickable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=648795535]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_8eh32")
+debug_color = Color(1, 0.3, 0.2, 0.45)

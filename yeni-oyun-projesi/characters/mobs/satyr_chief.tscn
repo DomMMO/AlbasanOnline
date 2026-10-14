@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="SpriteFrames" path="res://characters/mobs/satyr_chief.tres" id="1_ie5oy"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_jxl32"]
+size = Vector2(41, 37)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ybtul"]
+size = Vector2(10, 6)
+
+[node name="SatyrChief" type="Node2D" unique_id=2092326171]
+
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1002527382]
+sprite_frames = ExtResource("1_ie5oy")
+animation = &"idle"
+autoplay = "idle"
+centered = false
+offset = Vector2(-31.241999, -38.4258)
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=740809147]
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1594807999]
+position = Vector2(1.2580013, -16.9258)
+shape = SubResource("RectangleShape2D_jxl32")
+debug_color = Color(0.2, 0.6, 1, 0.35)
+
+[node name="Feet" type="Area2D" parent="." unique_id=551871818]
+collision_layer = 2
+collision_mask = 0
+input_pickable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1819538904]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_ybtul")
+debug_color = Color(1, 0.3, 0.2, 0.45)

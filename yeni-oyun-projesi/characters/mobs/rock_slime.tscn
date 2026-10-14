@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="SpriteFrames" path="res://characters/mobs/rock_slime.tres" id="1_1icwl"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_5l706"]
+size = Vector2(30, 26)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_si8h5"]
+size = Vector2(10, 6)
+
+[node name="RockSlime" type="Node2D" unique_id=1704832237]
+
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=136357634]
+sprite_frames = ExtResource("1_1icwl")
+animation = &"idle"
+autoplay = "idle"
+centered = false
+offset = Vector2(-16.556, -27.9031)
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=790183346]
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=291851913]
+position = Vector2(4.4440002, -10.9031)
+shape = SubResource("RectangleShape2D_5l706")
+debug_color = Color(0.2, 0.6, 1, 0.35)
+
+[node name="Feet" type="Area2D" parent="." unique_id=1827590314]
+collision_layer = 2
+collision_mask = 0
+input_pickable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=491035117]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_si8h5")
+debug_color = Color(1, 0.3, 0.2, 0.45)

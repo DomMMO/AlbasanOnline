@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="SpriteFrames" path="res://characters/mobs/canyon_jackal.tres" id="1_yme0h"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_0ko6u"]
+size = Vector2(53, 27)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_bm6fw"]
+size = Vector2(10, 6)
+
+[node name="CanyonJackal" type="Node2D" unique_id=80148060]
+
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=564556488]
+sprite_frames = ExtResource("1_yme0h")
+animation = &"idle"
+autoplay = "idle"
+centered = false
+offset = Vector2(-28.656, -24.8859)
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=906525918]
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1001772248]
+position = Vector2(-1.1560001, -11.3859005)
+shape = SubResource("RectangleShape2D_0ko6u")
+debug_color = Color(0.2, 0.6, 1, 0.35)
+
+[node name="Feet" type="Area2D" parent="." unique_id=570680967]
+collision_layer = 2
+collision_mask = 0
+input_pickable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=643515819]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_bm6fw")
+debug_color = Color(1, 0.3, 0.2, 0.45)

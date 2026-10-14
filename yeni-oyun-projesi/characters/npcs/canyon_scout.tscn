@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="SpriteFrames" path="res://characters/npcs/canyon_scout.tres" id="1_5l2ta"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_y0mcn"]
+size = Vector2(12, 16)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_4jix0"]
+size = Vector2(10, 6)
+
+[node name="CanyonScout" type="Node2D" unique_id=28527572]
+
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=340399703]
+sprite_frames = ExtResource("1_5l2ta")
+animation = &"idle_down"
+autoplay = "idle_down"
+centered = false
+offset = Vector2(-6, -16)
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1506238471]
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1055301984]
+position = Vector2(0, -8)
+shape = SubResource("RectangleShape2D_y0mcn")
+debug_color = Color(0.2, 0.6, 1, 0.35)
+
+[node name="Feet" type="Area2D" parent="." unique_id=18508079]
+collision_layer = 2
+collision_mask = 0
+input_pickable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=20632813]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_4jix0")
+debug_color = Color(1, 0.3, 0.2, 0.45)

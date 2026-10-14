@@ -2,6 +2,8 @@
 
 Tarayıcıda çalışan, 2D pixel art bir online MMORPG. Savaş ve içerik yapısı WoW'dan, item basma (+N) sistemi Knight Online'dan esinleniyor.
 
+Oyun istemcisi **Godot 4.7** ile yazılmıştır (`yeni-oyun-projesi/`, ayrıntılar onun README'sinde); web build'i https://albasanonline.com adresinde telefon ve bilgisayarda oynanır. Eski Phaser web istemcisi kaldırıldı; `client/` artık yalnızca GM paneli, harita editörü ve Godot görsellerini üreten **bake** için çizim kodunu içerir.
+
 ## Çalıştırma
 
 ```bash
@@ -15,9 +17,9 @@ Durdurmak için: `npm run dev`'i çalıştırdığın terminalde **Ctrl+C**, ya 
 
 - **db**: geliştirme için gömülü PostgreSQL 17, port 5433. Kurulum gerektirmez; programı `embedded-postgres` npm paketinden gelir. Veriler kalıcıdır.
 - **server**: oyun sunucusu ve REST API, http://localhost:2567
-- **client**: http://localhost:5173 (aynı ağdaki telefondan: `http://<bilgisayarın-IP'si>:5173`)
+- **client**: GM paneli ve harita editörü, http://localhost:5173/admin.html
 
-Kayıt olun, bir karakter oluşturun ve oyuna girin. Yeni karakterler **Ana Merkez**'de (şehir) başlar; çıkış yaptığın bölgeye (şehir ya da Başlangıç Vadisi) geri girersin. Çok oyunculu test için ikinci bir hesap açıp başka bir sekmeden girin. Aynı karakterle ikinci kez girilirse eski bağlantı atılır.
+Oyunu Godot ile aç (`yeni-oyun-projesi/README.md`) ve yerel sunucuya bağla. Kayıt olun, bir karakter oluşturun ve oyuna girin. Yeni karakterler **Ana Merkez**'de (şehir) başlar; çıkış yaptığın bölgeye (şehir ya da Başlangıç Vadisi) geri girersin. Çok oyunculu test için ikinci bir hesap açıp başka bir sekmeden girin. Aynı karakterle ikinci kez girilirse eski bağlantı atılır.
 
 > **Windows notu:** PostgreSQL, yolunda ASCII dışı karakter olan klasörlerde (ör. `Masaüstü`) çalışamıyor. Proje böyle bir klasördeyse PostgreSQL programı ve veriler `%LOCALAPPDATA%\mmo-creation` altında tutulur. Veritabanını sıfırlamak için `npm run dev` kapalıyken o klasördeki `data` klasörünü silin. Yayında `DATABASE_URL` ile gerçek bir PostgreSQL kullanılır.
 
@@ -142,17 +144,15 @@ Tuşlar **Esc → Menü → Tuş Atamaları** sayfasından değiştirilebilir: 1
 
 ### Mobil (telefon / tablet)
 
-Telefon bilgisayarla aynı Wi-Fi'de olmalı: `npm run dev` çıktısındaki **Network** adresini aç (ör. `http://192.168.1.7:5173`). Windows Güvenlik Duvarı Node.js'e izin istediğinde **Özel ağlar** için izin ver; oyun sunucusu 2567 portunu kullanır, o da erişilebilir olmalı.
-
-Dokunmatik cihazlarda ekrana kontroller gelir (bilgisayarda denemek için adrese `?touch=1` ekle):
+Dokunmatik cihazlarda ekrana kontroller gelir (web build'de adrese `?touch=1` ekleyerek ya da Godot'u `--touch` argümanıyla çalıştırarak bilgisayarda denenebilir):
 
 - Sol altta **joystick**: yürü (8 yön).
 - Sağ altta **Saldır** (F), **Hedef** (Tab), **E** (konuş / al / portal / tezgâh).
-- Sağda **Çanta**, **Görev**, **Sohbet**, **Menü**.
+- Üstte **Çanta**, **Görev**, **Pasif**, **Portal**, **At**, **Yetenek**, **Sohbet**, **Menü**.
 - Mob'a, NPC'ye, portala ve hotbar slotlarına dokunmak doğrudan çalışır.
 - Envanterde bir item'a bir kez dokun: bilgisi çıkar; tekrar dokun: kullan/kuşan (bilgisayardaki sağ tık).
 
-Dokunmatik kontroller `client/src/ui/touch.ts` içindedir; tuşlarla aynı eylemleri tetikler (`InputManager`).
+Dokunmatik kontroller `yeni-oyun-projesi/scripts/ui/touch_controls.gd` ve `hud.gd` içindedir; tuşlarla aynı eylemleri tetikler (`World.do_action`).
 
 ### Görseller (asset) hazırlamak
 
@@ -592,6 +592,7 @@ Tek VPS üzerinde Docker Compose: Postgres + oyun sunucusu + Caddy (otomatik HTT
 
 - İlk kurulum (bir kez): `ssh root@IP 'bash -s' < deploy/server-setup.sh`, sonra `/opt/mmo/.env` içinde `DOMAIN` ayarlanır (domain yoksa `1-2-3-4.sslip.io`). `REDIRECT_DOMAINS` (boşlukla ayrılmış) eski adresleri ana domain'e yönlendirir; `www.` her zaman yönlenir.
 - Güncelleme: `main`e her push GitHub Actions ile typecheck edilip otomatik deploy edilir (`.github/workflows/deploy.yml`). Elle (commitlenmemiş değişikliklerle): `deploy/deploy.sh root@IP` (Git Bash); bu, `client/src/assets/licensed/` klasörünü de sunucudaki `/opt/mmo/licensed` içine eşitler.
+- Oyun (Godot web build): `yeni-oyun-projesi`'nden Web preset'iyle dışa aktar (sunucudaki kodla aynı veriden bake edilmiş olmalı), sonra `deploy/deploy-godot.sh root@IP <build klasörü>`. Build sunucuda `/opt/mmo/godot-web`'de durur; `update.sh` her deploy'da onu `client/public/`'e kopyalar ve site kökünde sunulur. `/oyun` adresi köke yönlenir.
 - GM yetkisi: `ssh root@IP 'docker exec mmo-app-1 npm run make-admin -w server -- <kullanıcı-adı>'`
 - Loglar: `ssh root@IP 'docker logs -f mmo-app-1'`
 
@@ -608,11 +609,11 @@ server/
                    doğrular, Game'e iletir, karakteri kaydeder, portal geçişi için bilet verir
   src/game/        Oyun simülasyonu: Game (döngü), combat (skill/büyü/hasar/XP/ölüm), mobs (AI), boss (mekanikler), chat, spawns,
                    inventory (saf envanter işlemleri), items (kuşanma, loot, dükkân), upgrade (+N basma)
+yeni-oyun-projesi/  Oyun istemcisi (Godot 4.7, GDScript): Colyseus bağlantısı, dünya, arayüz, dokunmatik kontroller
 client/
-  src/scenes/      WorldScene: state'i görüntüye bağlar, tahmin/düzeltme
-  src/entities/    EntityView (çizim), SnapshotBuffer (interpolasyon)
-  src/ui/          DOM arayüzü: karakter/hedef çerçevesi, hotbar, XP barı, envanter, dükkân, demirci, tooltip
-  src/gfx/         Kodla çizilen pixel art: harita, karakterler, item ikonları
+  src/admin/       GM paneli; src/editor/: harita editörü
+  src/bake/        Godot bake sayfası (tools/godot/bake.mjs onu headless Chrome'da açar)
+  src/gfx/         Kodla çizilen pixel art: harita, karakterler, item ikonları (editör ve bake kullanır)
 ```
 
 ### Temel kurallar
@@ -671,7 +672,8 @@ Faz 2 bitince oyun oynanabilir hale gelir. Sonraki fazlar bunun üzerine eklenir
 
 ## Teknoloji
 
-- İstemci: TypeScript, Phaser 3, Vite
+- İstemci: Godot 4.7 (GDScript, GL Compatibility, web export)
+- GM paneli / harita editörü / bake: TypeScript, Phaser 3, Vite
 - Sunucu: Node.js, TypeScript, Colyseus 0.16
 - Veritabanı (Faz 1'den itibaren): PostgreSQL
 - Haritalar: şimdilik kodla üretiliyor (`shared/src/map.ts`), ileride Tiled editörüne geçilecek

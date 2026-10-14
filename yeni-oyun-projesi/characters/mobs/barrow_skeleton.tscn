@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="SpriteFrames" path="res://characters/mobs/barrow_skeleton.tres" id="1_mnirr"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_pe0qu"]
+size = Vector2(20, 27)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_kwpik"]
+size = Vector2(10, 6)
+
+[node name="BarrowSkeleton" type="Node2D" unique_id=276841694]
+
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1202203697]
+sprite_frames = ExtResource("1_mnirr")
+animation = &"idle"
+autoplay = "idle"
+centered = false
+offset = Vector2(-17.3432, -28.947601)
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1203245051]
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1377425360]
+position = Vector2(-0.34320027, -11.4476)
+shape = SubResource("RectangleShape2D_pe0qu")
+debug_color = Color(0.2, 0.6, 1, 0.35)
+
+[node name="Feet" type="Area2D" parent="." unique_id=1718640796]
+collision_layer = 2
+collision_mask = 0
+input_pickable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1120854237]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_kwpik")
+debug_color = Color(1, 0.3, 0.2, 0.45)

@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="SpriteFrames" path="res://characters/mobs/bandit_chief.tres" id="1_a6apc"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_c7j3o"]
+size = Vector2(28, 46)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_u7ipo"]
+size = Vector2(10, 6)
+
+[node name="BanditChief" type="Node2D" unique_id=510566398]
+
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1936438113]
+sprite_frames = ExtResource("1_a6apc")
+animation = &"idle"
+autoplay = "idle"
+centered = false
+offset = Vector2(-20.1782, -45.5787)
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=656071600]
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1136491363]
+position = Vector2(-1.1781999, -21.578701)
+shape = SubResource("RectangleShape2D_c7j3o")
+debug_color = Color(0.2, 0.6, 1, 0.35)
+
+[node name="Feet" type="Area2D" parent="." unique_id=1591880561]
+collision_layer = 2
+collision_mask = 0
+input_pickable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1156920417]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_u7ipo")
+debug_color = Color(1, 0.3, 0.2, 0.45)

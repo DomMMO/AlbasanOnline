@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="SpriteFrames" path="res://characters/mobs/orc_brute.tres" id="1_owmj0"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_xm0uo"]
+size = Vector2(25, 35)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_yrvoo"]
+size = Vector2(10, 6)
+
+[node name="OrcBrute" type="Node2D" unique_id=1806184106]
+
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=34673613]
+sprite_frames = ExtResource("1_owmj0")
+animation = &"idle"
+autoplay = "idle"
+centered = false
+offset = Vector2(-23.177, -38.2448)
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1554570308]
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1482433302]
+position = Vector2(-0.6769995, -15.7448)
+shape = SubResource("RectangleShape2D_xm0uo")
+debug_color = Color(0.2, 0.6, 1, 0.35)
+
+[node name="Feet" type="Area2D" parent="." unique_id=1468664215]
+collision_layer = 2
+collision_mask = 0
+input_pickable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=642498053]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_yrvoo")
+debug_color = Color(1, 0.3, 0.2, 0.45)

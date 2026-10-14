@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="SpriteFrames" path="res://characters/mobs/caravan_ghost.tres" id="1_6x32n"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1436t"]
+size = Vector2(41, 55)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_42qin"]
+size = Vector2(10, 6)
+
+[node name="CaravanGhost" type="Node2D" unique_id=1620809006]
+
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1943380971]
+sprite_frames = ExtResource("1_6x32n")
+animation = &"idle"
+autoplay = "idle"
+centered = false
+offset = Vector2(-33.9416, -54.9315)
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1434841031]
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1444932849]
+position = Vector2(1.5583993, -26.4315)
+shape = SubResource("RectangleShape2D_1436t")
+debug_color = Color(0.2, 0.6, 1, 0.35)
+
+[node name="Feet" type="Area2D" parent="." unique_id=414761459]
+collision_layer = 2
+collision_mask = 0
+input_pickable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1851390954]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_42qin")
+debug_color = Color(1, 0.3, 0.2, 0.45)

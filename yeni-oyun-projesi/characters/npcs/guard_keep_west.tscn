@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="SpriteFrames" path="res://characters/npcs/guard_keep_west.tres" id="1_t4emk"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_423j7"]
+size = Vector2(12, 16)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_nmajr"]
+size = Vector2(10, 6)
+
+[node name="GuardKeepWest" type="Node2D" unique_id=1145531548]
+
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=22476187]
+sprite_frames = ExtResource("1_t4emk")
+animation = &"idle_down"
+autoplay = "idle_down"
+centered = false
+offset = Vector2(-6, -16)
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1745631823]
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=2103961896]
+position = Vector2(0, -8)
+shape = SubResource("RectangleShape2D_423j7")
+debug_color = Color(0.2, 0.6, 1, 0.35)
+
+[node name="Feet" type="Area2D" parent="." unique_id=1138031239]
+collision_layer = 2
+collision_mask = 0
+input_pickable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1708074552]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_nmajr")
+debug_color = Color(1, 0.3, 0.2, 0.45)

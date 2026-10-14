@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="SpriteFrames" path="res://characters/mobs/satyr_spearman.tres" id="1_yrmh1"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_l53ei"]
+size = Vector2(32, 31)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_l4djf"]
+size = Vector2(10, 6)
+
+[node name="SatyrSpearman" type="Node2D" unique_id=787440241]
+
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1285355553]
+sprite_frames = ExtResource("1_yrmh1")
+animation = &"idle"
+autoplay = "idle"
+centered = false
+offset = Vector2(-24.3695, -30.369299)
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=612160925]
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1672543537]
+position = Vector2(0.6305014, -13.8693)
+shape = SubResource("RectangleShape2D_l53ei")
+debug_color = Color(0.2, 0.6, 1, 0.35)
+
+[node name="Feet" type="Area2D" parent="." unique_id=1568366812]
+collision_layer = 2
+collision_mask = 0
+input_pickable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=160596886]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_l4djf")
+debug_color = Color(1, 0.3, 0.2, 0.45)

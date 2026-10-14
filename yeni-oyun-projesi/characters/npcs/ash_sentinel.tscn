@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="SpriteFrames" path="res://characters/npcs/ash_sentinel.tres" id="1_81ahu"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_b7l36"]
+size = Vector2(12, 16)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ttvjn"]
+size = Vector2(10, 6)
+
+[node name="AshSentinel" type="Node2D" unique_id=1014086800]
+
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1063265145]
+sprite_frames = ExtResource("1_81ahu")
+animation = &"idle_down"
+autoplay = "idle_down"
+centered = false
+offset = Vector2(-6, -16)
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1095788272]
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1295543162]
+position = Vector2(0, -8)
+shape = SubResource("RectangleShape2D_b7l36")
+debug_color = Color(0.2, 0.6, 1, 0.35)
+
+[node name="Feet" type="Area2D" parent="." unique_id=758187149]
+collision_layer = 2
+collision_mask = 0
+input_pickable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=917044260]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_ttvjn")
+debug_color = Color(1, 0.3, 0.2, 0.45)

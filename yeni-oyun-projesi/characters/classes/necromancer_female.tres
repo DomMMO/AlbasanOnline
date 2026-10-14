@@ -1,0 +1,141 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://characters/classes/necromancer_female.png" id="1_kqty7"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rmxci"]
+atlas = ExtResource("1_kqty7")
+region = Rect2(0, 0, 12, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_k87fp"]
+atlas = ExtResource("1_kqty7")
+region = Rect2(12, 0, 12, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_n8gm6"]
+atlas = ExtResource("1_kqty7")
+region = Rect2(0, 0, 12, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ldgbj"]
+atlas = ExtResource("1_kqty7")
+region = Rect2(24, 0, 12, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_w2mfw"]
+atlas = ExtResource("1_kqty7")
+region = Rect2(0, 0, 12, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hxh7a"]
+atlas = ExtResource("1_kqty7")
+region = Rect2(72, 0, 12, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ny3kv"]
+atlas = ExtResource("1_kqty7")
+region = Rect2(36, 0, 12, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_45vor"]
+atlas = ExtResource("1_kqty7")
+region = Rect2(72, 0, 12, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cjls8"]
+atlas = ExtResource("1_kqty7")
+region = Rect2(84, 0, 12, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_eppo4"]
+atlas = ExtResource("1_kqty7")
+region = Rect2(72, 0, 12, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lgsca"]
+atlas = ExtResource("1_kqty7")
+region = Rect2(96, 0, 12, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ipord"]
+atlas = ExtResource("1_kqty7")
+region = Rect2(36, 0, 12, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_25qh6"]
+atlas = ExtResource("1_kqty7")
+region = Rect2(48, 0, 12, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mheyc"]
+atlas = ExtResource("1_kqty7")
+region = Rect2(36, 0, 12, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0acsq"]
+atlas = ExtResource("1_kqty7")
+region = Rect2(60, 0, 12, 16)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rmxci")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_k87fp")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_n8gm6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ldgbj")
+}],
+"loop": 1,
+"name": &"down",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_w2mfw")
+}],
+"loop": 0,
+"name": &"idle_down",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hxh7a")
+}],
+"loop": 0,
+"name": &"idle_side",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ny3kv")
+}],
+"loop": 0,
+"name": &"idle_up",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_45vor")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cjls8")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_eppo4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_lgsca")
+}],
+"loop": 1,
+"name": &"side",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ipord")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_25qh6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mheyc")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0acsq")
+}],
+"loop": 1,
+"name": &"up",
+"speed": 8.0
+}]

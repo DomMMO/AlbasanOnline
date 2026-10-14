@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="SpriteFrames" path="res://characters/mobs/night_wraith.tres" id="1_k4cnn"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_7ii6x"]
+size = Vector2(20, 29)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_5tj14"]
+size = Vector2(10, 6)
+
+[node name="NightWraith" type="Node2D" unique_id=1151054081]
+
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=235871280]
+sprite_frames = ExtResource("1_k4cnn")
+animation = &"idle"
+autoplay = "idle"
+centered = false
+offset = Vector2(-18.9728, -28.277699)
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1690191239]
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=366742115]
+position = Vector2(1.0272007, -12.777699)
+shape = SubResource("RectangleShape2D_7ii6x")
+debug_color = Color(0.2, 0.6, 1, 0.35)
+
+[node name="Feet" type="Area2D" parent="." unique_id=80068565]
+collision_layer = 2
+collision_mask = 0
+input_pickable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=782713168]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_5tj14")
+debug_color = Color(1, 0.3, 0.2, 0.45)

@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="SpriteFrames" path="res://characters/mobs/flame_guard.tres" id="1_h8jfs"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_fxovi"]
+size = Vector2(31, 27)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_nidmv"]
+size = Vector2(10, 6)
+
+[node name="FlameGuard" type="Node2D" unique_id=1206054583]
+
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1553686735]
+sprite_frames = ExtResource("1_h8jfs")
+animation = &"idle"
+autoplay = "idle"
+centered = false
+offset = Vector2(-20.984001, -30.0885)
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=618646124]
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1056159693]
+position = Vector2(5.516, -11.5885)
+shape = SubResource("RectangleShape2D_fxovi")
+debug_color = Color(0.2, 0.6, 1, 0.35)
+
+[node name="Feet" type="Area2D" parent="." unique_id=1399426820]
+collision_layer = 2
+collision_mask = 0
+input_pickable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=767436969]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_nidmv")
+debug_color = Color(1, 0.3, 0.2, 0.45)

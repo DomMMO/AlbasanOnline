@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="SpriteFrames" path="res://characters/mobs/yeti.tres" id="1_0nn7y"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_qua3d"]
+size = Vector2(38, 37)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_6gk6s"]
+size = Vector2(10, 6)
+
+[node name="Yeti" type="Node2D" unique_id=28206104]
+
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1036578999]
+sprite_frames = ExtResource("1_0nn7y")
+animation = &"idle"
+autoplay = "idle"
+centered = false
+offset = Vector2(-27.4291, -37.1419)
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1830849452]
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=732153619]
+position = Vector2(6.570901, -16.6419)
+shape = SubResource("RectangleShape2D_qua3d")
+debug_color = Color(0.2, 0.6, 1, 0.35)
+
+[node name="Feet" type="Area2D" parent="." unique_id=1870064035]
+collision_layer = 2
+collision_mask = 0
+input_pickable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1921616376]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_6gk6s")
+debug_color = Color(1, 0.3, 0.2, 0.45)

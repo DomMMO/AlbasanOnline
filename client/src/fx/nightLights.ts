@@ -51,6 +51,10 @@ export function resetLights(scene: Phaser.Scene) {
   glows.set(scene, []);
 }
 
+/** The lights and glows decor registered in a scene (the Godot bake exports them). */
+export const lightsOf = (scene: Phaser.Scene): readonly Light[] => lights.get(scene) ?? [];
+export const glowsOf = (scene: Phaser.Scene): readonly Glow[] => glows.get(scene) ?? [];
+
 /** Called by decor: a light source at (x, y) in world pixels; `lamp` ones go out by day. */
 export function addLight(scene: Phaser.Scene, x: number, y: number, radius: number, color = 0xffc070, flicker = 0.06, lamp = true) {
   let list = lights.get(scene);

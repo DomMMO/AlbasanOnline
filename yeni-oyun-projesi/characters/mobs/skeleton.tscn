@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="SpriteFrames" path="res://characters/mobs/skeleton.tres" id="1_tncih"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ucdnn"]
+size = Vector2(21, 26)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_g78lg"]
+size = Vector2(10, 6)
+
+[node name="Skeleton" type="Node2D" unique_id=1227655260]
+
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=2005842525]
+sprite_frames = ExtResource("1_tncih")
+animation = &"idle"
+autoplay = "idle"
+centered = false
+offset = Vector2(-17.070301, -29.379398)
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=33148277]
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=550055354]
+position = Vector2(-0.5703001, -12.379399)
+shape = SubResource("RectangleShape2D_ucdnn")
+debug_color = Color(0.2, 0.6, 1, 0.35)
+
+[node name="Feet" type="Area2D" parent="." unique_id=1769995797]
+collision_layer = 2
+collision_mask = 0
+input_pickable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=405306106]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_g78lg")
+debug_color = Color(1, 0.3, 0.2, 0.45)

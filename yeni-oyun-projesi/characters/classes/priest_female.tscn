@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="SpriteFrames" path="res://characters/classes/priest_female.tres" id="1_q5sxj"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_v54rj"]
+size = Vector2(12, 16)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_qp88v"]
+size = Vector2(10, 6)
+
+[node name="PriestFemale" type="Node2D" unique_id=1199282567]
+
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=16349706]
+sprite_frames = ExtResource("1_q5sxj")
+animation = &"idle_down"
+autoplay = "idle_down"
+centered = false
+offset = Vector2(-6, -16)
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1873273931]
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1514751582]
+position = Vector2(0, -8)
+shape = SubResource("RectangleShape2D_v54rj")
+debug_color = Color(0.2, 0.6, 1, 0.35)
+
+[node name="Feet" type="Area2D" parent="." unique_id=1415357966]
+collision_layer = 2
+collision_mask = 0
+input_pickable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=903021333]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_qp88v")
+debug_color = Color(1, 0.3, 0.2, 0.45)
