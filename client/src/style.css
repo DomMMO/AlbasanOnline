@@ -4852,3 +4852,220 @@ body.touch #chat {
   font-weight: bold;
   color: var(--gold-light);
 }
+
+/* ---- Phones held sideways: little height, plenty of width ----
+   Everything moves to the edges: frame, potions, chat and joystick on the left; clock,
+   minimap, damage meter and action buttons on the right; menu across the top; a smaller
+   hotbar at the bottom. The globes go, since the frame already shows health and resource. */
+@media (orientation: landscape) and (max-height: 520px) {
+  body.touch .globe {
+    display: none;
+  }
+
+  body.touch #potion-slots {
+    left: 8px;
+    top: 80px;
+    bottom: auto;
+  }
+
+  body.touch #mount-button {
+    left: 116px;
+    right: auto;
+    top: 80px;
+    bottom: auto;
+    width: 50px;
+    height: 50px;
+  }
+
+  body.touch #chat {
+    left: 8px;
+    top: 140px;
+    bottom: auto;
+    width: min(300px, 38vw);
+  }
+
+  body.touch #chat-log {
+    max-height: 64px;
+  }
+
+  body.touch #joystick {
+    left: 16px;
+    bottom: 16px;
+    width: 112px;
+    height: 112px;
+  }
+
+  body.touch #joystick-knob {
+    width: 46px;
+    height: 46px;
+  }
+
+  body.touch #clock {
+    top: 8px;
+    right: 8px;
+  }
+
+  body.touch #minimap {
+    top: 36px;
+    right: 8px;
+  }
+
+  body.touch #minimap-canvas {
+    width: 96px;
+  }
+
+  body.touch #minimap-legend {
+    display: none;
+  }
+
+  body.touch #damage-meter {
+    top: auto;
+    right: 8px;
+    bottom: 134px;
+    width: 170px;
+    max-height: calc(100vh - 134px - 174px);
+    overflow-y: auto;
+  }
+
+  body.touch .dm-title {
+    font-size: 14px;
+    white-space: nowrap;
+  }
+
+  body.touch #touch-actions {
+    right: 16px;
+    bottom: 16px;
+    grid-template-columns: 50px 50px;
+    gap: 8px;
+  }
+
+  body.touch #touch-actions button {
+    height: 50px;
+  }
+
+  body.touch #touch-actions button.big {
+    height: 52px;
+  }
+
+  /* Between the player frame and the clock / minimap column. */
+  body.touch #touch-menu {
+    top: 8px;
+    bottom: auto;
+    left: 226px;
+    right: 132px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px;
+  }
+
+  body.touch #touch-menu button {
+    padding: 5px 7px;
+    font-size: 11px;
+  }
+
+  body.touch #action-dock {
+    transform: scale(0.78);
+    transform-origin: bottom center;
+  }
+
+  body.touch #stall-button,
+  body.touch #fish-button {
+    bottom: 92px;
+  }
+
+  body.touch #quest-tracker {
+    top: 76px;
+    right: auto;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+  }
+
+  body.touch #cast-bar {
+    bottom: 132px;
+  }
+}
+
+/* Sideways phones, continued: windows open at the top and scroll inside the screen, and the
+   login / character panels tighten up so their buttons fit without scrolling.
+   !important: every window places itself with an id rule (top: 60px and so on). */
+@media (orientation: landscape) and (max-height: 520px) {
+  body.touch .window:not(#leaderboard) {
+    top: 6px !important;
+    max-height: calc(100vh - 12px) !important;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  body.touch #leaderboard {
+    max-height: calc(100vh - 12px) !important;
+    overflow-y: auto;
+  }
+
+  .panel {
+    max-height: calc(100vh - 12px);
+    padding: 14px 18px 12px;
+    gap: 6px;
+  }
+
+  .panel h1 {
+    margin: 0;
+    font-size: 20px;
+  }
+
+  .game-logo {
+    width: 52px;
+    height: 52px;
+    padding: 7px;
+  }
+
+  .panel input {
+    padding-top: 5px;
+    padding-bottom: 5px;
+  }
+
+  #auth button,
+  #create-panel button[type="submit"],
+  #play-btn {
+    font-size: 18px;
+    padding: 4px 10px;
+  }
+
+  /* Two columns of name / class / level ... instead of five rows. */
+  #character-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3px 12px;
+    padding: 5px 8px;
+  }
+
+  .info-row {
+    font-size: 12px;
+    gap: 6px;
+  }
+
+  .info-row b {
+    min-width: 0;
+    flex: 1;
+    padding: 0 4px;
+  }
+
+  .lobby-hint {
+    display: none;
+  }
+
+  /* On the left at full height, not docked to the bottom as on narrow portrait screens. */
+  #characters.lobby-panel,
+  #create-panel.lobby-panel {
+    left: 16px;
+    top: 50%;
+    bottom: auto;
+    transform: translateY(-50%);
+    max-height: calc(100vh - 12px);
+  }
+
+  #create-panel.lobby-panel h1 {
+    font-size: 22px;
+  }
+}
