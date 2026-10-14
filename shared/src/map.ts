@@ -46,9 +46,11 @@ export enum Tile {
   SnowTree = 22,
   /** Molten rock in the fire dungeons (blocking, glows). */
   Lava = 23,
+  /** Kor Toprakları floor: grey volcanic ash with embers in it. */
+  Ash = 24,
 }
 
-export const TILE_COUNT = 24;
+export const TILE_COUNT = 25;
 
 const BLOCKING = new Set<Tile>([Tile.Water, Tile.Tree, Tile.CaveWall, Tile.Wall, Tile.Solid, Tile.WoodWall, Tile.Sky, Tile.RedRock, Tile.SnowTree, Tile.Lava]);
 

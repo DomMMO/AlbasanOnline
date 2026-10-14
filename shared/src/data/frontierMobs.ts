@@ -1,17 +1,16 @@
 import type { Appearance } from "./appearance";
-import { gearDrops } from "./loot";
+import { gearDrops, gearTierFor, MAX_GEAR_TIER } from "./loot";
 import type { BossAbility, LootTable, MobDef } from "./mobs";
 
-// The open-world mobs of the two zones off the Starting Valley: Kızıl Kanyon to the west
-// (levels 20-30) and Ayaz Dağları to the east (levels 30-40), each with a field boss who
-// comes back a few minutes after falling. Stats follow the same level curve as the big
+// The open-world mobs of the zones off the Starting Valley: Kızıl Kanyon to the west
+// (levels 20-30), Ayaz Dağları to the east (30-40) and Kor Toprakları to the south (40-50),
+// each with a field boss who comes back a few minutes after falling. Stats follow the same level curve as the big
 // dungeons (dungeonMobs.ts), so a level 33 yeti is about as tough as a level 33 dungeon mob.
 
 type Drop = LootTable["drops"][number];
 
 const hpFor = (level: number) => Math.round(12 * level + 1.3 * level * level);
 const xpFor = (level: number) => Math.round(0.6 * level * level + 6 * level);
-const gearTier = (level: number) => Math.max(1, Math.min(10, Math.floor((level - 6) / 3)));
 
 interface FieldSpec {
   id: string;
@@ -32,7 +31,7 @@ interface FieldSpec {
 
 function field(spec: FieldSpec): MobDef {
   const { level } = spec;
-  const tier = gearTier(level);
+  const tier = gearTierFor(level);
   return {
     id: spec.id,
     name: spec.name,
@@ -76,7 +75,7 @@ interface FieldBossSpec {
 
 function fieldBoss(spec: FieldBossSpec): MobDef {
   const { level } = spec;
-  const tier = gearTier(level);
+  const tier = gearTierFor(level);
   return {
     id: spec.id,
     name: spec.name,
@@ -101,7 +100,7 @@ function fieldBoss(spec: FieldBossSpec): MobDef {
         { item: "spirit_stone", chance: 0.6, min: 1, max: 2 },
         { item: "super_hp_potion", chance: 1, min: 2, max: 4 },
         ...gearDrops(tier, 0.05),
-        ...gearDrops(Math.min(10, tier + 1), 0.025),
+        ...gearDrops(Math.min(MAX_GEAR_TIER, tier + 1), 0.025),
       ],
     },
     boss: {
@@ -188,6 +187,33 @@ const list: MobDef[] = [
     abilities: [slam(40, 12_000), leap(40), charge(40, 14_000)],
     addMob: "yeti",
     material: "yeti_fur",
+  }),
+
+  // ---- Kor Toprakları, Sv 40-50
+  field({ id: "magma_slime", name: "Magma Balçığı", level: 40, hp: 1.2, speed: 30, aggroRange: 0, appearance: { type: "slime", color: 0xff4500 }, material: "obsidian_shard" }),
+  field({ id: "ember_wolf", name: "Kor Kurdu", level: 41, attack: 1.1, speed: 78, attackSpeedMs: 1600, appearance: { type: "wolf", fur: 0xff6b00 }, material: "ember_core" }),
+  field({
+    id: "ash_cultist",
+    name: "Kül Tapıcısı",
+    level: 43,
+    appearance: { type: "humanoid", tunic: 0x343a40, skin: 0xc8bfa8, hair: 0x1a1a1a, headwear: { color: 0x7a0a0a, style: "hood" } },
+    material: "obsidian_shard",
+  }),
+  field({ id: "fire_elemental", name: "Ateş Elementali", level: 44, hp: 0.9, attack: 1.35, appearance: { type: "image", key: "wraith_purple", tint: 0xff8a2a }, material: "ember_core" }),
+  field({ id: "lava_salamander", name: "Lav Semenderi", level: 45, attack: 1.15, speed: 76, attackSpeedMs: 1600, appearance: { type: "wolf", fur: 0xd9480f }, material: "ember_core" }),
+  field({ id: "lava_golem", name: "Lav Golemi", level: 47, hp: 1.8, speed: 42, appearance: { type: "image", key: "golem_earth", tint: 0xff5a1f }, material: "obsidian_shard" }),
+  // Night only.
+  field({ id: "ash_ghost", name: "Kül Hayaleti", level: 46, hp: 1.0, attack: 1.35, nightOnly: true, appearance: { type: "image", key: "wraith_teal", tint: 0x868e96 }, material: "night_essence" }),
+  field({ id: "hellhound", name: "Cehennem Tazısı", level: 48, attack: 1.2, speed: 82, attackSpeedMs: 1500, nightOnly: true, appearance: { type: "wolf", fur: 0x7a0000 }, material: "ember_core" }),
+  fieldBoss({
+    id: "ember_giant_atesan",
+    name: "Kor Devi Ateşhan",
+    level: 50,
+    scale: 3,
+    appearance: { type: "humanoid", tunic: 0x3a0a0a, skin: 0x8a4a2a, hair: 0xff6b00, hairStyle: "spiky", gear: { chest: "plate_chest_13" } },
+    abilities: [slam(50, 12_000), leap(50), charge(50, 14_000)],
+    addMob: "lava_golem",
+    material: "ember_core",
   }),
 ];
 

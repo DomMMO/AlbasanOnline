@@ -1,5 +1,5 @@
 import type { Appearance, HumanoidGear } from "./appearance";
-import { gearDrops } from "./loot";
+import { gearDrops, gearTierFor, MAX_GEAR_TIER } from "./loot";
 import type { BossAbility, LootTable, MobDef } from "./mobs";
 
 // Mobs and bosses of the big dungeons (see dungeons.ts / zones.ts). Stats come from
@@ -10,8 +10,6 @@ type Drop = LootTable["drops"][number];
 
 const hpFor = (level: number) => Math.round(12 * level + 1.3 * level * level);
 const xpFor = (level: number) => Math.round(0.6 * level * level + 6 * level);
-/** Gear tier for a level: tier t is level 3t + 6 (gear.ts); there are ten. */
-const gearTier = (level: number) => Math.max(1, Math.min(10, Math.floor((level - 6) / 3)));
 const hpPotion = (level: number) => (level >= 17 ? "super_hp_potion" : "large_hp_potion");
 
 interface TrashSpec {
@@ -30,7 +28,7 @@ interface TrashSpec {
 
 function trash(spec: TrashSpec): MobDef {
   const { level } = spec;
-  const tier = gearTier(level);
+  const tier = gearTierFor(level);
   return {
     id: spec.id,
     name: spec.name,
@@ -75,7 +73,7 @@ interface BossSpec {
 
 function boss(spec: BossSpec): MobDef {
   const { level } = spec;
-  const tier = gearTier(level);
+  const tier = gearTierFor(level);
   const hpMult = spec.final ? 18 : 11;
   return {
     id: spec.id,
@@ -108,7 +106,7 @@ function boss(spec: BossSpec): MobDef {
         { item: "spirit_stone", chance: spec.final ? 0.8 : 0.25, min: 1, max: spec.final ? 3 : 1 },
         { item: hpPotion(level), chance: 1, min: 2, max: 4 },
         ...gearDrops(tier, spec.final ? 0.06 : 0.025),
-        ...(spec.final && tier < 10 ? gearDrops(tier + 1, 0.025) : []),
+        ...(spec.final && tier < MAX_GEAR_TIER ? gearDrops(tier + 1, 0.025) : []),
         ...(spec.extraDrops ?? []),
       ],
     },
@@ -217,6 +215,23 @@ const list: MobDef[] = [
   boss({ id: "ice_witch_ayaza", name: "Buz Cadısı Ayaza", level: 37, appearance: { type: "humanoid", tunic: 0x5f3dc4, skin: 0xdde3ea, hair: 0xf8f9fa, gender: "female", hairStyle: "long", headwear: { color: 0x3b5bdb, style: "hat" } }, abilities: [leap(37), leap(37, 6000), slam(37, 14_000)], addMob: "frost_mage" }),
   boss({ id: "white_drake_kiragi", name: "Ak Ejder Kırağı", level: 38, scale: 3, appearance: { type: "wolf", fur: 0xe7f5ff }, abilities: [charge(38), slam(38), leap(38, 13_000)], addMob: "ice_hound" }),
   boss({ id: "winter_king_ulukan", name: "Kış Kralı Ulukan", level: 39, final: true, appearance: { type: "humanoid", tunic: 0x0b2540, skin: 0xdde3ea, hair: 0xf1f3f5, gear: { head: "plate_head_10", chest: "plate_chest_10", legs: "plate_legs_10", feet: "plate_feet_10" } }, abilities: [slam(39), charge(39), leap(39, 12_000)], addMob: "giant_guard", addsAt: [0.75, 0.5, 0.25], extraDrops: [{ item: "yeti_fur", chance: 1, min: 2, max: 4 }, { item: "upgrade_scroll_high", chance: 1 }] }),
+  // ---- 10. Magma Ocakları (Magma Forges, Kor Toprakları), Sv 42-45
+  trash({ id: "ember_smith", name: "Kor Cüce Demirci", level: 42, hp: 1.3, speed: 50, appearance: { type: "humanoid", tunic: 0x5c3a1e, skin: 0xd9a07a, hair: 0xc92a2a, hairStyle: "bald", gear: { chest: "plate_chest_10" } }, material: "obsidian_shard" }),
+  trash({ id: "magma_hound", name: "Magma Tazısı", level: 43, attack: 1.15, speed: 80, attackSpeedMs: 1500, appearance: { type: "wolf", fur: 0xd9480f }, material: "ember_core" }),
+  trash({ id: "slag_slime", name: "Cüruf Balçığı", level: 43, hp: 1.4, speed: 30, appearance: { type: "slime", color: 0x5c5450 }, material: "obsidian_shard" }),
+  trash({ id: "fire_djinn", name: "Ateş Cini", level: 44, hp: 0.9, attack: 1.35, appearance: { type: "image", key: "wraith_purple", tint: 0xff6b00 }, material: "ember_core" }),
+  boss({ id: "master_smith_gurz", name: "Demirci Ustası Gürz", level: 43, appearance: { type: "humanoid", tunic: 0x3a2412, skin: 0xd9a07a, hair: 0xe03131, hairStyle: "bald", gear: { head: "plate_head_10", chest: "plate_chest_10" } }, abilities: [slam(43), charge(43)], addMob: "ember_smith" }),
+  boss({ id: "molten_golem", name: "Erimiş Golem", level: 44, scale: 1, appearance: { type: "image", key: "golem_earth_big", tint: 0xff5a1f }, abilities: [slam(44), leap(44, 13_000)], addMob: "slag_slime", addsAt: [0.5] }),
+  boss({ id: "forge_king_tamgar", name: "Ocak Kralı Tamgar", level: 45, final: true, appearance: { type: "humanoid", tunic: 0x1a0a0a, skin: 0xd9a07a, hair: 0xff6b00, gear: { head: "plate_head_11", chest: "plate_chest_11", legs: "plate_legs_11", feet: "plate_feet_11" } }, abilities: [slam(45), charge(45), leap(45, 13_000)], addMob: "magma_hound", addsAt: [0.75, 0.5, 0.25], extraDrops: [{ item: "ember_core", chance: 1, min: 2, max: 4 }] }),
+
+  // ---- 11. Kül Tapınağı (Temple of Ash, Kor Toprakları), Sv 46-49
+  trash({ id: "ash_priest", name: "Kül Rahibi", level: 46, hp: 0.9, attack: 1.35, appearance: { type: "humanoid", tunic: 0x343a40, skin: 0xc8bfa8, hair: 0x868e96, hairStyle: "long", headwear: { color: 0x495057, style: "hood" } }, material: "obsidian_shard" }),
+  trash({ id: "flame_guard", name: "Alev Muhafızı", level: 47, hp: 1.5, appearance: { type: "humanoid", tunic: 0x7a0a0a, skin: 0xd9a07a, hair: 0x1a1a1a, gear: { head: "plate_head_11", chest: "plate_chest_11", legs: "plate_legs_11" } }, material: "ember_core" }),
+  trash({ id: "salamander", name: "Semender", level: 47, attack: 1.15, speed: 78, attackSpeedMs: 1500, appearance: { type: "wolf", fur: 0xf76707 }, material: "ember_core" }),
+  trash({ id: "cinder_wraith", name: "Kül Hortlağı", level: 48, hp: 1.0, attack: 1.4, appearance: { type: "image", key: "wraith_teal", tint: 0x868e96 }, material: "night_essence" }),
+  boss({ id: "flame_warden_tufan", name: "Alev Muhafızı Tufan", level: 47, appearance: { type: "humanoid", tunic: 0x5c0a0a, skin: 0xd9a07a, hair: 0x1a1a1a, gear: { head: "plate_head_12", chest: "plate_chest_12", legs: "plate_legs_12", feet: "plate_feet_12" } }, abilities: [slam(47), charge(47)], addMob: "flame_guard" }),
+  boss({ id: "ash_priestess_nevra", name: "Kül Rahibesi Nevra", level: 48, appearance: { type: "humanoid", tunic: 0x212529, skin: 0xc8bfa8, hair: 0xf1f3f5, gender: "female", hairStyle: "long", headwear: { color: 0xff6b00, style: "hood" } }, abilities: [leap(48), leap(48, 6000), slam(48, 14_000)], addMob: "ash_priest" }),
+  boss({ id: "fire_dragon_kozhan", name: "Ateş Ejderi Közhan", level: 49, final: true, scale: 3, appearance: { type: "wolf", fur: 0xc92a2a }, abilities: [slam(49), charge(49), leap(49, 12_000)], addMob: "salamander", addsAt: [0.75, 0.5, 0.25], extraDrops: [{ item: "ember_core", chance: 1, min: 3, max: 5 }, { item: "upgrade_scroll_high", chance: 1, min: 1, max: 2 }] }),
 ];
 
 export const DUNGEON_MOBS: Record<string, MobDef> = Object.fromEntries(list.map((mob) => [mob.id, mob]));

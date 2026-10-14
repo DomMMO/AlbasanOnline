@@ -279,7 +279,7 @@ function groundAround(tiles: Tile[][], x: number, y: number): Tile {
   for (let r = 1; r < 6; r++) {
     for (const [dx, dy] of [[0, r], [-r, 0], [r, 0], [0, -r]]) {
       const t = tiles[y + dy]?.[x + dx];
-      if (t === Tile.Cobble || t === Tile.Plaza || t === Tile.Market || t === Tile.Grass || t === Tile.Path || t === Tile.DarkGrass || t === Tile.WoodFloor || t === Tile.Sand || t === Tile.Snow) return t;
+      if (t === Tile.Cobble || t === Tile.Plaza || t === Tile.Market || t === Tile.Grass || t === Tile.Path || t === Tile.DarkGrass || t === Tile.WoodFloor || t === Tile.Sand || t === Tile.Snow || t === Tile.Ash) return t;
     }
   }
   return Tile.Cobble;
@@ -310,6 +310,7 @@ const TILE_COLORS: Record<Tile, { base: string; speckle: string[] }> = {
   [Tile.Ice]: { base: "#a9d4ec", speckle: ["#bfe0f2", "#94c6e2", "#d6eef9"] },
   [Tile.SnowTree]: { base: "#e6edf3", speckle: ["#d5e0ea"] },
   [Tile.Lava]: { base: "#c2410c", speckle: ["#ea580c", "#9a3412", "#f59e0b"] },
+  [Tile.Ash]: { base: "#3d3836", speckle: ["#47413e", "#332f2d", "#524b47"] },
 };
 /** A tile's main colour (the minimap paints one pixel of it per tile). */
 export function tileBaseColor(tile: Tile): string {
@@ -519,6 +520,11 @@ export function paintTileStrip(): HTMLCanvasElement {
       px(ox + 4, 5, "#f4f8fb", 8, 1);
       px(ox + 5, 1, "#ffffff", 6, 1);
       px(ox + 4, 15, "#00000022", 8, 1);
+    } else if (t === Tile.Ash) {
+      // Drifts of pale ash and a couple of embers still glowing in it.
+      for (const [dx, dy, w] of [[2, 4, 5], [9, 10, 4]]) px(ox + dx, dy, "#5c5450", w, 1);
+      px(ox + 5, 12, "#f97316");
+      px(ox + 12, 3, "#fb923c");
     } else if (t === Tile.Lava) {
       // Molten rock: a dark crust broken by bright glowing seams.
       px(ox + 1, 2, "#7c2d12", 5, 3);

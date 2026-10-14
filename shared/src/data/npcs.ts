@@ -4,6 +4,7 @@ import { FROST_SPOTS } from "../frost";
 import { HARBOR_SPOTS } from "../harbor";
 import { KEEP_HALL_SPOTS } from "../keepHall";
 import { TOWN_SPOTS } from "../town";
+import { VOLCANO_SPOTS } from "../volcano";
 import type { Appearance } from "./appearance";
 import type { ClassId } from "./classes";
 
@@ -359,5 +360,26 @@ export const NPCS: Record<string, NpcDef> = {
     shop: [],
     greeting:
       "Doğuda buzdan bir taht var; Buz Devi Ayazhan orada oturur, yaklaşanı ezer. Kuzeydoğudaki Buz Mağarası'nda kristaller şarkı söyler derler, güneydoğudaki Ayaz Kalesi'nde ise Kış Kralı Ulukan hüküm sürer. Gece olunca Ak Börüler iner, ateşten uzaklaşma.",
+  },
+
+  // ---- Kor Toprakları: the outpost at the valley gate.
+  ember_trader: {
+    id: "ember_trader",
+    name: "Közcü Necmi",
+    ...VOLCANO_SPOTS.trader,
+    appearance: { type: "humanoid", tunic: 0x5c3a1e, hair: 0x2d2d2d, skin: 0xc68a5a, gear: { chest: "leather_vest" }, headwear: { color: 0x7a0a0a, style: "hood" } },
+    role: "merchant",
+    shop: ["super_hp_potion", "super_mana_potion", "return_scroll", "upgrade_scroll_low", "upgrade_scroll_mid"],
+    greeting: "Burada her şey yanar, bir benim tezgâhım yanmaz. Obsidyen getirirsen altınla öderim.",
+  },
+  ash_sentinel: {
+    id: "ash_sentinel",
+    name: "Kül Gözcüsü Ilgaz",
+    ...VOLCANO_SPOTS.sentinel,
+    appearance: { type: "humanoid", tunic: 0x343a40, hair: 0x1a1a1a, skin: 0xd8a47a, gear: { head: "iron_helm", chest: "chainmail" } },
+    role: "quest",
+    shop: [],
+    greeting:
+      "Lav nehrini üç köprüden geçebilirsin, başka yolu yok. Güneybatıdaki kor kazanında Kor Devi Ateşhan uyur; uyanırsa kaç. Doğudaki Magma Ocakları'nda cüceler hâlâ örs döver, batıdaki Kül Tapınağı'nda ise Ateş Ejderi Közhan'a tapıyorlar.",
   },
 };
