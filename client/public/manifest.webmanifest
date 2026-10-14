@@ -4,7 +4,7 @@
   "lang": "tr",
   "start_url": "/",
   "display": "fullscreen",
-  "orientation": "landscape",
+  "orientation": "any",
   "background_color": "#1a120b",
   "theme_color": "#1a120b",
   "icons": [
