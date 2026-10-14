@@ -586,6 +586,15 @@ Jack'in görselleri hazır bir sprite paketinden gelir (`client/src/assets/`, ka
 }
 ```
 
+## Sunucuya kurulum (Hetzner)
+
+Tek VPS üzerinde Docker Compose: Postgres + oyun sunucusu + Caddy (otomatik HTTPS). Dosyalar: `docker-compose.yml`, `deploy/`.
+
+- İlk kurulum (bir kez): `ssh root@IP 'bash -s' < deploy/server-setup.sh`, sonra `/opt/mmo/.env` içinde `DOMAIN` ayarlanır (domain yoksa `1-2-3-4.sslip.io`).
+- Güncelleme: `deploy/deploy.sh root@IP` (Git Bash). Kodu bu bilgisayardan, git'te olmayan `client/src/assets/licensed/` ile birlikte yükler ve yeniden build eder.
+- GM yetkisi: `ssh root@IP 'docker exec mmo-app-1 npm run make-admin -w server -- <kullanıcı-adı>'`
+- Loglar: `ssh root@IP 'docker logs -f mmo-app-1'`
+
 ## Yapı
 
 ```
