@@ -5003,61 +5003,61 @@ body.touch #chat {
     overflow-y: auto;
   }
 
-  .panel {
+  body.touch .panel {
     max-height: calc(100vh - 12px);
     padding: 14px 18px 12px;
     gap: 6px;
   }
 
-  .panel h1 {
+  body.touch .panel h1 {
     margin: 0;
     font-size: 20px;
   }
 
-  .game-logo {
+  body.touch .game-logo {
     width: 52px;
     height: 52px;
     padding: 7px;
   }
 
-  .panel input {
+  body.touch .panel input {
     padding-top: 5px;
     padding-bottom: 5px;
   }
 
-  #auth button,
-  #create-panel button[type="submit"],
-  #play-btn {
+  body.touch #auth button,
+  body.touch #create-panel button[type="submit"],
+  body.touch #play-btn {
     font-size: 18px;
     padding: 4px 10px;
   }
 
   /* Two columns of name / class / level ... instead of five rows. */
-  #character-info {
+  body.touch #character-info {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 3px 12px;
     padding: 5px 8px;
   }
 
-  .info-row {
+  body.touch .info-row {
     font-size: 12px;
     gap: 6px;
   }
 
-  .info-row b {
+  body.touch .info-row b {
     min-width: 0;
     flex: 1;
     padding: 0 4px;
   }
 
-  .lobby-hint {
+  body.touch .lobby-hint {
     display: none;
   }
 
   /* On the left at full height, not docked to the bottom as on narrow portrait screens. */
-  #characters.lobby-panel,
-  #create-panel.lobby-panel {
+  body.touch #characters.lobby-panel,
+  body.touch #create-panel.lobby-panel {
     left: 16px;
     top: 50%;
     bottom: auto;
@@ -5065,7 +5065,7 @@ body.touch #chat {
     max-height: calc(100vh - 12px);
   }
 
-  #create-panel.lobby-panel h1 {
+  body.touch #create-panel.lobby-panel h1 {
     font-size: 22px;
   }
 }
