@@ -1,19 +1,34 @@
 import { TILE_SIZE } from "./constants";
-import { buildDungeon, type BuiltDungeon, type DungeonRoom } from "./dungeons";
+import { buildDungeon, type BuiltDungeon, type DungeonRoom, type DungeonTheme } from "./dungeons";
 import { Tile } from "./map";
 
-// The five big dungeons, all entered from the Dark Forest. Much longer than the Goblin Cave:
-// 30-40 mobs in packs along a chain of rooms, and 3-4 bosses in their own rooms. The exit
-// at the end opens only when every boss is down.
+// The big dungeons: five entered from the Dark Forest, two from Kızıl Kanyon and two from
+// Ayaz Dağları. Much longer than the Goblin Cave: 30-40 mobs in packs along a chain of rooms,
+// and 3-4 bosses in their own rooms. The exit at the end opens only when every boss is down.
 
-export type BigDungeonId = "abandoned_mine" | "sunken_temple" | "bone_crypt" | "orc_fortress" | "dragon_lair";
+export type BigDungeonId =
+  | "abandoned_mine"
+  | "sunken_temple"
+  | "bone_crypt"
+  | "orc_fortress"
+  | "dragon_lair"
+  | "red_caves"
+  | "buried_caravanserai"
+  | "frost_cavern"
+  | "frost_citadel";
+
+/** Open-world zones with big dungeon entrances. */
+export type DungeonHost = "forest" | "canyon" | "frost";
 
 export interface BigDungeon {
   id: BigDungeonId;
   name: string;
   minLevel: number;
-  /** Entrance tile in the Dark Forest (kept clear by buildForest). */
-  forestTile: { tx: number; ty: number };
+  /** The zone its entrance is in, and the entrance tile there (kept clear by that zone's builder). */
+  host: DungeonHost;
+  entranceTile: { tx: number; ty: number };
+  /** How dark it is inside (0..1); torches and fires glow. */
+  dim: number;
   layout: BuiltDungeon;
 }
 
@@ -26,6 +41,7 @@ interface DungeonSource extends Omit<BigDungeon, "layout"> {
   seed: number;
   wall: Tile;
   floor: Tile;
+  theme: DungeonTheme;
   rooms: DungeonRoom[];
 }
 
@@ -34,10 +50,13 @@ const list: DungeonSource[] = [
     id: "abandoned_mine",
     name: "Terk Edilmiş Maden",
     minLevel: 9,
-    forestTile: { tx: 7, ty: 24 },
+    host: "forest",
+    entranceTile: { tx: 7, ty: 24 },
+    dim: 0.5,
     seed: 501,
     wall: Tile.CaveWall,
     floor: Tile.CaveFloor,
+    theme: "mine",
     rooms: [
       entrance,
       pack(["kobold_miner", 4], ["tunnel_rat", 2]),
@@ -56,10 +75,13 @@ const list: DungeonSource[] = [
     id: "sunken_temple",
     name: "Batık Tapınak",
     minLevel: 12,
-    forestTile: { tx: 25, ty: 19 },
+    host: "forest",
+    entranceTile: { tx: 25, ty: 19 },
+    dim: 0.35,
     seed: 502,
     wall: Tile.Wall,
     floor: Tile.Plaza,
+    theme: "temple",
     rooms: [
       entrance,
       pack(["temple_guard", 3], ["bog_slime", 2]),
@@ -79,10 +101,13 @@ const list: DungeonSource[] = [
     id: "bone_crypt",
     name: "Kemik Mahzeni",
     minLevel: 15,
-    forestTile: { tx: 14, ty: 5 },
+    host: "forest",
+    entranceTile: { tx: 14, ty: 5 },
+    dim: 0.55,
     seed: 503,
     wall: Tile.Wall,
     floor: Tile.Cobble,
+    theme: "crypt",
     rooms: [
       entrance,
       pack(["bone_soldier", 4], ["crypt_hound", 2]),
@@ -101,10 +126,13 @@ const list: DungeonSource[] = [
     id: "orc_fortress",
     name: "Ork Kalesi",
     minLevel: 18,
-    forestTile: { tx: 8, ty: 37 },
+    host: "forest",
+    entranceTile: { tx: 8, ty: 37 },
+    dim: 0.3,
     seed: 504,
     wall: Tile.Wall,
     floor: Tile.Path,
+    theme: "fortress",
     rooms: [
       entrance,
       pack(["orc_warrior", 4], ["war_wolf", 2]),
@@ -124,10 +152,13 @@ const list: DungeonSource[] = [
     id: "dragon_lair",
     name: "Ejder İni",
     minLevel: 21,
-    forestTile: { tx: 32, ty: 4 },
+    host: "forest",
+    entranceTile: { tx: 32, ty: 4 },
+    dim: 0.25,
     seed: 505,
     wall: Tile.CaveWall,
     floor: Tile.CaveFloor,
+    theme: "lair",
     rooms: [
       entrance,
       pack(["dragon_cultist", 4], ["fire_slime", 2]),
@@ -143,17 +174,127 @@ const list: DungeonSource[] = [
       finalRoom("elder_dragon", ["drake", 2]),
     ],
   },
+  {
+    id: "red_caves",
+    name: "Kızıl Mağaralar",
+    minLevel: 22,
+    host: "canyon",
+    entranceTile: { tx: 5, ty: 22 },
+    dim: 0.45,
+    seed: 506,
+    wall: Tile.RedRock,
+    floor: Tile.Sand,
+    theme: "redcave",
+    rooms: [
+      entrance,
+      pack(["gnoll_hunter", 4], ["cave_hyena", 2]),
+      pack(["dust_slime", 3], ["gnoll_hunter", 2]),
+      bossRoom("gnoll_chief", ["gnoll_hunter", 2]),
+      pack(["cave_hyena", 4], ["gnoll_seer", 1]),
+      pack(["gnoll_seer", 2], ["dust_slime", 3]),
+      bossRoom("hyena_matriarch", ["cave_hyena", 2]),
+      pack(["red_minotaur", 2], ["gnoll_hunter", 3]),
+      pack(["gnoll_seer", 2], ["red_minotaur", 2]),
+      finalRoom("red_bull_tarhan", ["red_minotaur", 2]),
+    ],
+  },
+  {
+    id: "buried_caravanserai",
+    name: "Gömülü Kervansaray",
+    minLevel: 26,
+    host: "canyon",
+    entranceTile: { tx: 32, ty: 4 },
+    dim: 0.4,
+    seed: 507,
+    wall: Tile.Wall,
+    floor: Tile.Sand,
+    theme: "ruins",
+    rooms: [
+      entrance,
+      pack(["shrouded_dead", 4], ["tomb_jackal", 2]),
+      pack(["cursed_merchant", 2], ["shrouded_dead", 3]),
+      bossRoom("caravan_ghost", ["cursed_merchant", 2]),
+      pack(["tomb_jackal", 4], ["sand_shade", 1]),
+      pack(["ruin_golem", 2], ["shrouded_dead", 2]),
+      bossRoom("vizier_kamil", ["shrouded_dead", 2]),
+      pack(["sand_shade", 3], ["tomb_jackal", 2]),
+      pack(["ruin_golem", 2], ["cursed_merchant", 2]),
+      bossRoom("stone_sentinel", ["ruin_golem", 1]),
+      pack(["sand_shade", 3], ["shrouded_dead", 3]),
+      pack(["tomb_jackal", 3], ["cursed_merchant", 2]),
+      pack(["ruin_golem", 2], ["sand_shade", 2]),
+      pack(["shrouded_dead", 3], ["tomb_jackal", 3]),
+      finalRoom("sand_sultan", ["sand_shade", 2]),
+    ],
+  },
+  {
+    id: "frost_cavern",
+    name: "Buz Mağarası",
+    minLevel: 31,
+    host: "frost",
+    entranceTile: { tx: 57, ty: 7 },
+    dim: 0.3,
+    seed: 508,
+    wall: Tile.CaveWall,
+    floor: Tile.Ice,
+    theme: "ice",
+    rooms: [
+      entrance,
+      pack(["ice_fox", 4], ["crystal_slime", 2]),
+      pack(["frost_kobold", 3], ["crystal_slime", 2]),
+      bossRoom("icebreaker_gorr", ["ice_elemental", 1]),
+      pack(["ice_elemental", 2], ["frost_kobold", 3]),
+      pack(["ice_fox", 3], ["frozen_spirit", 2]),
+      bossRoom("snow_mother_fox", ["ice_fox", 2]),
+      pack(["frozen_spirit", 3], ["frost_kobold", 2]),
+      pack(["ice_elemental", 2], ["crystal_slime", 3]),
+      pack(["frozen_spirit", 2], ["ice_fox", 3]),
+      finalRoom("crystal_mother_neyra", ["frozen_spirit", 2]),
+    ],
+  },
+  {
+    id: "frost_citadel",
+    name: "Ayaz Kalesi",
+    minLevel: 35,
+    host: "frost",
+    entranceTile: { tx: 56, ty: 40 },
+    dim: 0.3,
+    seed: 509,
+    wall: Tile.Wall,
+    floor: Tile.Snow,
+    theme: "citadel",
+    rooms: [
+      entrance,
+      pack(["frost_knight", 3], ["ice_hound", 2]),
+      pack(["frost_mage", 2], ["frost_knight", 2]),
+      bossRoom("gate_commander_sergun", ["frost_knight", 2]),
+      pack(["ice_hound", 4], ["frost_mage", 1]),
+      pack(["giant_guard", 2], ["frost_knight", 2]),
+      bossRoom("ice_witch_ayaza", ["frost_mage", 2]),
+      pack(["winter_wraith", 3], ["ice_hound", 2]),
+      pack(["giant_guard", 2], ["frost_mage", 2]),
+      bossRoom("white_drake_kiragi", ["ice_hound", 2]),
+      pack(["frost_knight", 3], ["winter_wraith", 2]),
+      pack(["giant_guard", 2], ["winter_wraith", 2]),
+      finalRoom("winter_king_ulukan", ["giant_guard", 2]),
+    ],
+  },
 ];
 
 export const BIG_DUNGEONS: Record<BigDungeonId, BigDungeon> = Object.fromEntries(
-  list.map(({ rooms, seed, wall, floor, ...dungeon }) => [dungeon.id, { ...dungeon, layout: buildDungeon({ seed, wall, floor, rooms }) }]),
+  list.map(({ rooms, seed, wall, floor, theme, ...dungeon }) => [dungeon.id, { ...dungeon, layout: buildDungeon({ seed, wall, floor, theme, rooms }) }]),
 ) as Record<BigDungeonId, BigDungeon>;
 
 export const BIG_DUNGEON_IDS = Object.keys(BIG_DUNGEONS) as BigDungeonId[];
 
-/** Feet position of a forest entrance, and where you stand when you come back out. */
+/** The big dungeons whose entrances are in a zone. */
+export function dungeonsIn(host: DungeonHost): BigDungeon[] {
+  return BIG_DUNGEON_IDS.map((id) => BIG_DUNGEONS[id]).filter((dungeon) => dungeon.host === host);
+}
+
+/** Feet position of a dungeon's entrance in its host zone, and where you stand when you come back out. */
 export function bigDungeonEntrance(dungeon: BigDungeon) {
-  const { tx, ty } = dungeon.forestTile;
+  const { tx, ty } = dungeon.entranceTile;
   return {
     portal: { x: (tx + 0.5) * TILE_SIZE, y: (ty + 1) * TILE_SIZE },
     returnTo: { x: (tx + 0.5) * TILE_SIZE, y: (ty + 3) * TILE_SIZE },

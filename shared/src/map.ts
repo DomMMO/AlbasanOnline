@@ -34,11 +34,23 @@ export enum Tile {
   WoodWall = 16,
   /** Open sky round a floating island (Ana Merkez): drawn see-through over the clouds, never walkable. */
   Sky = 17,
+  /** Kızıl Kanyon floor: dry sand. */
+  Sand = 18,
+  /** Kızıl Kanyon cliffs and boulders (blocking). */
+  RedRock = 19,
+  /** Ayaz Dağları floor: snow. */
+  Snow = 20,
+  /** A frozen lake (walkable). */
+  Ice = 21,
+  /** A snow-laden pine (blocking). */
+  SnowTree = 22,
+  /** Molten rock in the fire dungeons (blocking, glows). */
+  Lava = 23,
 }
 
-export const TILE_COUNT = 18;
+export const TILE_COUNT = 24;
 
-const BLOCKING = new Set<Tile>([Tile.Water, Tile.Tree, Tile.CaveWall, Tile.Wall, Tile.Solid, Tile.WoodWall, Tile.Sky]);
+const BLOCKING = new Set<Tile>([Tile.Water, Tile.Tree, Tile.CaveWall, Tile.Wall, Tile.Solid, Tile.WoodWall, Tile.Sky, Tile.RedRock, Tile.SnowTree, Tile.Lava]);
 
 /** Goblin Cave entrance in the world (tile coordinates); a path leads there from the centre. */
 export const CAVE_ENTRANCE_TILE = { tx: 10, ty: 43 };
@@ -181,7 +193,7 @@ export function generateWorldMap(seed = 1337, width = 64, height = 48): WorldMap
 }
 
 /** Tiles that block sight (ranged attacks); water doesn't. */
-const OPAQUE = new Set<Tile>([Tile.Tree, Tile.CaveWall, Tile.Wall, Tile.Solid]);
+const OPAQUE = new Set<Tile>([Tile.Tree, Tile.CaveWall, Tile.Wall, Tile.Solid, Tile.RedRock, Tile.SnowTree]);
 
 /** True when nothing opaque stands between two characters (checked at chest height). */
 export function hasLineOfSight(map: WorldMap, a: { x: number; y: number }, b: { x: number; y: number }): boolean {

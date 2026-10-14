@@ -4,7 +4,9 @@ import { buildForest, FOREST_SPOTS } from "./forest";
 import { NODE_SPAWNS } from "./data/gathering";
 import { NPCS } from "./data/npcs";
 import { applyMapEdits, type MapEdits } from "./mapEdits";
-import { BIG_DUNGEON_IDS, BIG_DUNGEONS, bigDungeonEntrance, type BigDungeonId } from "./bigDungeons";
+import { BIG_DUNGEON_IDS, BIG_DUNGEONS, bigDungeonEntrance, dungeonsIn, type BigDungeonId, type DungeonHost } from "./bigDungeons";
+import { buildCanyon, CANYON_SPOTS } from "./canyon";
+import { buildFrost, FROST_SPOTS } from "./frost";
 import { CAVE_BRIDGE, CAVE_ENTRANCE_TILE, CAVE_TORCHES, generateWorldMap, type WorldMap } from "./map";
 import { buildTown, TOWN_SPOTS } from "./town";
 import { buildHarbor, HARBOR_SPOTS } from "./harbor";
@@ -16,7 +18,7 @@ import { buildKeepHall, KEEP_HALL_SPOTS } from "./keepHall";
 // there and you log back in where you left. Every other zone is entered through a portal
 // and leaving it puts you back at the portal you used.
 
-export type ZoneId = "town" | "world" | "forest" | "harbor" | "keep_hall" | "goblin_cave" | "jack_lair" | "pvp_arena" | BigDungeonId;
+export type ZoneId = "town" | "world" | "forest" | "canyon" | "frost" | "harbor" | "keep_hall" | "goblin_cave" | "jack_lair" | "pvp_arena" | BigDungeonId;
 
 /** New characters start here; the zone anyone can join without a portal ticket. */
 export const HOME_ZONE: ZoneId = "town";
@@ -76,6 +78,17 @@ const caveEntrance = { x: (CAVE_ENTRANCE_TILE.tx + 1) * TILE_SIZE, y: (CAVE_ENTR
 const worldTownGate = { x: 29.5 * TILE_SIZE, y: 22 * TILE_SIZE };
 /** At the north end of the valley's main road: the way into the Dark Forest. */
 const worldForestGate = { x: 33 * TILE_SIZE, y: 5 * TILE_SIZE };
+/** At the west and east ends of the valley's cross road: Kızıl Kanyon and Ayaz Dağları. */
+const worldCanyonGate = { x: 3.5 * TILE_SIZE, y: 25 * TILE_SIZE };
+const worldFrostGate = { x: 60.5 * TILE_SIZE, y: 25 * TILE_SIZE };
+
+/** Entrances of the big dungeons in an open-world zone; each one's way out leads back to it. */
+function dungeonPortals(host: DungeonHost): PortalDef[] {
+  return dungeonsIn(host).map((dungeon) => {
+    const { portal, returnTo } = bigDungeonEntrance(dungeon);
+    return { id: `${dungeon.id}_entrance`, ...portal, to: dungeon.id, label: dungeon.name, style: "cave" as const, minLevel: dungeon.minLevel, returnTo };
+  });
+}
 
 /** Where the valley's mobs live (tiles on the 64x48 valley map, crossroads at 32,24). */
 const WORLD_SPAWN_ZONES: SpawnZone[] = [
@@ -176,6 +189,26 @@ export const ZONES: Record<ZoneId, ZoneDef> = {
         arriveAt: FOREST_SPOTS.fromValley,
       },
       {
+        id: "world_canyon_gate",
+        ...worldCanyonGate,
+        to: "canyon",
+        label: "Kızıl Kanyon",
+        style: "gate",
+        auto: true,
+        minLevel: 20,
+        arriveAt: CANYON_SPOTS.fromValley,
+      },
+      {
+        id: "world_frost_gate",
+        ...worldFrostGate,
+        to: "frost",
+        label: "Ayaz Dağları",
+        style: "gate",
+        auto: true,
+        minLevel: 30,
+        arriveAt: FROST_SPOTS.fromValley,
+      },
+      {
         id: "goblin_cave_entrance",
         ...caveEntrance,
         to: "goblin_cave",
@@ -195,11 +228,7 @@ export const ZONES: Record<ZoneId, ZoneDef> = {
     npcs: ["ranger", "peddler"],
     respawnText: "Korucuların kampında yeniden doğacaksın.",
     portals: [
-      ...BIG_DUNGEON_IDS.map((id) => {
-        const dungeon = BIG_DUNGEONS[id];
-        const { portal, returnTo } = bigDungeonEntrance(dungeon);
-        return { id: `${id}_entrance`, ...portal, to: id, label: dungeon.name, style: "cave" as const, minLevel: dungeon.minLevel, returnTo };
-      }),
+      ...dungeonPortals("forest"),
       {
         id: "forest_valley_gate",
         ...FOREST_SPOTS.valleyGate,
@@ -208,6 +237,48 @@ export const ZONES: Record<ZoneId, ZoneDef> = {
         style: "gate",
         auto: true,
         arriveAt: { x: worldForestGate.x, y: worldForestGate.y + TILE_SIZE * 3 },
+      },
+    ],
+  },
+  canyon: {
+    id: "canyon",
+    outdoor: true,
+    name: "Kızıl Kanyon",
+    instanced: false,
+    persistent: true,
+    npcs: ["caravan_master", "canyon_scout"],
+    respawnText: "Kervan konağında yeniden doğacaksın.",
+    portals: [
+      ...dungeonPortals("canyon"),
+      {
+        id: "canyon_valley_gate",
+        ...CANYON_SPOTS.valleyGate,
+        to: "world",
+        label: "Başlangıç Vadisi",
+        style: "gate",
+        auto: true,
+        arriveAt: { x: worldCanyonGate.x + TILE_SIZE * 3, y: worldCanyonGate.y },
+      },
+    ],
+  },
+  frost: {
+    id: "frost",
+    outdoor: true,
+    name: "Ayaz Dağları",
+    instanced: false,
+    persistent: true,
+    npcs: ["furrier", "mountain_guide"],
+    respawnText: "Avcı barınağında yeniden doğacaksın.",
+    portals: [
+      ...dungeonPortals("frost"),
+      {
+        id: "frost_valley_gate",
+        ...FROST_SPOTS.valleyGate,
+        to: "world",
+        label: "Başlangıç Vadisi",
+        style: "gate",
+        auto: true,
+        arriveAt: { x: worldFrostGate.x - TILE_SIZE * 3, y: worldFrostGate.y },
       },
     ],
   },
@@ -280,16 +351,17 @@ export const ZONES: Record<ZoneId, ZoneDef> = {
   },
   ...(Object.fromEntries(
     BIG_DUNGEON_IDS.map((id) => {
-      const { name, layout } = BIG_DUNGEONS[id];
+      const { name, layout, host, dim } = BIG_DUNGEONS[id];
       const zone: ZoneDef = {
         id,
         name,
         instanced: true,
+        dim,
         npcs: [],
         respawnText: "Zindanın girişinde yeniden doğacaksın.",
         portals: [
-          { id: `${id}_exit`, ...layout.entrancePortal, to: "forest", label: "Çıkış", style: "exit" },
-          { id: `${id}_final_exit`, ...layout.exitPortal, to: "forest", label: "Çıkış", style: "exit", requiresClear: true },
+          { id: `${id}_exit`, ...layout.entrancePortal, to: host, label: "Çıkış", style: "exit" },
+          { id: `${id}_final_exit`, ...layout.exitPortal, to: host, label: "Çıkış", style: "exit", requiresClear: true },
         ],
       };
       return [id, zone];
@@ -305,9 +377,17 @@ const BUILDERS: Record<ZoneId, () => DungeonLayout> = {
     map: generateWorldMap(),
     mobs: [],
     spawnZones: WORLD_SPAWN_ZONES,
-    decor: [{ kind: "bridge", ...CAVE_BRIDGE }, ...CAVE_TORCHES.map((t) => ({ kind: "torch" as const, ...t }))],
+    decor: [
+      { kind: "bridge", ...CAVE_BRIDGE },
+      ...CAVE_TORCHES.map((t) => ({ kind: "torch" as const, ...t })),
+      // Signposts by the west and east gates (walk-through).
+      { kind: "signboard", tx: 5, ty: 22, w: 3, text: "Kanyon · Sv 20" },
+      { kind: "signboard", tx: 56, ty: 22, w: 3, text: "Ayaz · Sv 30" },
+    ],
   }),
   forest: buildForest,
+  canyon: buildCanyon,
+  frost: buildFrost,
   harbor: buildHarbor,
   keep_hall: buildKeepHall,
   goblin_cave: buildGoblinCave,
