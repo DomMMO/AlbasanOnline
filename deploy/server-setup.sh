@@ -33,4 +33,9 @@ if [ ! -f /opt/mmo/.env ]; then
   chmod 600 /opt/mmo/.env
   echo ">>> /opt/mmo/.env created; set DOMAIN in it."
 fi
+# Nightly database dump at 02:00 UTC (05:00 Turkey); /opt/mmo/backup.sh arrives with the first deploy.
+cat > /etc/cron.d/mmo-backup <<'CRON'
+0 2 * * * root [ -x /opt/mmo/backup.sh ] && /opt/mmo/backup.sh >> /var/log/mmo-backup.log 2>&1
+CRON
+
 echo ">>> Server ready."

@@ -18,6 +18,8 @@ rm -rf app.old
 mv app.new app
 rm -rf app.old
 
+install -m 755 app/deploy/backup.sh /opt/mmo/backup.sh
+
 cd app
 docker compose -p mmo --env-file /opt/mmo/.env up -d --build --remove-orphans
 docker image prune -f >/dev/null

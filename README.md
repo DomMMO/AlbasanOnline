@@ -594,6 +594,7 @@ Tek VPS üzerinde Docker Compose: Postgres + oyun sunucusu + Caddy (otomatik HTT
 - Güncelleme: `main`e her push GitHub Actions ile typecheck edilip otomatik deploy edilir (`.github/workflows/deploy.yml`). Elle (commitlenmemiş değişikliklerle): `deploy/deploy.sh root@IP` (Git Bash); bu, `client/src/assets/licensed/` klasörünü de sunucudaki `/opt/mmo/licensed` içine eşitler.
 - GM yetkisi: `ssh root@IP 'docker exec mmo-app-1 npm run make-admin -w server -- <kullanıcı-adı>'`
 - Loglar: `ssh root@IP 'docker logs -f mmo-app-1'`
+- Yedek: her gece 02:00 UTC'de `pg_dump`, `/opt/mmo/backups` içinde 14 gün saklanır (log: `/var/log/mmo-backup.log`). Geri yükleme (oyun sunucusu o sırada durur, önce güncel durum yedeklenir): `ssh root@IP /opt/mmo/app/deploy/restore.sh /opt/mmo/backups/mmo-YYYYMMDD-HHMM.dump`. Bilgisayara indirmek: `scp root@IP:/opt/mmo/backups/<dosya> .`
 
 ## Yapı
 
