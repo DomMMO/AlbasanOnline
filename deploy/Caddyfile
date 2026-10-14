@@ -1,6 +1,11 @@
-# Caddy fetches and renews the HTTPS certificate for $DOMAIN by itself and
-# proxies WebSocket upgrades without extra config.
+# Caddy fetches and renews the HTTPS certificates by itself and proxies WebSocket
+# upgrades without extra config. DOMAIN and REDIRECT_DOMAINS come from /opt/mmo/.env.
 {$DOMAIN} {
 	encode zstd gzip
 	reverse_proxy app:2567
+}
+
+# www and older addresses (e.g. the sslip.io one) send players to the main domain.
+www.{$DOMAIN} {$REDIRECT_DOMAINS} {
+	redir https://{$DOMAIN}{uri} permanent
 }
