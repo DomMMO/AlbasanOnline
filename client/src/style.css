@@ -2669,14 +2669,6 @@ table.controls td:first-child {
   width: min(480px, calc(100vw - 32px));
 }
 
-.game-subtitle {
-  margin: -6px 0 8px !important;
-  font-family: var(--font-title);
-  font-size: 22px;
-  color: #c49bff;
-  text-shadow: 0 2px 0 #000;
-}
-
 .panel button.character {
   font-family: var(--font-title);
   font-weight: normal;
