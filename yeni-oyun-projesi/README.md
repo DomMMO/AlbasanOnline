@@ -2,7 +2,7 @@
 
 Oyunun Godot 4.7 (GDScript, GL Compatibility) istemcisi. Colyseus sunucusuna (REST `/api`,
 eşleştirme `/matchmake`, WebSocket) bağlanır. Web build'i https://albasanonline.com kökünde
-sunulur (eski Phaser web istemcisinin yerine); telefonda dokunmatik kontrollerle oynanır.
+sunulur; telefonda dokunmatik kontrollerle oynanır.
 
 Depoda yalnızca kod, sahneler ve `characters/` durur. `data/` ve `art/` (fontlar hariç) bake
 çıktısıdır ve depoya girmez (bir kısmı lisanslı pikseller içerir): ilk açılıştan önce depo
@@ -25,7 +25,7 @@ kökünde `npm run bake:godot` çalıştır, `art/licensed/` için yerel lisansl
 | `scripts/autoload/` | `GameData` (shared verisi), `Net` (REST + odalar), `Keys` (tuş atamaları), `Settings` |
 | `scripts/core/` | `ZoneMap` (çarpışma + istemci tahmini, `shared/src/movement.ts` ile birebir), `Items` |
 | `scripts/gfx/` | `Sprites` (humanoid şablonları, kurt/balçık/sandık/portal, mob sheet'leri), `HorsePainter`, `Art`, `Fonts` |
-| `scripts/world/` | `World` (WorldScene), `EntityView`, `WeaponView`, `ZoneView`, `NightLayer`, `Fx`, `SnapshotBuffer` |
+| `scripts/world/` | `World`, `EntityView`, `WeaponView`, `ZoneView`, `NightLayer`, `Fx`, `SnapshotBuffer` |
 | `scripts/ui/` | HUD, sohbet, mini harita, tüm pencereler (envanter, dükkân, demirci, yetenekler, görevler, depo, ahır, arkadaşlar, takas, pazar, pasif ağaç, hasar ölçer, PvP sıralaması, menü) |
 | `scripts/lobby/` | Giriş, karakter seçimi ve yaratma (kale önünde) |
 | `data/` | `shared.json` (eşyalar, moblar, skill'ler, bölgeler…), `zones/<id>.json` (harita + dekor + ışıklar) |
@@ -36,9 +36,9 @@ kökünde `npm run bake:godot` çalıştır, `art/licensed/` için yerel lisansl
 
 ## Görseller ve veri nereden geliyor? (bake)
 
-Haritalar, dekor, ikonlar ve diğer kodla çizilen her şey web istemcisinin kendi Phaser kodu
-çalıştırılarak üretilir; bu yüzden pikseller web ile aynıdır. `shared/` ya da çizim kodu
-değişince (yeni bölge, eşya, mob, dekor) depo kökünde:
+Haritalar, dekor, ikonlar ve diğer kodla çizilen her şey `client/` içindeki çizim kodu
+(harita editörüyle ortak) çalıştırılarak üretilir; bu yüzden pikseller editörle aynıdır.
+`shared/` ya da çizim kodu değişince (yeni bölge, eşya, mob, dekor) depo kökünde:
 
 ```
 npm run bake:godot                 # her şey (~12 dk)

@@ -1,7 +1,7 @@
 class_name GameWindow
 extends PanelContainer
 
-## An in-game window (client/src/ui/windows.ts): title bar to drag it by, a round close button,
+## An in-game window: title bar to drag it by, a round close button,
 ## the content below. Windows open in a stack: Esc closes the newest, clicking one brings it to
 ## the front, and dragged positions are remembered (user://windows.cfg).
 

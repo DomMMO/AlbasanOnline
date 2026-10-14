@@ -2,9 +2,8 @@ shader_type canvas_item;
 render_mode blend_mul, unshaded;
 
 // The night (client/src/fx/nightLights.ts NightLayer): the scene multiplied by a deep blue, with
-// warm pools cut out round the lights. Phaser builds this in a render texture: fill with the
-// night colour, then for every light erase a radial gradient and draw it again tinted, and
-// multiply the result over the scene. Here the same sums run per pixel.
+// warm pools cut out round the lights: the night colour with a radial gradient erased and
+// drawn again tinted for every light, multiplied over the scene, computed per pixel.
 
 uniform vec2 view_origin;
 uniform vec2 view_size;

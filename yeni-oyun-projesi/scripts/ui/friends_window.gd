@@ -1,7 +1,7 @@
 class_name FriendsWindow
 extends GameWindow
 
-## Arkadaşlar (client/src/ui/friends.ts): requests in and out, friends with where they are,
+## Arkadaşlar: requests in and out, friends with where they are,
 ## whisper and invite buttons, add by name.
 
 var ui: GameUi

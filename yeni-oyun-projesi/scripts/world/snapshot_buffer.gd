@@ -1,7 +1,7 @@
 class_name SnapshotBuffer
 extends RefCounted
 
-## Snapshot interpolation for entities we don't control: client/src/entities/SnapshotBuffer.ts.
+## Snapshot interpolation for entities we don't control.
 ## Remote entities are drawn INTERPOLATION_DELAY_MS in the past so there are always two
 ## snapshots to blend between.
 

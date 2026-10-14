@@ -1,7 +1,7 @@
 class_name Minimap
 extends PanelContainer
 
-## The minimap (client/src/ui/minimap.ts): 21 tiles round you, dots for you, your party, other
+## The minimap: 21 tiles round you, dots for you, your party, other
 ## players, NPCs, portals, pings, and a pulsing arrow where a guard told you to go. M hides it.
 
 const VIEW_RADIUS := 10

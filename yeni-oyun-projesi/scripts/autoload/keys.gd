@@ -1,8 +1,7 @@
 extends Node
 
-## Key bindings (autoload "Keys"): client/src/input/InputManager.ts DEFAULT_BINDINGS and
-## keybindings.ts. Actions are registered in the InputMap at start; a player's own bindings
-## override the defaults (user://keybindings.cfg). Esc and Enter stay reserved.
+## Key bindings (autoload "Keys"). Actions are registered in the InputMap at start; a player's
+## own bindings override the defaults (user://keybindings.cfg). Esc and Enter stay reserved.
 
 const FILE := "user://keybindings.cfg"
 

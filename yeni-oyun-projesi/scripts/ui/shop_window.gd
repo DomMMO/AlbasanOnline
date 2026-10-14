@@ -1,7 +1,7 @@
 class_name ShopWindow
 extends GameWindow
 
-## A merchant's wares (client/src/ui/shop.ts): click to buy (Shift: five), drop a bag item on
+## A merchant's wares: click to buy (Shift: five), drop a bag item on
 ## the window or right click it in the bag to sell.
 
 var ui: GameUi

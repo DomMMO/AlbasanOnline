@@ -1,6 +1,6 @@
 extends Node
 
-## Player preferences (autoload "Settings"): client/src/settings.ts. Kept on this machine
+## Player preferences (autoload "Settings"). Kept on this machine
 ## (user://settings.cfg [game]); nothing here affects the server.
 
 signal changed

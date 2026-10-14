@@ -1,7 +1,7 @@
 class_name SkillsWindow
 extends GameWindow
 
-## Yetenekler (client/src/ui/skills.ts): the class's active skills (drag them to the hotbar)
+## Yetenekler: the class's active skills (drag them to the hotbar)
 ## and passives with their ranks, and the life skills (Madencilik, Botanik).
 
 var ui: GameUi

@@ -1,7 +1,7 @@
 class_name UpgradeWindow
 extends GameWindow
 
-## The blacksmith's forge (client/src/ui/upgrade.ts): +N upgrades with the chance, scroll, cost,
+## The blacksmith's forge: +N upgrades with the chance, scroll, cost,
 ## the burn risk above +3 and protection charms.
 
 const OUTCOME := {"success": ["BAŞARILI!", "#8ce99a"], "failed": ["Başarısız", "#ffb347"], "protected": ["Başarısız, item korundu", "#74c0fc"], "burned": ["İTEM YANDI!", "#ff5a5a"]}

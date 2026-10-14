@@ -1,6 +1,6 @@
 shader_type canvas_item;
 
-// The +7..+10 weapon glow (Phaser preFX addGlow): a soft purple halo round the opaque pixels.
+// The +7..+10 weapon glow: a soft purple halo round the opaque pixels.
 // The texture carries transparent padding so the halo has room.
 uniform vec4 glow_color : source_color = vec4(0.65, 0.3, 1.0, 1.0);
 uniform float strength = 2.0;

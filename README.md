@@ -41,7 +41,7 @@ Giriş yapınca **Ana Merkez'in iç kalesinin önüne** gelirsin (Metin2 tarzı)
 | Ten rengi | 7 ton |
 | Kıyafet rengi | 10 renk |
 
-**Rastgele** hepsini rastgele seçer. Görünüm oyunda herkese aynı görünür (senkronize). Miğfer saçı, Şaman şapkası ve kapüşonlar saçın üstünü örter; uzun saç ve at kuyruğu arkadan ve yandan görünür. Veriler `characters.look` (JSON) ve `characters.play_seconds` sütunlarında; seçenekler `shared/src/data/appearance.ts`, piksel şablonları `client/src/gfx/humanoid.ts`, lobi sahnesi `client/src/scenes/LobbyScene.ts`.
+**Rastgele** hepsini rastgele seçer. Görünüm oyunda herkese aynı görünür (senkronize). Miğfer saçı, Şaman şapkası ve kapüşonlar saçın üstünü örter; uzun saç ve at kuyruğu arkadan ve yandan görünür. Veriler `characters.look` (JSON) ve `characters.play_seconds` sütunlarında; seçenekler `shared/src/data/appearance.ts`, piksel şablonları `client/src/gfx/humanoid.ts`, lobi sahnesi `yeni-oyun-projesi/scripts/lobby/lobby.gd`.
 
 ### Sınıflar
 
@@ -183,7 +183,7 @@ Hazır sheet'leri `client/src/assets/` altına koy. Kabak Jack'teki gibi her she
 - **Esc** sırası: önce oyun menüsü (ayarlar/kontroller sayfasındaysan ana menüye döner), sonra **en son açılan pencere**, sonra hedef; hiçbir şey açık değilse menüyü açar. Grup davetinde Esc daveti reddeder.
 - Menü açıkken oyun girdisi kilitlidir (yürüme, skill, kısayollar).
 - Pencereler başlığından **sürüklenir**, tıklanan öne gelir; yeri bu tarayıcıda hatırlanır. Başlığa çift tıklamak varsayılan yerine döndürür.
-- Başlıklar, isimler ve düğmeler **Cloister Black** ile yazılır (`client/src/assets/licensed/fonts/`, Türkçe harfler eklenmiş kopya; depoda yok, yoksa serif kullanılır); uzun metinler okunaklı bir serif fontla. Pencere yönetimi `client/src/ui/windows.ts`, tema `style.css` sonundaki "Theme" bölümündedir.
+- Başlıklar, isimler ve düğmeler **Cloister Black** ile yazılır (`client/src/assets/licensed/fonts/`, Türkçe harfler eklenmiş kopya; depoda yok, yoksa serif kullanılır); uzun metinler okunaklı bir serif fontla. Pencere yönetimi `yeni-oyun-projesi/scripts/ui/game_window.gd`, tema `yeni-oyun-projesi/scripts/ui/ui_theme.gd`'dedir.
 
 ### Hikaye: Kırık Mühür
 
@@ -492,7 +492,7 @@ Knight Online tarzı depo. Pazarın doğusundaki ambarın önünde **Depocu Hati
 - Envanterde sağ tık: depoya koy. Depoda sağ tık: envantere al. İki pencere arasında sürükle-bırak da çalışır (yığılan item'lar birleşir).
 - Altın: miktarı yaz, **Koy** ya da **Al**'a bas.
 - Kuşanılmış item doğrudan depolanamaz, önce çıkarılır. Pazar tezgâhı ya da takas açıkken depo kullanılamaz.
-- Depo, karakterin geri kalanıyla aynı kayıtta saklanır (`items.container = 'storage'`, `characters.storage_gold`); bir item'ın yarısı depoda yarısı çantada kalamaz. Kod: `server/src/game/storage.ts`, `client/src/ui/storage.ts`.
+- Depo, karakterin geri kalanıyla aynı kayıtta saklanır (`items.container = 'storage'`, `characters.storage_gold`); bir item'ın yarısı depoda yarısı çantada kalamaz. Kod: `server/src/game/storage.ts`, `yeni-oyun-projesi/scripts/ui/storage_window.gd`.
 
 ### Takas (oyuncudan oyuncuya)
 
@@ -504,7 +504,7 @@ Yanındaki bir oyuncuya tıklayıp hedef çerçevesindeki **Takas**'a bas ya da 
 
 - Takas açıkken iki tarafın da envanteri kilitlidir (item kullanamaz, taşıyamaz, satamazsın). Böylece karşı tarafın gördüğü teklif değiştirilemez.
 - Takas sunucuda tekrar kontrol edilir (item'lar hâlâ orada mı, altın yetiyor mu, iki tarafta da yer var mı) ve iki karakter **tek veritabanı işleminde** kaydedilir. Yer yoksa hiçbir şey değişmez ve takas iptal olur. +N ve statlar korunur: item aynı kimlikle el değiştirir.
-- 8 kareden fazla uzaklaşırsanız, biriniz ölürse ya da bölgeden çıkarsa takas iptal olur. Görev eşyaları takas edilemez. Kod: `server/src/game/trade.ts`, `client/src/ui/trade.ts`.
+- 8 kareden fazla uzaklaşırsanız, biriniz ölürse ya da bölgeden çıkarsa takas iptal olur. Görev eşyaları takas edilemez. Kod: `server/src/game/trade.ts`, `yeni-oyun-projesi/scripts/ui/trade_window.gd`.
 
 ### Başlangıç Vadisi (av sahası)
 
@@ -563,7 +563,7 @@ Jack'in görselleri hazır bir sprite paketinden gelir (`client/src/assets/`, ka
 `http://localhost:5173/editor.html` (GM panelindeki **Harita Editörü** bağlantısı). Bölgenin kodda üretilen haritası altta çizilir; editörde konan objeler üç katmanda üstüne serilir: **Zemin** (çimen, yol, kaldırım…), **Engel** (duvar, ağaç, kaya, su, görünmez engel) ve **Doğuş** (oyuncu doğuşu, yaratık doğuşu: yaratık, adet, yarıçap).
 
 - Paletten sürükle-bırak ya da paletten seçip haritada sürükleyerek boya; 16/32/64 px ızgaraya oturur. `Q` farenin altındaki kareyi/objeyi paletten seçer (pipet). Tıkla seç, sürükle taşı; `Delete` sil, `R` döndür, `Ctrl+Z` geri al, `Ctrl+D` kopyala, oklar kaydır, `Ctrl+S` kaydet. Katmanlar gizlenebilir/kilitlenebilir; JSON olarak indirilip yüklenebilir.
-- Editör haritayı oyunun kendi koduyla (Phaser, `client/src/gfx/ground.ts`) ve düzenlemeler uygulanmış haliyle çizer: kale, kuleler ve binalar oyundaki gibi ayakta görünür. `Engeller` kutusu hareketi engelleyen kareleri tarar. Boyanan kare, tamamen örttüğü eski düzenlemelerin yerini alır.
+- Editör haritayı bake'in kullandığı çizim koduyla (`client/src/gfx/ground.ts`) ve düzenlemeler uygulanmış haliyle çizer: kale, kuleler ve binalar oyundaki gibi ayakta görünür. `Engeller` kutusu hareketi engelleyen kareleri tarar. Boyanan kare, tamamen örttüğü eski düzenlemelerin yerini alır.
 - **Kale:** Kale Duvarı kareleri birbirine bağlanır; köşe, mazgal ve ön yüz komşulara göre oyunda kendiliğinden çizilir. Köşelere 4×4 **Kule** konabilir. Boyamak hiçbir süsü silmez; bina, kule, çeşme gibi bir süsü kaldırmak için **Süs Kaldır** (`K`) alanı çizilir (kaldırılan kulenin yerinde kale duvarı kalır).
 - Kaydedince açık odalar haritayı hemen değiştirir (`Msg.MapChanged`); içerdekiler yeni zemini görür, duvarın içinde kalan doğuş noktasına alınır. Yaratık alanları bölge yeniden açılınca değişir.
 - **Süsler (level design):** "Süs" katmanında evler (3 boy; çatı rengi, mahya yönü, baca, ölçü ayarlanır), büyük ağaç, çalı, otlar ve çiçekler, fener, meşale, sancak, fıçı, sandık, çuval, saman, kuyu, kukla, araba, örs ve kamp ateşi konur, taşınır, silinir. Haritanın kendi süsleri (kodda tanımlı evler, otlar, fenerler...) tıklanınca seçilir: `Delete` ile kaldırılır, sürüklenince taşınır (aslı gizlenir, kopyası yeni yerine konur; eski yerindeki engel kalkar, zemin çevresine göre dolar). Ev, fener, ağaç gibi süslerin altı kendiliğinden engel olur; ot, çalı ve tabelanın içinden geçilir. Sunucu süs verisini sıkı doğrular (`sanitizeDecor`).
@@ -621,7 +621,7 @@ client/
 - **Sunucu otoriterdir.** İstemci sadece "şu yöne basıyorum" bilgisini gönderir. Konum, hasar, drop ve item basma sonucu yalnızca sunucuda hesaplanır.
 - **Ortak kod `shared/` içinde durur.** Hareket fonksiyonu (`stepMovement`) iki tarafta da aynıdır. İstemci bu sayede kendi hareketini anında tahmin eder (*client-side prediction*). Sunucudan cevap gelince henüz işlenmemiş girdileri yeniden oynatarak düzeltir (*reconciliation*).
 - **Diğer oyuncular 100 ms geriden çizilir.** Bu gecikme *snapshot interpolation* içindir ve kayan, kesintisiz bir hareket sağlar.
-- **Girdiler eylem katmanından geçer** (`client/src/input/InputManager.ts`). Oyun kodu tuşları değil eylemleri sorar. Mobil dokunmatik kontroller ileride aynı eylemlere bağlanacak.
+- **Girdiler eylem katmanından geçer** (`yeni-oyun-projesi/scripts/autoload/keys.gd`). Oyun kodu tuşları değil eylemleri sorar; mobil dokunmatik kontroller (`yeni-oyun-projesi/scripts/ui/touch_controls.gd`) de aynı eylemleri tetikler.
 - **Oyun mantığı odadan ayrıdır.** `Game` ağdan habersizdir, sadece `GameIO` üzerinden mesaj yollar. İleride her dungeon instance'ı kendi `Game`'ini çalıştırır.
 - **Her bölge ayrı bir odadır.** Şehir, vadi ve PvP arenası ortaktır; dungeon'lar her girişte yeni bir oda (instance) olarak açılır. Şehir ve vadi "kalıcı" bölgelerdir: karakterin bölgesi ve konumu sadece orada kaydedilir ve girişte oraya bağlanırsın. Başka bölgelere portal bileti olmadan girilemez; bilet varış noktasını da taşıyabilir (ışınlanma kapıları). Portal kullanınca sunucu tek kullanımlık bir bilet verir, istemci mevcut odadan çıkıp hedef odaya o biletle girer. Dungeon'lara biletsiz girilemez. Haritalar ve dungeon yerleşimleri `shared/src/zones.ts`, `shared/src/town.ts` ve `shared/src/dungeons.ts` içindedir. Şehrin binaları, çeşmesi ve fenerleri harita üstüne kodla çizilen dekordur (`client/src/gfx/decor.ts`); altlarındaki kareler çarpışma için `Tile.Solid`'dir.
 - **Kalıcılık oda katmanındadır.** Karakter girişte veritabanından yüklenir; çıkışta ve her 30 saniyede bir kaydedilir. Şifreler bcrypt ile, oturum token'ları SHA-256 hash'i olarak saklanır.
@@ -658,7 +658,7 @@ client/
 | 7.16 | Gece fenerlerin ışık havuzları, atta Shift ile dörtnala, Liman yolu, iki sütunlu yetenek sayfası, arkadaş sistemi (O) | ✅ |
 | 7.17 | İç Kale'ye girilebilir: ahşap büyük salon, ateş başında oturan 6 sınıf ustası (öğüt verir), muhafızlara yol sorma (yön oku + harita işareti) | ✅ |
 | 7.18 | Acemi başlangıç + Ustaların Ateşi görevi, 7 usta (Alp, Kam, Börü, Tigin, Erşek, Ak Ana, Erlik Ruh Eğitmeni), yeni sınıflar Şaman, Okçu, Druid (Büyücü ve Muhafız kalktı), onaylı sınıf seçimi, Ayşe Teyze'de altınla yol sıfırlama | ✅ |
-| 7.19 | Boss müziği: Kadim Ejder Azhdar'ın savaşında kendi şarkısı çalar (Esc → Ayarlar → Boss müziği); müzik `client/src/assets/licensed/music/<mob id>.weba`, eşleme `client/src/audio/bossMusic.ts` | ✅ |
+| 7.19 | Boss müziği: Kadim Ejder Azhdar'ın savaşında kendi şarkısı çalar (Esc → Ayarlar → Boss müziği); müzik `yeni-oyun-projesi/art/licensed/music/<mob id>.ogg`, kod `yeni-oyun-projesi/scripts/world/boss_music.gd` | ✅ |
 | 7.20 | Telifli varlıklar (şarkı, CraftPix ve Kabak Jack çizimleri, Cloister Black) depodan çıktı; `client/src/assets/licensed/` yalnızca yerelde, yoksa oyun kodla çizilen benzerlerini kullanır | ✅ |
 | 7.21 | At çiftliği ve Seyis Yusuf (doğu kapısının dışında): Bozkır Atı 25.000, Arap Atı 75.000, Ahal-Teke 200.000, Kara Yel 500.000 altın (%10-40 daha hızlı); bindiğin atın donu, yelesi, örtüsü ve eyeri 1.000.000 altına düzenlenir | ✅ |
 | 7.22 | Çeşmenin etrafında 4 bank (8 koltuk): banka tıkla, karakter yürüyüp çeşmeye dönük oturur; yürüyünce ya da ata binince kalkar, herkes oturduğunu görür | ✅ |

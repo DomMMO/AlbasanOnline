@@ -1,7 +1,7 @@
 class_name TouchControls
 extends RefCounted
 
-## On-screen controls for phones and tablets (client/src/ui/touch.ts): a joystick for walking
+## On-screen controls for phones and tablets: a joystick for walking
 ## and buttons for what otherwise needs a keyboard. They feed the same actions as the keys.
 ## Every control follows its own finger (multi-touch), so you can walk and tap at once.
 

@@ -1,7 +1,7 @@
 class_name TradeWindow
 extends GameWindow
 
-## Takas (client/src/ui/trade.ts): both offers side by side, lock, then confirm.
+## Takas: both offers side by side, lock, then confirm.
 
 var ui: GameUi
 var trade: Variant = null

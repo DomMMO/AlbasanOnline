@@ -1,7 +1,7 @@
 class_name InventoryWindow
 extends GameWindow
 
-## Karakter (client/src/ui/inventory.ts): the paper doll, the eight equipment slots, the stats,
+## Karakter: the paper doll, the eight equipment slots, the stats,
 ## the 32 bag slots and the gold. Drag to move or equip, right click / double click to use,
 ## equip, sell or put away (whatever window is open next to it), sort button.
 

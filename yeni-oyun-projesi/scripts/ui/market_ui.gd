@@ -1,7 +1,7 @@
 class_name MarketUi
 extends RefCounted
 
-## Player market stalls (client/src/ui/market.ts): setting up your stall on the market square
+## Player market stalls: setting up your stall on the market square
 ## with prices, and browsing someone else's.
 
 var ui: GameUi

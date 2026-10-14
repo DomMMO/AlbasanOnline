@@ -21,7 +21,7 @@ class SpriteSet:
 	var frames: SpriteFrames
 	var width := 0
 	var height := 0
-	## Phaser origin (fractions of the frame): the feet.
+	## Origin (fractions of the frame): the feet.
 	var origin := Vector2(0.5, 1.0)
 	## Image sheets: art sheet key (animations "idle", "walk", "attack", ...).
 	var sheet := ""

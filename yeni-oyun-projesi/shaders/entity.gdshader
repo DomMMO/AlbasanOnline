@@ -1,6 +1,6 @@
 shader_type canvas_item;
 
-// Characters: modulate is Phaser's tint (multiply); `flash` is setTintFill(white) for hit flashes.
+// Characters: modulate is the tint (multiply); `flash` fills the sprite white for hit flashes.
 uniform float flash : hint_range(0.0, 1.0) = 0.0;
 
 void fragment() {

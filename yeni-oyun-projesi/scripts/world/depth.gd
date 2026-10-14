@@ -1,10 +1,10 @@
 class_name Depth
 extends RefCounted
 
-## Phaser draws by `depth` (characters at their feet y, overlays at 100000+, the night at 1e7).
-## Godot y-sorts by position, so every depth-sorted thing sits in a wrapper Node2D placed at
+## Things are drawn by `depth` (characters at their feet y, overlays at 100000+, the night at
+## 1e7). Godot y-sorts by position, so every depth-sorted thing sits in a wrapper Node2D placed at
 ## (x, depth) inside the y-sorted world layer, with the visible node offset to its real y.
-## Same depth -> creation order, as in Phaser.
+## Same depth -> creation order.
 
 
 static func wrap(layer: Node, child: Node2D) -> Node2D:
@@ -22,7 +22,7 @@ static func place(w: Node2D, x: float, y: float, depth: float) -> void:
 		child.position = Vector2(0, y - depth)
 
 
-## A node drawn by a Callable (the Phaser Graphics objects): painter.call(node).
+## A node drawn by a Callable: painter.call(node).
 class Painter extends Node2D:
 	var painter: Callable
 
@@ -34,7 +34,7 @@ class Painter extends Node2D:
 			painter.call(self)
 
 
-## Ellipse helper for painters (Phaser fillEllipse / strokeEllipse take the full width/height).
+## Ellipse helper for painters (takes the full width/height).
 static func ellipse_points(cx: float, cy: float, w: float, h: float, n := 32) -> PackedVector2Array:
 	var pts := PackedVector2Array()
 	for i in n:
