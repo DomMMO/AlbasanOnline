@@ -23,7 +23,7 @@ import math
 import os
 import sys
 
-from PIL import Image
+from PIL import Image, ImageChops, ImageEnhance, ImageFilter
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Third-party art: written to the git-ignored licensed/ folder, never committed.
@@ -122,6 +122,40 @@ def crisp(img: Image.Image, cut: int = 96) -> Image.Image:
     return Image.merge("RGBA", (r, g, b, a))
 
 
+OUTLINE = (20, 16, 24, 255)
+
+
+def without_trails(img: Image.Image) -> Image.Image:
+    """Drops the see-through white swoosh the chibi packs draw behind a swing (a white blob once small)."""
+    r, g, b, a = img.split()
+    light = ImageChops.darker(ImageChops.darker(r, g), b).point(lambda v: 255 if v >= 120 else 0)
+    faint = a.point(lambda v: 255 if v < 245 else 0)
+    trail = ImageChops.multiply(light, faint)
+    return Image.merge("RGBA", (r, g, b, ImageChops.subtract(a, trail)))
+
+
+def pixelize(img: Image.Image, w: int, h: int) -> Image.Image:
+    """
+    Big painted frames to small pixel art: area-averaged (no ringing halos), hard alpha, a little
+    more contrast and colour to make up for the averaging, and a 1 px dark outline round the
+    silhouette, as hand-made pixel sprites have, so the figure still reads small and at night.
+    The result is w+2 x h+2 (the outline needs the room).
+    """
+    small = img.convert("RGBa").resize((w, h), Image.BOX).convert("RGBA")
+    r, g, b, a = small.split()
+    a = a.point(lambda v: 255 if v >= 110 else 0)
+    rgb = ImageEnhance.Color(ImageEnhance.Contrast(Image.merge("RGB", (r, g, b))).enhance(1.2)).enhance(1.15)
+    body = rgb.convert("RGBA")
+    body.putalpha(a)
+    out = Image.new("RGBA", (w + 2, h + 2), (0, 0, 0, 0))
+    mask = Image.new("L", out.size, 0)
+    mask.paste(a, (1, 1))
+    ring = ImageChops.subtract(mask.filter(ImageFilter.MaxFilter(3)), mask)
+    out.paste(Image.new("RGBA", out.size, OUTLINE), (0, 0), ring)
+    out.alpha_composite(body, (1, 1))
+    return out
+
+
 def pack_dir(downloads: str, pack: str) -> str | None:
     folder = PACKS[pack][0]
     for parent in (downloads, os.path.join(downloads, "yeniasssets")):
@@ -165,12 +199,13 @@ def build_mob(downloads: str, key: str, pack: str, variant: int, height: int):
     if not pack_dir(downloads, pack):
         print(f"mob {key}: pack {pack} not found, skipped")
         return
-    anims = {name: frames_of(downloads, pack, variant, tag, step) for name, (tag, step) in ANIMS[PACKS[pack][1]].items()}
+    anims = {name: [without_trails(im) for im in frames_of(downloads, pack, variant, tag, step)] for name, (tag, step) in ANIMS[PACKS[pack][1]].items()}
     every = [im for frames in anims.values() for im in frames]
     idle = anims["idle"][0]
     idle_box = idle.getbbox()
     scale = height / (idle_box[3] - idle_box[1])
     box = union_box(every)
+    # One pixel of room all round for the outline, which pixelize() draws.
     pad = 1
     fw = math.ceil((box[2] - box[0]) * scale) + pad * 2
     fh = math.ceil((box[3] - box[1]) * scale) + pad * 2
@@ -182,8 +217,8 @@ def build_mob(downloads: str, key: str, pack: str, variant: int, height: int):
     for name, frames in anims.items():
         meta_anims[name] = []
         for im in frames:
-            cut = im.crop(box).resize((fw - pad * 2, fh - pad * 2), Image.LANCZOS)
-            sheet.paste(crisp(cut), ((index % cols) * fw + pad, (index // cols) * fh + pad))
+            cut = pixelize(im.crop(box), fw - pad * 2, fh - pad * 2)
+            sheet.paste(cut, ((index % cols) * fw, (index // cols) * fh))
             meta_anims[name].append(index)
             index += 1
     meta = {
