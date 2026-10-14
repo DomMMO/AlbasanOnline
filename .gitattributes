@@ -1,0 +1,4 @@
+# Shell scripts and server configs run on Linux: keep LF line endings.
+*.sh text eol=lf
+deploy/Caddyfile text eol=lf
+docker-compose.yml text eol=lf

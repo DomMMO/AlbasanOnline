@@ -1,0 +1,38 @@
+# Every push to main is typechecked and then deployed to the Hetzner server.
+# Secrets: DEPLOY_HOST (server IP), DEPLOY_SSH_KEY (private key whose public half may
+# only run /opt/mmo/update.sh on the server), DEPLOY_KNOWN_HOSTS (ssh-keyscan of the host).
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npm run typecheck
+
+      - name: Ship to server
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+        run: |
+          install -m 700 -d ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          echo "${{ secrets.DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          # The server's authorized_keys forces /opt/mmo/update.sh for this key; it reads the tarball.
+          git archive --format=tar.gz HEAD | ssh -i ~/.ssh/id_deploy "root@$DEPLOY_HOST"
