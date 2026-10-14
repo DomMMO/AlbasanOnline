@@ -47,6 +47,7 @@ export const TILE_ART_SLOTS: TileArtSlot[] = [
   tile("ice", "Buz", Tile.Ice, "Zemin karesi: donmuş göl."),
   tile("snow_tree", "Karlı Çam", Tile.SnowTree, "Engel karesi: arka planıyla birlikte çiz."),
   tile("lava", "Lav", Tile.Lava, "Engel karesi (ateş zindanları)."),
+  tile("ash", "Kül", Tile.Ash, "Zemin karesi (Kor Toprakları)."),
   tile("cave_wall_face", "Kaya (ön yüz)", TILE_COUNT, "Mağara duvarının, altında zemin olan karesi."),
   tile("wall", "Zindan duvarı (üstten)", Tile.Wall, "Kale dışındaki düz duvar karesi (zindanlar). Kalede görünmez: kaleyi aşağıdaki parçalar çizer."),
   tile("town_wall_face", "Zindan duvarı (ön yüz)", TILE_COUNT + 1, "Düz duvarın, altında zemin olan karesi (zindanlar)."),

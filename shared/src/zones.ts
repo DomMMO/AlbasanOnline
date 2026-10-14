@@ -7,6 +7,7 @@ import { applyMapEdits, type MapEdits } from "./mapEdits";
 import { BIG_DUNGEON_IDS, BIG_DUNGEONS, bigDungeonEntrance, dungeonsIn, type BigDungeonId, type DungeonHost } from "./bigDungeons";
 import { buildCanyon, CANYON_SPOTS } from "./canyon";
 import { buildFrost, FROST_SPOTS } from "./frost";
+import { buildVolcano, VOLCANO_SPOTS } from "./volcano";
 import { CAVE_BRIDGE, CAVE_ENTRANCE_TILE, CAVE_TORCHES, generateWorldMap, type WorldMap } from "./map";
 import { buildTown, TOWN_SPOTS } from "./town";
 import { buildHarbor, HARBOR_SPOTS } from "./harbor";
@@ -18,7 +19,7 @@ import { buildKeepHall, KEEP_HALL_SPOTS } from "./keepHall";
 // there and you log back in where you left. Every other zone is entered through a portal
 // and leaving it puts you back at the portal you used.
 
-export type ZoneId = "town" | "world" | "forest" | "canyon" | "frost" | "harbor" | "keep_hall" | "goblin_cave" | "jack_lair" | "pvp_arena" | BigDungeonId;
+export type ZoneId = "town" | "world" | "forest" | "canyon" | "frost" | "volcano" | "harbor" | "keep_hall" | "goblin_cave" | "jack_lair" | "pvp_arena" | BigDungeonId;
 
 /** New characters start here; the zone anyone can join without a portal ticket. */
 export const HOME_ZONE: ZoneId = "town";
@@ -81,6 +82,8 @@ const worldForestGate = { x: 33 * TILE_SIZE, y: 5 * TILE_SIZE };
 /** At the west and east ends of the valley's cross road: Kızıl Kanyon and Ayaz Dağları. */
 const worldCanyonGate = { x: 3.5 * TILE_SIZE, y: 25 * TILE_SIZE };
 const worldFrostGate = { x: 60.5 * TILE_SIZE, y: 25 * TILE_SIZE };
+/** At the south end of the valley's main road: the way down to Kor Toprakları. */
+const worldVolcanoGate = { x: 33 * TILE_SIZE, y: 46 * TILE_SIZE };
 
 /** Entrances of the big dungeons in an open-world zone; each one's way out leads back to it. */
 function dungeonPortals(host: DungeonHost): PortalDef[] {
@@ -209,6 +212,16 @@ export const ZONES: Record<ZoneId, ZoneDef> = {
         arriveAt: FROST_SPOTS.fromValley,
       },
       {
+        id: "world_volcano_gate",
+        ...worldVolcanoGate,
+        to: "volcano",
+        label: "Kor Toprakları",
+        style: "gate",
+        auto: true,
+        minLevel: 40,
+        arriveAt: VOLCANO_SPOTS.fromValley,
+      },
+      {
         id: "goblin_cave_entrance",
         ...caveEntrance,
         to: "goblin_cave",
@@ -279,6 +292,27 @@ export const ZONES: Record<ZoneId, ZoneDef> = {
         style: "gate",
         auto: true,
         arriveAt: { x: worldFrostGate.x - TILE_SIZE * 3, y: worldFrostGate.y },
+      },
+    ],
+  },
+  volcano: {
+    id: "volcano",
+    outdoor: true,
+    name: "Kor Toprakları",
+    instanced: false,
+    persistent: true,
+    npcs: ["ember_trader", "ash_sentinel"],
+    respawnText: "Kor Karakolu'nda yeniden doğacaksın.",
+    portals: [
+      ...dungeonPortals("volcano"),
+      {
+        id: "volcano_valley_gate",
+        ...VOLCANO_SPOTS.valleyGate,
+        to: "world",
+        label: "Başlangıç Vadisi",
+        style: "gate",
+        auto: true,
+        arriveAt: { x: worldVolcanoGate.x, y: worldVolcanoGate.y - TILE_SIZE * 3 },
       },
     ],
   },
@@ -377,17 +411,12 @@ const BUILDERS: Record<ZoneId, () => DungeonLayout> = {
     map: generateWorldMap(),
     mobs: [],
     spawnZones: WORLD_SPAWN_ZONES,
-    decor: [
-      { kind: "bridge", ...CAVE_BRIDGE },
-      ...CAVE_TORCHES.map((t) => ({ kind: "torch" as const, ...t })),
-      // Signposts by the west and east gates (walk-through).
-      { kind: "signboard", tx: 5, ty: 22, w: 3, text: "Kanyon · Sv 20" },
-      { kind: "signboard", tx: 56, ty: 22, w: 3, text: "Ayaz · Sv 30" },
-    ],
+    decor: [{ kind: "bridge", ...CAVE_BRIDGE }, ...CAVE_TORCHES.map((t) => ({ kind: "torch" as const, ...t }))],
   }),
   forest: buildForest,
   canyon: buildCanyon,
   frost: buildFrost,
+  volcano: buildVolcano,
   harbor: buildHarbor,
   keep_hall: buildKeepHall,
   goblin_cave: buildGoblinCave,

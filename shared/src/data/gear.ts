@@ -1,7 +1,7 @@
 import type { ClassId } from "./classes";
 import type { EquipSlot, IconShape, ItemDef, Rarity } from "./items";
 
-// The big item catalogue for levels 5-36, in the spirit of Knight Online and Metin2:
+// The big item catalogue for levels 5-45, in the spirit of Knight Online and Metin2:
 // weapon lines per class, class armour sets, accessories (necklace, ring, earring),
 // stronger potions, the return scroll, and the materials/quest items dropped by the
 // Dark Forest mobs. Stats follow a formula per tier so the lines stay balanced;
@@ -18,7 +18,7 @@ const MAGE: ClassId[] = ["shaman", "druid", "necromancer"];
 const ARCHER: ClassId[] = ["archer"];
 
 /** Rarity by tier index (0 = first tier of a line). */
-const TIER_RARITY: Rarity[] = ["uncommon", "uncommon", "rare", "rare", "epic", "epic", "epic", "epic", "legendary", "legendary"];
+const TIER_RARITY: Rarity[] = ["uncommon", "uncommon", "rare", "rare", "epic", "epic", "epic", "epic", "legendary", "legendary", "legendary", "legendary", "legendary"];
 
 const sellPrice = (level: number, rarity: Rarity) =>
   Math.round(level * level * 0.9 * { common: 1, uncommon: 1.3, rare: 1.8, epic: 2.6, legendary: 4 }[rarity]);
@@ -51,6 +51,9 @@ const WEAPON_LINES: WeaponLine[] = [
       { name: "Ayaz Kılıcı", level: 30, color: 0xb8e0ff, maxHp: 75 },
       { name: "Kutup Yıldızı Kılıcı", level: 33, color: 0xe7f5ff, maxHp: 90, description: "Kuzeyin en parlak yıldızı ağzına işlenmiş." },
       { name: "Kış Kralı Kılıcı", level: 36, color: 0x74c0fc, maxHp: 110, description: "Ulukan'ın kılıcı. Değdiği yeri kırağı tutar." },
+      { name: "Obsidyen Kılıç", level: 39, color: 0x2b2b33, maxHp: 130 },
+      { name: "Kor Kılıcı", level: 42, color: 0xff6b00, maxHp: 150 },
+      { name: "Közhan'ın Pençesi", level: 45, color: 0xd9480f, maxHp: 175, description: "Ateş Ejderi'nin pençesinden dövülmüş; ağzı hiç soğumaz." },
     ],
   },
   {
@@ -70,6 +73,9 @@ const WEAPON_LINES: WeaponLine[] = [
       { name: "Ayaz Baltası", level: 30, color: 0xa5d8ff, maxHp: 80 },
       { name: "Çığ Baltası", level: 33, color: 0xf1f3f5, maxHp: 95 },
       { name: "Ulukan'ın Teberi", level: 36, color: 0x4dabf7, maxHp: 115, description: "Bir vuruşta donmuş bir şelaleyi ikiye böler." },
+      { name: "Bazalt Balta", level: 39, color: 0x495057, maxHp: 135 },
+      { name: "Magma Teberi", level: 42, color: 0xf76707, maxHp: 155 },
+      { name: "Volkan Kıran", level: 45, color: 0xc92a2a, maxHp: 180 },
     ],
   },
   {
@@ -89,6 +95,9 @@ const WEAPON_LINES: WeaponLine[] = [
       { name: "Kırağı Asası", level: 30, color: 0xd0ebff, maxHp: 60 },
       { name: "Kuzey Işığı Asası", level: 33, color: 0x63e6be, maxHp: 75, description: "Tepesinde yeşil bir ışık dalgalanıyor." },
       { name: "Kadim Buz Asası", level: 36, color: 0x91a7ff, maxHp: 90 },
+      { name: "Kül Asası", level: 39, color: 0x868e96, maxHp: 105 },
+      { name: "Alev Dili Asası", level: 42, color: 0xff922b, maxHp: 120 },
+      { name: "Anka Kanadı Asası", level: 45, color: 0xffd43b, maxHp: 140, description: "Ucunda küllerinden doğan bir kuşun tüyü tutuşur." },
     ],
   },
   {
@@ -108,6 +117,9 @@ const WEAPON_LINES: WeaponLine[] = [
       { name: "Ayaz Yayı", level: 30, color: 0xb8e0ff, maxHp: 60 },
       { name: "Kar Baykuşu Yayı", level: 33, color: 0xf8f9fa, maxHp: 75 },
       { name: "Gökbörü Yayı", level: 36, color: 0x5c7cfa, maxHp: 90, description: "Gökten inen kurdun dişinden oyulmuş." },
+      { name: "Obsidyen Yay", level: 39, color: 0x2b2b33, maxHp: 105 },
+      { name: "Kor Yayı", level: 42, color: 0xff6b00, maxHp: 120 },
+      { name: "Güneş Oku Yayı", level: 45, color: 0xffd43b, maxHp: 140 },
     ],
   },
   {
@@ -127,6 +139,9 @@ const WEAPON_LINES: WeaponLine[] = [
       { name: "Kar Tanesi Topuzu", level: 30, color: 0xe7f5ff, maxHp: 80 },
       { name: "Şafak Yıldızı Topuzu", level: 33, color: 0xffe8cc, maxHp: 95 },
       { name: "Ebedî Nur Topuzu", level: 36, color: 0xfff9db, maxHp: 115 },
+      { name: "Kutsal Ateş Topuzu", level: 39, color: 0xffa94d, maxHp: 135 },
+      { name: "Kor Topuz", level: 42, color: 0xff6b00, maxHp: 155 },
+      { name: "Şafak Ateşi Topuzu", level: 45, color: 0xfff3bf, maxHp: 180 },
     ],
   },
 ];
@@ -191,6 +206,9 @@ const ARMOUR_SETS: ArmourSet[] = [
       { name: "Ayaz", level: 29, color: 0xa5d8ff },
       { name: "Buzul", level: 32, color: 0xe7f5ff },
       { name: "Kış Kralı", level: 35, color: 0x4dabf7 },
+      { name: "Bazalt", level: 38, color: 0x495057 },
+      { name: "Magma", level: 41, color: 0xf76707 },
+      { name: "Ejder Kanı", level: 44, color: 0xc92a2a },
     ],
   },
   {
@@ -211,6 +229,9 @@ const ARMOUR_SETS: ArmourSet[] = [
       { name: "Kırağı", level: 29, color: 0x74c0fc },
       { name: "Kuzey Işığı", level: 32, color: 0x63e6be },
       { name: "Ebedî", level: 35, color: 0xf8f9fa },
+      { name: "Kül", level: 38, color: 0x868e96 },
+      { name: "Alev", level: 41, color: 0xff922b },
+      { name: "Anka", level: 44, color: 0xffd43b },
     ],
   },
 ];
@@ -344,6 +365,9 @@ export const GEAR: ItemDef[] = [
   def({ id: "sand_crystal", name: "Kum Kristali", rarity: "uncommon", level: 1, maxStack: 50, sellPrice: 40, icon: { shape: "gem", color: 0xe0b070 }, description: "Güneşte tutunca içinde kum taneleri döner." }),
   def({ id: "frost_shard", name: "Ayaz Kristali", rarity: "common", level: 1, maxStack: 50, sellPrice: 30, icon: { shape: "gem", color: 0xb8e0ff } }),
   def({ id: "yeti_fur", name: "Yeti Postu", rarity: "uncommon", level: 1, maxStack: 50, sellPrice: 55, icon: { shape: "fang", color: 0xf1f3f5 }, description: "Kürkçüler bunun için altın öder." }),
+  // Kor Toprakları.
+  def({ id: "obsidian_shard", name: "Obsidyen Parçası", rarity: "common", level: 1, maxStack: 50, sellPrice: 38, icon: { shape: "gem", color: 0x343a40 } }),
+  def({ id: "ember_core", name: "Kor Çekirdeği", rarity: "uncommon", level: 1, maxStack: 50, sellPrice: 70, icon: { shape: "gem", color: 0xff6b00 }, description: "Avucunda hâlâ sıcak. Demirciler bayılır." }),
   def({ id: "spirit_stone", name: "Ruh Taşı", rarity: "rare", level: 1, maxStack: 20, sellPrice: 150, icon: { shape: "gem", color: 0x845ef7 }, description: "İçinde sönük bir ruh ışığı yanıp sönüyor. Tüccarlar iyi para verir." }),
 
   // ---- Quest items

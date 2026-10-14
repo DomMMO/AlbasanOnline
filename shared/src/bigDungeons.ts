@@ -2,8 +2,8 @@ import { TILE_SIZE } from "./constants";
 import { buildDungeon, type BuiltDungeon, type DungeonRoom, type DungeonTheme } from "./dungeons";
 import { Tile } from "./map";
 
-// The big dungeons: five entered from the Dark Forest, two from Kızıl Kanyon and two from
-// Ayaz Dağları. Much longer than the Goblin Cave: 30-40 mobs in packs along a chain of rooms,
+// The big dungeons: five entered from the Dark Forest and two each from Kızıl Kanyon,
+// Ayaz Dağları and Kor Toprakları. Much longer than the Goblin Cave: 30-40 mobs in packs along a chain of rooms,
 // and 3-4 bosses in their own rooms. The exit at the end opens only when every boss is down.
 
 export type BigDungeonId =
@@ -15,10 +15,12 @@ export type BigDungeonId =
   | "red_caves"
   | "buried_caravanserai"
   | "frost_cavern"
-  | "frost_citadel";
+  | "frost_citadel"
+  | "magma_forges"
+  | "ash_temple";
 
 /** Open-world zones with big dungeon entrances. */
-export type DungeonHost = "forest" | "canyon" | "frost";
+export type DungeonHost = "forest" | "canyon" | "frost" | "volcano";
 
 export interface BigDungeon {
   id: BigDungeonId;
@@ -277,6 +279,57 @@ const list: DungeonSource[] = [
       pack(["frost_knight", 3], ["winter_wraith", 2]),
       pack(["giant_guard", 2], ["winter_wraith", 2]),
       finalRoom("winter_king_ulukan", ["giant_guard", 2]),
+    ],
+  },
+  {
+    id: "magma_forges",
+    name: "Magma Ocakları",
+    minLevel: 42,
+    host: "volcano",
+    entranceTile: { tx: 58, ty: 28 },
+    dim: 0.4,
+    seed: 510,
+    wall: Tile.CaveWall,
+    floor: Tile.Ash,
+    theme: "lair",
+    rooms: [
+      entrance,
+      pack(["ember_smith", 3], ["slag_slime", 2]),
+      pack(["magma_hound", 3], ["ember_smith", 2]),
+      bossRoom("master_smith_gurz", ["ember_smith", 2]),
+      pack(["fire_djinn", 2], ["slag_slime", 3]),
+      pack(["magma_hound", 4], ["fire_djinn", 1]),
+      bossRoom("molten_golem", ["slag_slime", 2]),
+      pack(["ember_smith", 3], ["fire_djinn", 2]),
+      pack(["magma_hound", 3], ["slag_slime", 2]),
+      pack(["fire_djinn", 3], ["ember_smith", 2]),
+      finalRoom("forge_king_tamgar", ["magma_hound", 2]),
+    ],
+  },
+  {
+    id: "ash_temple",
+    name: "Kül Tapınağı",
+    minLevel: 46,
+    host: "volcano",
+    entranceTile: { tx: 6, ty: 15 },
+    dim: 0.45,
+    seed: 511,
+    wall: Tile.Wall,
+    floor: Tile.Ash,
+    theme: "ashtemple",
+    rooms: [
+      entrance,
+      pack(["ash_priest", 3], ["flame_guard", 2]),
+      pack(["salamander", 3], ["ash_priest", 2]),
+      bossRoom("flame_warden_tufan", ["flame_guard", 2]),
+      pack(["cinder_wraith", 2], ["flame_guard", 2]),
+      pack(["salamander", 4], ["cinder_wraith", 1]),
+      bossRoom("ash_priestess_nevra", ["ash_priest", 2]),
+      pack(["flame_guard", 3], ["ash_priest", 2]),
+      pack(["cinder_wraith", 3], ["salamander", 2]),
+      pack(["flame_guard", 2], ["cinder_wraith", 2]),
+      pack(["salamander", 3], ["ash_priest", 3]),
+      finalRoom("fire_dragon_kozhan", ["salamander", 2]),
     ],
   },
 ];

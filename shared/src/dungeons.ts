@@ -288,7 +288,7 @@ export type DungeonRoom =
   | { kind: "pack"; mobs: [mob: string, count: number][] }
   | { kind: "boss"; boss: string; guards?: [mob: string, count: number][]; final?: boolean };
 
-export type DungeonTheme = "mine" | "temple" | "crypt" | "fortress" | "lair" | "redcave" | "ruins" | "ice" | "citadel";
+export type DungeonTheme = "mine" | "temple" | "crypt" | "fortress" | "lair" | "redcave" | "ruins" | "ice" | "citadel" | "ashtemple";
 
 type RoomShape = "rect" | "cavern" | "octagon" | "cross" | "pillars" | "pools" | "blocks";
 type Prop = Extract<Decor, { kind: "prop" }>["prop"];
@@ -322,6 +322,7 @@ const THEMES: Record<DungeonTheme, ThemeStyle> = {
   ruins: { packShapes: ["pillars", "cross", "blocks", "octagon"], bossShapes: ["pillars", "octagon"], pool: Tile.Water, columns: true, props: ["column", "obelisk", "sack", "cart"], torches: true, cols: 5 },
   ice: { packShapes: ["cavern", "pools", "pillars", "cavern"], bossShapes: ["cavern", "pools"], pool: Tile.Water, columns: false, props: ["obelisk"], torches: false, cols: 4 },
   citadel: { packShapes: ["octagon", "pillars", "cross", "blocks"], bossShapes: ["pillars", "octagon"], pool: Tile.Ice, columns: true, props: ["barrel", "crate", "column"], racks: true, torches: true, cols: 4 },
+  ashtemple: { packShapes: ["pillars", "pools", "octagon", "pools"], bossShapes: ["pools", "pillars"], pool: Tile.Lava, columns: true, props: ["obelisk", "column"], torches: true, cols: 4 },
 };
 
 export interface DungeonSpec {
