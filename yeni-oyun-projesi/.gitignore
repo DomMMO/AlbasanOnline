@@ -1,0 +1,14 @@
+# Godot 4+ specific ignores
+.godot/
+/android/
+
+# Third-party art, fonts and music (as in the web client): kept on this machine only.
+art/licensed/
+# Bake handshake file.
+.bake-done
+
+# Bake output (npm run bake:godot): regenerated from shared/ and the drawing code. Some of it
+# contains licensed pixels (decor, item icons), so none of it goes into the public repo.
+/data/
+/art/*
+!/art/fonts/

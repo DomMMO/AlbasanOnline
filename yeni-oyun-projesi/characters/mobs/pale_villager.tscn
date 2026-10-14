@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="SpriteFrames" path="res://characters/mobs/pale_villager.tres" id="1_optvg"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_05k8m"]
+size = Vector2(19, 24)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_nqls3"]
+size = Vector2(10, 6)
+
+[node name="PaleVillager" type="Node2D" unique_id=484142528]
+
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1819712728]
+sprite_frames = ExtResource("1_optvg")
+animation = &"idle"
+autoplay = "idle"
+centered = false
+offset = Vector2(-15.813, -26.8336)
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1936276654]
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=2054358546]
+position = Vector2(-0.3129996, -10.8336)
+shape = SubResource("RectangleShape2D_05k8m")
+debug_color = Color(0.2, 0.6, 1, 0.35)
+
+[node name="Feet" type="Area2D" parent="." unique_id=662837475]
+collision_layer = 2
+collision_mask = 0
+input_pickable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1764947908]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_nqls3")
+debug_color = Color(1, 0.3, 0.2, 0.45)

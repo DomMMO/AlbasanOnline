@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="SpriteFrames" path="res://characters/players/male_bun.tres" id="1_he85r"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_eaomi"]
+size = Vector2(12, 16)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_kkf84"]
+size = Vector2(10, 6)
+
+[node name="MaleBun" type="Node2D" unique_id=1157144244]
+
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1654109992]
+sprite_frames = ExtResource("1_he85r")
+animation = &"idle_down"
+autoplay = "idle_down"
+centered = false
+offset = Vector2(-6, -16)
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1095234249]
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=666347593]
+position = Vector2(0, -8)
+shape = SubResource("RectangleShape2D_eaomi")
+debug_color = Color(0.2, 0.6, 1, 0.35)
+
+[node name="Feet" type="Area2D" parent="." unique_id=443994016]
+collision_layer = 2
+collision_mask = 0
+input_pickable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1873952304]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_kkf84")
+debug_color = Color(1, 0.3, 0.2, 0.45)

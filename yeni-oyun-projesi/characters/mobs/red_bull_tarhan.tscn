@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="SpriteFrames" path="res://characters/mobs/red_bull_tarhan.tres" id="1_rg1g2"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1sxmy"]
+size = Vector2(68, 63)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_dj3xl"]
+size = Vector2(10, 6)
+
+[node name="RedBullTarhan" type="Node2D" unique_id=2091847694]
+
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=2002845877]
+sprite_frames = ExtResource("1_rg1g2")
+animation = &"idle"
+autoplay = "idle"
+centered = false
+offset = Vector2(-47.0761, -66.3351)
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1494385643]
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1487548916]
+position = Vector2(9.9239, -29.835098)
+shape = SubResource("RectangleShape2D_1sxmy")
+debug_color = Color(0.2, 0.6, 1, 0.35)
+
+[node name="Feet" type="Area2D" parent="." unique_id=1885160874]
+collision_layer = 2
+collision_mask = 0
+input_pickable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1517269486]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_dj3xl")
+debug_color = Color(1, 0.3, 0.2, 0.45)

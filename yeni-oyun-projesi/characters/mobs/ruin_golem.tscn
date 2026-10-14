@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="SpriteFrames" path="res://characters/mobs/ruin_golem.tres" id="1_n3wi5"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_bquen"]
+size = Vector2(45, 37)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_dqoir"]
+size = Vector2(10, 6)
+
+[node name="RuinGolem" type="Node2D" unique_id=396268805]
+
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1574994149]
+sprite_frames = ExtResource("1_n3wi5")
+animation = &"idle"
+autoplay = "idle"
+centered = false
+offset = Vector2(-25.1503, -42.936398)
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=291681212]
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1018994746]
+position = Vector2(6.3497005, -17.4364)
+shape = SubResource("RectangleShape2D_bquen")
+debug_color = Color(0.2, 0.6, 1, 0.35)
+
+[node name="Feet" type="Area2D" parent="." unique_id=1539829335]
+collision_layer = 2
+collision_mask = 0
+input_pickable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1064498134]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_dqoir")
+debug_color = Color(1, 0.3, 0.2, 0.45)

@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="SpriteFrames" path="res://characters/mobs/fallen_commander_karacor.tres" id="1_g4t82"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_v1bq7"]
+size = Vector2(62, 52)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_h1dql"]
+size = Vector2(10, 6)
+
+[node name="FallenCommanderKaracor" type="Node2D" unique_id=1185571222]
+
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=128687116]
+sprite_frames = ExtResource("1_g4t82")
+animation = &"idle"
+autoplay = "idle"
+centered = false
+offset = Vector2(-42.63, -61.6044)
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=224055745]
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=355421105]
+position = Vector2(11.369999, -24.604399)
+shape = SubResource("RectangleShape2D_v1bq7")
+debug_color = Color(0.2, 0.6, 1, 0.35)
+
+[node name="Feet" type="Area2D" parent="." unique_id=989715597]
+collision_layer = 2
+collision_mask = 0
+input_pickable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1401738155]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_h1dql")
+debug_color = Color(1, 0.3, 0.2, 0.45)

@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="SpriteFrames" path="res://characters/mobs/lava_golem.tres" id="1_mud88"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ynll0"]
+size = Vector2(45, 37)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_0lmam"]
+size = Vector2(10, 6)
+
+[node name="LavaGolem" type="Node2D" unique_id=169975123]
+
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=136661289]
+sprite_frames = ExtResource("1_mud88")
+animation = &"idle"
+autoplay = "idle"
+centered = false
+offset = Vector2(-25.1503, -42.936398)
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1907015348]
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=813964941]
+position = Vector2(6.3497005, -17.4364)
+shape = SubResource("RectangleShape2D_ynll0")
+debug_color = Color(0.2, 0.6, 1, 0.35)
+
+[node name="Feet" type="Area2D" parent="." unique_id=1938134625]
+collision_layer = 2
+collision_mask = 0
+input_pickable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1118648159]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_0lmam")
+debug_color = Color(1, 0.3, 0.2, 0.45)

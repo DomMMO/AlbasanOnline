@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="SpriteFrames" path="res://characters/mobs/ash_priestess_nevra.tres" id="1_utxcc"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_0ud4e"]
+size = Vector2(38, 49)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_2shjd"]
+size = Vector2(10, 6)
+
+[node name="AshPriestessNevra" type="Node2D" unique_id=186708499]
+
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=616983682]
+sprite_frames = ExtResource("1_utxcc")
+animation = &"idle"
+autoplay = "idle"
+centered = false
+offset = Vector2(-32.6991, -54.5013)
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1140151603]
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1100997119]
+position = Vector2(0.30090067, -23.0013)
+shape = SubResource("RectangleShape2D_0ud4e")
+debug_color = Color(0.2, 0.6, 1, 0.35)
+
+[node name="Feet" type="Area2D" parent="." unique_id=1024739665]
+collision_layer = 2
+collision_mask = 0
+input_pickable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1832585332]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_2shjd")
+debug_color = Color(1, 0.3, 0.2, 0.45)

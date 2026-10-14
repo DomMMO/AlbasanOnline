@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="SpriteFrames" path="res://characters/mobs/ember_giant_atesan.tres" id="1_ya1tc"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ku33q"]
+size = Vector2(82, 67)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_eq4jj"]
+size = Vector2(10, 6)
+
+[node name="EmberGiantAtesan" type="Node2D" unique_id=317425446]
+
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=116268636]
+sprite_frames = ExtResource("1_ya1tc")
+animation = &"idle"
+autoplay = "idle"
+centered = false
+offset = Vector2(-46.4688, -79.942505)
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1057612126]
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1937509709]
+position = Vector2(11.531199, -32.4425)
+shape = SubResource("RectangleShape2D_ku33q")
+debug_color = Color(0.2, 0.6, 1, 0.35)
+
+[node name="Feet" type="Area2D" parent="." unique_id=764643357]
+collision_layer = 2
+collision_mask = 0
+input_pickable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=463297969]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_eq4jj")
+debug_color = Color(1, 0.3, 0.2, 0.45)

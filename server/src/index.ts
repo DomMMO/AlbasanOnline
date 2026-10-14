@@ -34,7 +34,7 @@ app.use("/api/admin", createAdminRouter());
 app.use("/api", createApiRouter());
 // The game used to be tried out at /oyun/; it is at the root now.
 app.get(["/oyun", "/oyun/*splat"], (_req, res) => res.redirect(301, "/"));
-// In production the built client (game + GM panel) is served from the same origin.
+// In production the built client (the Godot game at the root + the GM pages) is served from the same origin.
 if (existsSync(CLIENT_DIST)) app.use(express.static(CLIENT_DIST));
 
 const gameServer = new Server({ transport: new WebSocketTransport({ server: createServer(app) }) });

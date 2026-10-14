@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="SpriteFrames" path="res://characters/mobs/desert_raider.tres" id="1_0eh6s"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1d1ug"]
+size = Vector2(21, 28)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ff7gh"]
+size = Vector2(10, 6)
+
+[node name="DesertRaider" type="Node2D" unique_id=1724203026]
+
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=692631079]
+sprite_frames = ExtResource("1_0eh6s")
+animation = &"idle"
+autoplay = "idle"
+centered = false
+offset = Vector2(-13.252501, -27.965101)
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1521833558]
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1902168006]
+position = Vector2(-1.7525003, -12.965101)
+shape = SubResource("RectangleShape2D_1d1ug")
+debug_color = Color(0.2, 0.6, 1, 0.35)
+
+[node name="Feet" type="Area2D" parent="." unique_id=438089428]
+collision_layer = 2
+collision_mask = 0
+input_pickable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1510568927]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_ff7gh")
+debug_color = Color(1, 0.3, 0.2, 0.45)

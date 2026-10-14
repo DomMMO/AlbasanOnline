@@ -1,24 +1,16 @@
-import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { defineConfig } from "vite";
 
-// In production the game is the Godot web build, which deploy/update.sh copies into public/
-// (index.html, index.wasm, index.pck...); then the old web client is not built at all.
-const godotBuild = existsSync(resolve(__dirname, "public/index.html"));
-
+// The game is the Godot client (yeni-oyun-projesi/); its web build is copied into public/ by
+// deploy/update.sh and served at the site root. This client builds only the GM pages.
 export default defineConfig({
   build: {
     rollupOptions: {
-      // The game (unless the Godot build replaces it), the GM panel and the GM map editor.
-      input: {
-        ...(godotBuild ? {} : { main: resolve(__dirname, "index.html") }),
-        admin: resolve(__dirname, "admin.html"),
-        editor: resolve(__dirname, "editor.html"),
-      },
+      // The GM panel and the GM map editor.
+      input: { admin: resolve(__dirname, "admin.html"), editor: resolve(__dirname, "editor.html") },
     },
   },
   server: {
-    // Expose on the LAN so the game can be opened from a phone on the same network.
     host: true,
     port: 5173,
     fs: { allow: [".."] },

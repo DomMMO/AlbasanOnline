@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="SpriteFrames" path="res://characters/mobs/frost_wraith.tres" id="1_m8jso"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_0f4d2"]
+size = Vector2(20, 29)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1ao5m"]
+size = Vector2(10, 6)
+
+[node name="FrostWraith" type="Node2D" unique_id=1883201942]
+
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=43016398]
+sprite_frames = ExtResource("1_m8jso")
+animation = &"idle"
+autoplay = "idle"
+centered = false
+offset = Vector2(-18.9728, -28.277699)
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1539764873]
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1388484080]
+position = Vector2(1.0272007, -12.777699)
+shape = SubResource("RectangleShape2D_0f4d2")
+debug_color = Color(0.2, 0.6, 1, 0.35)
+
+[node name="Feet" type="Area2D" parent="." unique_id=48678183]
+collision_layer = 2
+collision_mask = 0
+input_pickable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=690111454]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_1ao5m")
+debug_color = Color(1, 0.3, 0.2, 0.45)

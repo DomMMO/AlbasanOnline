@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="SpriteFrames" path="res://characters/classes/novice_male.tres" id="1_4sixe"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_gudps"]
+size = Vector2(12, 16)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ccw1n"]
+size = Vector2(10, 6)
+
+[node name="NoviceMale" type="Node2D" unique_id=240629719]
+
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=985577798]
+sprite_frames = ExtResource("1_4sixe")
+animation = &"idle_down"
+autoplay = "idle_down"
+centered = false
+offset = Vector2(-6, -16)
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1773167211]
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=194240198]
+position = Vector2(0, -8)
+shape = SubResource("RectangleShape2D_gudps")
+debug_color = Color(0.2, 0.6, 1, 0.35)
+
+[node name="Feet" type="Area2D" parent="." unique_id=492476286]
+collision_layer = 2
+collision_mask = 0
+input_pickable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=816072629]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_ccw1n")
+debug_color = Color(1, 0.3, 0.2, 0.45)

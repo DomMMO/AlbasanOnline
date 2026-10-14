@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="SpriteFrames" path="res://characters/npcs/fisherman.tres" id="1_av4e3"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_436ce"]
+size = Vector2(12, 16)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_trxaa"]
+size = Vector2(10, 6)
+
+[node name="Fisherman" type="Node2D" unique_id=1497622206]
+
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=315886984]
+sprite_frames = ExtResource("1_av4e3")
+animation = &"idle_down"
+autoplay = "idle_down"
+centered = false
+offset = Vector2(-6, -16)
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=711690277]
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1228090407]
+position = Vector2(0, -8)
+shape = SubResource("RectangleShape2D_436ce")
+debug_color = Color(0.2, 0.6, 1, 0.35)
+
+[node name="Feet" type="Area2D" parent="." unique_id=78542919]
+collision_layer = 2
+collision_mask = 0
+input_pickable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=990782020]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_trxaa")
+debug_color = Color(1, 0.3, 0.2, 0.45)

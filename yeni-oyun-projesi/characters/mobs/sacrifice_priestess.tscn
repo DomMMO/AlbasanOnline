@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="SpriteFrames" path="res://characters/mobs/sacrifice_priestess.tres" id="1_wlrgu"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_fixtt"]
+size = Vector2(58, 54)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_bpukh"]
+size = Vector2(10, 6)
+
+[node name="SacrificePriestess" type="Node2D" unique_id=2036643361]
+
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=2078503715]
+sprite_frames = ExtResource("1_wlrgu")
+animation = &"idle"
+autoplay = "idle"
+centered = false
+offset = Vector2(-26.599298, -57.802597)
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1083185763]
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1016179325]
+position = Vector2(4.4007006, -24.802599)
+shape = SubResource("RectangleShape2D_fixtt")
+debug_color = Color(0.2, 0.6, 1, 0.35)
+
+[node name="Feet" type="Area2D" parent="." unique_id=971290873]
+collision_layer = 2
+collision_mask = 0
+input_pickable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1706212885]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_bpukh")
+debug_color = Color(1, 0.3, 0.2, 0.45)

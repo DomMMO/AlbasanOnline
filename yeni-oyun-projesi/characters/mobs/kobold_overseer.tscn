@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="SpriteFrames" path="res://characters/mobs/kobold_overseer.tres" id="1_mujrw"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ck16m"]
+size = Vector2(41, 37)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_j2stk"]
+size = Vector2(10, 6)
+
+[node name="KoboldOverseer" type="Node2D" unique_id=46435453]
+
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=2099901702]
+sprite_frames = ExtResource("1_mujrw")
+animation = &"idle"
+autoplay = "idle"
+centered = false
+offset = Vector2(-28.4016, -39.5428)
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1576079740]
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=68175966]
+position = Vector2(6.098399, -17.0428)
+shape = SubResource("RectangleShape2D_ck16m")
+debug_color = Color(0.2, 0.6, 1, 0.35)
+
+[node name="Feet" type="Area2D" parent="." unique_id=695328912]
+collision_layer = 2
+collision_mask = 0
+input_pickable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=854228332]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_j2stk")
+debug_color = Color(1, 0.3, 0.2, 0.45)

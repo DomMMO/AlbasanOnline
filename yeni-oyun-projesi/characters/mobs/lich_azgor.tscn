@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="SpriteFrames" path="res://characters/mobs/lich_azgor.tres" id="1_ut268"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ohvgy"]
+size = Vector2(41, 55)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_cum8w"]
+size = Vector2(10, 6)
+
+[node name="LichAzgor" type="Node2D" unique_id=1166000612]
+
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1205980415]
+sprite_frames = ExtResource("1_ut268")
+animation = &"idle"
+autoplay = "idle"
+centered = false
+offset = Vector2(-33.9416, -54.9315)
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=114766686]
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1246745872]
+position = Vector2(1.5583993, -26.4315)
+shape = SubResource("RectangleShape2D_ohvgy")
+debug_color = Color(0.2, 0.6, 1, 0.35)
+
+[node name="Feet" type="Area2D" parent="." unique_id=308088492]
+collision_layer = 2
+collision_mask = 0
+input_pickable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=310274338]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_cum8w")
+debug_color = Color(1, 0.3, 0.2, 0.45)

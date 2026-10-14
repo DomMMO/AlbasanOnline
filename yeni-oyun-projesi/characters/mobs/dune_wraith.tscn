@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="SpriteFrames" path="res://characters/mobs/dune_wraith.tres" id="1_3nq8v"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_llh7c"]
+size = Vector2(20, 29)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_6ynxy"]
+size = Vector2(10, 6)
+
+[node name="DuneWraith" type="Node2D" unique_id=342955145]
+
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1474467868]
+sprite_frames = ExtResource("1_3nq8v")
+animation = &"idle"
+autoplay = "idle"
+centered = false
+offset = Vector2(-18.9728, -28.277699)
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1924081377]
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=35135626]
+position = Vector2(1.0272007, -12.777699)
+shape = SubResource("RectangleShape2D_llh7c")
+debug_color = Color(0.2, 0.6, 1, 0.35)
+
+[node name="Feet" type="Area2D" parent="." unique_id=1536268055]
+collision_layer = 2
+collision_mask = 0
+input_pickable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=205094960]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_6ynxy")
+debug_color = Color(1, 0.3, 0.2, 0.45)

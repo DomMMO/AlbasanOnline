@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="SpriteFrames" path="res://characters/mobs/drowned_priest.tres" id="1_wxtrx"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_8mi8f"]
+size = Vector2(22, 28)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1plga"]
+size = Vector2(10, 6)
+
+[node name="DrownedPriest" type="Node2D" unique_id=372415245]
+
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1403233204]
+sprite_frames = ExtResource("1_wxtrx")
+animation = &"idle"
+autoplay = "idle"
+centered = false
+offset = Vector2(-17.1926, -27.9906)
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1785695839]
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1870323185]
+position = Vector2(1.8074, -12.990601)
+shape = SubResource("RectangleShape2D_8mi8f")
+debug_color = Color(0.2, 0.6, 1, 0.35)
+
+[node name="Feet" type="Area2D" parent="." unique_id=196651837]
+collision_layer = 2
+collision_mask = 0
+input_pickable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=293675153]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_1plga")
+debug_color = Color(1, 0.3, 0.2, 0.45)

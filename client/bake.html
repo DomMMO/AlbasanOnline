@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Godot bake</title>
+    <style>
+      body { margin: 0; background: #111; color: #ccc; font: 12px monospace; }
+    </style>
+  </head>
+  <body>
+    <!-- tools/godot/bake.mjs opens this page headless: it draws every zone with the game's own
+         Phaser code and sends the pictures and data to the Godot project. -->
+    <pre id="log"></pre>
+    <div id="game"></div>
+    <script type="module" src="/src/bake/main.ts"></script>
+  </body>
+</html>

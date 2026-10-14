@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="SpriteFrames" path="res://characters/mobs/tomb_jackal.tres" id="1_f3he1"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_bnpca"]
+size = Vector2(53, 27)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_5bst2"]
+size = Vector2(10, 6)
+
+[node name="TombJackal" type="Node2D" unique_id=912106994]
+
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=563601715]
+sprite_frames = ExtResource("1_f3he1")
+animation = &"idle"
+autoplay = "idle"
+centered = false
+offset = Vector2(-28.656, -24.8859)
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=599349505]
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1690556485]
+position = Vector2(-1.1560001, -11.3859005)
+shape = SubResource("RectangleShape2D_bnpca")
+debug_color = Color(0.2, 0.6, 1, 0.35)
+
+[node name="Feet" type="Area2D" parent="." unique_id=777296021]
+collision_layer = 2
+collision_mask = 0
+input_pickable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=5419005]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_5bst2")
+debug_color = Color(1, 0.3, 0.2, 0.45)

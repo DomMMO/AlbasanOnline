@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="SpriteFrames" path="res://characters/npcs/alchemist.tres" id="1_ya5eh"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_gsyrj"]
+size = Vector2(12, 16)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_yppnu"]
+size = Vector2(10, 6)
+
+[node name="Alchemist" type="Node2D" unique_id=1507410659]
+
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1509893238]
+sprite_frames = ExtResource("1_ya5eh")
+animation = &"idle_down"
+autoplay = "idle_down"
+centered = false
+offset = Vector2(-6, -16)
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1352769858]
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=251316543]
+position = Vector2(0, -8)
+shape = SubResource("RectangleShape2D_gsyrj")
+debug_color = Color(0.2, 0.6, 1, 0.35)
+
+[node name="Feet" type="Area2D" parent="." unique_id=1900069864]
+collision_layer = 2
+collision_mask = 0
+input_pickable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=190574875]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_yppnu")
+debug_color = Color(1, 0.3, 0.2, 0.45)

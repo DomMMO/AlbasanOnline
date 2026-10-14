@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="SpriteFrames" path="res://characters/mobs/orc_warrior.tres" id="1_jelhb"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_nssrx"]
+size = Vector2(20, 28)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_cif07"]
+size = Vector2(10, 6)
+
+[node name="OrcWarrior" type="Node2D" unique_id=1115855855]
+
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1457676055]
+sprite_frames = ExtResource("1_jelhb")
+animation = &"idle"
+autoplay = "idle"
+centered = false
+offset = Vector2(-19.852001, -30.960001)
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1237561519]
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=49942083]
+position = Vector2(-0.8520005, -12.960001)
+shape = SubResource("RectangleShape2D_nssrx")
+debug_color = Color(0.2, 0.6, 1, 0.35)
+
+[node name="Feet" type="Area2D" parent="." unique_id=714247565]
+collision_layer = 2
+collision_mask = 0
+input_pickable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=70005353]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_cif07")
+debug_color = Color(1, 0.3, 0.2, 0.45)

@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="SpriteFrames" path="res://characters/mobs/gnoll_seer.tres" id="1_jbi0v"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_40yo4"]
+size = Vector2(29, 31)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_a061s"]
+size = Vector2(10, 6)
+
+[node name="GnollSeer" type="Node2D" unique_id=1963218544]
+
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1150288411]
+sprite_frames = ExtResource("1_jbi0v")
+animation = &"idle"
+autoplay = "idle"
+centered = false
+offset = Vector2(-25.0228, -31.3766)
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1124517060]
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=90225274]
+position = Vector2(1.4771994, -13.876599)
+shape = SubResource("RectangleShape2D_40yo4")
+debug_color = Color(0.2, 0.6, 1, 0.35)
+
+[node name="Feet" type="Area2D" parent="." unique_id=1600400321]
+collision_layer = 2
+collision_mask = 0
+input_pickable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1544460964]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_a061s")
+debug_color = Color(1, 0.3, 0.2, 0.45)
