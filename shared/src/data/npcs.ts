@@ -1,4 +1,6 @@
+import { CANYON_SPOTS } from "../canyon";
 import { FOREST_SPOTS } from "../forest";
+import { FROST_SPOTS } from "../frost";
 import { HARBOR_SPOTS } from "../harbor";
 import { KEEP_HALL_SPOTS } from "../keepHall";
 import { TOWN_SPOTS } from "../town";
@@ -315,5 +317,47 @@ export const NPCS: Record<string, NpcDef> = {
     role: "merchant",
     shop: ["large_hp_potion", "large_mana_potion", "hp_potion", "mana_potion", "return_scroll", "upgrade_scroll_low"],
     greeting: "Ormanın ortasında tüccar mı dedin? Kâr nerede, Rıza orada!",
+  },
+
+  // ---- Kızıl Kanyon: the caravan stop at the valley gate.
+  caravan_master: {
+    id: "caravan_master",
+    name: "Kervancı Hasan",
+    ...CANYON_SPOTS.caravanMaster,
+    appearance: { type: "humanoid", tunic: 0xb5835a, hair: 0x2d2d2d, skin: 0xc68a5a, headwear: { color: 0xe8dcc0, style: "hood" } },
+    role: "merchant",
+    shop: ["super_hp_potion", "super_mana_potion", "large_hp_potion", "large_mana_potion", "return_scroll", "upgrade_scroll_low", "upgrade_scroll_mid"],
+    greeting: "Kervan üç gündür gelmedi, mallar bende kaldı. Ucuz veririm, yeter ki sırtlanlara kalmasın.",
+  },
+  canyon_scout: {
+    id: "canyon_scout",
+    name: "Akıncı İzcisi Gökhan",
+    ...CANYON_SPOTS.scout,
+    appearance: { type: "humanoid", tunic: 0x5a1a10, hair: 0x1a1a1a, skin: 0xc68a5a, gear: { chest: "leather_vest", legs: "leather_pants" } },
+    role: "quest",
+    shop: [],
+    greeting:
+      "Bir zamanlar ben de Kara Toygar'ın akıncılarındandım. Kuzeybatıdaki ordugâhında oturur; yanına tek başına gitme. Batı yamacındaki Kızıl Mağaralar gnolların yuvası, kuzeyde kumun altındaki kervansaraydan ise dönen pek olmadı.",
+  },
+
+  // ---- Ayaz Dağları: the hunters' shelter at the valley gate.
+  furrier: {
+    id: "furrier",
+    name: "Kürkçü Oğuz",
+    ...FROST_SPOTS.furrier,
+    appearance: { type: "humanoid", tunic: 0x6b4a2b, hair: 0x8b4513, skin: 0xe0b088, gear: { chest: "leather_vest", legs: "wolf_hide_leggings" } },
+    role: "merchant",
+    shop: ["super_hp_potion", "super_mana_potion", "return_scroll", "upgrade_scroll_low", "upgrade_scroll_mid"],
+    greeting: "Yeti postu getirirsen iyi para veririm. Önce şu iksirlerden al; dağ, hazırlıksız geleni sevmez.",
+  },
+  mountain_guide: {
+    id: "mountain_guide",
+    name: "Dağ Rehberi Batu",
+    ...FROST_SPOTS.guide,
+    appearance: { type: "humanoid", tunic: 0x3b5bdb, hair: 0xf1f3f5, skin: 0xd8a47a, gear: { head: "leather_cap", chest: "leather_vest" } },
+    role: "quest",
+    shop: [],
+    greeting:
+      "Doğuda buzdan bir taht var; Buz Devi Ayazhan orada oturur, yaklaşanı ezer. Kuzeydoğudaki Buz Mağarası'nda kristaller şarkı söyler derler, güneydoğudaki Ayaz Kalesi'nde ise Kış Kralı Ulukan hüküm sürer. Gece olunca Ak Börüler iner, ateşten uzaklaşma.",
   },
 };

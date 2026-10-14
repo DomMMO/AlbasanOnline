@@ -7,7 +7,8 @@
     "db": "tsx scripts/dev-db.ts",
     "start": "tsx src/index.ts",
     "make-admin": "tsx scripts/make-admin.ts",
-    "stop": "tsx scripts/stop.ts"
+    "stop": "tsx scripts/stop.ts",
+    "check-zones": "tsx scripts/check-zones.ts"
   },
   "dependencies": {
     "@colyseus/core": "0.16.26",

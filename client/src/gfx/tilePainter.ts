@@ -279,7 +279,7 @@ function groundAround(tiles: Tile[][], x: number, y: number): Tile {
   for (let r = 1; r < 6; r++) {
     for (const [dx, dy] of [[0, r], [-r, 0], [r, 0], [0, -r]]) {
       const t = tiles[y + dy]?.[x + dx];
-      if (t === Tile.Cobble || t === Tile.Plaza || t === Tile.Market || t === Tile.Grass || t === Tile.Path || t === Tile.DarkGrass || t === Tile.WoodFloor) return t;
+      if (t === Tile.Cobble || t === Tile.Plaza || t === Tile.Market || t === Tile.Grass || t === Tile.Path || t === Tile.DarkGrass || t === Tile.WoodFloor || t === Tile.Sand || t === Tile.Snow) return t;
     }
   }
   return Tile.Cobble;
@@ -304,6 +304,12 @@ const TILE_COLORS: Record<Tile, { base: string; speckle: string[] }> = {
   [Tile.WoodFloor]: { base: "#7a5233", speckle: ["#845a38", "#6e4a2d"] },
   [Tile.WoodWall]: { base: "#3e2a1a", speckle: ["#46301e", "#352416"] },
   [Tile.Sky]: { base: "#8ec8ee", speckle: ["#a4d4f2", "#7fbde8"] },
+  [Tile.Sand]: { base: "#d9a066", speckle: ["#e3ae74", "#c98f58", "#e8b984"] },
+  [Tile.RedRock]: { base: "#9a4a2c", speckle: ["#a85634", "#873f25", "#b0613b"] },
+  [Tile.Snow]: { base: "#e6edf3", speckle: ["#f4f8fb", "#d5e0ea", "#ffffff"] },
+  [Tile.Ice]: { base: "#a9d4ec", speckle: ["#bfe0f2", "#94c6e2", "#d6eef9"] },
+  [Tile.SnowTree]: { base: "#e6edf3", speckle: ["#d5e0ea"] },
+  [Tile.Lava]: { base: "#c2410c", speckle: ["#ea580c", "#9a3412", "#f59e0b"] },
 };
 /** A tile's main colour (the minimap paints one pixel of it per tile). */
 export function tileBaseColor(tile: Tile): string {
@@ -475,6 +481,51 @@ export function paintTileStrip(): HTMLCanvasElement {
     } else if (t === Tile.CaveFloor) {
       px(ox + 3, 11, "#5a5047", 2, 1);
       px(ox + 11, 5, "#5a5047", 1, 1);
+    } else if (t === Tile.Sand) {
+      // Wind ripples: a lit crest with its shadow just under it.
+      for (const [rx, ry, w] of [[1, 3, 6], [9, 6, 5], [3, 10, 7], [11, 13, 4]]) {
+        px(ox + rx, ry, "#efc896", w, 1);
+        px(ox + rx + 1, ry + 1, "#bf8550", w - 1, 1);
+      }
+    } else if (t === Tile.RedRock) {
+      // Rough rock seen from above: lumps of different sizes, each lit on its top-left and
+      // shaded below, with short dark cracks between them. Nothing runs edge to edge, so a
+      // cliff of these reads as rock rather than as a brick wall.
+      for (const [lx, ly, w, h] of [[1, 1, 6, 5], [8, 2, 6, 4], [3, 8, 5, 5], [10, 9, 5, 5], [0, 12, 3, 3]] as const) {
+        px(ox + lx, ly, "#a5512f", w, h);
+        px(ox + lx + 1, ly, "#c46a3e", w - 2, 1);
+        px(ox + lx, ly + 1, "#b85f37", 1, h - 2);
+        px(ox + lx + 1, ly + h - 1, "#6e2f18", w - 1, 1);
+      }
+      for (const [cx, cy, w, h] of [[7, 3, 1, 3], [8, 7, 2, 1], [9, 11, 1, 3], [2, 6, 2, 1]] as const) px(ox + cx, cy, "#4a1d0d", w, h);
+    } else if (t === Tile.Snow) {
+      // Soft drifts: a bluish hollow under each, and a few glints.
+      for (const [dx, dy, w] of [[2, 5, 5], [9, 11, 5]]) px(ox + dx, dy, "#c9d6e2", w, 1);
+      for (const [gx, gy] of [[5, 2], [12, 7], [3, 13]]) px(ox + gx, gy, "#ffffff");
+    } else if (t === Tile.Ice) {
+      // Clear ice: a white shine streak and thin cracks.
+      px(ox + 2, 3, "#eef8fd", 5, 1);
+      px(ox + 3, 4, "#eef8fd", 2, 1);
+      px(ox + 9, 8, "#7fb5d6", 1, 4);
+      px(ox + 10, 11, "#7fb5d6", 3, 1);
+      px(ox + 5, 12, "#7fb5d6", 3, 1);
+    } else if (t === Tile.SnowTree) {
+      // A dark pine in three tiers, snow lying on each.
+      px(ox + 7, 13, "#4a3020", 2, 2);
+      px(ox + 3, 9, "#1f3d2c", 10, 4);
+      px(ox + 4, 5, "#244a33", 8, 4);
+      px(ox + 5, 1, "#2a553b", 6, 4);
+      px(ox + 3, 9, "#f4f8fb", 10, 1);
+      px(ox + 4, 5, "#f4f8fb", 8, 1);
+      px(ox + 5, 1, "#ffffff", 6, 1);
+      px(ox + 4, 15, "#00000022", 8, 1);
+    } else if (t === Tile.Lava) {
+      // Molten rock: a dark crust broken by bright glowing seams.
+      px(ox + 1, 2, "#7c2d12", 5, 3);
+      px(ox + 9, 9, "#7c2d12", 5, 3);
+      px(ox + 2, 11, "#fbbf24", 4, 1);
+      px(ox + 8, 4, "#fde68a", 5, 1);
+      px(ox + 6, 7, "#facc15", 2, 1);
     } else if (t === Tile.Sky) {
       // Only seen in the editor's palette: a puff of cloud.
       px(ox + 3, 7, "#ffffff", 10, 4);

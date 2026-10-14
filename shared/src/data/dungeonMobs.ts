@@ -2,7 +2,7 @@ import type { Appearance, HumanoidGear } from "./appearance";
 import { gearDrops } from "./loot";
 import type { BossAbility, LootTable, MobDef } from "./mobs";
 
-// Mobs and bosses of the five big dungeons (see dungeons.ts / zones.ts). Stats come from
+// Mobs and bosses of the big dungeons (see dungeons.ts / zones.ts). Stats come from
 // one curve per level so the dungeons line up with the open world: a level 16 pack mob is
 // about as tough as the Dark Forest's level 16 orcs. Dungeon mobs never respawn.
 
@@ -10,7 +10,8 @@ type Drop = LootTable["drops"][number];
 
 const hpFor = (level: number) => Math.round(12 * level + 1.3 * level * level);
 const xpFor = (level: number) => Math.round(0.6 * level * level + 6 * level);
-const gearTier = (level: number) => Math.max(1, Math.min(5, Math.floor((level - 6) / 3)));
+/** Gear tier for a level: tier t is level 3t + 6 (gear.ts); there are ten. */
+const gearTier = (level: number) => Math.max(1, Math.min(10, Math.floor((level - 6) / 3)));
 const hpPotion = (level: number) => (level >= 17 ? "super_hp_potion" : "large_hp_potion");
 
 interface TrashSpec {
@@ -107,7 +108,7 @@ function boss(spec: BossSpec): MobDef {
         { item: "spirit_stone", chance: spec.final ? 0.8 : 0.25, min: 1, max: spec.final ? 3 : 1 },
         { item: hpPotion(level), chance: 1, min: 2, max: 4 },
         ...gearDrops(tier, spec.final ? 0.06 : 0.025),
-        ...(spec.final && tier < 5 ? gearDrops(tier + 1, 0.025) : []),
+        ...(spec.final && tier < 10 ? gearDrops(tier + 1, 0.025) : []),
         ...(spec.extraDrops ?? []),
       ],
     },
@@ -175,6 +176,47 @@ const list: MobDef[] = [
   boss({ id: "lava_giant", name: "Lav Devi", level: 23, scale: 1, appearance: { type: "image", key: "golem_earth_big", tint: 0xff8a50 }, abilities: [leap(23), slam(23, 13_000)], addMob: "fire_slime", extraDrops: [{ item: "might_ring", chance: 0.15 }] }),
   boss({ id: "dragon_priest", name: "Ejder Rahibi Vael", level: 23, appearance: human(0x5c0a0a, 0xd9a07a, 0xf1f3f5), abilities: [leap(23), charge(23)], addMob: "dragonkin_guard", extraDrops: [{ item: "seal_necklace", chance: 0.15 }] }),
   boss({ id: "elder_dragon", name: "Kadim Ejder Azhdar", level: 24, final: true, scale: 3, appearance: { type: "wolf", fur: 0x8b0000 }, abilities: [slam(24), charge(24), leap(24, 15_000)], addMob: "drake", addsAt: [0.75, 0.5, 0.25], extraDrops: [{ item: "seal_fragment", chance: 1 }, { item: "might_ring", chance: 0.3 }, { item: "red_dragon_earring", chance: 0.3 }, { item: "seal_necklace", chance: 0.3 }] }),
+  // ---- 6. Kızıl Mağaralar (Red Caves, Kızıl Kanyon), Sv 22-25
+  trash({ id: "gnoll_hunter", name: "Gnol Avcı", level: 22, appearance: { type: "humanoid", tunic: 0x6b4423, skin: 0xb08850, hair: 0x4a3420, hairStyle: "spiky", gear: { chest: "leather_vest" } }, material: "hyena_fang" }),
+  trash({ id: "cave_hyena", name: "Mağara Sırtlanı", level: 23, attack: 1.1, speed: 76, attackSpeedMs: 1600, appearance: { type: "wolf", fur: 0x9c7a4a }, material: "hyena_fang" }),
+  trash({ id: "dust_slime", name: "Toz Balçığı", level: 23, hp: 1.3, speed: 32, appearance: { type: "slime", color: 0xd9a066 }, material: "sand_crystal" }),
+  trash({ id: "gnoll_seer", name: "Gnol Kâhini", level: 24, hp: 0.9, attack: 1.3, appearance: { type: "humanoid", tunic: 0x8a2a1a, skin: 0xb08850, hair: 0xe8e4d8, hairStyle: "long", headwear: { color: 0x8a2a1a, style: "hood" } }, material: "sand_crystal" }),
+  trash({ id: "red_minotaur", name: "Kızıl Minotor", level: 25, hp: 1.5, speed: 54, appearance: { type: "image", key: "minotaur_brown", tint: 0xc0583a }, material: "hyena_fang" }),
+  boss({ id: "gnoll_chief", name: "Gnol Şefi Kıkırgan", level: 23, appearance: { type: "humanoid", tunic: 0x4a2a12, skin: 0xb08850, hair: 0x2a1a0a, hairStyle: "spiky", gear: { head: "chieftain_helm", chest: "leather_vest" } }, abilities: [slam(23), charge(23)], addMob: "gnoll_hunter" }),
+  boss({ id: "hyena_matriarch", name: "Sırtlan Ana", level: 24, scale: 3, appearance: { type: "wolf", fur: 0x7a5a32 }, abilities: [charge(24), leap(24, 11_000)], addMob: "cave_hyena" }),
+  boss({ id: "red_bull_tarhan", name: "Kızıl Boğa Tarhan", level: 25, final: true, scale: 1, appearance: { type: "image", key: "minotaur_dark_big", tint: 0xc0583a }, abilities: [charge(25), slam(25), leap(25, 15_000)], addMob: "red_minotaur", extraDrops: [{ item: "sand_crystal", chance: 1, min: 2, max: 4 }] }),
+
+  // ---- 7. Gömülü Kervansaray (Buried Caravanserai, Kızıl Kanyon), Sv 26-29
+  trash({ id: "shrouded_dead", name: "Kefenli Ölü", level: 26, hp: 1.2, speed: 48, appearance: { type: "humanoid", tunic: 0xd8cfb8, skin: 0xc8bfa8, hair: 0xd8cfb8, hairStyle: "bald" }, material: "bone_dust" }),
+  trash({ id: "tomb_jackal", name: "Mezar Çakalı", level: 27, attack: 1.1, speed: 78, attackSpeedMs: 1600, appearance: { type: "wolf", fur: 0x3a2a1a }, material: "hyena_fang" }),
+  trash({ id: "cursed_merchant", name: "Lanetli Tüccar", level: 27, hp: 0.9, attack: 1.3, appearance: { type: "image", key: "wraith_hood", tint: 0xc9a227 }, material: "sand_crystal" }),
+  trash({ id: "sand_shade", name: "Kum Gölgesi", level: 28, hp: 0.9, attack: 1.3, appearance: { type: "image", key: "wraith_teal", tint: 0xd9a066 }, material: "night_essence" }),
+  trash({ id: "ruin_golem", name: "Harabe Golemi", level: 28, hp: 1.7, speed: 44, appearance: { type: "image", key: "golem_earth", tint: 0xd9b48a }, material: "golem_core" }),
+  boss({ id: "caravan_ghost", name: "Kervanbaşı Sadi'nin Hortlağı", level: 27, scale: 1, appearance: { type: "image", key: "wraith_purple_big", tint: 0xd9a066 }, abilities: [leap(27), slam(27, 13_000)], addMob: "cursed_merchant" }),
+  boss({ id: "vizier_kamil", name: "Lanetli Vezir Kâmil", level: 28, appearance: { type: "humanoid", tunic: 0x5f3dc4, skin: 0xc8bfa8, hair: 0xf1f3f5, hairStyle: "long", headwear: { color: 0xe8b84a, style: "hat" } }, abilities: [leap(28), charge(28)], addMob: "shrouded_dead" }),
+  boss({ id: "stone_sentinel", name: "Taş Nöbetçi", level: 28, scale: 1, appearance: { type: "image", key: "golem_stone_big", tint: 0xd9b48a }, abilities: [slam(28), leap(28, 14_000)], addMob: "ruin_golem", addsAt: [0.5] }),
+  boss({ id: "sand_sultan", name: "Kum Sultanı Erkam", level: 29, final: true, appearance: { type: "humanoid", tunic: 0xe8b84a, skin: 0xc8bfa8, hair: 0x1a1a1a, gear: { head: "plate_head_7", chest: "plate_chest_7" } }, abilities: [slam(29), charge(29), leap(29, 14_000)], addMob: "sand_shade", addsAt: [0.75, 0.5, 0.25], extraDrops: [{ item: "sand_crystal", chance: 1, min: 3, max: 5 }] }),
+
+  // ---- 8. Buz Mağarası (Frozen Cavern, Ayaz Dağları), Sv 31-34
+  trash({ id: "ice_fox", name: "Buz Tilkisi", level: 31, attack: 1.1, speed: 80, attackSpeedMs: 1500, appearance: { type: "wolf", fur: 0xd0e8f5 }, material: "frost_shard" }),
+  trash({ id: "crystal_slime", name: "Kristal Balçık", level: 32, hp: 1.3, speed: 30, appearance: { type: "slime", color: 0x9ad5ff }, material: "frost_shard" }),
+  trash({ id: "frost_kobold", name: "Ayaz Koboldu", level: 32, appearance: { type: "humanoid", tunic: 0x3b5bdb, skin: 0x9fb7c9, hair: 0xf1f3f5, gear: { head: "leather_cap" } }, material: "frost_shard" }),
+  trash({ id: "ice_elemental", name: "Buz Elementali", level: 33, hp: 1.6, speed: 46, appearance: { type: "image", key: "golem_stone", tint: 0xb8e0ff }, material: "frost_shard" }),
+  trash({ id: "frozen_spirit", name: "Donuk Ruh", level: 34, hp: 0.9, attack: 1.3, appearance: { type: "image", key: "wraith_teal" }, material: "night_essence" }),
+  boss({ id: "icebreaker_gorr", name: "Buzkıran Gorr", level: 32, scale: 1, appearance: { type: "image", key: "golem_stone_big", tint: 0xb8e0ff }, abilities: [slam(32), leap(32, 12_000)], addMob: "ice_elemental", addsAt: [0.5] }),
+  boss({ id: "snow_mother_fox", name: "Ak Tilki Ana", level: 33, scale: 3, appearance: { type: "wolf", fur: 0xf8f9fa }, abilities: [charge(33), charge(33, 7000)], addMob: "ice_fox" }),
+  boss({ id: "crystal_mother_neyra", name: "Kristal Ana Neyra", level: 34, final: true, appearance: { type: "humanoid", tunic: 0x74c0fc, skin: 0xdde3ea, hair: 0xe7f5ff, gender: "female", hairStyle: "long", headwear: { color: 0xb8e0ff, style: "hat" } }, abilities: [leap(34), slam(34), charge(34, 12_000)], addMob: "frozen_spirit", addsAt: [0.75, 0.5, 0.25], extraDrops: [{ item: "frost_shard", chance: 1, min: 3, max: 5 }] }),
+
+  // ---- 9. Ayaz Kalesi (Frost Citadel, Ayaz Dağları), Sv 35-39
+  trash({ id: "frost_knight", name: "Ayaz Şövalyesi", level: 35, hp: 1.4, appearance: { type: "humanoid", tunic: 0x1c3d5a, skin: 0xdde3ea, hair: 0x1a1a1a, gear: { head: "plate_head_8", chest: "plate_chest_8", legs: "plate_legs_8" } }, material: "frost_shard" }),
+  trash({ id: "frost_mage", name: "Ayaz Büyücüsü", level: 36, hp: 0.9, attack: 1.35, appearance: { type: "humanoid", tunic: 0x3b5bdb, skin: 0xdde3ea, hair: 0xf1f3f5, hairStyle: "long", gear: { chest: "robe_chest_8" } }, material: "frost_shard" }),
+  trash({ id: "ice_hound", name: "Buz Tazısı", level: 36, attack: 1.15, speed: 80, attackSpeedMs: 1500, appearance: { type: "wolf", fur: 0x8fbfe0 }, material: "yeti_fur" }),
+  trash({ id: "giant_guard", name: "Dev Muhafız", level: 37, hp: 1.8, attack: 1.1, speed: 46, appearance: { type: "humanoid", tunic: 0x343a40, skin: 0xb8c8d8, hair: 0xf1f3f5, hairStyle: "bald", gear: { chest: "plate_chest_9" } }, material: "yeti_fur" }),
+  trash({ id: "winter_wraith", name: "Kış Hortlağı", level: 38, hp: 1.0, attack: 1.35, appearance: { type: "image", key: "wraith_purple", tint: 0xb8e0ff }, material: "night_essence" }),
+  boss({ id: "gate_commander_sergun", name: "Kapı Kumandanı Sergün", level: 36, appearance: { type: "humanoid", tunic: 0x1c3d5a, skin: 0xdde3ea, hair: 0x1a1a1a, gear: { head: "plate_head_9", chest: "plate_chest_9", legs: "plate_legs_9", feet: "plate_feet_9" } }, abilities: [slam(36), charge(36)], addMob: "frost_knight" }),
+  boss({ id: "ice_witch_ayaza", name: "Buz Cadısı Ayaza", level: 37, appearance: { type: "humanoid", tunic: 0x5f3dc4, skin: 0xdde3ea, hair: 0xf8f9fa, gender: "female", hairStyle: "long", headwear: { color: 0x3b5bdb, style: "hat" } }, abilities: [leap(37), leap(37, 6000), slam(37, 14_000)], addMob: "frost_mage" }),
+  boss({ id: "white_drake_kiragi", name: "Ak Ejder Kırağı", level: 38, scale: 3, appearance: { type: "wolf", fur: 0xe7f5ff }, abilities: [charge(38), slam(38), leap(38, 13_000)], addMob: "ice_hound" }),
+  boss({ id: "winter_king_ulukan", name: "Kış Kralı Ulukan", level: 39, final: true, appearance: { type: "humanoid", tunic: 0x0b2540, skin: 0xdde3ea, hair: 0xf1f3f5, gear: { head: "plate_head_10", chest: "plate_chest_10", legs: "plate_legs_10", feet: "plate_feet_10" } }, abilities: [slam(39), charge(39), leap(39, 12_000)], addMob: "giant_guard", addsAt: [0.75, 0.5, 0.25], extraDrops: [{ item: "yeti_fur", chance: 1, min: 2, max: 4 }, { item: "upgrade_scroll_high", chance: 1 }] }),
 ];
 
 export const DUNGEON_MOBS: Record<string, MobDef> = Object.fromEntries(list.map((mob) => [mob.id, mob]));

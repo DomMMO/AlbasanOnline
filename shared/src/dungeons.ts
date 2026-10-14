@@ -278,19 +278,58 @@ export function buildJackLair(): DungeonLayout {
 // Laid out by a generator: a chain of rooms on a grid, snaking left-right and down a row,
 // joined by corridors. Rooms are an entrance, mob packs and boss rooms; the last boss
 // room holds the exit, which opens once every boss in the dungeon is dead.
+// A theme gives each dungeon its own look: the shapes its rooms are cut in (ragged caverns,
+// pillared halls, rooms with pools in the corners...), its pools (water, lava), its clutter
+// and torches. Every room keeps a three-tile cross through its centre open, so the corridors
+// always join up and the boss always has room to stand.
 
 export type DungeonRoom =
   | { kind: "entrance" }
   | { kind: "pack"; mobs: [mob: string, count: number][] }
   | { kind: "boss"; boss: string; guards?: [mob: string, count: number][]; final?: boolean };
 
+export type DungeonTheme = "mine" | "temple" | "crypt" | "fortress" | "lair" | "redcave" | "ruins" | "ice" | "citadel";
+
+type RoomShape = "rect" | "cavern" | "octagon" | "cross" | "pillars" | "pools" | "blocks";
+type Prop = Extract<Decor, { kind: "prop" }>["prop"];
+
+interface ThemeStyle {
+  /** Shapes for pack rooms and boss rooms, used in turn. */
+  packShapes: RoomShape[];
+  bossShapes: RoomShape[];
+  /** What fills the corner pools of "pools" rooms. */
+  pool: Tile;
+  /** Pillars: stone columns (drawn), or plain wall tiles (rock). */
+  columns: boolean;
+  /** Clutter standing along the walls. */
+  props: Prop[];
+  /** Graves in rows (crypts), a camp (tent and fire) in pack rooms, a weapon rack on the back wall. */
+  graves?: boolean;
+  camps?: boolean;
+  racks?: boolean;
+  torches: boolean;
+  /** Rooms per row of the grid. */
+  cols: number;
+}
+
+const THEMES: Record<DungeonTheme, ThemeStyle> = {
+  mine: { packShapes: ["cavern", "blocks", "cavern", "rect"], bossShapes: ["cavern", "pillars"], pool: Tile.Water, columns: false, props: ["crate", "barrel", "cart", "sack"], torches: true, cols: 4 },
+  temple: { packShapes: ["pools", "pillars", "cross", "pools"], bossShapes: ["pillars", "pools"], pool: Tile.Water, columns: true, props: ["obelisk", "column"], torches: true, cols: 4 },
+  crypt: { packShapes: ["rect", "cross", "pillars", "octagon"], bossShapes: ["octagon", "pillars"], pool: Tile.Water, columns: true, props: ["column", "sack"], graves: true, torches: true, cols: 3 },
+  fortress: { packShapes: ["rect", "blocks", "cross", "rect"], bossShapes: ["octagon", "blocks"], pool: Tile.Water, columns: false, props: ["barrel", "crate", "hay", "dummy"], camps: true, racks: true, torches: true, cols: 4 },
+  lair: { packShapes: ["cavern", "pools", "cavern", "blocks"], bossShapes: ["pools", "cavern"], pool: Tile.Lava, columns: false, props: ["obelisk"], torches: false, cols: 4 },
+  redcave: { packShapes: ["cavern", "blocks", "cavern", "cross"], bossShapes: ["cavern", "octagon"], pool: Tile.Water, columns: false, props: ["sack", "crate", "barrel"], camps: true, torches: true, cols: 3 },
+  ruins: { packShapes: ["pillars", "cross", "blocks", "octagon"], bossShapes: ["pillars", "octagon"], pool: Tile.Water, columns: true, props: ["column", "obelisk", "sack", "cart"], torches: true, cols: 5 },
+  ice: { packShapes: ["cavern", "pools", "pillars", "cavern"], bossShapes: ["cavern", "pools"], pool: Tile.Water, columns: false, props: ["obelisk"], torches: false, cols: 4 },
+  citadel: { packShapes: ["octagon", "pillars", "cross", "blocks"], bossShapes: ["pillars", "octagon"], pool: Tile.Ice, columns: true, props: ["barrel", "crate", "column"], racks: true, torches: true, cols: 4 },
+};
+
 export interface DungeonSpec {
   seed: number;
   wall: Tile;
   floor: Tile;
+  theme: DungeonTheme;
   rooms: DungeonRoom[];
-  /** Rooms per row. */
-  cols?: number;
 }
 
 export interface BuiltDungeon extends DungeonLayout {
@@ -304,14 +343,19 @@ const CELL_W = 22;
 const CELL_H = 17;
 
 export function buildDungeon(spec: DungeonSpec): BuiltDungeon {
-  const cols = spec.cols ?? 4;
+  const style = THEMES[spec.theme];
+  const cols = style.cols;
   const rows = Math.ceil(spec.rooms.length / cols);
   const width = cols * CELL_W + 2;
   const height = rows * CELL_H + 2;
   const tiles: Tile[][] = Array.from({ length: height }, () => Array(width).fill(spec.wall));
   const rand = mulberry32(spec.seed);
+  const inside = (tx: number, ty: number) => ty > 0 && tx > 0 && ty < height - 1 && tx < width - 1;
+  const set = (tx: number, ty: number, tile: Tile) => {
+    if (inside(tx, ty)) tiles[ty][tx] = tile;
+  };
   const carve = (x: number, y: number, w: number, h: number) => {
-    for (let ty = y; ty < y + h; ty++) for (let tx = x; tx < x + w; tx++) if (ty > 0 && tx > 0 && ty < height - 1 && tx < width - 1) tiles[ty][tx] = spec.floor;
+    for (let ty = y; ty < y + h; ty++) for (let tx = x; tx < x + w; tx++) set(tx, ty, spec.floor);
   };
   const jitter = () => Math.floor(rand() * 3) - 1;
 
@@ -319,7 +363,7 @@ export function buildDungeon(spec: DungeonSpec): BuiltDungeon {
     const row = Math.floor(i / cols);
     const col = row % 2 === 0 ? i % cols : cols - 1 - (i % cols);
     const [baseW, baseH] = room.kind === "entrance" ? [10, 8] : room.kind === "pack" ? [15, 11] : room.final ? [19, 14] : [17, 13];
-    const w = baseW + Math.floor(rand() * 2);
+    const w = baseW + Math.floor(rand() * 3);
     const h = baseH + Math.floor(rand() * 2);
     return {
       x: 1 + col * CELL_W + Math.floor((CELL_W - w) / 2) + jitter(),
@@ -328,8 +372,87 @@ export function buildDungeon(spec: DungeonSpec): BuiltDungeon {
       h,
     };
   });
-  for (const r of rects) carve(r.x, r.y, r.w, r.h);
-  const centre = (r: (typeof rects)[number]) => ({ x: r.x + Math.floor(r.w / 2), y: r.y + Math.floor(r.h / 2) });
+  type Rect = (typeof rects)[number];
+  const centre = (r: Rect) => ({ x: r.x + Math.floor(r.w / 2), y: r.y + Math.floor(r.h / 2) });
+  /** The open cross through a room's centre, where corridors arrive and the boss stands. */
+  const inCross = (r: Rect, tx: number, ty: number) => {
+    const c = centre(r);
+    return Math.abs(tx - c.x) <= 1 || Math.abs(ty - c.y) <= 1;
+  };
+
+  const shapeOf = (room: DungeonRoom, i: number): RoomShape => {
+    if (room.kind === "entrance") return "rect";
+    const list = room.kind === "pack" ? style.packShapes : style.bossShapes;
+    return list[i % list.length];
+  };
+  const decor: Decor[] = [];
+
+  // Rooms in their shapes.
+  rects.forEach((r, i) => {
+    carve(r.x, r.y, r.w, r.h);
+    const c = centre(r);
+    const shape = shapeOf(spec.rooms[i], i);
+    const each = (fn: (tx: number, ty: number) => void) => {
+      for (let ty = r.y; ty < r.y + r.h; ty++) for (let tx = r.x; tx < r.x + r.w; tx++) if (!inCross(r, tx, ty)) fn(tx, ty);
+    };
+    if (shape === "cavern") {
+      // An ellipse with a ragged rim.
+      each((tx, ty) => {
+        const d = ((tx + 0.5 - (r.x + r.w / 2)) / (r.w / 2)) ** 2 + ((ty + 0.5 - (r.y + r.h / 2)) / (r.h / 2)) ** 2;
+        if (d > 0.95 - rand() * 0.2) set(tx, ty, spec.wall);
+      });
+    } else if (shape === "octagon") {
+      each((tx, ty) => {
+        const ex = Math.min(tx - r.x, r.x + r.w - 1 - tx);
+        const ey = Math.min(ty - r.y, r.y + r.h - 1 - ty);
+        if (ex + ey < 3) set(tx, ty, spec.wall);
+      });
+    } else if (shape === "cross") {
+      const cw = Math.floor(r.w * 0.28);
+      const ch = Math.floor(r.h * 0.3);
+      each((tx, ty) => {
+        const ex = Math.min(tx - r.x, r.x + r.w - 1 - tx);
+        const ey = Math.min(ty - r.y, r.y + r.h - 1 - ty);
+        if (ex < cw && ey < ch) set(tx, ty, spec.wall);
+      });
+    } else if (shape === "pillars") {
+      // A grid of pillars, two tiles in from the walls.
+      for (let ty = r.y + 2; ty < r.y + r.h - 2; ty += 3) {
+        for (let tx = r.x + 2; tx < r.x + r.w - 2; tx += 4) {
+          if (inCross(r, tx, ty)) continue;
+          if (style.columns) {
+            set(tx, ty, Tile.Solid);
+            decor.push({ kind: "prop", tx, ty, prop: "column" });
+          } else set(tx, ty, spec.wall);
+        }
+      }
+    } else if (shape === "pools") {
+      // A pool in each quarter of the room.
+      for (const [qx, qy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+        const cx = c.x + qx * Math.floor(r.w / 4);
+        const cy = c.y + qy * Math.floor(r.h / 4);
+        const rx = Math.max(1, Math.floor(r.w / 8));
+        const ry = Math.max(1, Math.floor(r.h / 8));
+        for (let ty = cy - ry; ty <= cy + ry; ty++) {
+          for (let tx = cx - rx; tx <= cx + rx; tx++) {
+            if (inCross(r, tx, ty) || tx <= r.x || ty <= r.y || tx >= r.x + r.w - 1 || ty >= r.y + r.h - 1) continue;
+            if (((tx - cx) / (rx + 0.5)) ** 2 + ((ty - cy) / (ry + 0.5)) ** 2 <= 1) set(tx, ty, style.pool);
+          }
+        }
+      }
+    } else if (shape === "blocks") {
+      // A chunk of wall to hide behind in each quarter.
+      for (const [qx, qy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+        const bw = 2 + Math.floor(rand() * 2);
+        const bh = 2;
+        const bx = c.x + qx * (3 + Math.floor(rand() * 2)) - (qx < 0 ? bw - 1 : 0);
+        const by = c.y + qy * 3 - (qy < 0 ? bh - 1 : 0);
+        for (let ty = by; ty < by + bh; ty++) for (let tx = bx; tx < bx + bw; tx++) if (!inCross(r, tx, ty)) set(tx, ty, spec.wall);
+      }
+    }
+  });
+
+  // Corridors along the room centres (the open crosses line up with them).
   for (let i = 1; i < rects.length; i++) {
     const a = centre(rects[i - 1]);
     const b = centre(rects[i]);
@@ -337,6 +460,68 @@ export function buildDungeon(spec: DungeonSpec): BuiltDungeon {
     carve(b.x - 1, Math.min(a.y, b.y) - 1, 3, Math.abs(a.y - b.y) + 3);
   }
 
+  const isFloor = (tx: number, ty: number) => tiles[ty]?.[tx] === spec.floor;
+  const solid = (tx: number, ty: number) => (tiles[ty][tx] = Tile.Solid);
+  /** Floor tiles of a room (off its open cross) that pass `test`. */
+  const spots = (r: Rect, test: (tx: number, ty: number) => boolean) => {
+    const out: [number, number][] = [];
+    for (let ty = r.y + 1; ty < r.y + r.h - 1; ty++) {
+      for (let tx = r.x + 1; tx < r.x + r.w - 1; tx++) if (isFloor(tx, ty) && !inCross(r, tx, ty) && test(tx, ty)) out.push([tx, ty]);
+    }
+    return out;
+  };
+  const againstWall = (tx: number, ty: number) => [tiles[ty - 1]?.[tx], tiles[ty + 1]?.[tx], tiles[ty]?.[tx - 1], tiles[ty]?.[tx + 1]].includes(spec.wall);
+  const take = <T>(list: T[]) => list.splice(Math.floor(rand() * list.length), 1)[0];
+
+  // Torches, racks, camps, graves and clutter.
+  rects.forEach((r, i) => {
+    const room = spec.rooms[i];
+    if (room.kind === "entrance") return;
+    if (style.torches) {
+      for (const tx of [r.x + 3, r.x + r.w - 4]) {
+        if (isFloor(tx, r.y) && !inCross(r, tx, r.y) && tiles[r.y - 1]?.[tx] === spec.wall) {
+          solid(tx, r.y);
+          decor.push({ kind: "torch", tx, ty: r.y });
+        }
+      }
+    }
+    if (style.racks && room.kind === "boss") {
+      const tx = centre(r).x + 3;
+      if ([tx, tx + 1].every((x) => isFloor(x, r.y) && !inCross(r, x, r.y))) {
+        solid(tx, r.y);
+        solid(tx + 1, r.y);
+        decor.push({ kind: "rack", tx, ty: r.y, w: 2 });
+      }
+    }
+    if (style.camps && room.kind === "pack" && i % 2 === 1) {
+      // A tent in the top-left corner and its fire in front.
+      const tx = r.x + 1;
+      const ty = r.y + 1;
+      const open = (x: number, y: number) => isFloor(x, y) && !inCross(r, x, y);
+      if ([0, 1, 2].every((dx) => open(tx + dx, ty) && open(tx + dx, ty + 1)) && open(tx + 1, ty + 3)) {
+        for (const dx of [0, 1, 2]) for (const dy of [0, 1]) solid(tx + dx, ty + dy);
+        decor.push({ kind: "tent", tx, ty, w: 3, h: 2, color: spec.theme === "redcave" ? 0x8a5a2b : 0x6b1f1f });
+        solid(tx + 1, ty + 3);
+        decor.push({ kind: "campfire", tx: tx + 1, ty: ty + 3 });
+      }
+    }
+    if (style.graves && room.kind === "pack") {
+      for (const [tx, ty] of spots(r, (tx, ty) => (tx - r.x) % 3 === 2 && (ty - r.y) % 3 === 2)) {
+        if (rand() < 0.45) {
+          solid(tx, ty);
+          decor.push({ kind: "grave", tx, ty });
+        }
+      }
+    }
+    const free = spots(r, againstWall);
+    for (let n = 2 + Math.floor(rand() * 3); n > 0 && free.length > 0; n--) {
+      const [tx, ty] = take(free);
+      solid(tx, ty);
+      decor.push({ kind: "prop", tx, ty, prop: style.props[Math.floor(rand() * style.props.length)] });
+    }
+  });
+
+  // Mobs, the spawn point and the portals.
   const mobs: MobPlacement[] = [];
   let entrancePortal = { x: 0, y: 0 };
   let exitPortal = { x: 0, y: 0 };
@@ -347,13 +532,15 @@ export function buildDungeon(spec: DungeonSpec): BuiltDungeon {
     const scatter = (list: [string, number][], keepClear = 0) => {
       for (const [mob, count] of list) {
         for (let n = 0; n < count; n++) {
-          let tx: number;
-          let ty: number;
-          do {
-            tx = r.x + 2 + Math.floor(rand() * (r.w - 4));
-            ty = r.y + 2 + Math.floor(rand() * (r.h - 4));
-          } while (keepClear > 0 && Math.hypot(tx - c.x, ty - c.y) < keepClear);
-          mobs.push({ mob, ...px(tx, ty) });
+          let at = { tx: c.x, ty: c.y };
+          for (let attempt = 0; attempt < 60; attempt++) {
+            const tx = r.x + 2 + Math.floor(rand() * (r.w - 4));
+            const ty = r.y + 2 + Math.floor(rand() * (r.h - 4));
+            if (!isFloor(tx, ty) || !isFloor(tx, ty - 1) || Math.hypot(tx - c.x, ty - c.y) < keepClear) continue;
+            at = { tx, ty };
+            break;
+          }
+          mobs.push({ mob, ...px(at.tx, at.ty) });
         }
       }
     };
@@ -366,9 +553,10 @@ export function buildDungeon(spec: DungeonSpec): BuiltDungeon {
       mobs.push({ mob: room.boss, ...px(c.x, c.y - 1) });
       // Guards stand off to the sides so the boss can be pulled on its own with care.
       scatter(room.guards ?? [], 5);
-      if (room.final) exitPortal = px(r.x + 2, r.y + 1);
+      // The way out: at the top of the room's open cross.
+      if (room.final) exitPortal = px(c.x, r.y + 1);
     }
   });
 
-  return { map: { width, height, tiles, spawn }, mobs, entrancePortal, exitPortal };
+  return { map: { width, height, tiles, spawn }, mobs, decor, entrancePortal, exitPortal };
 }

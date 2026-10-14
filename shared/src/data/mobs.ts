@@ -1,5 +1,6 @@
 import type { Appearance } from "./appearance";
 import { DUNGEON_MOBS } from "./dungeonMobs";
+import { FRONTIER_MOBS } from "./frontierMobs";
 import { gearDrops } from "./loot";
 
 export interface LootTable {
@@ -720,4 +721,5 @@ export const MOBS: Record<string, MobDef> = {
     },
   },
   ...DUNGEON_MOBS,
+  ...FRONTIER_MOBS,
 };
