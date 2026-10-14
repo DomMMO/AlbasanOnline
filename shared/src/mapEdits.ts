@@ -1,6 +1,7 @@
 import { TILE_SIZE } from "./constants";
 import { ICON_SHAPES, type IconShape } from "./data/items";
 import { MOBS } from "./data/mobs";
+import { DECOR_ART } from "./data/decorArt";
 import type { Decor, DungeonLayout, SpawnZone } from "./dungeons";
 import { isBlockingTile, Tile, type WorldMap } from "./map";
 
@@ -437,6 +438,10 @@ export function decorFootprint(d: Decor): { tx: number; ty: number; w: number; h
       return null;
     case "prop":
       return { tx: d.tx, ty: d.ty, w: d.prop === "well" ? 2 : 1, h: d.prop === "well" ? 2 : 1 };
+    case "art": {
+      const [w, h] = DECOR_ART[d.key]?.size ?? [1, 1];
+      return { tx: d.tx, ty: d.ty, w, h };
+    }
     default:
       return { tx: d.tx, ty: d.ty, w: "w" in d ? d.w : 1, h: "h" in d ? d.h : 1 };
   }

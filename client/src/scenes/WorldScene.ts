@@ -152,6 +152,7 @@ import { INTERPOLATION_DELAY_MS, SnapshotBuffer } from "../entities/SnapshotBuff
 import { floatingText } from "../fx/floatingText";
 import { ringEffect } from "../fx/slash";
 import { preloadImageSprites } from "../gfx/imageSprites";
+import { preloadDecorArt } from "../gfx/decorArt";
 import { lightAt, NightLayer, setLampLevel } from "../fx/nightLights";
 import { setBossMusic } from "../audio/bossMusic";
 import { loadZoneEdits } from "../net/mapEdits";
@@ -377,6 +378,7 @@ export class WorldScene extends Phaser.Scene {
 
   preload() {
     preloadImageSprites(this);
+    preloadDecorArt(this);
   }
 
   /** Builds (or rebuilds) the ground tiles and the decor from the zone's current layout. */

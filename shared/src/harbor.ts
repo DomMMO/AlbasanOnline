@@ -1,5 +1,5 @@
 import { TILE_SIZE } from "./constants";
-import type { Decor, DungeonLayout } from "./dungeons";
+import { placeArt, type Decor, type DungeonLayout } from "./dungeons";
 import { mulberry32, Tile } from "./map";
 
 // The harbour (Liman), just south of the main town: a stone quay and a sandy beach on the
@@ -101,5 +101,16 @@ export function buildHarbor(): DungeonLayout {
   }
   // Clear the odd tree right beside the lane so the avenue reads cleanly.
   for (let y = 3; y <= 14; y++) for (const x of [24, 26, 30, 32]) if (tiles[y][x] === Tile.Tree) tiles[y][x] = Tile.Grass;
+
+  // Palms along the beach, an old stone face looking out to sea, ferns and stones in the grass.
+  const beach = (x: number, y: number) => tiles[y][x] === Tile.Path;
+  for (const [i, [tx, ty]] of [[3, 17], [7, 18], [14, 17], [18, 17]].entries()) placeArt(tiles, decor, i % 2 ? "t_palm_2" : "t_palm_1", tx, ty, beach);
+  placeArt(tiles, decor, "t_statue", 4, 14, free);
+  const extra = mulberry32(7332);
+  for (let n = 0; n < 14; n++) {
+    const tx = 3 + Math.floor(extra() * 18);
+    const ty = 3 + Math.floor(extra() * 12);
+    if (free(tx, ty)) decor.push({ kind: "art", key: ["t_fern_1", "t_fern_2", "t_stones_1", "t_stones_2"][n % 4], tx, ty });
+  }
   return { map: { width: WIDTH, height: HEIGHT, tiles, spawn: HARBOR_SPOTS.spawn }, mobs: [], decor };
 }

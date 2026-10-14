@@ -1,5 +1,6 @@
 import Phaser from "phaser";
-import { CASTLE_MERLON_H, CASTLE_TOWER_H, CASTLE_WALL_H, COLOSSEUM, insideCastle, mulberry32, TILE_SIZE, type Decor, type IconShape } from "../../../shared/src";
+import { CASTLE_MERLON_H, CASTLE_TOWER_H, CASTLE_WALL_H, COLOSSEUM, DECOR_ART, insideCastle, mulberry32, TILE_SIZE, type Decor, type IconShape } from "../../../shared/src";
+import { decorArtKey } from "./decorArt";
 import { addGlow, addLight } from "../fx/nightLights";
 import { ICON_SIZE, paintIcon } from "./icons";
 import { bench, firepit, rack, rug, shelf, stool, table } from "./interior";
@@ -63,6 +64,9 @@ export function drawDecor(scene: Phaser.Scene, decor: Decor[]) {
         break;
       case "kurgan":
         kurgan(scene, piece);
+        break;
+      case "art":
+        art(scene, piece);
         break;
       case "bridge":
         bridge(scene, piece);
@@ -845,6 +849,50 @@ function tent(scene: Phaser.Scene, t: Extract<Decor, { kind: "tent" }>) {
   g.fillStyle(dark).fillTriangle(W / 2, -H - 10, W + 2, 0, W / 2 + 4, 0);
   g.fillStyle(0x1a1410).fillTriangle(W / 2 - 6, 0, W / 2 + 6, 0, W / 2, -14);
   g.fillStyle(0x5b3a1e).fillRect(W / 2 - 1, -H - 13, 2, 4);
+}
+
+/**
+ * Art decor (data/decorArt.ts): the image stands centred on the tiles it blocks, its bottom on
+ * theirs; flat pieces lie under characters. Without the art file, its code-drawn fallback.
+ */
+function art(scene: Phaser.Scene, a: Extract<Decor, { kind: "art" }>) {
+  const def = DECOR_ART[a.key];
+  const [w, h] = def.size ?? [1, 1];
+  const texture = decorArtKey(a.key);
+  if (!scene.textures.exists(texture)) {
+    if (def.fallback) drawDecor(scene, [artFallback(def.fallback, a.tx, a.ty, w, h)]);
+    return;
+  }
+  const x = (a.tx + w / 2) * TILE_SIZE;
+  const bottom = (a.ty + h) * TILE_SIZE;
+  // Loose scatter gets a little jitter so rows of it don't line up on the grid.
+  const jitter = def.size ? 0 : (hash01(a.tx, a.ty, 3) - 0.5) * 8;
+  scene.add
+    .image(Math.round(x + jitter), bottom, texture)
+    .setOrigin(0.5, 1)
+    .setDepth(def.flat ? -0.5 : bottom)
+    .setFlipX(!def.size && hash01(a.tx, a.ty, 5) < 0.5);
+}
+
+function artFallback(fallback: NonNullable<(typeof DECOR_ART)[string]["fallback"]>, tx: number, ty: number, w: number, h: number): Decor {
+  switch (fallback) {
+    case "grave":
+      return { kind: "grave", tx, ty };
+    case "banner":
+      return { kind: "banner", tx, ty, color: 0x9c2a2a };
+    case "rack":
+      return { kind: "rack", tx, ty, w };
+    case "shelf":
+      return { kind: "shelf", tx, ty, w };
+    case "table":
+      return { kind: "table", tx, ty, w, h };
+    case "tent":
+      return { kind: "tent", tx, ty, w, h, color: 0xc9a227 };
+    case "tree":
+      return { kind: "bigTree", tx, ty, variant: 0 };
+    default:
+      return { kind: "prop", tx, ty, prop: fallback };
+  }
 }
 
 /** A burial mound: a low hump of withered grass, darker on its shaded side, stones round its foot. */

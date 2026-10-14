@@ -1,6 +1,6 @@
 import { TILE_SIZE } from "./constants";
-import type { Decor } from "./dungeons";
-import { mulberry32, Tile, valueNoise } from "./map";
+import { placeArt, type Decor } from "./dungeons";
+import { isBlockingTile, mulberry32, Tile, valueNoise } from "./map";
 import { dungeonsIn, type DungeonHost } from "./bigDungeons";
 
 // Shared tools for the open-world zones carved in code (Kızıl Kanyon, Ayaz Dağları): noisy
@@ -97,6 +97,46 @@ export class Terrain {
   prop(tx: number, ty: number, prop: Extract<Decor, { kind: "prop" }>["prop"]) {
     this.solid(tx, ty);
     this.decor.push({ kind: "prop", tx, ty, prop });
+  }
+
+  /** Art decor (data/decorArt.ts) with its anchor at this tile; false if its tiles aren't open ground. */
+  art(key: string, tx: number, ty: number, onlyOpen = true): boolean {
+    const blocked = new Set([Tile.Solid, Tile.Path, Tile.Cobble, Tile.Bridge, Tile.Wall]);
+    return placeArt(this.tiles, this.decor, key, tx, ty, (x, y) => !onlyOpen || (this.inner(x, y) && !blocked.has(this.tiles[y][x]) && !isBlockingTile(this.tiles[y][x])));
+  }
+
+  /** Art as near this tile as there is room for it (spiralling out up to `reach` tiles); false if none. */
+  artNear(key: string, tx: number, ty: number, reach = 6): boolean {
+    for (let r = 0; r <= reach; r++) {
+      for (let dy = -r; dy <= r; dy++) {
+        for (let dx = -r; dx <= r; dx++) {
+          if (Math.max(Math.abs(dx), Math.abs(dy)) === r && this.art(key, tx + dx, ty + dy)) return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  /** `count` pieces of art (random keys) on random open ground, never within `keepOut` circles. */
+  artAround(keys: string[], count: number, keepOut: { tx: number; ty: number; r: number }[] = []) {
+    const { width, height } = this.spec;
+    for (let n = 0, tries = 0; n < count && tries < count * 30; tries++) {
+      const x = 3 + Math.floor(this.rand() * (width - 6));
+      const y = 3 + Math.floor(this.rand() * (height - 6));
+      if (keepOut.some((k) => (x - k.tx) ** 2 + (y - k.ty) ** 2 <= k.r * k.r)) continue;
+      if (this.art(keys[Math.floor(this.rand() * keys.length)], x, y)) n++;
+    }
+  }
+
+  /** Loose art scatter (blocks nothing) on `count` random open tiles within a radius. */
+  scatter(keys: string[], cx: number, cy: number, r: number, count: number) {
+    for (let n = 0, tries = 0; n < count && tries < count * 20; tries++) {
+      const x = Math.round(cx + (this.rand() * 2 - 1) * r);
+      const y = Math.round(cy + (this.rand() * 2 - 1) * r);
+      if (!this.inner(x, y) || isBlockingTile(this.tiles[y][x]) || this.tiles[y][x] === Tile.Path || this.tiles[y][x] === Tile.Cobble) continue;
+      this.decor.push({ kind: "art", key: keys[Math.floor(this.rand() * keys.length)], tx: x, ty: y });
+      n++;
+    }
   }
 
   /** Keeps the ground clear in front of this zone's big dungeon entrances, with a torch either side. */

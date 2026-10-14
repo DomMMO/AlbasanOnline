@@ -1,6 +1,7 @@
 import { TILE_SIZE } from "./constants";
 import type { DungeonLayout, SpawnZone } from "./dungeons";
 import { Tile } from "./map";
+import { artKeys } from "./data/decorArt";
 import { Terrain, tilePx } from "./wilds";
 
 // Kurgan Ovası (the Barrow Plain), levels 50-58: south of Kor Toprakları. A withered steppe
@@ -71,6 +72,9 @@ export function buildKurgan(): DungeonLayout {
   t.clearing(RITUAL.tx, RITUAL.ty, 6, 5);
   fill(FORT.x0 - 2, FORT.y0 - 3, FORT.x1 + 1, FORT.y1 + 1, Tile.Blight);
 
+  // Where the bones of a giant khan lie half out of the ground, south of the graveyard.
+  t.clearing(40, 43, 6, 3);
+
   // The bog in the south-west: still black water among the dead trees.
   for (const [cx, cy, rx, ry] of [[9, 45, 4, 3], [18, 50, 4, 2], [6, 51, 2, 1], [22, 44, 2, 2]]) t.clearing(cx, cy, rx, ry, Tile.Bog);
 
@@ -123,13 +127,16 @@ export function buildKurgan(): DungeonLayout {
   const gatePost = fence.filter(({ tx, ty }) => t.tiles[ty][tx] !== Tile.Path);
   t.decor.push({ kind: "fence", tiles: gatePost });
   for (const { tx, ty } of gatePost) t.solid(tx, ty);
+  const graves = artKeys("u_grave");
+  let g = 0;
   for (const y of [26, 28, 33, 35]) {
     for (const x of [35, 37, 43, 45]) {
       if (x >= x1) continue;
-      t.solid(x, y);
-      t.decor.push({ kind: "grave", tx: x, ty: y });
+      t.art(graves[g++ % graves.length], x, y, false);
     }
   }
+  // The dead reach out of the earth between the rows.
+  for (const [tx, ty, key] of [[36, 30, "u_arm_1"], [44, 27, "u_arm_2"], [34, 34, "u_arm_3"], [42, 35, "u_arm_4"]] as const) t.decor.push({ kind: "art", key, tx, ty });
 
   // ---- The dark oracles' ring of balbals in the bog, a fire in the middle.
   for (let i = 0; i < 8; i++) {
@@ -162,13 +169,36 @@ export function buildKurgan(): DungeonLayout {
   }
   t.decor.push({ kind: "castleWall", tiles: wall, inner: COURT });
   towers.forEach(({ tx, ty }) => t.decor.push({ kind: "tower", tx, ty, w: 4, h: 4, flag: 0x2b2b33 }));
-  // Where the hall stood: two rows of broken columns, graves of the fallen at its far end.
-  for (const tx of [53, 55, 61, 63]) for (const ty of [43, 47]) t.prop(tx, ty, "column");
-  for (const tx of [56, 58, 60]) {
-    t.solid(tx, 49);
-    t.decor.push({ kind: "grave", tx, ty: 49 });
-  }
+  // Where the hall stood: its broken arches and columns, graves of the fallen at its far end.
+  t.art("u_ruin_1", 51, 43, false);
+  t.art("u_ruin_2", 62, 43, false);
+  t.art("u_ruin_3", 52, 48, false);
+  t.art("u_ruin_4", 62, 48, false);
+  t.art("u_ruin_5", 55, 39, false);
+  for (const [i, tx] of [56, 58, 60].entries()) t.art(graves[i], tx, 49, false);
   for (const [tx, ty] of [[52, 37], [64, 37]]) t.decor.push({ kind: "torch", tx, ty }), t.solid(tx, ty);
+
+  t.art("u_skull_pile", 31, 45, false);
+
+  // ---- The giant khan's bones, Han Kurganı's skull door, and the dead land all round.
+  t.art("u_lich", 37, 43, false);
+  t.decor.push({ kind: "art", key: "u_skull_door", tx: 18, ty: 23 });
+  for (const [tx, ty, key] of [[7, 26, "u_ribs_1"], [27, 28, "u_ribs_2"], [12, 33, "u_skull_beast"], [25, 21, "u_bones_big"]] as const) t.decor.push({ kind: "art", key, tx, ty });
+  const keepOut = [
+    { tx: 11, ty: 7, r: 6 },
+    { tx: VILLAGE.tx, ty: VILLAGE.ty, r: 10 },
+    { tx: 39, ty: 30, r: 9 },
+    { tx: RITUAL.tx, ty: RITUAL.ty, r: 5 },
+    { tx: 58, ty: 43, r: 13 },
+    { tx: 18, ty: 26, r: 4 },
+  ];
+  t.artAround([...artKeys("u_dead_tree"), ...artKeys("u_tree"), "u_stump_1", "u_stump_2"], 26, keepOut);
+  t.artAround(["u_rock_3", "u_rock_4", "u_rock_5", "u_log"], 8, keepOut);
+  t.scatter(artKeys("u_bones"), KURGANS.tx, KURGANS.ty, 11, 14);
+  t.scatter(artKeys("u_bones"), 58, 42, 7, 8);
+  t.scatter([...artKeys("u_thorn"), ...artKeys("u_bush")], 36, 28, 34, 40);
+  t.scatter(artKeys("u_fern"), 12, 47, 9, 10);
+  t.scatter(["u_thorn_1", "u_bones_3", "u_bones_7"], VILLAGE.tx, VILLAGE.ty, 9, 8);
 
   // ---- The kam's camp at the gate: two felt yurts, a fire, balbals of his ancestors.
   t.tent(4, 5, 0xe8dfc8);
