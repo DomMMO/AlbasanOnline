@@ -50,7 +50,7 @@ export const IMAGE_SPRITES: Record<string, ImageSprite> = {
 };
 
 /** Code-drawn stand-ins for each kind of sheet, used when its art isn't on this machine. */
-const FALLBACK_LOOKS: [prefix: string, look: Extract<Appearance, { type: "humanoid" }>][] = [
+const FALLBACK_LOOKS: [prefix: string, look: Extract<Appearance, { type: "humanoid" } | { type: "wolf" }>][] = [
   ["golem", { type: "humanoid", tunic: 0x6f695e, skin: 0x8a8478, hair: 0x5e584f, hairStyle: "bald" }],
   ["minotaur", { type: "humanoid", tunic: 0x5b3a1e, skin: 0x8b5a2b, hair: 0x2a1a0e, gear: { chest: "chainmail" } }],
   ["satyr", { type: "humanoid", tunic: 0x6b4423, skin: 0xc68a5a, hair: 0x3a2a1a, hairStyle: "spiky" }],
@@ -63,13 +63,23 @@ const FALLBACK_LOOKS: [prefix: string, look: Extract<Appearance, { type: "humano
   ["zombie", { type: "humanoid", tunic: 0x5a5a3a, skin: 0x8a9a6a, hair: 0x3a3a2a }],
   ["oracle", { type: "humanoid", tunic: 0x212529, skin: 0xc8bfa8, hair: 0x1a1a1a, headwear: { color: 0x343a40, style: "hood" } }],
   ["knight", { type: "humanoid", tunic: 0x495057, skin: 0xd9a07a, hair: 0x1a1a1a, gear: { head: "iron_helm", chest: "chainmail" } }],
+  ["demon", { type: "humanoid", tunic: 0x7a0a0a, skin: 0xd9480f, hair: 0x1a1a1a, hairStyle: "spiky" }],
+  ["dragon", { type: "wolf", fur: 0x7048e8 }],
+  ["small_dragon", { type: "wolf", fur: 0x7048e8 }],
+  ["lizard", { type: "humanoid", tunic: 0x5c7a3a, skin: 0xd9c33a, hair: 0x8a7a1a, hairStyle: "bald" }],
+  ["medusa", { type: "humanoid", tunic: 0x2f6b4a, skin: 0x9ad07a, hair: 0x2f9e44, hairStyle: "long", gender: "female" }],
+  ["jinn", { type: "humanoid", tunic: 0x1c7ed6, skin: 0x4dabf7, hair: 0xf1f3f5, headwear: { color: 0xf1f3f5, style: "hat" } }],
+  ["wizard", { type: "humanoid", tunic: 0x3b2a5a, skin: 0xd9a07a, hair: 0x1a1a1a, headwear: { color: 0x3b2a5a, style: "hood" } }],
+  ["tribal", { type: "humanoid", tunic: 0x8a5a2b, skin: 0xc68a5a, hair: 0x2a1a0a, gear: { head: "chieftain_helm", legs: "wolf_hide_leggings" } }],
+  ["bandit", { type: "humanoid", tunic: 0x5a4a3a, skin: 0xd8a47a, hair: 0x3a2a1a, gear: { head: "leather_cap", chest: "leather_vest" } }],
 ];
 
 /** An image appearance whose sheet is missing becomes a drawn look-alike (the tint, if any, colours its clothes). */
 export function withFallback(appearance: Appearance): Appearance {
   if (appearance.type !== "image" || IMAGE_SPRITES[appearance.key]) return appearance;
-  const look = FALLBACK_LOOKS.find(([prefix]) => appearance.key.startsWith(prefix))?.[1] ?? { type: "humanoid" as const, tunic: 0x495057 };
-  return appearance.tint === undefined ? look : { ...look, tunic: appearance.tint };
+  const look = FALLBACK_LOOKS.filter(([prefix]) => appearance.key.startsWith(prefix)).pop()?.[1] ?? { type: "humanoid" as const, tunic: 0x495057 };
+  if (appearance.tint === undefined) return look;
+  return look.type === "wolf" ? { ...look, fur: appearance.tint } : { ...look, tunic: appearance.tint };
 }
 
 /** Whether a sheet has an animation of that name (e.g. "attack", "hurt"). */

@@ -21,6 +21,7 @@ import glob
 import json
 import math
 import os
+import re
 import sys
 
 from PIL import Image, ImageChops, ImageEnhance, ImageFilter
@@ -32,7 +33,10 @@ ITEM_OUT = os.path.join(ROOT, "client", "src", "assets", "licensed", "items")
 
 # Pack folder and its layout: "tiny" = PNG/<Name>_0<n>/PNG Sequences/<anim>/,
 # "chibi" = <Sub>/PNG/PNG Sequences/<anim>/ (Sub is the variant folder, e.g. Skeleton_Warrior_2),
-# "knight" = _PNG/<n>_KNIGHT/Knight_0<n>__<ANIM>_<frame>.png.
+# "knight" = _PNG/<n>_KNIGHT/Knight_0<n>__<ANIM>_<frame>.png,
+# "frames" = PNG/<name>/<Anim><n>.png (one file per frame), "strip" = <name>/<Anim>.png (a row
+# of square frames), "dir4" = <name>/PNG/PNG Sequences/Right - <anim>/ (the side view of a
+# four-direction pack). For those three the variant is the character's folder name.
 PACKS = {
     "Golem": ("craftpix-891178-free-golem-tiny-style-2d-character-sprites", "tiny"),
     "Satyr": ("craftpix-891179-free-satyr-tiny-style-2d-sprites", "tiny"),
@@ -45,6 +49,10 @@ PACKS = {
     "Zombie_Villager": ("craftpix-net-905641-free-zombie-villager-chibi-character-sprites", "chibi"),
     "Dark_Oracle": ("craftpix-net-919731-free-chibi-dark-oracle-character-sprites", "chibi"),
     "Knight": ("craftpix-062999-2d-fantasy-knight-free-sprite-sheets", "knight"),
+    "Monster": ("craftpix-561178-free-rpg-monster-sprites-pixel-art", "frames"),
+    "Wizard": ("craftpix-net-529677-free-wizard-sprite-sheets-pixel-art", "strip"),
+    "Tribal": ("craftpix-net-176111-free-tribal-warrior-boss-characters-asset-pack", "dir4"),
+    "Bandit": ("craftpix-net-218811-free-medieval-bandit-4-direction-character-pack", "dir4"),
 }
 # Packs with a single character (no numbered variants).
 SINGLE = {"Goblin", "Orc", "Ogre"}
@@ -89,6 +97,28 @@ MOBS = [
     ("knight_2", "Knight", 2, 24),
     ("knight_3", "Knight", 3, 24),
     ("knight_3_big", "Knight", 3, 50),
+    ("demon", "Monster", "demon", 34),
+    ("demon_big", "Monster", "demon", 56),
+    ("dragon_big", "Monster", "dragon", 60),
+    ("small_dragon", "Monster", "small_dragon", 22),
+    ("small_dragon_big", "Monster", "small_dragon", 40),
+    ("lizard", "Monster", "lizard", 30),
+    ("lizard_big", "Monster", "lizard", 52),
+    ("medusa_big", "Monster", "medusa", 48),
+    ("jinn_big", "Monster", "jinn_animation", 48),
+    ("wizard_fire", "Wizard", "Fire Wizard", 32),
+    ("wizard_light", "Wizard", "Lightning Mage", 32),
+    ("wizard_light_big", "Wizard", "Lightning Mage", 50),
+    ("wizard_wanderer", "Wizard", "Wanderer Magican", 32),
+    ("wizard_wanderer_big", "Wizard", "Wanderer Magican", 50),
+    ("tribal_aztec_big", "Tribal", "Aztec Leader", 46),
+    ("tribal_maya_big", "Tribal", "Maya Leader", 46),
+    ("tribal_nordic", "Tribal", "Nordic Leader", 28),
+    ("tribal_nordic_big", "Tribal", "Nordic Leader", 46),
+    ("bandit_assassin", "Bandit", "Assassin", 26),
+    ("bandit_robber", "Bandit", "Robber", 26),
+    ("bandit_thug", "Bandit", "Thug", 26),
+    ("bandit_thug_big", "Bandit", "Thug", 44),
 ]
 
 # Game animation name -> (folder or file tag per layout, take every Nth frame).
@@ -96,7 +126,12 @@ ANIMS = {
     "tiny": {"idle": ("Idle", 2), "walk": ("Walking", 2), "attack": ("Attacking", 1), "hurt": ("Hurt", 2), "dead": ("Dying", 1)},
     "chibi": {"idle": ("Idle", 2), "walk": ("Walking", 2), "attack": ("Slashing", 1), "hurt": ("Hurt", 2), "dead": ("Dying", 1)},
     "knight": {"idle": ("IDLE", 1), "walk": ("WALK", 1), "attack": ("ATTACK", 1), "hurt": ("HURT", 1), "dead": ("DIE", 1)},
+    "frames": {"idle": ("Idle", 1), "walk": ("Walk", 1), "attack": ("Attack", 1), "hurt": ("Hurt", 1), "dead": ("Death", 1)},
+    "strip": {"idle": ("Idle", 1), "walk": ("Walk", 1), "attack": ("Attack_1", 1), "hurt": ("Hurt", 1), "dead": ("Dead", 1)},
+    "dir4": {"idle": ("Right - Idle", 2), "walk": ("Right - Walking", 2), "attack": ("Right - Attacking", 1), "hurt": ("Right - Hurt", 2), "dead": ("Dying", 1)},
 }
+# Characters missing an animation use another (the jinn floats instead of walking).
+STAND_INS = {"Walk": "Flight"}
 
 # Item icon key, pack, variant.
 WEAPONS = [
@@ -164,7 +199,7 @@ def pack_dir(downloads: str, pack: str) -> str | None:
     return None
 
 
-def anim_files(downloads: str, pack: str, variant: int, tag: str) -> list[str]:
+def anim_files(downloads: str, pack: str, variant, tag: str) -> list[str]:
     """Frame files of one animation, in order."""
     base = pack_dir(downloads, pack)
     layout = PACKS[pack][1]
@@ -173,13 +208,30 @@ def anim_files(downloads: str, pack: str, variant: int, tag: str) -> list[str]:
     elif layout == "chibi":
         sub = pack if pack in SINGLE else f"{pack}_{variant}"
         pattern = os.path.join(base, sub, "PNG", "PNG Sequences", tag, "*.png")
-    else:
+    elif layout == "knight":
         pattern = os.path.join(base, "_PNG", f"{variant}_KNIGHT", f"Knight_0{variant}__{tag}_*.png")
+    elif layout == "frames":
+        files = glob.glob(os.path.join(base, "PNG", str(variant), f"{tag}[0-9]*.png"))
+        files = [f for f in files if re.fullmatch(rf"{re.escape(tag)}\d+\.png", os.path.basename(f))]
+        if not files and tag in STAND_INS:
+            return anim_files(downloads, pack, variant, STAND_INS[tag])
+        return sorted(files, key=lambda f: int(re.search(r"(\d+)\.png$", f).group(1)))
+    elif layout == "strip":
+        return glob.glob(os.path.join(base, str(variant), f"{tag}.png"))
+    else:
+        pattern = os.path.join(base, str(variant), "PNG", "PNG Sequences", tag, "*.png")
     return sorted(glob.glob(pattern))
 
 
-def frames_of(downloads: str, pack: str, variant: int, tag: str, step: int) -> list[Image.Image]:
-    return [Image.open(f).convert("RGBA") for f in anim_files(downloads, pack, variant, tag)[::step]]
+def frames_of(downloads: str, pack: str, variant, tag: str, step: int) -> list[Image.Image]:
+    files = anim_files(downloads, pack, variant, tag)
+    if PACKS[pack][1] == "strip":
+        # One row of square frames.
+        strip = Image.open(files[0]).convert("RGBA")
+        size = strip.height
+        frames = [strip.crop((x, 0, x + size, size)) for x in range(0, strip.width - size + 1, size)]
+        return [f for f in frames if f.getbbox()][::step]
+    return [Image.open(f).convert("RGBA") for f in files[::step]]
 
 
 def union_box(images: list[Image.Image]):
@@ -195,7 +247,7 @@ def feet_x(idle: Image.Image) -> float:
     return (band[0] + band[2]) / 2 if band else (box[0] + box[2]) / 2
 
 
-def build_mob(downloads: str, key: str, pack: str, variant: int, height: int):
+def build_mob(downloads: str, key: str, pack: str, variant, height: int):
     if not pack_dir(downloads, pack):
         print(f"mob {key}: pack {pack} not found, skipped")
         return

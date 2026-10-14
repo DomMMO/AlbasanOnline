@@ -400,7 +400,7 @@ export const MOBS: Record<string, MobDef> = {
     xp: 160,
     aggroRange: 72,
     respawnMs: 18_000,
-    appearance: { type: "humanoid", tunic: 0x5a1e1e, hair: 0x1a1a1a, gear: { head: "leather_cap", chest: "leather_vest" } },
+    appearance: { type: "image", key: "bandit_robber" },
     loot: {
       gold: [15, 30],
       drops: [
@@ -690,8 +690,8 @@ export const MOBS: Record<string, MobDef> = {
     xp: 2500,
     aggroRange: 96,
     respawnMs: 300_000,
-    scale: 2,
-    appearance: { type: "humanoid", tunic: 0x2a0a0a, hair: 0x1a1a1a, skin: 0xc68a5a, gear: { head: "chieftain_helm", chest: "chainmail", legs: "wolf_hide_leggings" } },
+    scale: 1,
+    appearance: { type: "image", key: "bandit_thug_big" },
     loot: {
       gold: [300, 600],
       drops: [
