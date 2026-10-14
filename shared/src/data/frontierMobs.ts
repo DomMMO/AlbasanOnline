@@ -196,7 +196,7 @@ const list: MobDef[] = [
     id: "ash_cultist",
     name: "Kül Tapıcısı",
     level: 43,
-    appearance: { type: "humanoid", tunic: 0x343a40, skin: 0xc8bfa8, hair: 0x1a1a1a, headwear: { color: 0x7a0a0a, style: "hood" } },
+    appearance: { type: "image", key: "oracle_2", tint: 0xff9a80 },
     material: "obsidian_shard",
   }),
   field({ id: "fire_elemental", name: "Ateş Elementali", level: 44, hp: 0.9, attack: 1.35, appearance: { type: "image", key: "wraith_purple", tint: 0xff8a2a }, material: "ember_core" }),
