@@ -96,6 +96,9 @@ export function buildCanyon(): DungeonLayout {
   for (const [key, tx, ty] of [["s_mesa_1", 5, 40], ["s_mesa_2", 50, 40], ["s_mesa_1", 22, 4], ["s_mesa_2", 46, 4], ["s_mesa_1", 36, 16]] as const) t.artNear(key, tx, ty, 8);
   t.artAround(["s_rocks_1", "s_rocks_2", "s_rock_1"], 10, keepOut);
   t.artAround(artKeys("s_cactus"), 22, keepOut.map((k) => ({ ...k, r: k.r - 3 })));
+  // Lone savanna trees on the sand, and palms round the oasis.
+  t.artAround(["s_acacia", "s_acacia", "s_baobab", "s_dragon_tree", "s_dead_tree_1", "s_dead_tree_2"], 14, keepOut);
+  for (const [i, [tx, ty]] of [[28, 29], [38, 30], [30, 34], [36, 34], [33, 27]].entries()) t.artNear(artKeys("s_palm")[i % 5], tx, ty, 2);
   t.scatter(["s_shrub_1", "s_shrub_2", "s_skull"], 32, 24, 28, 30);
 
   return {

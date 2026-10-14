@@ -95,6 +95,12 @@ export const DECOR_ART: Record<string, DecorArtDef> = {
   s_rocks_1: { size: [2, 1], tile: Tile.RedRock },
   s_rocks_2: { size: [2, 1], tile: Tile.RedRock },
   s_rock_1: { size: [1, 1], tile: Tile.RedRock },
+  ...many("s_palm", 5, { size: [1, 1], fallback: "tree" }),
+  s_acacia: { size: [1, 1], fallback: "tree" },
+  s_baobab: { size: [2, 1], fallback: "tree" },
+  s_dragon_tree: { size: [1, 1], fallback: "tree" },
+  s_dead_tree_1: tree,
+  s_dead_tree_2: tree,
 
   // ---- Tropical (painted art): Liman.
   t_palm_1: { size: [1, 1], fallback: "tree" },

@@ -134,6 +134,16 @@ for key, name, height in [
     ("s_rocks_1", "stones_4", 22),
     ("s_rocks_2", "stones_6", 22),
     ("s_rock_1", "stones_5", 16),
+    ("s_palm_1", "tree_1", 54),
+    ("s_palm_2", "tree_2", 58),
+    ("s_palm_3", "tree_3", 50),
+    ("s_palm_4", "tree_6", 52),
+    ("s_palm_5", "tree_9", 56),
+    ("s_acacia", "tree_10", 40),
+    ("s_baobab", "tree_8", 62),
+    ("s_dragon_tree", "tree_7", 50),
+    ("s_dead_tree_1", "tree_11", 50),
+    ("s_dead_tree_2", "tree_12", 48),
 ]:
     ART[key] = (f"{DESERT}/{name}.png", None, height)
 

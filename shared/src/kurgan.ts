@@ -192,7 +192,7 @@ export function buildKurgan(): DungeonLayout {
     { tx: 58, ty: 43, r: 13 },
     { tx: 18, ty: 26, r: 4 },
   ];
-  t.artAround([...artKeys("u_dead_tree"), ...artKeys("u_tree"), "u_stump_1", "u_stump_2"], 26, keepOut);
+  t.artAround([...artKeys("u_dead_tree"), ...artKeys("u_tree"), ...artKeys("s_dead_tree"), "u_stump_1", "u_stump_2"], 30, keepOut);
   t.artAround(["u_rock_3", "u_rock_4", "u_rock_5", "u_log"], 8, keepOut);
   t.scatter(artKeys("u_bones"), KURGANS.tx, KURGANS.ty, 11, 14);
   t.scatter(artKeys("u_bones"), 58, 42, 7, 8);

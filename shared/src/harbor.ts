@@ -105,6 +105,7 @@ export function buildHarbor(): DungeonLayout {
   // Palms along the beach, an old stone face looking out to sea, ferns and stones in the grass.
   const beach = (x: number, y: number) => tiles[y][x] === Tile.Path;
   for (const [i, [tx, ty]] of [[3, 17], [7, 18], [14, 17], [18, 17]].entries()) placeArt(tiles, decor, i % 2 ? "t_palm_2" : "t_palm_1", tx, ty, beach);
+  for (const [i, [tx, ty]] of [[5, 19], [2, 15], [19, 14]].entries()) placeArt(tiles, decor, `s_palm_${i * 2 + 1}`, tx, ty, (x, y) => beach(x, y) || free(x, y));
   placeArt(tiles, decor, "t_statue", 4, 14, free);
   const extra = mulberry32(7332);
   for (let n = 0; n < 14; n++) {
