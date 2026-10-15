@@ -17,6 +17,8 @@ var dimmed := false
 var locked := false
 ## 0..1 of the slot covered by the cooldown sweep.
 var sweep := 0.0
+## Seconds left on the slot's own cooldown, drawn in the middle ("" = none).
+var cooldown_text := ""
 var _pressed_until := 0
 ## Drag & drop: what this slot hands out when dragged (null = nothing) and what it accepts.
 var drag_data: Variant = null
@@ -93,6 +95,12 @@ func _draw() -> void:
 	if not key_label.is_empty():
 		draw_string(font, Vector2(4, 12), key_label, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color.BLACK)
 		draw_string(font, Vector2(3, 11), key_label, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, UiTheme.GOLD_LIGHT)
+	if not cooldown_text.is_empty():
+		var font_size := 16 if r.size.y >= 40 else 13
+		var text_size := font.get_string_size(cooldown_text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size)
+		var at := Vector2((r.size.x - text_size.x) / 2.0, (r.size.y + font.get_ascent(font_size) - font.get_descent(font_size)) / 2.0)
+		draw_string_outline(font, at, cooldown_text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, 4, Color.BLACK)
+		draw_string(font, at, cooldown_text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color.WHITE)
 	if not count_text.is_empty():
 		var w := font.get_string_size(count_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x
 		draw_string(font, Vector2(r.size.x - w - 2, r.size.y - 2), count_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color.BLACK)
