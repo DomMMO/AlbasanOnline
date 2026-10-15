@@ -27,6 +27,7 @@ import {
   type EquipSlot,
   type JoinOptions,
   type BagSlotMessage,
+  type BuybackMessage,
   type MoveItemMessage,
   type PetBuyMessage,
   type PetSummonMessage,
@@ -56,7 +57,7 @@ import { accountForToken, type Account } from "../db/accounts";
 import { loadCharacter, saveCharacters, type CharacterSave } from "../db/characters";
 import { respawn, setTarget, useSkill } from "../game/combat";
 import { Game } from "../game/Game";
-import { buy, destroyItem, dropItem, moveItem, pickupLoot, sell, unequip, useItem } from "../game/items";
+import { buy, buyback, destroyItem, dropItem, moveItem, pickupLoot, sell, unequip, useItem } from "../game/items";
 import { upgradeItem } from "../game/upgrade";
 import { browseStall, buyFromStall, closeStall, openStall, stallLocked } from "../game/market";
 import { abandonQuest, acceptQuest, talkForQuest, turnInQuest } from "../game/quests";
@@ -220,6 +221,10 @@ export class ZoneRoom extends Room<WorldState> {
       if (typeof message?.npcId === "string" && typeof message.index === "number") {
         sell(this.game, client.sessionId, message.npcId, message.index);
       }
+    });
+    this.onMessage(Msg.Buyback, (client, message: Partial<BuybackMessage>) => {
+      if (this.itemsLocked(client.sessionId)) return;
+      if (typeof message?.npcId === "string" && typeof message.uid === "string") buyback(this.game, client.sessionId, message.npcId, message.uid);
     });
     this.onMessage(Msg.Upgrade, (client, message: Partial<UpgradeMessage>) => {
       if (this.itemsLocked(client.sessionId)) return;

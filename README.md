@@ -451,6 +451,8 @@ Bulutların üstünde **uçan bir adada** kurulu kale şehri; mob yok, PvP yok. 
 | **Bilge Ozan** (çeşmenin batısı) | Görevler, hikaye |
 
 - Her NPC'ye satış yapılabilir (dükkân açıkken envanterde sağ tık).
+- **Nadir ve üstü** (3+ statlı) ya da **+3 ve üstü** bir eşyayı satarken "emin misin" diye sorar.
+- **Geri al:** dükkân penceresinin **Geri Al** sekmesinde son sattığın 10 eşya durur; herhangi bir tüccardan, sattığın fiyata, aynen (+N ve statlarıyla) geri alırsın. Liste bölge değiştirince kaybolmaz ama kaydedilmez: sunucu yeniden başlayınca silinir.
 - Kapı ve İç Kale nöbetçileriyle konuşabilirsin (sadece laf atarlar).
 - Kale kapısından çıkan yolun sonunda **ışınlanma kapısı** var: içine yürüyünce Başlangıç Vadisi'ne ışınlanırsın (E'ye basmana gerek yok). Vadideki kavşakta da şehre dönüş kapısı var.
 - Kan Arenası portalı şehrin kuzeydoğusunda, kumlu arena meydanında.

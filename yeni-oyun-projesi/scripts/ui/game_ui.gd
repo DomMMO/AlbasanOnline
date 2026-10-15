@@ -159,7 +159,7 @@ func activate_inventory(index: int) -> void:
 		extra.add_to_stall(index)
 		return
 	if shop.visible and not shop.npc.is_empty():
-		send("sell", {"npcId": shop.npc.id, "index": index})
+		shop.sell(index)
 	else:
 		send("useItem", {"index": index})
 
