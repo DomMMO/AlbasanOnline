@@ -77,6 +77,8 @@ var tick_acc := 0.0
 var leaving := false
 var gates_armed := false
 var was_in_market := false
+## The "Pazar alanı" hint shows once per game session (static: it outlives zone changes).
+static var _market_hint_shown := false
 var approach: Variant = null
 ## Gathering on its own: after each node, walk to the nearest one of the same kind
 ## ({kind, last: node id} or {} = off). Moving, clicking something else or an interrupted gather stops it.
@@ -1951,7 +1953,8 @@ func _process(delta: float) -> void:
 		camera.position = Vector2(roundf(p.x), roundf(p.y))
 		check_gates()
 		var in_market := on_market_tile()
-		if in_market and not was_in_market:
+		if in_market and not was_in_market and not _market_hint_shown:
+			_market_hint_shown = true
 			hud.show_message("Pazar alanı: burada tezgâh açıp eşya satabilirsin", "info", "#e8c33a")
 		was_in_market = in_market
 		ui.set_stall_button_visible(in_market)
