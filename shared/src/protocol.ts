@@ -20,6 +20,8 @@ export const Msg = {
   PickupLoot: "pickupLoot",
   Buy: "buy",
   Sell: "sell",
+  /** Buy back something you sold (any merchant, the price you got for it). */
+  Buyback: "buyback",
   Upgrade: "upgrade",
   UsePortal: "usePortal",
   Chat: "chat",
@@ -531,6 +533,8 @@ export interface InventoryEvent {
   /** What is kept at the Depocu (the window only opens next to it). */
   storage: { gold: number; slots: (ItemView | null)[] };
   stats: CombatStats;
+  /** What we sold to merchants lately, newest first, with what it costs to buy back. */
+  buyback: (ItemView & { price: number })[];
 }
 
 export interface MoveItemMessage {
@@ -561,6 +565,11 @@ export interface BuyMessage {
 /** DropItem and DestroyItem: the bag slot. */
 export interface BagSlotMessage {
   index: number;
+}
+
+export interface BuybackMessage {
+  npcId: string;
+  uid: string;
 }
 
 export interface SellMessage {

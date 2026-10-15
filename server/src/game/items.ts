@@ -58,7 +58,8 @@ export function notice(game: Game, sessionId: string, message: string, color = E
 export function sendInventory(game: Game, sessionId: string) {
   const runtime = game.playerRuntime.get(sessionId);
   if (!runtime) return;
-  game.io.send(sessionId, Msg.Inventory, { ...toView(runtime.inventory), stats: runtime.stats } satisfies InventoryEvent);
+  const buyback = (soldItems.get(runtime.characterId) ?? []).map(({ stack, price }) => ({ ...stack, price }));
+  game.io.send(sessionId, Msg.Inventory, { ...toView(runtime.inventory), stats: runtime.stats, buyback } satisfies InventoryEvent);
 }
 
 /** Recomputes combat stats from level + equipment. Call after any equipment or level change. */
@@ -358,6 +359,14 @@ export function sortBags(game: Game, sessionId: string) {
 
 // ---- Merchant ------------------------------------------------------------------
 
+/** How many sold items a merchant will sell back. */
+const BUYBACK_SIZE = 10;
+/**
+ * What each character sold lately (characterId -> newest first). Module-wide, so it follows
+ * them from zone to zone; it is not saved and is gone when the server restarts.
+ */
+const soldItems = new Map<number, { stack: ItemStack; price: number }[]>();
+
 function nearNpc(game: Game, sessionId: string, npcId: string) {
   const ctx = context(game, sessionId);
   const npc = NPCS[npcId];
@@ -395,6 +404,27 @@ export function sell(game: Game, sessionId: string, npcId: string, index: number
   const value = itemSellPrice(def, stack.affixes) * stack.qty;
   ctx.inv.slots[index] = null;
   ctx.inv.gold += value;
+  const sold = soldItems.get(ctx.runtime.characterId) ?? [];
+  soldItems.set(ctx.runtime.characterId, [{ stack, price: value }, ...sold].slice(0, BUYBACK_SIZE));
   notice(game, sessionId, `${def.name}${stack.qty > 1 ? ` x${stack.qty}` : ""} satıldı (+${value} altın)`, GOLD_COLOR);
+  changed(game, sessionId);
+}
+
+/** Buys a sold item back, as it was (+N and modifiers), for what the merchant paid. */
+export function buyback(game: Game, sessionId: string, npcId: string, uid: string) {
+  const ctx = nearNpc(game, sessionId, npcId);
+  if (!ctx) return;
+  const sold = soldItems.get(ctx.runtime.characterId) ?? [];
+  const entry = sold.find((e) => e.stack.uid === uid);
+  if (!entry) return;
+  const { stack, price } = entry;
+  const def = ITEMS[stack.defId];
+  if (ctx.inv.gold < price) return notice(game, sessionId, "Yeterli altının yok");
+  if (!hasSpaceFor(ctx.inv, stack.defId, stack.qty)) return notice(game, sessionId, "Envanter dolu");
+  ctx.inv.gold -= price;
+  if (def.maxStack > 1) addItem(ctx.inv, stack.defId, stack.qty, stack.enhance, stack.affixes);
+  else ctx.inv.slots[ctx.inv.slots.indexOf(null)] = stack;
+  soldItems.set(ctx.runtime.characterId, sold.filter((e) => e !== entry));
+  notice(game, sessionId, `${def.name}${stack.qty > 1 ? ` x${stack.qty}` : ""} geri alındı (-${price} altın)`, GOLD_COLOR);
   changed(game, sessionId);
 }

@@ -44,6 +44,12 @@ static func rarity(d: Dictionary, affixes: Variant = null) -> String:
 	return RARITY_BY_COUNT[mini(list.size(), MAX_AFFIXES)]
 
 
+## Worth asking about before it goes to a merchant: rare or better, or upgraded to +3 or more.
+static func is_valuable(d: Dictionary, item: Dictionary) -> bool:
+	var r := rarity(d, item.get("affixes"))
+	return RARITY_ORDER.find(r) >= RARITY_ORDER.find("rare") or int(item.get("enhance", 0)) >= 3
+
+
 ## affixes.ts itemSellPrice()
 static func sell_price(d: Dictionary, affixes: Variant = null) -> int:
 	var list: Array = affixes if affixes is Array else []
