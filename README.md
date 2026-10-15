@@ -407,7 +407,7 @@ Sağ altta, mana/öfke küresinin solundaki **at düğmesine** bas (ya da **H**)
 
 ### Şehir portalı (T)
 
-**T**'ye basınca bulunduğun yerde (zindan dahil, şehir hariç) Ana Merkez'e bir portal açılır. Şehirde de seni tam bıraktığın yere geri götüren bir portal durur; ikisine **E** ya da tıklamayla girilir. Portal sen başka bir haritaya girene ya da oyundan çıkana kadar (20 sn tolerans) durur; yeni bir T eskisinin yerini alır. Portal açık olduğu sürece zindan kopyası kapanmaz, döndüğünde her şey bıraktığın gibidir. Portalları herkes görür, sadece sahibi kullanabilir. Kod: `server/src/game/townPortal.ts`.
+**T**'ye basınca bulunduğun yerde (zindan dahil, şehir hariç) Ana Merkez'e bir portal açılır. Şehirde de seni tam bıraktığın yere geri götüren bir portal durur; ikisine **E** ya da tıklamayla girilir. Portal sen başka bir haritaya girene ya da oyundan çıkana kadar (20 sn tolerans) durur; yeni bir T eskisinin yerini alır. Portal açık olduğu sürece zindan kopyası kapanmaz, döndüğünde her şey bıraktığın gibidir. Portalını yalnızca sen ve grup arkadaşların görürsün, sadece sahibi kullanabilir. Kod: `server/src/game/townPortal.ts`.
 
 ### Büyük zindanlar (Kara Orman)
 
