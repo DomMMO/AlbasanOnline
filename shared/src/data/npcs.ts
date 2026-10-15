@@ -19,8 +19,9 @@ export interface NpcDef {
   /**
    * quest = only gives quests and talks. storage = keeps your items (depo). guard = greets
    * and gives directions round town. master = a class master who hands out advice.
+   * pet = sells pets (pets.ts).
    */
-  role: "merchant" | "blacksmith" | "quest" | "storage" | "guard" | "master" | "stable";
+  role: "merchant" | "blacksmith" | "quest" | "storage" | "guard" | "master" | "stable" | "pet";
   /** Item ids for sale; prices come from ItemDef.buyPrice. */
   shop: string[];
   /** First line of the conversation window. */
@@ -201,6 +202,16 @@ export const NPCS: Record<string, NpcDef> = {
     shop: [],
     greeting:
       "Hoş geldin yiğidim! Bu çiftlikte bozkırın en iyi atları büyür. Pahalı mı? Pahalı. Ama Kara Yel'in sırtında rüzgârı geride bıraktığında parayı hatırlamazsın bile.",
+  },
+  pet_keeper: {
+    id: "pet_keeper",
+    name: "Petçi Nuri",
+    ...TOWN_SPOTS.petKeeper,
+    appearance: { type: "humanoid", tunic: 0x5c7a3a, hair: 0xc97a3a, skin: 0xe0b088, gear: { legs: "leather_pants" }, headwear: { color: 0x7a5a2a, style: "hat" } },
+    role: "pet",
+    shop: [],
+    greeting:
+      "Gel bakalım, korkma, ısırmaz! Benim hayvanlarım ganimet toplamayı bilir: sen kılıcını sallarken onlar yerdekini kapıp getirir. Ucuz değil, onu baştan söyleyeyim; ama bir kere alan bir daha eğilip yerden altın toplamaz.",
   },
   guard_gate_north: guard("guard_gate_north", "Kapı Nöbetçisi Ali", TOWN_SPOTS.guardGateNorth, "Kapıdan geçen herkesi görürüm. Sen de temiz görünüyorsun, geç bakalım."),
   guard_gate_south: guard("guard_gate_south", "Kapı Nöbetçisi Veli", TOWN_SPOTS.guardGateSouth, "Surun dışı uçurum, altı bulut. Kenara yaklaşma, aşağı düşen bir daha geri tırmanamıyor... galiba."),

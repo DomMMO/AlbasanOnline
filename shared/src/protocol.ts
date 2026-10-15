@@ -62,6 +62,10 @@ export const Msg = {
   HorseBuy: "horseBuy",
   HorseSelect: "horseSelect",
   HorseStyle: "horseStyle",
+  /** Petçi: buy a pet (it comes out with you). */
+  PetBuy: "petBuy",
+  /** Call one of your pets out, or send the one that is out home (pet: ""). */
+  PetSummon: "petSummon",
   /** A novice asks a master in the keep to take them on (their class). */
   ChooseClass: "chooseClass",
   /** Ayşe Teyze: undo the class choice for gold (back to novice). */
@@ -134,6 +138,8 @@ export const Msg = {
   TradeInvite: "tradeInvite",
   /** Your horses (on join and whenever they change). */
   HorseState: "horseState",
+  /** Your pets (on join and whenever they change). */
+  PetState: "petState",
   /** Your friend list and requests (on join and whenever they or a friend's status change). */
   FriendList: "friendList",
   /** A party member nearby just went into a dungeon: join them? */
@@ -378,6 +384,21 @@ export interface HorseStateEvent {
   owned: string[];
   active: string;
   looks: Record<string, { coat: number; mane: number; blanket: number; saddle: number }>;
+}
+
+export interface PetStateEvent {
+  owned: string[];
+  /** The pet that is out; "" = none. */
+  active: string;
+}
+
+export interface PetBuyMessage {
+  npcId: string;
+  pet: string;
+}
+
+export interface PetSummonMessage {
+  pet: string;
 }
 
 export interface FriendView {

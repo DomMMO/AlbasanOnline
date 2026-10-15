@@ -47,6 +47,8 @@ const INFO_COLOR = "#d8cba8";
 export interface LootContents {
   gold: number;
   items: ItemStack[];
+  /** A player put it down (dropItem): pets leave it alone. */
+  dropped?: boolean;
 }
 
 export function notice(game: Game, sessionId: string, message: string, color = ERROR_COLOR) {
@@ -275,15 +277,31 @@ function removeLoot(game: Game, lootId: string) {
   game.lootContents.delete(lootId);
 }
 
+/** Whether the loot is ours to take (ours, our party's, or nobody's any more). */
+export function mayLoot(game: Game, sessionId: string, loot: Loot): boolean {
+  if (!loot.owner || loot.owner === sessionId) return true;
+  const characterId = game.playerRuntime.get(sessionId)?.characterId;
+  return characterId !== undefined && loot.owner === `party:${partyIdOf(characterId)}`;
+}
+
 export function pickupLoot(game: Game, sessionId: string, lootId: string) {
   const ctx = context(game, sessionId);
   const loot = game.state.loot.get(lootId);
-  const contents = game.lootContents.get(lootId);
-  if (!ctx || !loot || !contents || ctx.player.dead) return;
-  const myParty = partyIdOf(ctx.runtime.characterId);
-  if (loot.owner && loot.owner !== sessionId && loot.owner !== `party:${myParty}`) return notice(game, sessionId, "Bu ganimet senin değil");
+  if (!ctx || !loot || ctx.player.dead) return;
+  if (!mayLoot(game, sessionId, loot)) return notice(game, sessionId, "Bu ganimet senin değil");
   if (distance(ctx.player, loot) > LOOT_RANGE) return notice(game, sessionId, "Çok uzak");
+  collectLoot(game, sessionId, lootId);
+}
 
+/**
+ * Moves a loot pile's gold and items into the player's bags (whatever fits). The caller
+ * checks who may take it and from where (the player in range, or their pet).
+ * Returns false when something was left behind (bags full).
+ */
+export function collectLoot(game: Game, sessionId: string, lootId: string): boolean {
+  const ctx = context(game, sessionId);
+  const contents = game.lootContents.get(lootId);
+  if (!ctx || !contents) return true;
   if (contents.gold > 0) {
     ctx.inv.gold += contents.gold;
     notice(game, sessionId, `+${contents.gold} altın`, GOLD_COLOR);
@@ -302,6 +320,7 @@ export function pickupLoot(game: Game, sessionId: string, lootId: string) {
   if (leftovers.length > 0) notice(game, sessionId, "Envanter dolu");
   else removeLoot(game, lootId);
   changed(game, sessionId);
+  return leftovers.length === 0;
 }
 
 /** Puts a bag stack on the ground at your feet; it is yours for a while, like a kill's loot. */
@@ -313,7 +332,7 @@ export function dropItem(game: Game, sessionId: string, index: number) {
   const def = ITEMS[stack.defId];
   if (def.questItem) return notice(game, sessionId, "Görev eşyası yere atılamaz");
   ctx.inv.slots[index] = null;
-  spawnLoot(game, ctx.player.x, ctx.player.y, { gold: 0, items: [stack] }, sessionId);
+  spawnLoot(game, ctx.player.x, ctx.player.y, { gold: 0, items: [stack], dropped: true }, sessionId);
   notice(game, sessionId, `${def.name}${stack.qty > 1 ? ` x${stack.qty}` : ""} yere atıldı`, INFO_COLOR);
   changed(game, sessionId);
 }

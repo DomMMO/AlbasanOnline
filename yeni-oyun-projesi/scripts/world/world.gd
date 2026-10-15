@@ -53,6 +53,8 @@ var local: LocalPlayer
 var players := {}  # sessionId -> Remote
 var mobs := {}  # mobId -> Remote
 var minions := {}
+## Owner sessionId -> Remote of their pet.
+var pets := {}
 var town_portals := {}  # id -> {state, view}
 var loot := {}  # id -> {state, view}
 var nodes := {}  # id -> {state, node (wrapper), def}
@@ -317,6 +319,9 @@ func _bind_state() -> void:
 	var minion_ref: Schema.MapRef = state.get_field("minions")
 	_offs.append(cb.on_add(minion_ref, _on_minion_add))
 	_offs.append(cb.on_remove(minion_ref, _on_minion_remove))
+	var pet_ref: Schema.MapRef = state.get_field("pets")
+	_offs.append(cb.on_add(pet_ref, _on_pet_add))
+	_offs.append(cb.on_remove(pet_ref, _on_pet_remove))
 	_offs.append(cb.listen(state, "cleared", func(_v, _p): _sync_portals()))
 	var first_clock := [true]
 	_offs.append(cb.listen(state, "clock", func(minute, _p):
@@ -613,6 +618,34 @@ func _on_minion_remove(_minion: Schema.Struct, minion_id: String) -> void:
 	minions.erase(minion_id)
 
 
+## A player's pet (pets.ts): the server moves it, we only draw it.
+func _on_pet_add(pet: Schema.Struct, owner_id: String) -> void:
+	var def: Dictionary = GameData.get_value("PETS", {}).get(String(f(pet, "kind", "")), {})
+	if def.is_empty():
+		return
+	_on_pet_remove(pet, owner_id)
+	var owner := player_state(owner_id)
+	var name := ("%s (%s)" % [def.name, f(owner, "name", "")]) if owner else String(def.name)
+	var view := EntityView.new(sorted, float(f(pet, "x")), float(f(pet, "y")), def.appearance, name, Color("#8ce99a"))
+	entities.add_child(view)
+	var remote := Remote.new()
+	remote.state = pet
+	remote.view = view
+	pets[owner_id] = remote
+	Fx.burst(sorted, pos_of(pet), Depth.c(0xf8f4ec), 8)
+	var sync := func(): remote.buffer.push(float(f(pet, "x")), float(f(pet, "y")), int(f(pet, "dir")))
+	sync.call()
+	_offs.append(room.callbacks.on_change(pet, sync))
+
+
+func _on_pet_remove(_pet: Schema.Struct, owner_id: String) -> void:
+	var remote: Remote = pets.get(owner_id)
+	if remote:
+		Fx.burst(sorted, remote.view.position, Depth.c(0xf8f4ec), 8)
+		remote.view.destroy(true)
+	pets.erase(owner_id)
+
+
 func _sync_portals() -> void:
 	for p in portals:
 		p.view.set_visible(portal_open(p.def))
@@ -664,6 +697,7 @@ func _bind_messages() -> void:
 	_on("horseState", func(e):
 		ui.set_horse_state(e)
 		hud.set_mount_icon(ui.extra.stable.active_look()))
+	_on("petState", func(e): ui.set_pet_state(e))
 	_on("partyUpdate", on_party_update)
 	_on("duelInvite", func(e): ui.show_invite("duel", String(e.from)))
 	_on("dungeonInvite", func(e): ui.show_invite("dungeon", String(e.from), String(e.get("dungeon", ""))))
@@ -1872,6 +1906,8 @@ func _process(delta: float) -> void:
 		render_remote(r, render_time)
 	for r in minions.values():
 		render_remote(r, render_time)
+	for r in pets.values():
+		render_remote(r, render_time)
 	for sid in cast_glows:
 		var glow: Node2D = cast_glows[sid]
 		var v: EntityView = glow.get_meta("view")
@@ -1897,6 +1933,8 @@ func _apply_lamp_light() -> void:
 	for r in mobs.values():
 		light.call(r.view)
 	for r in minions.values():
+		light.call(r.view)
+	for r in pets.values():
 		light.call(r.view)
 	for v in npc_views.values():
 		light.call(v)

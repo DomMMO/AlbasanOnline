@@ -643,7 +643,7 @@ func set_animation(dir: int, moving: bool) -> void:
 		sprite.flip_h = true
 	elif dir == Dir.RIGHT:
 		sprite.flip_h = false
-	if set.kind == "wolf":
+	if set.kind == "wolf" or set.kind == "rabbit":
 		if moving:
 			_play("side")
 		else:
@@ -670,10 +670,10 @@ func set_animation(dir: int, moving: bool) -> void:
 	set_position(_raw.x, _raw.y)
 
 
-## The standing frame for a facing: "idle_down" / "idle_up" / "idle_side" (wolves: "idle_side").
+## The standing frame for a facing: "idle_down" / "idle_up" / "idle_side" (wolves, rabbits: "idle_side").
 func _idle_name(dir: int) -> String:
 	var side := "up" if dir == Dir.UP else ("down" if dir == Dir.DOWN else "side")
-	if set.kind == "wolf":
+	if set.kind == "wolf" or set.kind == "rabbit":
 		side = "side"
 	for name in ["idle_" + side, "idle_down", "idle", "frame0"]:
 		if set.frames.has_animation(name):
