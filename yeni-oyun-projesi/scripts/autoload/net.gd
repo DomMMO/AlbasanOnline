@@ -3,13 +3,15 @@ extends Node
 ## Server access (autoload "Net"): the REST API for accounts and characters (client/src/net/api.ts)
 ## and joining zone rooms.
 ##
-## The server address: "--server=http://localhost:2567" on the command line (or
-## user://settings.cfg [net] server=...), otherwise the live server.
+## The server address: "--server=..." on the command line (or user://settings.cfg
+## [net] server=...), otherwise the local dev server when run from the editor and the
+## live server in exported builds.
 
 const DEFAULT_SERVER := "https://albasanonline.com"
+const LOCAL_SERVER := "http://localhost:2567"
 const SESSION_FILE := "user://session.cfg"
 
-var server := DEFAULT_SERVER
+var server := LOCAL_SERVER if OS.has_feature("editor") else DEFAULT_SERVER
 var token := ""
 
 
