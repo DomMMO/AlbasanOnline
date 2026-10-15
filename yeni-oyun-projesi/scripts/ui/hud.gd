@@ -525,6 +525,18 @@ func start_cooldown(id: String, cooldown_ms: float, gcd_ms: float) -> void:
 		_gcd_length = gcd_ms
 
 
+## Remaining cooldown for a slot: whole seconds (rounded up), tenths under 3 s, minutes past one.
+static func _cooldown_text(left_ms: float) -> String:
+	if left_ms <= 0:
+		return ""
+	var sec := left_ms / 1000.0
+	if sec >= 60.0:
+		return "%dd" % ceili(sec / 60.0)
+	if sec >= 3.0:
+		return str(ceili(sec))
+	return ("%.1f" % sec).replace(".", ",")
+
+
 func flash_slot(index: int) -> void:
 	if index >= 0 and index < _slots.size():
 		_slots[index].press_flash()
@@ -536,6 +548,7 @@ func _process(_delta: float) -> void:
 		var entry: Dictionary = _slot_entries[i]
 		var s := _slots[i]
 		var fraction := 0.0
+		var left := 0.0
 		if entry.kind == "skill":
 			var skill: Dictionary = entry.skill
 			var cd: Array = _cooldowns.get(String(skill.id), [0, 1])
@@ -545,18 +558,24 @@ func _process(_delta: float) -> void:
 				fraction = own / cd[1]
 			elif gcd > 0:
 				fraction = gcd / _gcd_length
+			# Only the skill's own cooldown gets a number; the short global cooldown is just the sweep.
+			left = own
 			s.dimmed = bool(entry.get("locked", false)) or _current_resource < int(skill.get("cost", 0))
 		s.sweep = clampf(fraction, 0.0, 1.0)
+		s.cooldown_text = _cooldown_text(left)
 	for i in _potion_slots.size():
 		var def_id: String = _potions[i]
 		var s := _potion_slots[i]
 		var def := GameData.item(def_id)
 		var fraction := 0.0
+		var left := 0.0
 		if not def.is_empty():
 			var cd: Array = _cooldowns.get(String(def.get("cooldownGroup", def_id)), [0, 1])
 			if cd[0] > now:
-				fraction = (cd[0] - now) / cd[1]
+				left = cd[0] - now
+				fraction = left / cd[1]
 		s.sweep = clampf(fraction, 0.0, 1.0)
+		s.cooldown_text = _cooldown_text(left)
 	if _cast_running:
 		var t := clampf((now - _cast_start) / _cast_ms, 0.0, 1.0)
 		_cast_fill.size = Vector2((_cast.size.x - 2) * t, _cast.size.y - 2)

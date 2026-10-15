@@ -33,7 +33,7 @@ export const MELEE_RANGE = 26;
 /** Mobs stop chasing at this distance and start swinging. */
 export const MOB_ATTACK_RANGE = 18;
 /** A mob that gets this far from its spawn point gives up and walks home at full health. */
-export const MOB_LEASH_RANGE = TILE_SIZE * 12;
+export const MOB_LEASH_RANGE = TILE_SIZE * 18;
 /** Players this many levels above a mob are left alone: it won't attack them and shies away a little. */
 export const MOB_FEAR_LEVEL_GAP = 5;
 

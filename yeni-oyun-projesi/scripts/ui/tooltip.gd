@@ -7,9 +7,17 @@ const SKILL_RANK_BONUS := 12
 const SKILL_MAX_RANK := 5
 
 var _box: VBoxContainer
+## slot -> the equipped item there ({defId, enhance, affixes}) or null; set by GameUi.
+var equipped_item: Callable
+## Holding Shift over a piece of gear shows what is worn in its slot in this second box.
+var _compare: Tooltip
+var _is_compare := false
+var _item_shown := {}  # {d, anchor} of the item tooltip on screen ({} = none)
+var _shift_shown := false
 
 
-func _init() -> void:
+func _init(is_compare := false) -> void:
+	_is_compare = is_compare
 	theme_type_variation = "FramePanel"
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	visible = false
@@ -18,6 +26,23 @@ func _init() -> void:
 	_box = VBoxContainer.new()
 	_box.add_theme_constant_override("separation", 2)
 	add_child(_box)
+
+
+func _ready() -> void:
+	if not _is_compare:
+		_compare = Tooltip.new(true)
+		get_parent().add_child.call_deferred(_compare)
+
+
+func _process(_delta: float) -> void:
+	if _is_compare or _item_shown.is_empty():
+		return
+	if not visible or not is_instance_valid(_item_shown.anchor):
+		_item_shown = {}
+		_compare.hide_tip()
+		return
+	if Input.is_key_pressed(KEY_SHIFT) != _shift_shown:
+		_update_compare()
 
 
 func _clear() -> void:
@@ -54,10 +79,60 @@ func show_item(d: Dictionary, ctx: Dictionary, anchor: Control) -> void:
 	custom_minimum_size = Vector2(220, 0)
 	for line in Items.tooltip_lines(d, ctx):
 		_line(line[0], line[1], line[2])
-	_place(anchor, false)
+	var comparable := not _is_compare and not ctx.get("equipped", false) and _worn(d) != null
+	if comparable:
+		_line("Shift: kuşanılanla kıyasla", UiTheme.MUTED, "muted")
+	_item_shown = {"d": d, "anchor": anchor, "playerLevel": ctx.get("playerLevel", 1)} if comparable else {}
+	_shift_shown = false
+	if _compare:
+		_compare.hide_tip()
+	await _place(anchor, false)
+	if comparable and visible:
+		_update_compare()
+
+
+## The item worn in the slot `d` goes into, or null (not gear, slot empty, no inventory yet).
+func _worn(d: Dictionary) -> Variant:
+	if not d.has("slot") or not equipped_item.is_valid():
+		return null
+	return equipped_item.call(String(d.slot))
+
+
+func _update_compare() -> void:
+	_shift_shown = Input.is_key_pressed(KEY_SHIFT)
+	var worn: Variant = _worn(_item_shown.d) if _shift_shown else null
+	if worn == null:
+		_compare.hide_tip()
+		return
+	_compare._clear()
+	_compare._line("Şu an kuşanılan", UiTheme.GOLD_LIGHT, "muted")
+	for line in Items.tooltip_lines(Items.def(worn.defId), {"enhance": worn.get("enhance", 0), "affixes": worn.get("affixes"), "playerLevel": _item_shown.playerLevel}):
+		_compare._line(line[0], line[1], line[2])
+	_compare._place_beside(self, _item_shown.anchor)
+
+
+## Puts the compare box next to `main`, on the side away from the hovered `anchor`.
+func _place_beside(main: Control, anchor: Control) -> void:
+	visible = true
+	reset_size()
+	await get_tree().process_frame
+	if not visible or not is_instance_valid(main) or not is_instance_valid(anchor):
+		return
+	reset_size()
+	var viewport := get_viewport_rect().size
+	var m := main.get_global_rect()
+	var left := m.position.x - size.x - 6
+	var right := m.end.x + 6
+	var x := left if m.position.x < anchor.get_global_rect().position.x else right
+	if x < 8 or x + size.x > viewport.x - 8:
+		x = right if x == left else left
+	global_position = Vector2(clampf(x, 8, maxf(8, viewport.x - size.x - 8)), clampf(m.position.y, 8, maxf(8, viewport.y - size.y - 8)))
 
 
 func show_skill(skill: Dictionary, ctx: Dictionary, anchor: Control) -> void:
+	_item_shown = {}
+	if _compare:
+		_compare.hide_tip()
 	_clear()
 	custom_minimum_size = Vector2(300, 0)
 	var head := HBoxContainer.new()
@@ -228,3 +303,6 @@ func _place(anchor: Control, above_if_low: bool) -> void:
 
 func hide_tip() -> void:
 	visible = false
+	_item_shown = {}
+	if _compare:
+		_compare.hide_tip()
