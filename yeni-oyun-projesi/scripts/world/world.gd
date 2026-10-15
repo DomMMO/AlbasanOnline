@@ -146,6 +146,7 @@ func _ready() -> void:
 	night.set_darkness(float(zone.get("dim", 0.0)))
 	add_child(night)
 	hud.minimap.set_zone(map, String(zone.get("name", zone_id)))
+	ui.world_map.set_zone(hud.minimap.ground, hud.minimap.map_size, String(zone.get("name", zone_id)))
 	hud.set_death_text(String(zone.get("respawnText", "")))
 	_target_ring = Depth.Painter.new(func(ci: CanvasItem): Depth.stroke_ellipse(ci, 0, 0, 18, 7, _ring_color, 1))
 	_target_ring.visible = false
@@ -690,6 +691,7 @@ func _bind_messages() -> void:
 		if String(e.sessionId) == room.session_id:
 			hud.show_message("Seviye %d!" % int(e.level), "level")
 			ui.refresh_quests()
+			ui.refresh_item_levels(int(e.level))
 			refresh_target_frame())
 
 
@@ -1763,6 +1765,8 @@ func refresh_minimap() -> void:
 	if guide:
 		dots.append({"x": float(guide.place.x), "y": float(guide.place.y), "kind": "guide"})
 	hud.minimap.draw_dots(dots)
+	if ui.world_map.visible:
+		ui.world_map.draw_dots(dots)
 
 
 func sit_on(bench: Dictionary) -> void:
@@ -1965,7 +1969,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if ui.menu_open() and not event.is_action("clear_target"):
 		return
-	for action in ["clear_target", "target_next", "attack", "inventory", "interact", "quest_log", "passive_tree", "skills", "friends", "leaderboard", "potion_1", "potion_2", "minimap", "mount", "town_portal"] + Keys.HOTBAR:
+	for action in ["clear_target", "target_next", "attack", "inventory", "interact", "quest_log", "passive_tree", "skills", "friends", "leaderboard", "potion_1", "potion_2", "world_map", "mount", "town_portal"] + Keys.HOTBAR:
 		if event.is_action(action):
 			do_action(action)
 			break
@@ -2009,8 +2013,8 @@ func do_action(action: String) -> void:
 			use_potion(0)
 		"potion_2":
 			use_potion(1)
-		"minimap":
-			hud.minimap.toggle()
+		"world_map":
+			ui.toggle_world_map()
 		"mount":
 			toggle_mount()
 		"town_portal":

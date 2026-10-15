@@ -46,6 +46,10 @@ export const Msg = {
   Gather: "gather",
   /** Inventory: stack and sort the bags. */
   SortInventory: "sortInventory",
+  /** Inventory: put a bag stack on the ground at your feet. */
+  DropItem: "dropItem",
+  /** Inventory: destroy a bag stack for good. */
+  DestroyItem: "destroyItem",
   /** Party ping on the map (Alt+click). */
   MapPing: "mapPing",
   /** Skill page: add (+1) or take back (-1) a rank; or reset all. */
@@ -531,6 +535,11 @@ export interface BuyMessage {
   npcId: string;
   itemId: string;
   qty: number;
+}
+
+/** DropItem and DestroyItem: the bag slot. */
+export interface BagSlotMessage {
+  index: number;
 }
 
 export interface SellMessage {

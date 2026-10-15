@@ -33,6 +33,13 @@ func set_value(value: float, max_value: float, label := "") -> void:
 	queue_redraw()
 
 
+## Takes over the fill another bar is drawing right now (it replaces that one), so the fill
+## eases on from there; without one it shows the value at once instead of easing from full.
+func continue_from(previous: Variant) -> void:
+	_shown = previous._shown if is_instance_valid(previous) and previous is Bar else _target
+	queue_redraw()
+
+
 func set_kind(value: String) -> void:
 	if value != kind:
 		kind = value

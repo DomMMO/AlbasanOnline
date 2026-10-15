@@ -42,6 +42,7 @@ import { partyIdOf } from "./party";
 
 const GOLD_COLOR = "#ffd34d";
 const ERROR_COLOR = "#ff5a5a";
+const INFO_COLOR = "#d8cba8";
 
 export interface LootContents {
   gold: number;
@@ -248,13 +249,18 @@ export function dropLoot(game: Game, x: number, y: number, mobDef: MobDef, owner
   if (game.random() < jewelOdds.major * power) contents.items.push(newStack("major_jewel", 1, 0, { level: mobDef.level, luck: power }));
   if (game.random() < jewelOdds.greater * power) contents.items.push(newStack("greater_jewel", 1, 0, { level: mobDef.level, luck: power }));
 
+  // A party's kill belongs to the whole party ("party:<id>"), otherwise to the killer.
+  const ownerParty = ownerId ? partyIdOf(game.playerRuntime.get(ownerId)?.characterId ?? -1) : null;
+  spawnLoot(game, x, y, contents, ownerParty ? `party:${ownerParty}` : (ownerId ?? ""));
+}
+
+/** A loot pile only `owner` may pick up for a while, then anyone, until it despawns. */
+function spawnLoot(game: Game, x: number, y: number, contents: LootContents, owner: string) {
   const lootId = game.newId("l");
   const loot = new Loot();
   loot.x = x;
   loot.y = y;
-  // A party's kill belongs to the whole party ("party:<id>"), otherwise to the killer.
-  const ownerParty = ownerId ? partyIdOf(game.playerRuntime.get(ownerId)?.characterId ?? -1) : null;
-  loot.owner = ownerParty ? `party:${ownerParty}` : (ownerId ?? "");
+  loot.owner = owner;
   game.state.loot.set(lootId, loot);
   game.lootContents.set(lootId, contents);
   game.after(LOOT_OWNER_MS, () => {
@@ -295,6 +301,31 @@ export function pickupLoot(game: Game, sessionId: string, lootId: string) {
   contents.items = leftovers;
   if (leftovers.length > 0) notice(game, sessionId, "Envanter dolu");
   else removeLoot(game, lootId);
+  changed(game, sessionId);
+}
+
+/** Puts a bag stack on the ground at your feet; it is yours for a while, like a kill's loot. */
+export function dropItem(game: Game, sessionId: string, index: number) {
+  const ctx = context(game, sessionId);
+  if (!ctx || !validIndex(index) || ctx.player.dead) return;
+  const stack = ctx.inv.slots[index];
+  if (!stack) return;
+  const def = ITEMS[stack.defId];
+  if (def.questItem) return notice(game, sessionId, "Görev eşyası yere atılamaz");
+  ctx.inv.slots[index] = null;
+  spawnLoot(game, ctx.player.x, ctx.player.y, { gold: 0, items: [stack] }, sessionId);
+  notice(game, sessionId, `${def.name}${stack.qty > 1 ? ` x${stack.qty}` : ""} yere atıldı`, INFO_COLOR);
+  changed(game, sessionId);
+}
+
+export function destroyItem(game: Game, sessionId: string, index: number) {
+  const ctx = context(game, sessionId);
+  if (!ctx || !validIndex(index)) return;
+  const stack = ctx.inv.slots[index];
+  if (!stack) return;
+  const def = ITEMS[stack.defId];
+  ctx.inv.slots[index] = null;
+  notice(game, sessionId, `${def.name}${stack.qty > 1 ? ` x${stack.qty}` : ""} yok edildi`, INFO_COLOR);
   changed(game, sessionId);
 }
 

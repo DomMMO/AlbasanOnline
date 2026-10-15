@@ -33,7 +33,7 @@ const DEFAULTS := {
 	"quest_log": [KEY_J],
 	"passive_tree": [KEY_P],
 	"town_portal": [KEY_T],
-	"minimap": [KEY_M],
+	"world_map": [KEY_M],
 	"mount": [KEY_H],
 	"sprint": [KEY_SHIFT],
 	"friends": [KEY_O],
@@ -44,7 +44,7 @@ const DEFAULTS := {
 const BINDABLE := [
 	["Skill barı", [["skill_1", "Slot 1"], ["skill_2", "Slot 2"], ["skill_3", "Slot 3"], ["skill_4", "Slot 4"], ["skill_5", "Slot 5"], ["skill_6", "Slot 6"], ["skill_7", "Slot 7"], ["skill_8", "Slot 8"], ["skill_9", "Slot 9"], ["skill_10", "Slot 10"], ["potion_1", "İksir 1"], ["potion_2", "İksir 2"]]],
 	["Hareket ve savaş", [["move_up", "Yukarı"], ["move_down", "Aşağı"], ["move_left", "Sola"], ["move_right", "Sağa"], ["target_next", "Sıradaki hedef"], ["attack", "Hedefe saldır"], ["interact", "Etkileşim (al, konuş, portal)"], ["town_portal", "Şehir portalı"], ["mount", "Ata bin / in"], ["sprint", "Dörtnala koş (atta basılı tut)"]]],
-	["Pencereler", [["inventory", "Karakter ve envanter"], ["skills", "Yetenekler"], ["passive_tree", "Pasif ağaç"], ["quest_log", "Görev günlüğü"], ["friends", "Arkadaşlar"], ["leaderboard", "PvP sıralaması"], ["minimap", "Mini harita"]]],
+	["Pencereler", [["inventory", "Karakter ve envanter"], ["skills", "Yetenekler"], ["passive_tree", "Pasif ağaç"], ["quest_log", "Görev günlüğü"], ["friends", "Arkadaşlar"], ["leaderboard", "PvP sıralaması"], ["world_map", "Büyük harita"]]],
 ]
 
 const HOTBAR := ["skill_1", "skill_2", "skill_3", "skill_4", "skill_5", "skill_6", "skill_7", "skill_8", "skill_9", "skill_10"]

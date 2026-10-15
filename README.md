@@ -132,14 +132,14 @@ Tuşlar **Esc → Menü → Tuş Atamaları** sayfasından değiştirilebilir: 1
 | T | Şehir portalı (bulunduğun yerde açılır) |
 | H | Ata bin / attan in (sağ alttaki at düğmesi de aynısını yapar) |
 | L | PvP sıralaması |
-| M | Mini harita aç/kapat (sağ üst: çevrendeki 10 kare, sen ortada; sarı sen, yeşil grup arkadaşların, beyaz diğer oyuncular, mavi NPC, mor portal. Muhafızın tarif ettiği yer, grup arkadaşların ve pingler görünüm dışındaysa kenarda o yöne bakan bir üçgen çıkar) |
+| M | Büyük harita aç/kapat (bütün bölge; mini haritaya tıklamak da açar). Mini harita sağ üstte hep açık: çevrendeki 10 kare, sen ortada; sarı sen, yeşil grup arkadaşların, beyaz diğer oyuncular, mavi NPC, mor portal. Muhafızın tarif ettiği yer, grup arkadaşların ve pingler görünüm dışındaysa kenarda o yöne bakan bir üçgen çıkar |
 | /davet İsim, /p, /ayril | Grup |
 | /duello İsim | Yanındaki oyuncuyu düelloya davet et |
 | /takas İsim | Yanındaki oyuncuya takas teklif et (ya da hedef çerçevesindeki **Takas**) |
 | I veya C | Karakter ve envanter penceresi |
 | E | Yakındaki sandığı aç / NPC ile konuş / portal / tezgâha bak |
 | Sağ tık (envanterde) | Kuşan, kullan; dükkân açıkken sat |
-| Sürükle-bırak | Item'ı taşı, kuşan, çıkar |
+| Sürükle-bırak | Item'ı taşı, kuşan, çıkar; envanterden pencere dışına bırak: yere at, **Çöp** slotuna bırak: yok et (ikisi de onay sorar; görev eşyası yere atılamaz). Seviyesi yetmeyen item kırmızı görünür |
 | Esc | Açık pencereyi kapat, yoksa hedefi bırak, yoksa **menü** (ayarlar, kontroller, karakter değiştir, çıkış) |
 
 ### Mobil (telefon / tablet)

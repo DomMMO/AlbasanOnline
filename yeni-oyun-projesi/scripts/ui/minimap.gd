@@ -2,11 +2,13 @@ class_name Minimap
 extends PanelContainer
 
 ## The minimap: 21 tiles round you, dots for you, your party, other
-## players, NPCs, portals, pings, and a pulsing arrow where a guard told you to go. M hides it.
+## players, NPCs, portals, pings, and a pulsing arrow where a guard told you to go. Clicking it
+## opens the big map.
+
+signal clicked
 
 const VIEW_RADIUS := 10
 const SIZE := 128
-const HIDDEN_FILE := "user://settings.cfg"
 ## Colours that read better from far away than the tiles' own (map.ts Tile ids).
 const MINIMAP_COLORS := {4: "#2b5422", 17: "#8ec8ee", 12: "#5a4636", 11: "#4d483f", 10: "#d9a441", 26: "#2a221c"}
 const DOT_STYLE := {
@@ -22,9 +24,10 @@ const DOT_STYLE := {
 const POINTED := {"guide": true, "party": true, "ping": true}
 
 var zone_label: Label
+## The zone's ground, one pixel per tile (the big map draws it too).
+var ground: ImageTexture
+var map_size := Vector2i.ZERO
 var _canvas: Control
-var _ground: ImageTexture
-var _map_size := Vector2i.ZERO
 var _dots: Array = []
 
 
@@ -49,10 +52,15 @@ func _init() -> void:
 		l.add_theme_color_override("font_color", Color(pair[1]))
 		legend.add_child(l)
 	box.add_child(legend)
-	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var cfg := ConfigFile.new()
-	if cfg.load(HIDDEN_FILE) == OK:
-		visible = not cfg.get_value("ui", "minimap_hidden", false)
+	mouse_filter = Control.MOUSE_FILTER_STOP
+	mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	tooltip_text = "Büyük harita (%s)" % Keys.label("world_map")
+
+
+func _gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		clicked.emit()
+		accept_event()
 
 
 ## Paints the zone's ground; call when entering a zone.
@@ -65,16 +73,8 @@ func set_zone(map: ZoneMap, zone_name: String) -> void:
 			var t := map.tiles[y * map.width + x]
 			var hex: String = MINIMAP_COLORS.get(t, colors[t] if t < colors.size() else "#000000")
 			image.set_pixel(x, y, Color(hex))
-	_ground = ImageTexture.create_from_image(image)
-	_map_size = Vector2i(map.width, map.height)
-
-
-func toggle() -> void:
-	visible = not visible
-	var cfg := ConfigFile.new()
-	cfg.load(HIDDEN_FILE)
-	cfg.set_value("ui", "minimap_hidden", not visible)
-	cfg.save(HIDDEN_FILE)
+	ground = ImageTexture.create_from_image(image)
+	map_size = Vector2i(map.width, map.height)
 
 
 ## dots: [{x, y, kind}] in world pixels.
@@ -90,7 +90,7 @@ func _draw_map() -> void:
 	for d in _dots:
 		if d.kind == "self":
 			me = d
-	if me == null or _ground == null:
+	if me == null or ground == null:
 		return
 	var ts := float(GameData.TILE_SIZE)
 	var span := VIEW_RADIUS * 2 + 1
@@ -99,11 +99,11 @@ func _draw_map() -> void:
 	var top: float = me.y / ts - span / 2.0
 	var sx := maxf(0.0, left)
 	var sy := maxf(0.0, top)
-	var ex := minf(_map_size.x, left + span)
-	var ey := minf(_map_size.y, top + span)
+	var ex := minf(map_size.x, left + span)
+	var ey := minf(map_size.y, top + span)
 	ci.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	if ex > sx and ey > sy:
-		ci.draw_texture_rect_region(_ground, Rect2((sx - left) * per_tile, (sy - top) * per_tile, (ex - sx) * per_tile, (ey - sy) * per_tile), Rect2(sx, sy, ex - sx, ey - sy))
+		ci.draw_texture_rect_region(ground, Rect2((sx - left) * per_tile, (sy - top) * per_tile, (ex - sx) * per_tile, (ey - sy) * per_tile), Rect2(sx, sy, ex - sx, ey - sy))
 	var pulse := 0.65 + 0.35 * sin(Time.get_ticks_msec() / 180.0)
 	var centre := SIZE / 2.0
 	var sorted := _dots.duplicate()

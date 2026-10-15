@@ -26,6 +26,7 @@ import {
   type BuyMessage,
   type EquipSlot,
   type JoinOptions,
+  type BagSlotMessage,
   type MoveItemMessage,
   type PickupLootMessage,
   type SellMessage,
@@ -53,7 +54,7 @@ import { accountForToken, type Account } from "../db/accounts";
 import { loadCharacter, saveCharacters, type CharacterSave } from "../db/characters";
 import { respawn, setTarget, useSkill } from "../game/combat";
 import { Game } from "../game/Game";
-import { buy, moveItem, pickupLoot, sell, unequip, useItem } from "../game/items";
+import { buy, destroyItem, dropItem, moveItem, pickupLoot, sell, unequip, useItem } from "../game/items";
 import { upgradeItem } from "../game/upgrade";
 import { browseStall, buyFromStall, closeStall, openStall, stallLocked } from "../game/market";
 import { abandonQuest, acceptQuest, talkForQuest, turnInQuest } from "../game/quests";
@@ -192,6 +193,14 @@ export class ZoneRoom extends Room<WorldState> {
     this.onMessage(Msg.Unequip, (client, message: Partial<UnequipMessage>) => {
       if (this.itemsLocked(client.sessionId)) return;
       if (EQUIP_SLOTS.includes(message?.slot as EquipSlot)) unequip(this.game, client.sessionId, message.slot!);
+    });
+    this.onMessage(Msg.DropItem, (client, message: Partial<BagSlotMessage>) => {
+      if (this.itemsLocked(client.sessionId)) return;
+      if (typeof message?.index === "number") dropItem(this.game, client.sessionId, message.index);
+    });
+    this.onMessage(Msg.DestroyItem, (client, message: Partial<BagSlotMessage>) => {
+      if (this.itemsLocked(client.sessionId)) return;
+      if (typeof message?.index === "number") destroyItem(this.game, client.sessionId, message.index);
     });
     this.onMessage(Msg.PickupLoot, (client, message: Partial<PickupLootMessage>) => {
       if (this.itemsLocked(client.sessionId)) return;

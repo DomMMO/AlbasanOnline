@@ -25,9 +25,12 @@ var skills: SkillsWindow
 var quests: QuestsUi
 var extra: ExtraWindows
 var menu: GameMenu
+var world_map: WorldMap
 
 var _invites := {}
 var _party_box: VBoxContainer
+## Member name -> [hp Bar, resource Bar] of the frames on screen.
+var _party_bars := {}
 var _fish_button: Button
 var _stall_button: Button
 var _ping_wheel: Control
@@ -49,6 +52,9 @@ func _init(the_hud: Hud) -> void:
 	w.add_child(skills)
 	quests = QuestsUi.new(self, w, hud.root)
 	extra = ExtraWindows.new(self, w, hud.root)
+	world_map = WorldMap.new()
+	w.add_child(world_map)
+	hud.minimap.clicked.connect(toggle_world_map)
 	_build_invites()
 	_build_party()
 	_build_buttons()
@@ -111,11 +117,19 @@ func has_fishing_rod() -> bool:
 # ---- Inventory and NPC windows ----
 
 func update_inventory(event: Dictionary) -> void:
+	ItemSlot.player_level = player_level()
 	inventory.update(event)
 	extra.update_inventory(event)
 	shop.refresh()
 	upgrade.refresh()
 	quests.refresh()
+
+
+## Our level changed (the levelUp message can beat the state patch, hence the argument):
+## items that just became wearable lose their red tint.
+func refresh_item_levels(level: int) -> void:
+	ItemSlot.player_level = level
+	hud.get_tree().call_group(ItemSlot.GROUP, "queue_redraw")
 
 
 func set_doll_look(color: int, cls: String, look: Dictionary) -> void:
@@ -290,6 +304,10 @@ func toggle_skills() -> void:
 	skills.toggle_window()
 
 
+func toggle_world_map() -> void:
+	world_map.toggle()
+
+
 # ---- The rest of the windows (ExtraWindows) ----
 
 func toggle_passives() -> void:
@@ -406,6 +424,10 @@ func _build_party() -> void:
 func render_party(event: Dictionary, my_name: String, my_zone: String, w: World) -> void:
 	for c in _party_box.get_children():
 		c.queue_free()
+	# Updates come often and rebuild the frames: new bars carry on from the old ones' fill
+	# (a new Bar starts full and would drain to the value every time).
+	var old_bars := _party_bars
+	_party_bars = {}
 	_party_box.visible = event.get("partyId") != null
 	if not _party_box.visible:
 		return
@@ -430,12 +452,16 @@ func render_party(event: Dictionary, my_name: String, my_zone: String, w: World)
 		var info := "çevrimdışı" if not m.get("online", false) else ("ölü" if m.get("dead", false) else (away if not away.is_empty() else "Sv %d" % int(m.level)))
 		title.add_child(UiTheme.label(info, 12, UiTheme.GOLD, true))
 		box.add_child(title)
+		var before: Array = old_bars.get(String(m.name), [null, null])
 		var hp := Bar.new("hp", 10)
 		hp.set_value(float(m.hp) if m.get("online", false) else 0.0, float(m.maxHp))
+		hp.continue_from(before[0])
 		box.add_child(hp)
 		var res := Bar.new("mana" if def.get("resource") == "mana" else "rage", 6)
 		res.set_value(float(m.resource) if m.get("online", false) else 0.0, float(m.maxResource))
+		res.continue_from(before[1])
 		box.add_child(res)
+		_party_bars[String(m.name)] = [hp, res]
 		var sid = m.get("sessionId")
 		frame.gui_input.connect(func(ev):
 			if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT and sid and w.players.has(sid):
@@ -568,6 +594,7 @@ func menu_back() -> void:
 func reset() -> void:
 	for c in _party_box.get_children():
 		c.queue_free()
+	_party_bars.clear()
 	_party_box.visible = false
 	for kind in _invites:
 		_invites[kind].panel.visible = false
