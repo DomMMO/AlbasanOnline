@@ -367,6 +367,7 @@ export class Game {
         lifeSkills: runtime.lifeSkills,
         horse: runtime.horse,
         pets: runtime.pets,
+        look: sanitizeLook({ gender: player.gender, hairStyle: player.hairStyle, hairColor: player.hairColor, skin: player.skin }),
         playSeconds: runtime.playSecondsBefore + Math.floor((Date.now() - runtime.joinedAt) / 1000),
       },
       gold: runtime.inventory.gold,

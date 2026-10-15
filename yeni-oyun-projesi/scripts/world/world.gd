@@ -386,6 +386,11 @@ func _on_player_add(player: Schema.Struct, session_id: String) -> void:
 			_fade_in()
 		sync_stall(session_id, player)
 		_offs.append(room.callbacks.listen(player, "stall", func(_v, _p): sync_stall(session_id, player), false))
+		# The barber changed our hair: the paper doll and the barber's "now" follow.
+		for field in ["hairStyle", "hairColor"]:
+			_offs.append(room.callbacks.listen(player, field, func(_v, _p):
+				ui.set_doll_look(int(f(player, "color", 0)), String(f(player, "cls", "novice")), look_appearance(player))
+				ui.extra.barber.refresh(), false))
 		var last_class := [String(f(player, "cls", "novice"))]
 		_offs.append(room.callbacks.listen(player, "cls", func(cls, _p):
 			if cls == last_class[0]:

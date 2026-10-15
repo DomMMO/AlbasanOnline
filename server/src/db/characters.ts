@@ -68,6 +68,8 @@ export interface CharacterProgress {
   lifeSkills: LifeSkills;
   horse: HorseState;
   pets: PetState;
+  /** Gender, hair and skin (the barber changes the hair). */
+  look: CharacterLook;
   playSeconds: number;
 }
 
@@ -243,7 +245,7 @@ export async function saveCharacters(saves: CharacterSave[]) {
       await client.query(
         `UPDATE characters SET level = $2, xp = $3, hp = $4, zone = COALESCE($5, zone), x = CASE WHEN $5::text IS NULL THEN x ELSE $6 END,
            y = CASE WHEN $5::text IS NULL THEN y ELSE $7 END, gold = $8, pvp_rating = $9, pvp_kills = $10, pvp_deaths = $11,
-           skill_ranks = $12, fortune = $13, storage_gold = $14, play_seconds = $15, life_skills = $16, class = $17, horse = $18, pets = $19, updated_at = now()
+           skill_ranks = $12, fortune = $13, storage_gold = $14, play_seconds = $15, life_skills = $16, class = $17, horse = $18, pets = $19, look = $20, updated_at = now()
          WHERE id = $1`,
         [
           characterId,
@@ -265,6 +267,7 @@ export async function saveCharacters(saves: CharacterSave[]) {
           progress.cls,
           JSON.stringify(progress.horse),
           JSON.stringify(progress.pets),
+          JSON.stringify(progress.look),
         ],
       );
     }

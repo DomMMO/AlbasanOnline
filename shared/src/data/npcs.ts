@@ -19,9 +19,9 @@ export interface NpcDef {
   /**
    * quest = only gives quests and talks. storage = keeps your items (depo). guard = greets
    * and gives directions round town. master = a class master who hands out advice.
-   * pet = sells pets (pets.ts).
+   * pet = sells pets (pets.ts). barber = restyles your hair for gold (BARBER_PRICE).
    */
-  role: "merchant" | "blacksmith" | "quest" | "storage" | "guard" | "master" | "stable" | "pet";
+  role: "merchant" | "blacksmith" | "quest" | "storage" | "guard" | "master" | "stable" | "pet" | "barber";
   /** Item ids for sale; prices come from ItemDef.buyPrice. */
   shop: string[];
   /** First line of the conversation window. */
@@ -202,6 +202,16 @@ export const NPCS: Record<string, NpcDef> = {
     shop: [],
     greeting:
       "Hoş geldin yiğidim! Bu çiftlikte bozkırın en iyi atları büyür. Pahalı mı? Pahalı. Ama Kara Yel'in sırtında rüzgârı geride bıraktığında parayı hatırlamazsın bile.",
+  },
+  barber: {
+    id: "barber",
+    name: "Berber Cemil",
+    ...TOWN_SPOTS.barber,
+    appearance: { type: "humanoid", tunic: 0xe9ecef, hair: 0x2d2d2d, skin: 0xd8a47a, hairStyle: "spiky", gear: { legs: "leather_pants" } },
+    role: "barber",
+    shop: [],
+    greeting:
+      "Buyur, otur şöyle! Kılıcın keskin olabilir ama saçın o kadar değil. Kısa mı, uzun mu, topuz mu? Rengini de değiştiririz; makas da boya da benden, sen sadece kesenin ağzını aç.",
   },
   pet_keeper: {
     id: "pet_keeper",

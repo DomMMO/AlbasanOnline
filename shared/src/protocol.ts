@@ -64,6 +64,8 @@ export const Msg = {
   HorseBuy: "horseBuy",
   HorseSelect: "horseSelect",
   HorseStyle: "horseStyle",
+  /** Berber: change hair style and colour for gold. */
+  BarberStyle: "barberStyle",
   /** Petçi: buy a pet (it comes out with you). */
   PetBuy: "petBuy",
   /** Call one of your pets out, or send the one that is out home (pet: ""). */
@@ -392,6 +394,12 @@ export interface PetStateEvent {
   owned: string[];
   /** The pet that is out; "" = none. */
   active: string;
+}
+
+export interface BarberStyleMessage {
+  npcId: string;
+  hairStyle: string;
+  hairColor: number;
 }
 
 export interface PetBuyMessage {
