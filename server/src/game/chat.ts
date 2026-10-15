@@ -5,6 +5,7 @@ import { requestTrade } from "./trade";
 import { invite, kick, leave, partyChat } from "./party";
 import { requestFriend } from "./friends";
 import { onlineCharacters } from "./registry";
+import { togglePet } from "./pets";
 
 // Chat: one global channel across every zone (dungeon instances included),
 // whispers with "/f Name message", and system lines. Server-side validation only.
@@ -74,9 +75,11 @@ export function handleChat(game: Game, sessionId: string, raw: unknown) {
       return argument ? requestFriend(runtime.characterId, argument) : system(game, sessionId, "Kullanım: /arkadas İsim");
     case "/takas":
       return argument ? requestTrade(game, sessionId, argument) : system(game, sessionId, "Kullanım: /takas İsim");
+    case "/pet":
+      return togglePet(game, sessionId);
   }
   if (text.startsWith("/")) {
-    return system(game, sessionId, "Komutlar: /f İsim mesaj (fısıltı), /p mesaj (grup), /davet İsim, /ayril, /at İsim, /duello İsim, /takas İsim, /arkadas İsim");
+    return system(game, sessionId, "Komutlar: /f İsim mesaj (fısıltı), /p mesaj (grup), /davet İsim, /ayril, /at İsim, /duello İsim, /takas İsim, /arkadas İsim, /pet (peti çağır / gönder)");
   }
 
   for (const entry of onlineCharacters.all()) {

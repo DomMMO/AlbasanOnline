@@ -3,7 +3,7 @@ extends RefCounted
 
 ## Character and creature sprites: client/src/gfx/humanoid.ts and textures.ts ported pixel for
 ## pixel (the 12x16 humanoid templates with hair styles, gender, worn armour and class headwear;
-## wolf, slime, chest and portal), plus the art sheets (art/licensed/mobs, built by
+## wolf, slime, chest and portal; the rabbit pet is drawn only here), plus the art sheets (art/licensed/mobs, built by
 ## tools/build_sprites.py) with their code-drawn look-alikes when a sheet is missing
 ## (imageSprites.ts FALLBACK_LOOKS).
 ##
@@ -53,6 +53,12 @@ const WOLF_BODY := [
 const SLIME_FRAMES := [
 	["............", "............", "....kkkk....", "...kffffk...", "..kfwfffffk.", ".kfwffffffk.", ".kffeffeffk.", ".kffffffffk.", ".kdffffffdk.", "..kkkkkkkk.."],
 	["............", "............", "............", "....kkkk....", "..kkffffkk..", ".kfwfffffffk", "kfffeffefffk", "kffffffffffk", "kdffffffffdk", ".kkkkkkkkkk."],
+]
+
+## The rabbit pet, facing right: sitting, then mid-hop (body up a pixel, legs stretched).
+const RABBIT_FRAMES := [
+	[".........k.....", "........kfkk...", "........kpkfk..", "........kpkpk..", "........kfkpk..", "........kffffk.", ".k.kkkkkkffefk.", "kwkffffffffffpk", "kwffffffffffkk.", ".kffffffffkk...", ".kdddffwddk....", "..kdddwkddk....", "...kkkk.kk....."],
+	["........kfkk...", "........kpkfk..", "........kpkpk..", "........kfkpk..", "........kffffk.", ".k.kkkkkkffefk.", "kwkffffffffffpk", "kwffffffffffkk.", ".kffffffffkk...", ".kdddffwddk....", "kkkkkwwkkkkk...", "dddk.kk..kddk..", "kkk.......kk..."],
 ]
 
 const CHEST_FRAMES := [
@@ -206,6 +212,8 @@ static func frames_for(a: Dictionary) -> Array:
 			return humanoid_frames(String(a.get("gender", "male")), String(a.get("hairStyle", "short")))
 		"wolf":
 			return _wolf_frames()
+		"rabbit":
+			return RABBIT_FRAMES
 		"chest":
 			return CHEST_FRAMES
 		"portal":
@@ -245,6 +253,9 @@ static func palette_for(a: Dictionary) -> Dictionary:
 		"wolf":
 			var fur := int(a.get("fur", 0x868e96))
 			return {"k": Color("#1a1420"), "e": Color("#e8c33a"), "f": css(fur), "d": css(fur, 0.7)}
+		"rabbit":
+			var fur := int(a.get("fur", 0xd8c4a8))
+			return {"k": Color("#1a1420"), "e": Color("#1a1420"), "f": css(fur), "d": css(fur, 0.75), "w": Color("#f8f4ec"), "p": Color("#f4a6b8")}
 		"slime":
 			var c := int(a.get("color", 0x51cf66))
 			return {"k": css(c, 0.35), "e": Color("#1a1420"), "f": css(c), "d": css(c, 0.7), "w": css(c, 1.5)}
@@ -491,7 +502,7 @@ static func _build_template(set: SpriteSet, a: Dictionary) -> void:
 				var first: int = pair[1]
 				_add_anim(set.frames, pair[0], [cells[first], cells[first + 1], cells[first], cells[first + 2]], 8, true)
 				_add_anim(set.frames, "idle_" + pair[0], [cells[first]], 1, false)
-		"wolf":
+		"wolf", "rabbit":
 			_add_anim(set.frames, "side", [cells[0], cells[1]], 8, true)
 			_add_anim(set.frames, "idle_side", [cells[0]], 1, false)
 		"slime":

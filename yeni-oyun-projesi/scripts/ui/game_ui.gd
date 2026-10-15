@@ -207,6 +207,7 @@ func close_npc_windows() -> void:
 	upgrade.close_window()
 	extra.close_storage()
 	extra.close_stable()
+	extra.close_pets()
 	quests.close_dialog()
 
 
@@ -229,6 +230,8 @@ func open_npc_window(npc: Dictionary) -> bool:
 			extra.open_storage(npc)
 		"stable":
 			extra.open_stable(npc)
+		"pet":
+			extra.open_pets(npc)
 		_:
 			return false
 	return true
@@ -252,6 +255,8 @@ func close_far_npc_windows(at: Vector2) -> void:
 		extra.close_storage()
 	if far.call(extra.stable_npc()):
 		extra.close_stable()
+	if far.call(extra.pet_npc()):
+		extra.close_pets()
 	if quests.dialog.visible and far.call(quests.npc):
 		quests.close_dialog()
 
@@ -332,6 +337,10 @@ func is_friend_or_pending(name: String) -> bool:
 
 func set_horse_state(event: Dictionary) -> void:
 	extra.set_horse_state(event)
+
+
+func set_pet_state(event: Dictionary) -> void:
+	extra.set_pet_state(event)
 
 
 func on_trade_state(event: Dictionary) -> void:

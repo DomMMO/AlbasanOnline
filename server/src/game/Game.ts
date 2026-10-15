@@ -14,6 +14,8 @@ import {
   sanitizeHorse,
   horseSpeedBonus,
   type HorseState,
+  sanitizePet,
+  type PetState,
   type FortuneState,
   type LifeSkills,
   type SkillRanks,
@@ -47,6 +49,7 @@ import { loseDuel, updateDuels, type DuelInvite, type DuelState } from "./duel";
 import { cancelTrade, updateTrades, type TradeInvite, type TradeSession } from "./trade";
 import { stopFishing, updateFishing, type FishingState } from "./fishing";
 import { updateMounts } from "./mount";
+import { removePet, sendPetState, syncPet, updatePets } from "./pets";
 import { worldMinute } from "./worldClock";
 import type { SpawnZone } from "../../../shared/src";
 
@@ -134,6 +137,12 @@ export interface PlayerRuntime {
   mountToggledAt: number;
   /** Owned breeds, the ridden one and restyled colours (stable.ts). */
   horse: HorseState;
+  /** Owned pets and the one that is out (pets.ts). */
+  pets: PetState;
+  /** The loot pile our pet is running to. */
+  petTarget: string | null;
+  /** Loot piles our pet gave up on (our bags were full). */
+  petSkips: Set<string>;
   /** Play time stored before this session, and when this session began (wall clock). */
   playSecondsBefore: number;
   joinedAt: number;
@@ -224,6 +233,7 @@ export class Game {
     this.state.players.forEach((player, sessionId) => this.applyQueuedInputs(sessionId, player, this.playerRuntime.get(sessionId)!));
     updateMobs(this);
     updateMinions(this);
+    updatePets(this);
     updateGathering(this);
     updatePlayerCombat(this);
     updateDuels(this);
@@ -305,12 +315,16 @@ export class Game {
       fishing: null,
       mountToggledAt: -Infinity,
       horse: sanitizeHorse(character.horse),
+      pets: sanitizePet(character.pets),
+      petTarget: null,
+      petSkips: new Set(),
       playSecondsBefore: character.playSeconds,
       joinedAt: Date.now(),
     });
 
     refreshStats(this, sessionId);
     syncHorse(this, sessionId);
+    syncPet(this, sessionId);
     // Characters that logged out dead come back at spawn with full health, as if they respawned.
     player.hp = character.hp !== null && character.hp > 0 ? Math.min(character.hp, player.maxHp) : player.maxHp;
     // Rage starts empty, mana full.
@@ -323,6 +337,7 @@ export class Game {
     sendFortuneState(this, sessionId);
     sendLifeSkills(this, sessionId);
     sendHorseState(this, sessionId);
+    sendPetState(this, sessionId);
     return player;
   }
 
@@ -351,6 +366,7 @@ export class Game {
         fortune: runtime.fortune,
         lifeSkills: runtime.lifeSkills,
         horse: runtime.horse,
+        pets: runtime.pets,
         playSeconds: runtime.playSecondsBefore + Math.floor((Date.now() - runtime.joinedAt) / 1000),
       },
       gold: runtime.inventory.gold,
@@ -365,6 +381,7 @@ export class Game {
     cancelTrade(this, sessionId, "Takas iptal edildi: karşı taraf ayrıldı");
     closeStall(this, sessionId);
     dismissMinions(this, sessionId);
+    removePet(this, sessionId);
     forgetPlayer(this, sessionId);
     this.state.players.delete(sessionId);
     this.playerRuntime.delete(sessionId);

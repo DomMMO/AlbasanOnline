@@ -28,6 +28,8 @@ import {
   type JoinOptions,
   type BagSlotMessage,
   type MoveItemMessage,
+  type PetBuyMessage,
+  type PetSummonMessage,
   type PickupLootMessage,
   type SellMessage,
   type SetTargetMessage,
@@ -63,6 +65,7 @@ import { respondDuel } from "../game/duel";
 import { notice, sendInventory } from "../game/items";
 import { chooseClass, resetClass } from "../game/classPath";
 import { buyHorse, selectHorse, styleHorse } from "../game/stable";
+import { buyPet, summonPet } from "../game/pets";
 import { sitOnBench } from "../game/benches";
 import { friendJoined, friendLeft, removeFriend, requestFriend, respondFriend } from "../game/friends";
 import { forgetInstance, instanceFor, refreshFor, registerInstance, respond, sameParty } from "../game/party";
@@ -295,6 +298,10 @@ export class ZoneRoom extends Room<WorldState> {
     this.onMessage(Msg.HorseBuy, (client, message: { npcId?: unknown; breed?: unknown }) => {
       if (!this.itemsLocked(client.sessionId)) buyHorse(this.game, client.sessionId, message?.npcId, message?.breed);
     });
+    this.onMessage(Msg.PetBuy, (client, message: Partial<PetBuyMessage>) => {
+      if (!this.itemsLocked(client.sessionId)) buyPet(this.game, client.sessionId, message?.npcId, message?.pet);
+    });
+    this.onMessage(Msg.PetSummon, (client, message: Partial<PetSummonMessage>) => summonPet(this.game, client.sessionId, message?.pet));
     this.onMessage(Msg.HorseSelect, (client, message: { npcId?: unknown; breed?: unknown }) => selectHorse(this.game, client.sessionId, message?.npcId, message?.breed));
     this.onMessage(Msg.HorseStyle, (client, message: { npcId?: unknown; look?: unknown }) => {
       if (!this.itemsLocked(client.sessionId)) styleHorse(this.game, client.sessionId, message?.npcId, message?.look);

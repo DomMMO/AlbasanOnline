@@ -102,6 +102,16 @@ export class Minion extends Schema {
 }
 
 /** A town portal end (see game/townPortal.ts). Only its owner can use it. */
+/** A pet following its owner (pets.ts); keyed by the owner's sessionId. */
+export class Pet extends Schema {
+  @type("string") kind = "";
+  @type("string") ownerId = "";
+  @type("number") x = 0;
+  @type("number") y = 0;
+  @type("uint8") dir: Direction = Direction.Down;
+  @type("boolean") moving = false;
+}
+
 export class TownPortal extends Schema {
   @type("string") owner = "";
   @type("number") x = 0;
@@ -139,4 +149,5 @@ export class WorldState extends Schema {
   @type({ map: Minion }) minions = new MapSchema<Minion>();
   @type({ map: TownPortal }) townPortals = new MapSchema<TownPortal>();
   @type({ map: GatherNode }) nodes = new MapSchema<GatherNode>();
+  @type({ map: Pet }) pets = new MapSchema<Pet>();
 }

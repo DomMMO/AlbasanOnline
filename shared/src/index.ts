@@ -18,6 +18,7 @@ export * from "./data/gathering";
 export * from "./data/fishing";
 export * from "./data/directions";
 export * from "./data/horses";
+export * from "./data/pets";
 export * from "./data/decorArt";
 export * from "./daynight";
 export * from "./data/quests";

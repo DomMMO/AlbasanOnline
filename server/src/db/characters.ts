@@ -7,6 +7,7 @@ import {
   type ClassId,
   type FortuneState,
   type HorseState,
+  type PetState,
   type LifeSkills,
   type QuestProgress,
   type SkillRanks,
@@ -42,6 +43,8 @@ export interface CharacterRecord {
   lifeSkills: unknown;
   /** Raw stored horses; sanitized on load. */
   horse: unknown;
+  /** Raw stored pets; sanitized on load. */
+  pets: unknown;
   items: StoredItem[];
   quests: QuestProgress[];
 }
@@ -64,6 +67,7 @@ export interface CharacterProgress {
   fortune: FortuneState | null;
   lifeSkills: LifeSkills;
   horse: HorseState;
+  pets: PetState;
   playSeconds: number;
 }
 
@@ -176,7 +180,7 @@ export async function loadCharacter(characterId: number, accountId: number): Pro
     `SELECT id, account_id AS "accountId", name, class, color, level, xp, gold, storage_gold AS "storageGold", look,
             play_seconds AS "playSeconds", hp, zone, x, y,
             pvp_rating AS "pvpRating", pvp_kills AS "pvpKills", pvp_deaths AS "pvpDeaths",
-            skill_ranks AS "skillRanks", fortune, life_skills AS "lifeSkills", horse
+            skill_ranks AS "skillRanks", fortune, life_skills AS "lifeSkills", horse, pets
      FROM characters WHERE id = $1 AND account_id = $2`,
     [characterId, accountId],
   );
@@ -239,7 +243,7 @@ export async function saveCharacters(saves: CharacterSave[]) {
       await client.query(
         `UPDATE characters SET level = $2, xp = $3, hp = $4, zone = COALESCE($5, zone), x = CASE WHEN $5::text IS NULL THEN x ELSE $6 END,
            y = CASE WHEN $5::text IS NULL THEN y ELSE $7 END, gold = $8, pvp_rating = $9, pvp_kills = $10, pvp_deaths = $11,
-           skill_ranks = $12, fortune = $13, storage_gold = $14, play_seconds = $15, life_skills = $16, class = $17, horse = $18, updated_at = now()
+           skill_ranks = $12, fortune = $13, storage_gold = $14, play_seconds = $15, life_skills = $16, class = $17, horse = $18, pets = $19, updated_at = now()
          WHERE id = $1`,
         [
           characterId,
@@ -260,6 +264,7 @@ export async function saveCharacters(saves: CharacterSave[]) {
           JSON.stringify(progress.lifeSkills),
           progress.cls,
           JSON.stringify(progress.horse),
+          JSON.stringify(progress.pets),
         ],
       );
     }

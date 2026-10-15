@@ -396,6 +396,15 @@ Sağ altta, mana/öfke küresinin solundaki **at düğmesine** bas (ya da **H**)
 - Binip inmek arasında 1,5 saniye bekleme var. Binince ve inince ayaklarının dibinde toz kalkar.
 - At kodla çizilir (`client/src/gfx/horse.ts`): yandan yürürken bacakları adım atar, önden atın başı, arkadan sağrısı ve kuyruğu görünür; herkes seni atlı görür. Mantık `server/src/game/mount.ts`.
 
+### Pet
+
+Şehirde, at çiftliği kapısının birkaç adım batısında **Petçi Nuri** evcil hayvan satar. Şimdilik tek pet var: **Tavşan**, **1.000.000 altın**.
+
+- Satın aldığın pet hemen yanına gelir ve peşinden zıplar. Yakınında (8 kare) **senin alabileceğin** bir ganimet varsa (kendi kestiğin, grubunun ya da artık herkese açık olanlar) ona koşar, alır, altın ve eşyalar çantana girer. Bu sırada sen dövüşmeye devam edersin.
+- Senin yere attığın eşyalara ve başkasının ganimetine dokunmaz. Çantan doluysa sığmayanı yerde bırakır.
+- Sahada **`/pet`** yazarak peti eve gönderir, tekrar yazarak geri çağırırsın (Petçi Nuri'nin penceresinden de olur). Peti olan herkes görür; çok geride kalırsa (bölge değiştirince, dörtnala koşunca) yanına ışınlanır.
+- Pet duvarların ve suyun üstünden zıplar, takılmaz. Kurallar `shared/src/data/pets.ts`, sunucu `server/src/game/pets.ts`, çizim `yeni-oyun-projesi/scripts/gfx/sprites.gd` (`RABBIT_FRAMES`). Petler `characters.pets` sütununda saklanır.
+
 ### Şehir portalı (T)
 
 **T**'ye basınca bulunduğun yerde (zindan dahil, şehir hariç) Ana Merkez'e bir portal açılır. Şehirde de seni tam bıraktığın yere geri götüren bir portal durur; ikisine **E** ya da tıklamayla girilir. Portal sen başka bir haritaya girene ya da oyundan çıkana kadar (20 sn tolerans) durur; yeni bir T eskisinin yerini alır. Portal açık olduğu sürece zindan kopyası kapanmaz, döndüğünde her şey bıraktığın gibidir. Portalları herkes görür, sadece sahibi kullanabilir. Kod: `server/src/game/townPortal.ts`.
@@ -666,6 +675,7 @@ client/
 | 7.24 | Vadiden batıya **Kızıl Kanyon** (Sv 20+: sırtlan, çakal, çöl akıncıları, kumtaşı golemi, minotor; alan bossu Akıncı Beyi Kara Toygar) doğuya **Ayaz Dağları** (Sv 30+: ayaz kurdu, yeti, buz golemi, hortlaklar; alan bossu Buz Devi Ayazhan) ve güneye **Kor Toprakları** (Sv 40+: lav nehri ve köprüleri, kor kurdu, kül tapıcıları, ateş elementali, lav golemi; alan bossu Kor Devi Ateşhan). 6 yeni zindan: Kızıl Mağaralar (22), Gömülü Kervansaray (26), Buz Mağarası (31), Ayaz Kalesi (35), Magma Ocakları (42), Kül Tapınağı (46). Zindanlar temalı: mağara, sütunlu salon, havuzlu, haç, sekizgen odalar; meşaleler, çadırlar, mezarlar, raflar. Yeni zemin: kum, kızıl kaya, kar, buz, karlı çam, lav, kül. Silah/zırh kademeleri Sv 45'e kadar; yaylar artık yaratıklardan düşüyor. `npm run check-zones -w server` her bölgenin oynanabilirliğini denetler | ✅ |
 | 7.25 | Moblar CraftPix çizimleriyle: goblin, ork, ogre, iskelet, zombi köylü, kara kâhin ve şövalye paketleri 26 moba, gnol/yeti/devler satir, minotor ve golem çizimlerine geçti (`tools/build_sprites.py`, dosyalar `client/src/assets/licensed/`). Kor Toprakları'nın güneyinde yeni bölge **Kurgan Ovası** (Sv 50+): kuru ağaçlı bozkır, yaşlı kamın yurt kampı, veba köylülerinin terk edilmiş köyü, kurgan tarlası ve balbal sıraları, çitli mezarlık, bataklıkta kara kâhinlerin balbal halkası, düşmüş şövalyelerin yıkık kalesi; alan bossu Düşkün Başbuğ Karaçor, gece Gece Yürüyenleri ve Kurgan Hortlakları. Yeni zindan **Han Kurganı** (55): Kemik Bey Sökmen, Kara Kâhin Albastı, Ölü Han Tolun. Yeni zemin: kurak bozkır, kuru ağaç, bataklık; yeni dekor: kurgan, balbal, terk edilmiş ev. Silah/zırh kademeleri Sv 57'ye kadar, yeni malzemeler Lanetli Kemik ve Kurgan Altını | ✅ |
 | 7.26 | Çizim dekorları: CraftPix ölümsüzler, zindan ve laboratuvar piksel paketleri ile çöl ve tropik paketlerinden 129 parça (`tools/build_decor.py`, katalog `shared/src/data/decorArt.ts`, dosyalar `client/src/assets/licensed/decor/`, yoksa kodla çizilen yedek). Kurgan Ovası'nda harabeler, kuru ağaçlar, mezar taşları, kemikler, dev iskelet han ve Han Kurganı'nın kafatası kapısı; zindanlarda temaya göre sancaklar, zırh heykelleri, silah rafları, erzak, simya rafları, canavar kavanozları, kökler ve kemikler; Kızıl Kanyon'da kayalık tepeler, kaktüsler, kervan arabası, gözcü kulesi; Liman'da palmiyeler ve taş yüz heykeli | ✅ |
+| 7.27 | Pet: Petçi Nuri (şehirde, at çiftliği kapısının batısında) **Tavşan** satar (1.000.000 altın). Yanındaki pet, kestiğin yaratıkların ganimetini toplayıp getirir; sahada `/pet` ile çağrılır / eve gönderilir | ✅ |
 | 8 | Optimizasyon, anti-cheat, yedekleme, alfa testi | ⏳ |
 
 Faz 2 bitince oyun oynanabilir hale gelir. Sonraki fazlar bunun üzerine eklenir.

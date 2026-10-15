@@ -251,6 +251,14 @@ const MIGRATIONS: { version: number; name: string; sql: string }[] = [
       CREATE INDEX tile_art_history_key ON tile_art_history (key, replaced_at DESC);
     `,
   },
+  {
+    version: 19,
+    name: "pets",
+    sql: `
+      -- { "owned": ["rabbit"], "active": "rabbit" }; {} = no pets
+      ALTER TABLE characters ADD COLUMN pets JSONB NOT NULL DEFAULT '{}';
+    `,
+  },
 ];
 
 export async function runMigrations() {
