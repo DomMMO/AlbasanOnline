@@ -88,7 +88,7 @@ func _wire(s: ItemSlot) -> void:
 			return
 		var d := Items.def(s.item.defId)
 		var hint := ui.activate_hint(int(s.ref.index)) if s.ref.area == "inv" else "Sağ tık: çıkar"
-		ui.tooltip.show_item(d, {"qty": s.item.get("qty", 1), "enhance": s.item.get("enhance", 0), "affixes": s.item.get("affixes"), "playerLevel": ui.player_level(), "footer": [{"text": hint}]}, s))
+		ui.tooltip.show_item(d, {"qty": s.item.get("qty", 1), "enhance": s.item.get("enhance", 0), "affixes": s.item.get("affixes"), "playerLevel": ui.player_level(), "equipped": s.ref.area == "equip", "footer": [{"text": hint}]}, s))
 
 
 func update(event: Dictionary) -> void:

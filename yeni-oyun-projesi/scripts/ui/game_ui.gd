@@ -42,6 +42,8 @@ func _init(the_hud: Hud) -> void:
 	hud = the_hud
 	var w := hud.windows
 	tooltip = Tooltip.new()
+	tooltip.equipped_item = func(slot: String) -> Variant:
+		return inventory.state.get("equipment", {}).get(slot) if inventory.state else null
 	inventory = InventoryWindow.new(self)
 	w.add_child(inventory)
 	shop = ShopWindow.new(self)
