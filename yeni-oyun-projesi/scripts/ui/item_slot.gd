@@ -3,11 +3,16 @@ extends Control
 
 ## An item slot (.item-slot): the icon, stack count, +N, rarity edge and the +7..+10 glow;
 ## an empty equipment slot shows its name. Drag and drop moves items (SlotRef dictionaries),
-## right click / double click activates, hovering shows the tooltip.
+## right click / double click activates, hovering shows the tooltip. An item above the player's
+## level is tinted red.
 
 signal activated
 signal hovered(inside: bool)
 signal dropped_on(from: Dictionary)
+## This slot's item was dragged and let go over the world (no window under the mouse).
+signal dropped_outside
+
+const GROUP := "item_slots"
 
 const GLOW := {7: Color(0.65, 0.3, 1.0, 0.35), 8: Color(0.65, 0.3, 1.0, 0.5), 9: Color(0.7, 0.35, 1.0, 0.65), 10: Color(0.75, 0.4, 1.0, 0.8)}
 
@@ -16,7 +21,10 @@ var item: Variant = null  # ItemView dictionary
 var placeholder := ""
 var accepts: Callable
 var highlight := false
+## The local player's level, for the red "too high level" tint; GameUi keeps it current.
+static var player_level := 1
 var _icon: Texture2D
+var _dragging := false
 
 
 func _init(slot_ref: Dictionary, slot_size := 36.0, label := "") -> void:
@@ -24,6 +32,7 @@ func _init(slot_ref: Dictionary, slot_size := 36.0, label := "") -> void:
 	placeholder = label
 	custom_minimum_size = Vector2(slot_size, slot_size)
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	add_to_group(GROUP)
 	mouse_entered.connect(func(): hovered.emit(true))
 	mouse_exited.connect(func(): hovered.emit(false))
 
@@ -60,6 +69,7 @@ func _get_drag_data(_at: Vector2) -> Variant:
 	preview.modulate.a = 0.85
 	set_drag_preview(preview)
 	hovered.emit(false)
+	_dragging = true
 	return {"type": "item", "ref": ref, "defId": item.defId, "uid": item.get("uid", "")}
 
 
@@ -73,6 +83,14 @@ func _drop_data(_at: Vector2, data: Variant) -> void:
 	dropped_on.emit(data.ref)
 
 
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_DRAG_END and _dragging:
+		_dragging = false
+		var vp := get_viewport()
+		if not vp.gui_is_drag_successful() and vp.gui_get_hovered_control() == null:
+			dropped_outside.emit()
+
+
 func _draw() -> void:
 	var r := Rect2(Vector2.ZERO, size)
 	draw_rect(r, Color("#140e08"))
@@ -83,8 +101,11 @@ func _draw() -> void:
 		tier = GameData.glow_tier(int(item.get("enhance", 0)))
 		if tier:
 			draw_rect(r, GLOW.get(tier, Color.TRANSPARENT))
+		var too_high := int(d.get("level", 1)) > player_level
 		if _icon:
-			draw_texture_rect(_icon, r.grow(-3), false)
+			draw_texture_rect(_icon, r.grow(-3), false, Color(1.0, 0.4, 0.4) if too_high else Color.WHITE)
+		if too_high:
+			draw_rect(r.grow(-1), Color(0.85, 0.1, 0.1, 0.3))
 		var rarity := Items.rarity(d, item.get("affixes"))
 		if rarity != "common":
 			draw_rect(r.grow(-1), Color(Items.rarity_color(rarity), 0.7), false, 1.0)

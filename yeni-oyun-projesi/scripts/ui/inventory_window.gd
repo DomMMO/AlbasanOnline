@@ -3,7 +3,8 @@ extends GameWindow
 
 ## Karakter: the paper doll, the eight equipment slots, the stats,
 ## the 32 bag slots and the gold. Drag to move or equip, right click / double click to use,
-## equip, sell or put away (whatever window is open next to it), sort button.
+## equip, sell or put away (whatever window is open next to it), sort button. A bag item dragged
+## out over the world is dropped on the ground, one dragged onto the bin is destroyed (both ask first).
 
 const EQUIP_LAYOUT := [["earring", "head"], ["weapon", "chest"], ["neck", "legs"], ["ring", "feet"]]
 
@@ -14,6 +15,7 @@ var _equip := {}
 var _bag: Array[ItemSlot] = []
 var _stats: GridContainer
 var _gold: Label
+var _confirm: ConfirmationDialog
 
 
 func _init(owner_ui: GameUi) -> void:
@@ -61,6 +63,14 @@ func _init(owner_ui: GameUi) -> void:
 	var sort := UiTheme.button("⇅", "DarkButton", func(): ui.send("sortInventory"))
 	sort.tooltip_text = "Düzenle: eşyaları türüne göre sıralar, yarım yığınları birleştirir"
 	gold_row.add_child(sort)
+	var bin := ItemSlot.new({"area": "bin"}, 30, "Çöp")
+	bin.tooltip_text = "Yok etmek için bir eşyayı buraya sürükle"
+	bin.accepts = func(data): return data.ref.get("area") == "inv"
+	bin.dropped_on.connect(func(from): _ask("destroyItem", int(from.index)))
+	gold_row.add_child(bin)
+	_confirm = ConfirmationDialog.new()
+	_confirm.cancel_button_text = "Vazgeç"
+	add_child(_confirm)
 
 
 func _wire(s: ItemSlot) -> void:
@@ -70,6 +80,8 @@ func _wire(s: ItemSlot) -> void:
 		else:
 			ui.send("unequip", {"slot": s.ref.slot}))
 	s.dropped_on.connect(func(from): ui.send("moveItem", {"from": from, "to": s.ref}))
+	if s.ref.area == "inv":
+		s.dropped_outside.connect(func(): _ask("dropItem", int(s.ref.index)))
 	s.hovered.connect(func(inside):
 		if not inside or s.item == null:
 			ui.tooltip.hide_tip()
@@ -121,6 +133,31 @@ static func _thousands(n: int) -> String:
 		out = "." + s.substr(s.length() - 3) + out
 		s = s.substr(0, s.length() - 3)
 	return ("-" if n < 0 else "") + s + out
+
+
+## "Yere at" / "Yok et" a bag slot, after the player says yes.
+func _ask(action: String, index: int) -> void:
+	var slots: Array = state.get("slots", []) if state else []
+	var item = slots[index] if index < slots.size() else null
+	if item == null:
+		return
+	var d := Items.def(item.defId)
+	if action == "dropItem" and d.get("questItem", false):
+		ui.hud.show_message("Görev eşyası yere atılamaz")
+		return
+	var qty := int(item.get("qty", 1))
+	var label := String(d.get("name", "?")) + (" x%d" % qty if qty > 1 else "")
+	var uid := String(item.get("uid", ""))
+	_confirm.dialog_text = ("%s yere atılsın mı?" if action == "dropItem" else "%s kalıcı olarak yok edilsin mi?") % label
+	_confirm.ok_button_text = "Yere at" if action == "dropItem" else "Yok et"
+	for c in _confirm.confirmed.get_connections():
+		_confirm.confirmed.disconnect(c.callable)
+	_confirm.confirmed.connect(func():
+		# The bags may have changed while the dialog was open: only act on the same item.
+		var now: Array = state.get("slots", []) if state else []
+		if index < now.size() and now[index] != null and String(now[index].get("uid", "")) == uid:
+			ui.send(action, {"index": index}), CONNECT_ONE_SHOT)
+	_confirm.popup_centered()
 
 
 func count_item(def_id: String) -> int:
