@@ -11,11 +11,12 @@ kökünde `npm run bake:godot` çalıştır, `art/licensed/` için yerel lisansl
 ## Çalıştırma
 
 1. Godot 4.7 ile `yeni-oyun-projesi/project.godot` dosyasını aç (ilk açılışta görseller içe aktarılır).
-2. F5. Varsayılan sunucu `https://albasanonline.com`.
-   - Yerel sunucu için: `npm run dev` (depo kökünde), sonra Godot'u
-     `--server=http://localhost:2567` argümanıyla çalıştır (Proje > Proje Ayarları > Çalıştır >
-     Ana Çalıştırma Argümanları ya da komut satırı), veya `user://settings.cfg` içine
-     `[net] server="http://localhost:2567"` yaz.
+2. Depo kökünde `npm run dev` ile yerel sunucuyu başlat, sonra F5. Editörden çalıştırınca
+   varsayılan sunucu `http://localhost:2567`; dışa aktarılmış sürümler (exe, web)
+   `https://albasanonline.com`'a bağlanır.
+   - Editörden canlı sunucuya bağlanmak için Godot'u `--server=https://albasanonline.com`
+     argümanıyla çalıştır (Proje > Proje Ayarları > Çalıştır > Ana Çalıştırma Argümanları ya da
+     komut satırı), veya `user://settings.cfg` içine `[net] server="https://albasanonline.com"` yaz.
 
 ## Klasörler
 
