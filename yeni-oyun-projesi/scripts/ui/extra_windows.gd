@@ -1,7 +1,7 @@
 class_name ExtraWindows
 extends RefCounted
 
-## Storage, stable, pets, friends, trade, the market stall, the passive tree, the damage meter and
+## Storage, stable, pets, the barber, friends, trade, the market stall, the passive tree, the damage meter and
 ## the PvP leaderboard.
 
 var ui: GameUi
@@ -12,6 +12,7 @@ var friends: FriendsWindow
 var leaderboard: LeaderboardWindow
 var stable: StableWindow
 var pet: PetWindow
+var barber: BarberWindow
 var trade: TradeWindow
 var market: MarketUi
 var passives: PassivesWindow
@@ -32,6 +33,8 @@ func _init(owner_ui: GameUi, windows: Control, root: Control) -> void:
 	windows.add_child(stable)
 	pet = PetWindow.new(ui)
 	windows.add_child(pet)
+	barber = BarberWindow.new(ui)
+	windows.add_child(barber)
 	trade = TradeWindow.new(ui)
 	windows.add_child(trade)
 	market = MarketUi.new(ui, windows)
@@ -46,6 +49,7 @@ func update_inventory(event: Dictionary) -> void:
 	passives.update(event)
 	stable.refresh()
 	pet.refresh()
+	barber.refresh()
 	market.refresh()
 	trade.refresh()
 
@@ -103,6 +107,20 @@ func close_pets() -> void:
 
 func set_pet_state(event: Dictionary) -> void:
 	pet.set_state(event)
+
+
+# ---- Barber ----
+
+func barber_npc() -> Dictionary:
+	return barber.npc if barber.visible else {}
+
+
+func open_barber(npc: Dictionary) -> void:
+	barber.open_for(npc)
+
+
+func close_barber() -> void:
+	barber.close_window()
 
 
 # ---- Friends ----

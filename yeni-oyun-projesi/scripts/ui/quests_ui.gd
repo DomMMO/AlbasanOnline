@@ -315,7 +315,7 @@ func render_dialog() -> void:
 			buttons.add_child(_button("Alışveriş", func(): ui.open_npc_window_from_dialog(target)))
 		"blacksmith":
 			buttons.add_child(_button("Eşya Yükselt", func(): ui.open_npc_window_from_dialog(target)))
-		"storage", "stable", "pet":
+		"storage", "stable", "pet", "barber":
 			buttons.add_child(_button("Aç", func(): ui.open_npc_window_from_dialog(target)))
 	if target.get("fortuneTeller", false) and fortune == null:
 		buttons.add_child(_button("Falıma bak", func(): ui.send("readFortune", {"npcId": target.id})))

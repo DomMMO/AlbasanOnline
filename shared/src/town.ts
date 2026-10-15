@@ -107,6 +107,8 @@ export const TOWN_SPOTS = {
   market: px(74, 67),
   /** Seyis Yusuf, at the gate of the horse farm. */
   stableMaster: px(HORSE_FARM.gateX - 2, HORSE_FARM.y0 - 1),
+  /** Berber Cemil, at the door of the house west of the fountain square. */
+  barber: px(62, 67),
   /** Petçi Nuri, a few steps west of Seyis Yusuf. */
   petKeeper: px(HORSE_FARM.gateX - 5, HORSE_FARM.y0 - 1),
   pvpPortal: px(52, 42),

@@ -208,6 +208,7 @@ func close_npc_windows() -> void:
 	extra.close_storage()
 	extra.close_stable()
 	extra.close_pets()
+	extra.close_barber()
 	quests.close_dialog()
 
 
@@ -232,6 +233,8 @@ func open_npc_window(npc: Dictionary) -> bool:
 			extra.open_stable(npc)
 		"pet":
 			extra.open_pets(npc)
+		"barber":
+			extra.open_barber(npc)
 		_:
 			return false
 	return true
@@ -257,6 +260,8 @@ func close_far_npc_windows(at: Vector2) -> void:
 		extra.close_stable()
 	if far.call(extra.pet_npc()):
 		extra.close_pets()
+	if far.call(extra.barber_npc()):
+		extra.close_barber()
 	if quests.dialog.visible and far.call(quests.npc):
 		quests.close_dialog()
 

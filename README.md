@@ -396,6 +396,10 @@ Sağ altta, mana/öfke küresinin solundaki **at düğmesine** bas (ya da **H**)
 - Binip inmek arasında 1,5 saniye bekleme var. Binince ve inince ayaklarının dibinde toz kalkar.
 - At kodla çizilir (`client/src/gfx/horse.ts`): yandan yürürken bacakları adım atar, önden atın başı, arkadan sağrısı ve kuyruğu görünür; herkes seni atlı görür. Mantık `server/src/game/mount.ts`.
 
+### Berber
+
+Çeşme meydanının batısında, tabelasız evin kapısında **Berber Cemil** durur. Penceresinde saç modelini (Kısa, Diken, Uzun, At Kuyruğu, Topuz, Kel) ve saç rengini seçersin; soldaki önizlemede karakterin yeni saçıyla görünür (kask çıkarılmış hâlde, tıklayınca döner). **Uygula** bir kerede **50.000 altın** tutar ve onay sorar. Yeni saçını herkes hemen görür, karakterle birlikte kaydedilir. Kod: `server/src/game/barber.ts`, fiyat `BARBER_PRICE` (`shared/src/data/appearance.ts`).
+
 ### Pet
 
 Şehirde, at çiftliği kapısının birkaç adım batısında **Petçi Nuri** evcil hayvan satar. Şimdilik tek pet var: **Tavşan**, **1.000.000 altın**.
@@ -678,6 +682,7 @@ client/
 | 7.25 | Moblar CraftPix çizimleriyle: goblin, ork, ogre, iskelet, zombi köylü, kara kâhin ve şövalye paketleri 26 moba, gnol/yeti/devler satir, minotor ve golem çizimlerine geçti (`tools/build_sprites.py`, dosyalar `client/src/assets/licensed/`). Kor Toprakları'nın güneyinde yeni bölge **Kurgan Ovası** (Sv 50+): kuru ağaçlı bozkır, yaşlı kamın yurt kampı, veba köylülerinin terk edilmiş köyü, kurgan tarlası ve balbal sıraları, çitli mezarlık, bataklıkta kara kâhinlerin balbal halkası, düşmüş şövalyelerin yıkık kalesi; alan bossu Düşkün Başbuğ Karaçor, gece Gece Yürüyenleri ve Kurgan Hortlakları. Yeni zindan **Han Kurganı** (55): Kemik Bey Sökmen, Kara Kâhin Albastı, Ölü Han Tolun. Yeni zemin: kurak bozkır, kuru ağaç, bataklık; yeni dekor: kurgan, balbal, terk edilmiş ev. Silah/zırh kademeleri Sv 57'ye kadar, yeni malzemeler Lanetli Kemik ve Kurgan Altını | ✅ |
 | 7.26 | Çizim dekorları: CraftPix ölümsüzler, zindan ve laboratuvar piksel paketleri ile çöl ve tropik paketlerinden 129 parça (`tools/build_decor.py`, katalog `shared/src/data/decorArt.ts`, dosyalar `client/src/assets/licensed/decor/`, yoksa kodla çizilen yedek). Kurgan Ovası'nda harabeler, kuru ağaçlar, mezar taşları, kemikler, dev iskelet han ve Han Kurganı'nın kafatası kapısı; zindanlarda temaya göre sancaklar, zırh heykelleri, silah rafları, erzak, simya rafları, canavar kavanozları, kökler ve kemikler; Kızıl Kanyon'da kayalık tepeler, kaktüsler, kervan arabası, gözcü kulesi; Liman'da palmiyeler ve taş yüz heykeli | ✅ |
 | 7.27 | Pet: Petçi Nuri (şehirde, at çiftliği kapısının batısında) **Tavşan** satar (1.000.000 altın). Yanındaki pet, kestiğin yaratıkların ganimetini toplayıp getirir; sahada `/pet` ile çağrılır / eve gönderilir | ✅ |
+| 7.28 | Berber Cemil (çeşme meydanının batısı): saç modeli ve rengi 50.000 altına değişir, önizlemeli pencere | ✅ |
 | 8 | Optimizasyon, anti-cheat, yedekleme, alfa testi | ⏳ |
 
 Faz 2 bitince oyun oynanabilir hale gelir. Sonraki fazlar bunun üzerine eklenir.

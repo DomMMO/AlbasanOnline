@@ -36,6 +36,9 @@ export interface CharacterLook {
   skin: number;
 }
 
+/** Berber Cemil: a new hair style and/or colour (one price for the visit). */
+export const BARBER_PRICE = 50_000;
+
 export const DEFAULT_LOOK: CharacterLook = { gender: "male", hairStyle: "short", hairColor: 0x5a3825, skin: 0xf0c49a };
 
 /** Turns whatever is stored or sent into a valid look (unknown values fall back to defaults). */
