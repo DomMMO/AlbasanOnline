@@ -20,6 +20,7 @@ import {
   MAX_AFFIXES,
   RARITY_COLORS,
   statsWithEquipment,
+  TOOL_SLOT_NAMES,
   type EquipSlot,
   type InventoryEvent,
   type MobDef,
@@ -31,9 +32,9 @@ import { Loot } from "../rooms/schema/WorldState";
 import { broadcastCombat } from "./combat";
 import { broadcastSystem } from "./chat";
 import type { Game } from "./Game";
-import { addItem, equippedItems, hasSpaceFor, indexOfItem, newStack, removeAt, socketedJewels, sortInventory, toView, type ItemStack } from "./inventory";
+import { addItem, equippedItems, fitsProfession, hasSpaceFor, indexOfItem, newStack, removeAt, socketedJewels, sortInventory, toView, type InventoryData, type ItemStack } from "./inventory";
 import { autoSocket, socketJewel, unsocketJewel } from "./passives";
-import { moveWithStorage } from "./storage";
+import { moveBetween, moveWithStorage } from "./storage";
 import { toggleFishing } from "./fishing";
 import { partyIdOf } from "./party";
 
@@ -101,6 +102,14 @@ function context(game: Game, sessionId: string) {
 const validIndex = (index: unknown): index is number =>
   Number.isInteger(index) && (index as number) >= 0 && (index as number) < INVENTORY_SIZE;
 
+const PROFESSION_ONLY = "Meslek çantasına sadece maden, bitki ve balık konur";
+
+/** The bags or the profession bag, with the index checked against it (null = no such slot). */
+function bagSlot(inv: InventoryData, area: "inv" | "prof", index: unknown): { row: (ItemStack | null)[]; index: number } | null {
+  const row = area === "prof" ? inv.profession : inv.slots;
+  return Number.isInteger(index) && (index as number) >= 0 && (index as number) < row.length ? { row, index: index as number } : null;
+}
+
 // ---- Equipment -----------------------------------------------------------------
 
 function equipFromInventory(game: Game, sessionId: string, index: number) {
@@ -137,6 +146,24 @@ export function moveItem(game: Game, sessionId: string, from: SlotRef, to: SlotR
   const { inv } = ctx;
 
   if (from.area === "storage" || to.area === "storage") return moveWithStorage(game, sessionId, from, to);
+  if (from.area === "tool" || to.area === "tool") return moveTool(game, sessionId, from, to);
+
+  if (from.area === "prof" || to.area === "prof") {
+    if ((from.area !== "inv" && from.area !== "prof") || (to.area !== "inv" && to.area !== "prof")) return;
+    const source = bagSlot(inv, from.area, from.index);
+    const target = bagSlot(inv, to.area, to.index);
+    if (!source || !target || (source.row === target.row && source.index === target.index)) return;
+    const a = source.row[source.index];
+    const b = target.row[target.index];
+    if (!a) return;
+    // A swap puts the target's stack where the dragged one was: both must fit their new row.
+    const merges = b && b.defId === a.defId && b.enhance === a.enhance && ITEMS[a.defId].maxStack > 1;
+    if ((to.area === "prof" && !fitsProfession(a)) || (from.area === "prof" && !merges && !fitsProfession(b))) {
+      return notice(game, sessionId, PROFESSION_ONLY);
+    }
+    moveBetween(source.row, source.index, target.row, target.index);
+    return changed(game, sessionId);
+  }
 
   if (from.area === "inv" && to.area === "inv") {
     if (!validIndex(from.index) || !validIndex(to.index) || from.index === to.index) return;
@@ -182,11 +209,44 @@ export function moveItem(game: Game, sessionId: string, from: SlotRef, to: SlotR
   }
 }
 
+/** Drag and drop on the profession bag's tool slots: only the right tool goes in, out to the bags. */
+function moveTool(game: Game, sessionId: string, from: SlotRef, to: SlotRef) {
+  const { inv } = context(game, sessionId)!;
+  if (from.area === "inv" && to.area === "tool") {
+    if (!validIndex(from.index)) return;
+    const stack = inv.slots[from.index];
+    if (!stack) return;
+    if (ITEMS[stack.defId]?.tool !== to.slot) return notice(game, sessionId, `Bu yuvaya sadece ${TOOL_SLOT_NAMES[to.slot]} konur`);
+    // Swap: a tool already there goes where the new one came from.
+    inv.slots[from.index] = inv.tools[to.slot] ?? null;
+    inv.tools[to.slot] = stack;
+    return changed(game, sessionId);
+  }
+  if (from.area === "tool" && to.area === "inv") {
+    if (!validIndex(to.index)) return;
+    const stack = inv.tools[from.slot];
+    if (!stack) return;
+    const target = inv.slots[to.index];
+    if (target && ITEMS[target.defId]?.tool === from.slot) {
+      inv.tools[from.slot] = target;
+      inv.slots[to.index] = stack;
+      return changed(game, sessionId);
+    }
+    const index = target ? inv.slots.indexOf(null) : to.index;
+    if (index === -1) return notice(game, sessionId, "Envanter dolu");
+    inv.slots[index] = stack;
+    delete inv.tools[from.slot];
+    return changed(game, sessionId);
+  }
+  if (to.area === "tool") return notice(game, sessionId, `Bu yuvaya sadece ${TOOL_SLOT_NAMES[to.slot]} konur`);
+}
+
 // ---- Using ---------------------------------------------------------------------
 
 export function useItem(game: Game, sessionId: string, index: number | undefined, defId: string | undefined) {
   const ctx = context(game, sessionId);
   if (!ctx) return;
+  if (index === undefined && defId !== undefined && ITEMS[defId]?.fishingRod && ctx.inv.tools.rod) return toggleFishing(game, sessionId);
   if (index === undefined && defId !== undefined) index = indexOfItem(ctx.inv, defId);
   if (!validIndex(index)) {
     if (defId) notice(game, sessionId, `${ITEMS[defId]?.name ?? "Item"} kalmadı`);
@@ -200,6 +260,7 @@ export function useItem(game: Game, sessionId: string, index: number | undefined
   if (def.jewel) return autoSocket(game, sessionId, index);
   if (def.recall) return recall(game, sessionId, index);
   if (def.fishingRod) return toggleFishing(game, sessionId);
+  if (def.tool) return moveTool(game, sessionId, { area: "inv", index }, { area: "tool", slot: def.tool });
   if (!def.heal && !def.mana) return;
 
   const { player, runtime } = ctx;
@@ -325,26 +386,28 @@ export function collectLoot(game: Game, sessionId: string, lootId: string): bool
 }
 
 /** Puts a bag stack on the ground at your feet; it is yours for a while, like a kill's loot. */
-export function dropItem(game: Game, sessionId: string, index: number) {
+export function dropItem(game: Game, sessionId: string, index: number, area: "inv" | "prof" = "inv") {
   const ctx = context(game, sessionId);
-  if (!ctx || !validIndex(index) || ctx.player.dead) return;
-  const stack = ctx.inv.slots[index];
+  const at = ctx && bagSlot(ctx.inv, area, index);
+  if (!ctx || !at || ctx.player.dead) return;
+  const stack = at.row[at.index];
   if (!stack) return;
   const def = ITEMS[stack.defId];
   if (def.questItem) return notice(game, sessionId, "Görev eşyası yere atılamaz");
-  ctx.inv.slots[index] = null;
+  at.row[at.index] = null;
   spawnLoot(game, ctx.player.x, ctx.player.y, { gold: 0, items: [stack], dropped: true }, sessionId);
   notice(game, sessionId, `${def.name}${stack.qty > 1 ? ` x${stack.qty}` : ""} yere atıldı`, INFO_COLOR);
   changed(game, sessionId);
 }
 
-export function destroyItem(game: Game, sessionId: string, index: number) {
+export function destroyItem(game: Game, sessionId: string, index: number, area: "inv" | "prof" = "inv") {
   const ctx = context(game, sessionId);
-  if (!ctx || !validIndex(index)) return;
-  const stack = ctx.inv.slots[index];
+  const at = ctx && bagSlot(ctx.inv, area, index);
+  if (!ctx || !at) return;
+  const stack = at.row[at.index];
   if (!stack) return;
   const def = ITEMS[stack.defId];
-  ctx.inv.slots[index] = null;
+  at.row[at.index] = null;
   notice(game, sessionId, `${def.name}${stack.qty > 1 ? ` x${stack.qty}` : ""} yok edildi`, INFO_COLOR);
   changed(game, sessionId);
 }
@@ -394,15 +457,16 @@ export function buy(game: Game, sessionId: string, npcId: string, itemId: string
   changed(game, sessionId);
 }
 
-export function sell(game: Game, sessionId: string, npcId: string, index: number) {
+export function sell(game: Game, sessionId: string, npcId: string, index: number, area: "inv" | "prof" = "inv") {
   const ctx = nearNpc(game, sessionId, npcId);
-  if (!ctx || !validIndex(index)) return;
-  const stack = ctx.inv.slots[index];
+  const at = ctx && bagSlot(ctx.inv, area, index);
+  if (!ctx || !at) return;
+  const stack = at.row[at.index];
   if (!stack) return;
   const def = ITEMS[stack.defId];
   if (def.questItem) return notice(game, sessionId, "Görev eşyası satılamaz");
   const value = itemSellPrice(def, stack.affixes) * stack.qty;
-  ctx.inv.slots[index] = null;
+  at.row[at.index] = null;
   ctx.inv.gold += value;
   const sold = soldItems.get(ctx.runtime.characterId) ?? [];
   soldItems.set(ctx.runtime.characterId, [{ stack, price: value }, ...sold].slice(0, BUYBACK_SIZE));
@@ -423,6 +487,7 @@ export function buyback(game: Game, sessionId: string, npcId: string, uid: strin
   if (!hasSpaceFor(ctx.inv, stack.defId, stack.qty)) return notice(game, sessionId, "Envanter dolu");
   ctx.inv.gold -= price;
   if (def.maxStack > 1) addItem(ctx.inv, stack.defId, stack.qty, stack.enhance, stack.affixes);
+  else if (def.tool && !ctx.inv.tools[def.tool]) ctx.inv.tools[def.tool] = stack;
   else ctx.inv.slots[ctx.inv.slots.indexOf(null)] = stack;
   soldItems.set(ctx.runtime.characterId, sold.filter((e) => e !== entry));
   notice(game, sessionId, `${def.name}${stack.qty > 1 ? ` x${stack.qty}` : ""} geri alındı (-${price} altın)`, GOLD_COLOR);

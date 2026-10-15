@@ -78,6 +78,9 @@ var leaving := false
 var gates_armed := false
 var was_in_market := false
 var approach: Variant = null
+## Gathering on its own: after each node, walk to the nearest one of the same kind
+## ({kind, last: node id} or {} = off). Moving, clicking something else or an interrupted gather stops it.
+var auto_gather := {}
 var dash_glide: Variant = null
 var guide: Variant = null
 var pings: Array = []
@@ -562,7 +565,7 @@ func _on_node_add(node: Schema.Struct, node_id: String) -> void:
 	var skill := String(def.skill)
 	area.input_event.connect(func(_vp, ev, _i):
 		if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT and not ev.alt_pressed:
-			walk_to(func(): return p if nodes.has(node_id) else null, GameData.GATHER_RANGE - 4, func(): room.send("gather", {"nodeId": node_id})))
+			gather_node(node_id))
 	area.mouse_entered.connect(func():
 		Art.set_cursor("mine" if skill == "mining" else "gather")
 		var life: Dictionary = GameData.get_value("LIFE_SKILLS", {}).get(skill, {})
@@ -694,7 +697,13 @@ func _bind_messages() -> void:
 	_on("gatherStart", func(e):
 		var skill: Dictionary = GameData.get_value("LIFE_SKILLS", {}).get(String(e.skill), {})
 		hud.start_cast_bar("%s: %s" % [skill.get("verb", "Toplanıyor"), e.name], float(e.ms), String(skill.get("color", "#8ce99a"))))
-	_on("gatherEnd", func(e): hud.stop_cast_bar(bool(e.interrupted)))
+	_on("gatherEnd", func(e):
+		hud.stop_cast_bar(bool(e.interrupted))
+		if bool(e.interrupted):
+			auto_gather = {}
+		elif not auto_gather.is_empty():
+			# A moment for the state patch that takes the gathered node away.
+			get_tree().create_timer(0.4).timeout.connect(_continue_gather))
 	_on("pingEvent", show_ping)
 	_on("skillRanks", func(e):
 		ui.set_skill_ranks(e)
@@ -964,6 +973,7 @@ func portal_open(def: Dictionary) -> bool:
 
 
 func walk_to(target: Callable, range: float, act: Callable) -> void:
+	auto_gather = {}
 	if local == null or leaving or f(local.state, "dead", false):
 		return
 	var at = target.call()
@@ -974,6 +984,38 @@ func walk_to(target: Callable, range: float, act: Callable) -> void:
 		act.call()
 		return
 	approach = {"target": target, "range": range, "act": act, "last": local.curr, "stuck": 0}
+
+
+## Walks to a vein / herb and gathers it, then keeps going (auto_gather).
+func gather_node(node_id: String) -> void:
+	if not nodes.has(node_id):
+		return
+	var p := pos_of(nodes[node_id].state)
+	walk_to(func(): return p if nodes.has(node_id) else null, GameData.GATHER_RANGE - 4, func(): room.send("gather", {"nodeId": node_id}))
+	auto_gather = {"kind": String(nodes[node_id].def.id), "last": node_id}
+
+
+## How far auto_gather looks for the next node.
+const AUTO_GATHER_TILES := 14.0
+
+
+func _continue_gather() -> void:
+	if auto_gather.is_empty() or local == null or approach != null or f(local.state, "dead", false):
+		return
+	var best := ""
+	var best_distance := GameData.TILE_SIZE * AUTO_GATHER_TILES
+	for id in nodes:
+		if id == auto_gather.last or String(nodes[id].def.id) != auto_gather.kind:
+			continue
+		var d: float = local.curr.distance_to(pos_of(nodes[id].state))
+		if d < best_distance:
+			best = id
+			best_distance = d
+	if best.is_empty():
+		hud.show_message("Yakında başka %s yok" % String(GameData.NODES.get(auto_gather.kind, {}).get("name", "toplanacak bir şey")))
+		auto_gather = {}
+		return
+	gather_node(best)
 
 
 func approach_axis() -> Vector2i:
@@ -1988,6 +2030,7 @@ func fixed_tick() -> void:
 	var axis := move_axis()
 	if axis != Vector2i.ZERO:
 		approach = null
+		auto_gather = {}
 	else:
 		axis = approach_axis()
 	var s := local.state

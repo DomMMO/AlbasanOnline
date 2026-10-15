@@ -45,24 +45,25 @@ func _init(owner_ui: GameUi) -> void:
 
 
 func _can_drop_data(_at: Vector2, data: Variant) -> bool:
-	return not npc.is_empty() and data is Dictionary and data.get("type") == "item" and data.ref.get("area") == "inv"
+	return not npc.is_empty() and data is Dictionary and data.get("type") == "item" and data.ref.get("area") in ["inv", "prof"]
 
 
 func _drop_data(_at: Vector2, data: Variant) -> void:
-	sell(int(data.ref.index))
+	sell(int(data.ref.index), String(data.ref.area))
 
 
-## Sells a bag slot; a valuable item (Items.is_valuable) asks first.
-func sell(index: int) -> void:
+## Sells a bag slot ("prof": a profession bag slot); a valuable item (Items.is_valuable) asks first.
+func sell(index: int, area := "inv") -> void:
 	if npc.is_empty():
 		return
-	var slots: Array = ui.inventory_state().get("slots", []) if ui.inventory_state() else []
+	var key := "profession" if area == "prof" else "slots"
+	var slots: Array = ui.inventory_state().get(key, []) if ui.inventory_state() else []
 	var item = slots[index] if index < slots.size() else null
 	if item == null:
 		return
 	var d := Items.def(item.defId)
 	if not Items.is_valuable(d, item):
-		ui.send("sell", {"npcId": npc.id, "index": index})
+		ui.send("sell", {"npcId": npc.id, "index": index, "area": area})
 		return
 	var r := Items.rarity(d, item.get("affixes"))
 	var enhance := int(item.get("enhance", 0))
@@ -75,9 +76,9 @@ func sell(index: int) -> void:
 		_confirm.confirmed.disconnect(c.callable)
 	_confirm.confirmed.connect(func():
 		# Only if the same item is still in that slot and we are still at this merchant.
-		var now: Array = ui.inventory_state().get("slots", []) if ui.inventory_state() else []
+		var now: Array = ui.inventory_state().get(key, []) if ui.inventory_state() else []
 		if not npc.is_empty() and String(npc.id) == merchant and index < now.size() and now[index] != null and String(now[index].get("uid", "")) == uid:
-			ui.send("sell", {"npcId": merchant, "index": index}), CONNECT_ONE_SHOT)
+			ui.send("sell", {"npcId": merchant, "index": index, "area": area}), CONNECT_ONE_SHOT)
 	_confirm.popup_centered()
 
 

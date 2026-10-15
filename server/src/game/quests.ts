@@ -82,7 +82,8 @@ function rewardItems(quest: QuestDef, cls: string) {
 
 /** Would the rewards fit after the collected items are taken? Tried on a copy of the inventory. */
 function rewardsFit(inv: InventoryData, quest: QuestDef, cls: string): boolean {
-  const copy: InventoryData = { ...inv, slots: inv.slots.map((s) => (s ? { ...s } : null)) };
+  const row = (slots: InventoryData["slots"]) => slots.map((s) => (s ? { ...s } : null));
+  const copy: InventoryData = { ...inv, slots: row(inv.slots), profession: row(inv.profession), tools: { ...inv.tools } };
   for (const objective of quest.objectives) if (objective.type === "collect") takeItems(copy, objective.item, objective.count);
   return rewardItems(quest, cls).every((reward) => addItem(copy, reward.item, reward.qty ?? 1) === 0);
 }

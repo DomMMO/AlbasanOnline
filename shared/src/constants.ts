@@ -87,6 +87,8 @@ export const TAB_TARGET_RANGE = TILE_SIZE * 10;
 // ---- Items & loot -------------------------------------------------------------
 
 export const INVENTORY_SIZE = 32;
+/** Material slots of the profession bag (ore, herbs, fish go here before the bags), besides its tool slots. */
+export const PROFESSION_BAG_SIZE = 24;
 /** How close you must be to pick up loot / talk to an NPC. */
 export const LOOT_RANGE = TILE_SIZE * 2;
 export const NPC_RANGE = TILE_SIZE * 3;

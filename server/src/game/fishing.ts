@@ -11,7 +11,7 @@ import {
 } from "../../../shared/src";
 import { broadcastSystem } from "./chat";
 import type { Game } from "./Game";
-import { addItem, hasSpaceFor } from "./inventory";
+import { addItem, hasSpaceFor, hasTool } from "./inventory";
 import { notice, sendInventory } from "./items";
 import { dismount } from "./mount";
 
@@ -32,8 +32,10 @@ const FACING: Record<Direction, { dx: number; dy: number }> = {
   [Direction.Right]: { dx: 1, dy: 0 },
 };
 
-const hasRod = (game: Game, sessionId: string) =>
-  !!game.playerRuntime.get(sessionId)?.inventory.slots.some((stack) => stack && ITEMS[stack.defId]?.fishingRod);
+const hasRod = (game: Game, sessionId: string) => {
+  const inv = game.playerRuntime.get(sessionId)?.inventory;
+  return !!inv && hasTool(inv, "rod");
+};
 
 const nextDelay = (game: Game) => FISHING_MIN_MS + game.random() * (FISHING_MAX_MS - FISHING_MIN_MS);
 
