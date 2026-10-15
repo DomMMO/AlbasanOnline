@@ -60,13 +60,16 @@ func _init(owner_ui: GameUi) -> void:
 	_gold = UiTheme.label("0", 15, UiTheme.GOLD_LIGHT, true)
 	_gold.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	gold_row.add_child(_gold)
+	var bag := UiTheme.button("⛏", "DarkButton", func(): ui.profession.toggle())
+	bag.tooltip_text = "Meslek Çantası: aletler, maden, bitki ve balıklar"
+	gold_row.add_child(bag)
 	var sort := UiTheme.button("⇅", "DarkButton", func(): ui.send("sortInventory"))
-	sort.tooltip_text = "Düzenle: eşyaları türüne göre sıralar, yarım yığınları birleştirir"
+	sort.tooltip_text = "Düzenle: eşyaları türüne göre sıralar, yarım yığınları birleştirir; aletleri ve malzemeleri meslek çantasına taşır"
 	gold_row.add_child(sort)
 	var bin := ItemSlot.new({"area": "bin"}, 30, "Çöp")
 	bin.tooltip_text = "Yok etmek için bir eşyayı buraya sürükle"
-	bin.accepts = func(data): return data.ref.get("area") == "inv"
-	bin.dropped_on.connect(func(from): _ask("destroyItem", int(from.index)))
+	bin.accepts = func(data): return data.ref.get("area") in ["inv", "prof"]
+	bin.dropped_on.connect(func(from): ask("destroyItem", int(from.index), String(from.area)))
 	gold_row.add_child(bin)
 	_confirm = ConfirmationDialog.new()
 	_confirm.cancel_button_text = "Vazgeç"
@@ -81,14 +84,14 @@ func _wire(s: ItemSlot) -> void:
 			ui.send("unequip", {"slot": s.ref.slot}))
 	s.dropped_on.connect(func(from): ui.send("moveItem", {"from": from, "to": s.ref}))
 	if s.ref.area == "inv":
-		s.dropped_outside.connect(func(): _ask("dropItem", int(s.ref.index)))
+		s.dropped_outside.connect(func(): ask("dropItem", int(s.ref.index)))
 	s.hovered.connect(func(inside):
 		if not inside or s.item == null:
 			ui.tooltip.hide_tip()
 			return
 		var d := Items.def(s.item.defId)
 		var hint := ui.activate_hint(int(s.ref.index)) if s.ref.area == "inv" else "Sağ tık: çıkar"
-		ui.tooltip.show_item(d, {"qty": s.item.get("qty", 1), "enhance": s.item.get("enhance", 0), "affixes": s.item.get("affixes"), "playerLevel": ui.player_level(), "footer": [{"text": hint}]}, s))
+		ui.tooltip.show_item(d, {"qty": s.item.get("qty", 1), "enhance": s.item.get("enhance", 0), "affixes": s.item.get("affixes"), "playerLevel": ui.player_level(), "equipped": s.ref.area == "equip", "footer": [{"text": hint}]}, s))
 
 
 func update(event: Dictionary) -> void:
@@ -135,9 +138,10 @@ static func _thousands(n: int) -> String:
 	return ("-" if n < 0 else "") + s + out
 
 
-## "Yere at" / "Yok et" a bag slot, after the player says yes.
-func _ask(action: String, index: int) -> void:
-	var slots: Array = state.get("slots", []) if state else []
+## "Yere at" / "Yok et" a bag slot ("prof": a profession bag slot), after the player says yes.
+func ask(action: String, index: int, area := "inv") -> void:
+	var key := "profession" if area == "prof" else "slots"
+	var slots: Array = state.get(key, []) if state else []
 	var item = slots[index] if index < slots.size() else null
 	if item == null:
 		return
@@ -154,17 +158,18 @@ func _ask(action: String, index: int) -> void:
 		_confirm.confirmed.disconnect(c.callable)
 	_confirm.confirmed.connect(func():
 		# The bags may have changed while the dialog was open: only act on the same item.
-		var now: Array = state.get("slots", []) if state else []
+		var now: Array = state.get(key, []) if state else []
 		if index < now.size() and now[index] != null and String(now[index].get("uid", "")) == uid:
-			ui.send(action, {"index": index}), CONNECT_ONE_SHOT)
+			ui.send(action, {"index": index, "area": area}), CONNECT_ONE_SHOT)
 	_confirm.popup_centered()
 
 
+## How many are carried: the bags, the profession bag and its tool slots (like the server's countOf).
 func count_item(def_id: String) -> int:
 	if state == null:
 		return 0
 	var total := 0
-	for slot in state.get("slots", []):
+	for slot in state.get("slots", []) + state.get("profession", []) + state.get("tools", {}).values():
 		if slot != null and String(slot.defId) == def_id:
 			total += int(slot.get("qty", 1))
 	return total

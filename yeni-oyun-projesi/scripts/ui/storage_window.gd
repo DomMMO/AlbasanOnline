@@ -50,7 +50,7 @@ func _init(owner_ui: GameUi) -> void:
 	row.add_child(_input)
 	row.add_child(UiTheme.button("Koy", "", func(): _send_gold(1)))
 	row.add_child(UiTheme.button("Al", "", func(): _send_gold(-1)))
-	body.add_child(UiTheme.muted("Sağ tık ya da sürükle: envanter ↔ depo. Depo bu karaktere aittir, eşyaların burada güvende.", 12))
+	body.add_child(UiTheme.muted("Sağ tık ya da sürükle: envanter / meslek çantası ↔ depo. Depo bu karaktere aittir, eşyaların burada güvende.", 12))
 
 
 func _send_gold(sign: int) -> void:
@@ -63,11 +63,11 @@ func _send_gold(sign: int) -> void:
 
 
 func _can_drop_data(_at: Vector2, data: Variant) -> bool:
-	return not npc.is_empty() and data is Dictionary and data.get("type") == "item" and data.ref.get("area") == "inv"
+	return not npc.is_empty() and data is Dictionary and data.get("type") == "item" and data.ref.get("area") in ["inv", "prof"]
 
 
 func _drop_data(_at: Vector2, data: Variant) -> void:
-	ui.send("storageQuick", {"npcId": npc.id, "from": {"area": "inv", "index": int(data.ref.index)}})
+	ui.send("storageQuick", {"npcId": npc.id, "from": {"area": String(data.ref.area), "index": int(data.ref.index)}})
 
 
 func update(event: Dictionary) -> void:

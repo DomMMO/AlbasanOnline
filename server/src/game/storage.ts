@@ -1,6 +1,6 @@
-import { distance, INVENTORY_SIZE, ITEMS, MAX_GOLD, NPC_RANGE, NPCS, STORAGE_SIZE, type SlotRef } from "../../../shared/src";
+import { distance, ITEMS, MAX_GOLD, NPC_RANGE, NPCS, type SlotRef } from "../../../shared/src";
 import type { Game } from "./Game";
-import { placeStack, type ItemStack } from "./inventory";
+import { fitsProfession, placeStack, type InventoryData, type ItemStack } from "./inventory";
 import { notice, sendInventory } from "./items";
 
 // Storage (depo) at the Depocu, Knight Online style: a second set of slots and a gold
@@ -34,7 +34,7 @@ const validIndex = (index: number, size: number) => Number.isInteger(index) && i
  * Moves the stack at from[i] onto to[j]: merges into the same item if it stacks,
  * otherwise swaps the two slots.
  */
-function moveBetween(from: (ItemStack | null)[], i: number, to: (ItemStack | null)[], j: number) {
+export function moveBetween(from: (ItemStack | null)[], i: number, to: (ItemStack | null)[], j: number) {
   const a = from[i];
   const b = to[j];
   if (!a) return;
@@ -50,31 +50,54 @@ function moveBetween(from: (ItemStack | null)[], i: number, to: (ItemStack | nul
   to[j] = a;
 }
 
-/** Drag and drop involving storage slots (bags <-> storage, or within storage). */
+type Row = "inv" | "prof" | "storage";
+
+function rowOf(inv: InventoryData, area: Row): (ItemStack | null)[] {
+  return area === "inv" ? inv.slots : area === "prof" ? inv.profession : inv.storage;
+}
+
+/** Drag and drop involving storage slots (bags or profession bag <-> storage, or within storage). */
 export function moveWithStorage(game: Game, sessionId: string, from: SlotRef, to: SlotRef) {
   if (from.area === "equip" || to.area === "equip") return notice(game, sessionId, "Önce item'ı çıkar, sonra depola");
+  if (from.area === "tool" || to.area === "tool") return notice(game, sessionId, "Önce aleti çantaya al, sonra depola");
   if (from.area === "passive" || to.area === "passive") return;
   const ctx = atStorage(game, sessionId);
   if (!ctx) return;
-  const { inv } = ctx;
-  const row = (area: "inv" | "storage") => (area === "inv" ? inv.slots : inv.storage);
-  const size = (area: "inv" | "storage") => (area === "inv" ? INVENTORY_SIZE : STORAGE_SIZE);
-  if (!validIndex(from.index, size(from.area)) || !validIndex(to.index, size(to.area))) return;
+  const source = rowOf(ctx.inv, from.area);
+  const target = rowOf(ctx.inv, to.area);
+  if (!validIndex(from.index, source.length) || !validIndex(to.index, target.length)) return;
   if (from.area === to.area && from.index === to.index) return;
-  moveBetween(row(from.area), from.index, row(to.area), to.index);
+  // A swap puts the target's stack where the dragged one was: both must fit their new row.
+  const a = source[from.index];
+  const b = target[to.index];
+  const merges = a && b && a.defId === b.defId && a.enhance === b.enhance && ITEMS[a.defId].maxStack > 1;
+  if ((to.area === "prof" && !fitsProfession(a)) || (from.area === "prof" && !merges && !fitsProfession(b))) {
+    return notice(game, sessionId, "Meslek çantasına sadece maden, bitki ve balık konur");
+  }
+  moveBetween(source, from.index, target, to.index);
   sendInventory(game, sessionId);
 }
 
-/** Right-click: sends a stack to the other side, merging with what is already there. */
-export function quickStorage(game: Game, sessionId: string, npcId: string, from: { area: "inv" | "storage"; index: number }) {
+/** Right-click: sends a stack to the other side, merging with what is already there. Storage -> the bags (ore, herbs, fish: the profession bag first). */
+export function quickStorage(game: Game, sessionId: string, npcId: string, from: { area: "inv" | "prof" | "storage"; index: number }) {
   const ctx = atStorage(game, sessionId, npcId);
   if (!ctx) return;
   const { inv } = ctx;
-  const [source, target] = from.area === "inv" ? [inv.slots, inv.storage] : [inv.storage, inv.slots];
+  const source = rowOf(inv, from.area);
+  if (from.area === "storage") {
+    if (!validIndex(from.index, source.length)) return;
+    const stack = source[from.index];
+    if (!stack) return;
+    const into = fitsProfession(stack) ? [inv.profession, inv.slots] : [inv.slots];
+    if (!into.some((row) => placeStack(row, stack))) return notice(game, sessionId, "Envanter dolu");
+    source[from.index] = null;
+    return sendInventory(game, sessionId);
+  }
+  const target = inv.storage;
   if (!validIndex(from.index, source.length)) return;
   const stack = source[from.index];
   if (!stack) return;
-  if (!placeStack(target, stack)) return notice(game, sessionId, from.area === "inv" ? "Depo dolu" : "Envanter dolu");
+  if (!placeStack(target, stack)) return notice(game, sessionId, "Depo dolu");
   source[from.index] = null;
   sendInventory(game, sessionId);
 }

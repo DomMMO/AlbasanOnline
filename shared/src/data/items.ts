@@ -26,6 +26,17 @@ export type EquipSlot = "weapon" | "head" | "chest" | "legs" | "feet" | "neck" |
 
 export const EQUIP_SLOTS: EquipSlot[] = ["weapon", "head", "chest", "legs", "feet", "neck", "ring", "earring"];
 
+/** The profession bag's tool slots: a tool there works like one in the bags and takes no bag space. */
+export type ToolSlot = "pickaxe" | "sickle" | "rod";
+
+export const TOOL_SLOTS: ToolSlot[] = ["pickaxe", "sickle", "rod"];
+
+export const TOOL_SLOT_NAMES: Record<ToolSlot, string> = {
+  pickaxe: "Kazma",
+  sickle: "Orak",
+  rod: "Olta",
+};
+
 export const EQUIP_SLOT_NAMES: Record<EquipSlot, string> = {
   weapon: "Silah",
   head: "Baş",
@@ -109,6 +120,10 @@ export interface ItemDef {
   recall?: boolean;
   /** A fishing rod: carried in the bags, lets you fish at the harbour (see data/fishing.ts). */
   fishingRod?: boolean;
+  /** A life-skill tool: goes in this tool slot of the profession bag. */
+  tool?: ToolSlot;
+  /** Ore, herbs, fish...: picked up into the profession bag first (see PROFESSION_BAG_SIZE). */
+  profession?: boolean;
   /** Quest items can't be sold to merchants. */
   questItem?: boolean;
   /** How worn armour looks on the character: plain cloth/leather, chain "mail", or shiny "plate". */
@@ -186,14 +201,14 @@ export const ITEMS: Record<string, ItemDef> = Object.fromEntries(
     def({ id: "protection_charm", name: "Koruma Tılsımı", rarity: "epic", level: 1, maxStack: 20, sellPrice: 100, icon: { shape: "gem", color: 0xe0a83f }, description: "Yükseltme başarısız olursa item yanmaz." }),
 
     // ---- Fishing (Liman, see data/fishing.ts)
-    def({ id: "fishing_rod", name: "Olta", rarity: "common", level: 1, fishingRod: true, maxStack: 1, buyPrice: 250, sellPrice: 50, icon: { shape: "rod", color: 0x8a5a2b }, description: "Limanda suyun kenarında balık tutmak için. Sağ tık ya da Balık Tut düğmesi." }),
-    def({ id: "fish_anchovy", name: "Hamsi", rarity: "common", level: 1, maxStack: 50, sellPrice: 2, icon: { shape: "fish", color: 0x8fa8c0 } }),
-    def({ id: "fish_horse_mackerel", name: "İstavrit", rarity: "common", level: 1, maxStack: 50, sellPrice: 3, icon: { shape: "fish", color: 0x9cb87a } }),
-    def({ id: "fish_seabass", name: "Levrek", rarity: "uncommon", level: 1, maxStack: 50, sellPrice: 7, icon: { shape: "fish", color: 0xb0b4bc } }),
-    def({ id: "fish_bream", name: "Çipura", rarity: "uncommon", level: 1, maxStack: 50, sellPrice: 10, icon: { shape: "fish", color: 0xd9c27a } }),
-    def({ id: "fish_bluefish", name: "Lüfer", rarity: "rare", level: 1, maxStack: 50, sellPrice: 18, icon: { shape: "fish", color: 0x3f7fd9 } }),
-    def({ id: "fish_golden", name: "Altın Balık", rarity: "epic", level: 1, maxStack: 50, sellPrice: 300, icon: { shape: "fish", color: 0xffd43b }, description: "Balıkçıların efsanesi. Tüccarlar iyi para verir." }),
-    def({ id: "sea_shell", name: "Deniz Kabuğu", rarity: "common", level: 1, maxStack: 50, sellPrice: 1, icon: { shape: "shell", color: 0xe8b4a0 } }),
+    def({ id: "fishing_rod", tool: "rod", name: "Olta", rarity: "common", level: 1, fishingRod: true, maxStack: 1, buyPrice: 250, sellPrice: 50, icon: { shape: "rod", color: 0x8a5a2b }, description: "Limanda suyun kenarında balık tutmak için. Sağ tık ya da Balık Tut düğmesi." }),
+    def({ id: "fish_anchovy", profession: true, name: "Hamsi", rarity: "common", level: 1, maxStack: 50, sellPrice: 2, icon: { shape: "fish", color: 0x8fa8c0 } }),
+    def({ id: "fish_horse_mackerel", profession: true, name: "İstavrit", rarity: "common", level: 1, maxStack: 50, sellPrice: 3, icon: { shape: "fish", color: 0x9cb87a } }),
+    def({ id: "fish_seabass", profession: true, name: "Levrek", rarity: "uncommon", level: 1, maxStack: 50, sellPrice: 7, icon: { shape: "fish", color: 0xb0b4bc } }),
+    def({ id: "fish_bream", profession: true, name: "Çipura", rarity: "uncommon", level: 1, maxStack: 50, sellPrice: 10, icon: { shape: "fish", color: 0xd9c27a } }),
+    def({ id: "fish_bluefish", profession: true, name: "Lüfer", rarity: "rare", level: 1, maxStack: 50, sellPrice: 18, icon: { shape: "fish", color: 0x3f7fd9 } }),
+    def({ id: "fish_golden", profession: true, name: "Altın Balık", rarity: "epic", level: 1, maxStack: 50, sellPrice: 300, icon: { shape: "fish", color: 0xffd43b }, description: "Balıkçıların efsanesi. Tüccarlar iyi para verir." }),
+    def({ id: "sea_shell", profession: true, name: "Deniz Kabuğu", rarity: "common", level: 1, maxStack: 50, sellPrice: 1, icon: { shape: "shell", color: 0xe8b4a0 } }),
 
     // ---- Food (Ayşe Teyze's dinner quests)
     def({ id: "ayse_stew", name: "Ayşe Teyze'nin Güveci", rarity: "uncommon", level: 1, heal: 150, cooldownGroup: "food", maxStack: 20, sellPrice: 4, icon: { shape: "bowl", color: 0xb5651d }, description: "Dumanı üstünde. 150 can yeniler; iksirlerle ayrı bekleme süresi var." }),
@@ -207,16 +222,16 @@ export const ITEMS: Record<string, ItemDef> = Object.fromEntries(
     def({ id: "greater_jewel", jewel: "greater", name: "Kadim Mücevher", rarity: "legendary", level: 1, maxStack: 1, sellPrice: 150, icon: { shape: "jewel_greater", color: 0xff8000 }, description: "Sadece pasif ağacın Kadim Yuvalarına (1, 6, 11 ve 16. yuvalar) takılır. Güçlü ve özel bir etkisi vardır; nadirliği arttıkça güçlenir." }),
     def({ id: "minor_jewel", jewel: "minor", name: "Küçük Mücevher", rarity: "uncommon", level: 1, maxStack: 1, sellPrice: 12, icon: { shape: "jewel_minor", color: 0x1eff00 }, description: "Pasif ağaçta, büyük mücevher takılı bir slotun küçük slotlarına takılır. Nadirliği arttıkça etkisi güçlenir." }),
     // ---- Life skills (see gathering.ts): tools and what veins and herbs give
-    def({ id: "miners_pickaxe", name: "Madenci Kazması", rarity: "common", level: 1, maxStack: 1, buyPrice: 50, sellPrice: 10, icon: { shape: "pickaxe", color: 0xa8adb6 }, description: "Envanterinde dururken maden damarlarını kazabilirsin (Madencilik)." }),
-    def({ id: "herb_sickle", name: "Bitki Orağı", rarity: "common", level: 1, maxStack: 1, buyPrice: 50, sellPrice: 10, icon: { shape: "sickle", color: 0xced4da }, description: "Envanterinde dururken şifalı bitkileri toplayabilirsin (Botanik)." }),
-    def({ id: "copper_ore", name: "Bakır Cevheri", rarity: "common", level: 1, maxStack: 50, sellPrice: 3, icon: { shape: "ore", color: 0xd9822b } }),
-    def({ id: "iron_ore", name: "Demir Cevheri", rarity: "common", level: 1, maxStack: 50, sellPrice: 7, icon: { shape: "ore", color: 0xa8adb6 } }),
-    def({ id: "silver_ore", name: "Gümüş Cevheri", rarity: "uncommon", level: 1, maxStack: 50, sellPrice: 16, icon: { shape: "ore", color: 0xe9ecef } }),
-    def({ id: "mithril_ore", name: "Mithril Cevheri", rarity: "rare", level: 1, maxStack: 50, sellPrice: 35, icon: { shape: "ore", color: 0x63e6be } }),
-    def({ id: "healing_herb", name: "Şifalı Ot", rarity: "common", level: 1, maxStack: 50, sellPrice: 3, icon: { shape: "herb", color: 0xff8787 } }),
-    def({ id: "lavender", name: "Lavanta", rarity: "common", level: 1, maxStack: 50, sellPrice: 7, icon: { shape: "herb", color: 0xb197fc } }),
-    def({ id: "night_bloom", name: "Gece Sefası", rarity: "uncommon", level: 1, maxStack: 50, sellPrice: 16, icon: { shape: "herb", color: 0x4dabf7 }, description: "Sadece gece açan mavi bir çiçek." }),
-    def({ id: "dragon_thorn", name: "Ejder Dikeni", rarity: "rare", level: 1, maxStack: 50, sellPrice: 35, icon: { shape: "herb", color: 0xff6b00 }, description: "Dokununca hâlâ sıcak." }),
+    def({ id: "miners_pickaxe", tool: "pickaxe", name: "Madenci Kazması", rarity: "common", level: 1, maxStack: 1, buyPrice: 50, sellPrice: 10, icon: { shape: "pickaxe", color: 0xa8adb6 }, description: "Meslek çantasının Kazma yuvasında ya da envanterinde dururken maden damarlarını kazabilirsin (Madencilik)." }),
+    def({ id: "herb_sickle", tool: "sickle", name: "Bitki Orağı", rarity: "common", level: 1, maxStack: 1, buyPrice: 50, sellPrice: 10, icon: { shape: "sickle", color: 0xced4da }, description: "Meslek çantasının Orak yuvasında ya da envanterinde dururken şifalı bitkileri toplayabilirsin (Botanik)." }),
+    def({ id: "copper_ore", profession: true, name: "Bakır Cevheri", rarity: "common", level: 1, maxStack: 50, sellPrice: 3, icon: { shape: "ore", color: 0xd9822b } }),
+    def({ id: "iron_ore", profession: true, name: "Demir Cevheri", rarity: "common", level: 1, maxStack: 50, sellPrice: 7, icon: { shape: "ore", color: 0xa8adb6 } }),
+    def({ id: "silver_ore", profession: true, name: "Gümüş Cevheri", rarity: "uncommon", level: 1, maxStack: 50, sellPrice: 16, icon: { shape: "ore", color: 0xe9ecef } }),
+    def({ id: "mithril_ore", profession: true, name: "Mithril Cevheri", rarity: "rare", level: 1, maxStack: 50, sellPrice: 35, icon: { shape: "ore", color: 0x63e6be } }),
+    def({ id: "healing_herb", profession: true, name: "Şifalı Ot", rarity: "common", level: 1, maxStack: 50, sellPrice: 3, icon: { shape: "herb", color: 0xff8787 } }),
+    def({ id: "lavender", profession: true, name: "Lavanta", rarity: "common", level: 1, maxStack: 50, sellPrice: 7, icon: { shape: "herb", color: 0xb197fc } }),
+    def({ id: "night_bloom", profession: true, name: "Gece Sefası", rarity: "uncommon", level: 1, maxStack: 50, sellPrice: 16, icon: { shape: "herb", color: 0x4dabf7 }, description: "Sadece gece açan mavi bir çiçek." }),
+    def({ id: "dragon_thorn", profession: true, name: "Ejder Dikeni", rarity: "rare", level: 1, maxStack: 50, sellPrice: 35, icon: { shape: "herb", color: 0xff6b00 }, description: "Dokununca hâlâ sıcak." }),
     def({ id: "night_essence", name: "Gece Özü", rarity: "rare", level: 1, maxStack: 50, sellPrice: 15, icon: { shape: "gem", color: 0x7a5cff }, description: "Sadece gece doğan yaratıklardan düşer. Tüccarlar iyi para verir." }),
     def({ id: "goblin_ear", name: "Goblin Kulağı", rarity: "common", level: 1, maxStack: 50, sellPrice: 5, icon: { shape: "ear", color: 0x7cb342 } }),
     ...GEAR,

@@ -259,6 +259,16 @@ const MIGRATIONS: { version: number; name: string; sql: string }[] = [
       ALTER TABLE characters ADD COLUMN pets JSONB NOT NULL DEFAULT '{}';
     `,
   },
+  {
+    version: 20,
+    name: "profession bag",
+    sql: `
+      -- tool: tool slot name (pickaxe, sickle, rod); profession: profession bag slot index
+      ALTER TABLE items DROP CONSTRAINT items_container_check;
+      ALTER TABLE items ADD CONSTRAINT items_container_check
+        CHECK (container IN ('inventory', 'equipment', 'passive', 'storage', 'tool', 'profession'));
+    `,
+  },
 ];
 
 export async function runMigrations() {

@@ -19,6 +19,7 @@ var hud: Hud
 var world: World
 var tooltip: Tooltip
 var inventory: InventoryWindow
+var profession: ProfessionWindow
 var shop: ShopWindow
 var upgrade: UpgradeWindow
 var skills: SkillsWindow
@@ -42,8 +43,12 @@ func _init(the_hud: Hud) -> void:
 	hud = the_hud
 	var w := hud.windows
 	tooltip = Tooltip.new()
+	tooltip.equipped_item = func(slot: String) -> Variant:
+		return inventory.state.get("equipment", {}).get(slot) if inventory.state else null
 	inventory = InventoryWindow.new(self)
 	w.add_child(inventory)
+	profession = ProfessionWindow.new(self)
+	w.add_child(profession)
 	shop = ShopWindow.new(self)
 	w.add_child(shop)
 	upgrade = UpgradeWindow.new(self)
@@ -108,6 +113,8 @@ func skill_rank(id: String) -> int:
 func has_fishing_rod() -> bool:
 	if inventory.state == null:
 		return false
+	if inventory.state.get("tools", {}).get("rod") != null:
+		return true
 	for s in inventory.state.get("slots", []):
 		if s != null and GameData.item(String(s.defId)).get("fishingRod", false):
 			return true
@@ -119,6 +126,7 @@ func has_fishing_rod() -> bool:
 func update_inventory(event: Dictionary) -> void:
 	ItemSlot.player_level = player_level()
 	inventory.update(event)
+	profession.update(event)
 	extra.update_inventory(event)
 	shop.refresh()
 	upgrade.refresh()
@@ -139,6 +147,7 @@ func set_doll_look(color: int, cls: String, look: Dictionary) -> void:
 func toggle_inventory(force: Variant = null) -> void:
 	inventory.toggle(force)
 	if not inventory.visible:
+		profession.close_window()
 		tooltip.hide_tip()
 
 
@@ -164,6 +173,45 @@ func activate_inventory(index: int) -> void:
 		send("useItem", {"index": index})
 
 
+## The first empty bag slot, or -1.
+func first_free_bag_slot() -> int:
+	var slots: Array = inventory.state.get("slots", []) if inventory.state else []
+	return slots.find(null)
+
+
+## Right click / double click on a profession bag item: into the storage or sold when that
+## window is open, otherwise back to the bags.
+func activate_profession(index: int) -> void:
+	if profession.item_at(index) == null:
+		return
+	var keeper := extra.storage_npc()
+	if not keeper.is_empty():
+		send("storageQuick", {"npcId": keeper.id, "from": {"area": "prof", "index": index}})
+		return
+	if shop.visible and not shop.npc.is_empty():
+		shop.sell(index, "prof")
+		return
+	var free := first_free_bag_slot()
+	if free == -1:
+		hud.show_message("Envanter dolu")
+		return
+	send("moveItem", {"from": {"area": "prof", "index": index}, "to": {"area": "inv", "index": free}})
+
+
+func activate_profession_hint(index: int) -> String:
+	var item = profession.item_at(index)
+	if item == null:
+		return ""
+	var def := Items.def(item.defId)
+	if not extra.storage_npc().is_empty():
+		return "Sağ tık: depoya koy"
+	if shop.visible and not shop.npc.is_empty():
+		return "Sağ tık: sat (%d altın)" % (Items.sell_price(def, item.get("affixes")) * int(item.get("qty", 1)))
+	if extra.is_trade_open() or extra.is_stall_setup_open():
+		return "Takas ve tezgâh için önce çantaya al (sağ tık)"
+	return "Sağ tık: çantaya al"
+
+
 func activate_hint(index: int) -> String:
 	var slots: Array = inventory.state.get("slots", []) if inventory.state else []
 	var item = slots[index] if index < slots.size() else null
@@ -183,6 +231,8 @@ func activate_hint(index: int) -> String:
 		return "Sağ tık: tezgâha koy"
 	if shop.visible and not shop.npc.is_empty():
 		return "Sağ tık: sat (%d altın)" % price
+	if def.has("tool") and not def.get("fishingRod", false):
+		return "Sağ tık: meslek çantasındaki yuvasına tak"
 	if def.get("fishingRod", false):
 		return "Sağ tık: balık tut (suyun kenarında)" if world and world.zone.get("fishing", false) else "Liman'da balık tutmak için"
 	if def.has("slot"):

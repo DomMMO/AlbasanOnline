@@ -1,4 +1,4 @@
-import type { EquipSlot } from "./data/items";
+import type { EquipSlot, ToolSlot } from "./data/items";
 import type { Affix } from "./data/affixes";
 import type { PassiveSocketView } from "./data/passives";
 import type { CombatStats } from "./data/progression";
@@ -524,9 +524,14 @@ export interface ItemView {
   affixes?: Affix[];
 }
 
-/** passive: big socket `socket`; `minor` = one of its small sockets (null = the big one). storage: the Depocu's slots. */
+/**
+ * passive: big socket `socket`; `minor` = one of its small sockets (null = the big one). storage: the Depocu's slots.
+ * prof: the profession bag's material slots; tool: its tool slots.
+ */
 export type SlotRef =
   | { area: "inv"; index: number }
+  | { area: "prof"; index: number }
+  | { area: "tool"; slot: ToolSlot }
   | { area: "storage"; index: number }
   | { area: "equip"; slot: EquipSlot }
   | { area: "passive"; socket: number; minor: number | null };
@@ -536,6 +541,9 @@ export interface InventoryEvent {
   gold: number;
   slots: (ItemView | null)[];
   equipment: Partial<Record<EquipSlot, ItemView>>;
+  /** Profession bag: the tools in their slots and the material slots. */
+  tools: Partial<Record<ToolSlot, ItemView>>;
+  profession: (ItemView | null)[];
   /** Passive tree: 20 big sockets, each with 5 small ones. */
   passives: PassiveSocketView[];
   /** What is kept at the Depocu (the window only opens next to it). */
@@ -570,9 +578,10 @@ export interface BuyMessage {
   qty: number;
 }
 
-/** DropItem and DestroyItem: the bag slot. */
+/** DropItem and DestroyItem: the bag slot ("prof": a profession bag slot). */
 export interface BagSlotMessage {
   index: number;
+  area?: "inv" | "prof";
 }
 
 export interface BuybackMessage {
@@ -583,6 +592,8 @@ export interface BuybackMessage {
 export interface SellMessage {
   npcId: string;
   index: number;
+  /** "prof" = a profession bag slot; the bags otherwise. */
+  area?: "inv" | "prof";
 }
 
 export interface UpgradeMessage {
@@ -657,7 +668,7 @@ export interface StorageGoldMessage {
 }
 
 export interface StorageQuickMessage {
-  from: { area: "inv" | "storage"; index: number };
+  from: { area: "inv" | "prof" | "storage"; index: number };
   npcId: string;
 }
 

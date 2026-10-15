@@ -33,7 +33,7 @@ export const MELEE_RANGE = 26;
 /** Mobs stop chasing at this distance and start swinging. */
 export const MOB_ATTACK_RANGE = 18;
 /** A mob that gets this far from its spawn point gives up and walks home at full health. */
-export const MOB_LEASH_RANGE = TILE_SIZE * 12;
+export const MOB_LEASH_RANGE = TILE_SIZE * 18;
 /** Players this many levels above a mob are left alone: it won't attack them and shies away a little. */
 export const MOB_FEAR_LEVEL_GAP = 5;
 
@@ -87,6 +87,8 @@ export const TAB_TARGET_RANGE = TILE_SIZE * 10;
 // ---- Items & loot -------------------------------------------------------------
 
 export const INVENTORY_SIZE = 32;
+/** Material slots of the profession bag (ore, herbs, fish go here before the bags), besides its tool slots. */
+export const PROFESSION_BAG_SIZE = 24;
 /** How close you must be to pick up loot / talk to an NPC. */
 export const LOOT_RANGE = TILE_SIZE * 2;
 export const NPC_RANGE = TILE_SIZE * 3;

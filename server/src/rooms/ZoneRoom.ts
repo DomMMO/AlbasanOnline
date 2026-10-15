@@ -23,8 +23,10 @@ import {
   type FriendRequestMessage,
   type FriendRespondMessage,
   EQUIP_SLOTS,
+  TOOL_SLOTS,
   type BuyMessage,
   type EquipSlot,
+  type ToolSlot,
   type JoinOptions,
   type BagSlotMessage,
   type BarberStyleMessage,
@@ -202,11 +204,11 @@ export class ZoneRoom extends Room<WorldState> {
     });
     this.onMessage(Msg.DropItem, (client, message: Partial<BagSlotMessage>) => {
       if (this.itemsLocked(client.sessionId)) return;
-      if (typeof message?.index === "number") dropItem(this.game, client.sessionId, message.index);
+      if (typeof message?.index === "number") dropItem(this.game, client.sessionId, message.index, message.area === "prof" ? "prof" : "inv");
     });
     this.onMessage(Msg.DestroyItem, (client, message: Partial<BagSlotMessage>) => {
       if (this.itemsLocked(client.sessionId)) return;
-      if (typeof message?.index === "number") destroyItem(this.game, client.sessionId, message.index);
+      if (typeof message?.index === "number") destroyItem(this.game, client.sessionId, message.index, message.area === "prof" ? "prof" : "inv");
     });
     this.onMessage(Msg.PickupLoot, (client, message: Partial<PickupLootMessage>) => {
       if (this.itemsLocked(client.sessionId)) return;
@@ -221,7 +223,7 @@ export class ZoneRoom extends Room<WorldState> {
     this.onMessage(Msg.Sell, (client, message: Partial<SellMessage>) => {
       if (this.itemsLocked(client.sessionId)) return;
       if (typeof message?.npcId === "string" && typeof message.index === "number") {
-        sell(this.game, client.sessionId, message.npcId, message.index);
+        sell(this.game, client.sessionId, message.npcId, message.index, message.area === "prof" ? "prof" : "inv");
       }
     });
     this.onMessage(Msg.Buyback, (client, message: Partial<BuybackMessage>) => {
@@ -327,7 +329,7 @@ export class ZoneRoom extends Room<WorldState> {
     this.onMessage(Msg.StorageQuick, (client, message: Partial<StorageQuickMessage>) => {
       if (this.itemsLocked(client.sessionId)) return;
       const from = message?.from;
-      if (typeof message?.npcId !== "string" || (from?.area !== "inv" && from?.area !== "storage") || typeof from.index !== "number") return;
+      if (typeof message?.npcId !== "string" || (from?.area !== "inv" && from?.area !== "prof" && from?.area !== "storage") || typeof from.index !== "number") return;
       quickStorage(this.game, client.sessionId, message.npcId, { area: from.area, index: from.index });
     });
     this.onMessage(Msg.DungeonRespond, (client, message: Partial<DungeonRespondMessage>) => {
@@ -597,6 +599,8 @@ function parseSlotRef(value: unknown): SlotRef | null {
   const ref = value as Record<string, unknown>;
   if (ref.area === "inv" && typeof ref.index === "number") return { area: "inv", index: ref.index };
   if (ref.area === "storage" && typeof ref.index === "number") return { area: "storage", index: ref.index };
+  if (ref.area === "prof" && typeof ref.index === "number") return { area: "prof", index: ref.index };
+  if (ref.area === "tool" && TOOL_SLOTS.includes(ref.slot as ToolSlot)) return { area: "tool", slot: ref.slot as ToolSlot };
   if (ref.area === "equip" && EQUIP_SLOTS.includes(ref.slot as EquipSlot)) return { area: "equip", slot: ref.slot as EquipSlot };
   if (ref.area === "passive" && typeof ref.socket === "number" && (ref.minor === null || typeof ref.minor === "number")) {
     return { area: "passive", socket: ref.socket, minor: ref.minor };
