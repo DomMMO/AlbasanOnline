@@ -66,7 +66,8 @@ var target_id := ""
 var _target_ring: Depth.Painter
 var _target_ring_w: Node2D
 var _ring_color := HOSTILE_COLOR
-var party := {"id": null, "sessions": {}}
+## sessions: members in this zone; names: every member, wherever they are (town portals).
+var party := {"id": null, "sessions": {}, "names": {}}
 var duel_opponent := ""
 var hotbar_layout: Array = []
 var hotbar: Array = []
@@ -371,6 +372,7 @@ func _on_player_add(player: Schema.Struct, session_id: String) -> void:
 		local.curr = local.prev
 		local.dir = int(f(player, "dir", 0))
 		view.set_interactive(false)
+		_sync_town_portals()
 		_offs.append(room.callbacks.on_change(player, func():
 			reconcile(player)
 			refresh_local_ui()))
@@ -582,8 +584,22 @@ func _on_town_portal_add(portal: Schema.Struct, portal_id: String) -> void:
 			return
 		walk_to(func(): return pos_of(portal), GameData.PORTAL_RANGE - 4, func(): use_town_portal(portal_id)))
 	view.hovered.connect(func(_v, inside): Art.set_cursor("portal" if inside else "default"))
-	Fx.beam(sorted, pos_of(portal), false, 0.7)
+	var shown := town_portal_shown(portal)
+	view.set_visible(shown)
+	if shown:
+		Fx.beam(sorted, pos_of(portal), false, 0.7)
 	town_portals[portal_id] = {"state": portal, "view": view}
+
+
+## Only our own town portals and our party members' are drawn (only the owner can use one).
+func town_portal_shown(portal: Schema.Struct) -> bool:
+	var owner := String(f(portal, "owner", ""))
+	return party.names.has(owner) or (local != null and owner == String(f(local.state, "name", "")))
+
+
+func _sync_town_portals() -> void:
+	for id in town_portals:
+		town_portals[id].view.set_visible(town_portal_shown(town_portals[id].state))
 
 
 func _on_town_portal_remove(_portal: Schema.Struct, portal_id: String) -> void:
@@ -891,15 +907,20 @@ func refresh_hostility() -> void:
 
 func on_party_update(e: Dictionary) -> void:
 	var sessions := {}
+	var names := {}
 	for m in e.get("members", []):
+		names[String(m.name)] = true
 		if m.get("online", false) and m.get("zone") == zone_id and m.get("sessionId"):
 			sessions[String(m.sessionId)] = true
 	var changed: bool = e.get("partyId") != party.id or sessions.size() != party.sessions.size()
 	for s in sessions:
 		if not party.sessions.has(s):
 			changed = true
-	party = {"id": e.get("partyId"), "sessions": sessions}
+	var names_changed: bool = names.size() != party.names.size() or names.keys().any(func(n): return not party.names.has(n))
+	party = {"id": e.get("partyId"), "sessions": sessions, "names": names}
 	ui.render_party(e, String(f(local.state, "name", "")) if local else "", zone_id, self)
+	if names_changed:
+		_sync_town_portals()
 	if not changed:
 		return
 	for id in loot:

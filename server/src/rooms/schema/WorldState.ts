@@ -101,7 +101,6 @@ export class Minion extends Schema {
   @type("boolean") moving = false;
 }
 
-/** A town portal end (see game/townPortal.ts). Only its owner can use it. */
 /** A pet following its owner (pets.ts); keyed by the owner's sessionId. */
 export class Pet extends Schema {
   @type("string") kind = "";
@@ -112,6 +111,10 @@ export class Pet extends Schema {
   @type("boolean") moving = false;
 }
 
+/**
+ * A town portal end (see game/townPortal.ts). Only its owner can use it; clients draw only
+ * their own and their party members'.
+ */
 export class TownPortal extends Schema {
   @type("string") owner = "";
   @type("number") x = 0;
