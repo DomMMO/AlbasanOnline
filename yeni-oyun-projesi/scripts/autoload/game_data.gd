@@ -94,6 +94,12 @@ func skill(id: String) -> Dictionary:
 	return SKILLS.get(id, {})
 
 
+## skills.ts skillCostAt(): mana costs grow with the level like max mana does.
+func skill_cost(skill: Dictionary, resource: String, level: int) -> int:
+	var cost := int(skill.get("cost", 0))
+	return int(round(cost * (1.0 + (level - 1) * 12.0 / 125.0))) if resource == "mana" else cost
+
+
 ## classes.ts classOf(): unknown ids are novices.
 func class_of(id: String) -> Dictionary:
 	return CLASSES.get(id, CLASSES.get("novice", {}))

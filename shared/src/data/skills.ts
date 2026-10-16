@@ -118,6 +118,18 @@ const DASH_RANGE = TILE_SIZE * 8;
 
 const skill = (def: SkillDef) => def;
 
+/** Max mana grows by this share of its level 1 value per level (classes.ts maxResource). */
+export const MANA_COST_GROWTH = 12 / 125;
+
+/**
+ * What a skill costs at a level, before passive tree reductions. Mana costs grow with the
+ * level like max mana does, so a spell always takes the same share of the pool (rage and
+ * energy pools don't grow, so neither do their costs). Mirrored in GameData.skill_cost().
+ */
+export function skillCostAt(skill: SkillDef, resource: string, level: number): number {
+  return resource === "mana" ? Math.round(skill.cost * (1 + (level - 1) * MANA_COST_GROWTH)) : skill.cost;
+}
+
 export const SKILLS: Record<string, SkillDef> = Object.fromEntries(
   [
     // ---- Warrior (rage)
