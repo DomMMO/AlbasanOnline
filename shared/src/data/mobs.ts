@@ -64,7 +64,7 @@ export interface MobDef {
  */
 export const MOB_TUNING = {
   maxHp: 3,
-  xp: 0.3,
+  xp: 0.6,
   gold: 0.2,
   dropChance: 0.35,
   /** Melee of dungeon bosses (the ones that never respawn), so the tank feels every swing. */
