@@ -49,6 +49,10 @@ export interface BossState {
   enraged: boolean;
   /** Indexes into def.boss.addsAt that already fired. */
   addsCalled: Set<number>;
+  /** Outnumbered regeneration: next heal (game time). */
+  nextRegenAt: number;
+  /** The "bring a friend" warning went out this fight. */
+  warnedAlone: boolean;
 }
 
 const FIRST_ABILITY_DELAY_MS = 6000;
@@ -60,12 +64,49 @@ const FACING_VECTOR: Record<Direction, [number, number]> = {
 };
 const BOSS_NOTICE_COLOR = "#ff8c1a";
 
+// Dungeon bosses need a group: fought by fewer than DUNGEON_BOSS_MIN_FIGHTERS living players,
+// they shrug off most damage and heal back, so a lone player can't wear them down.
+const DUNGEON_BOSS_MIN_FIGHTERS = 2;
+const OUTNUMBERED_DAMAGE_TAKEN = 0.3;
+/** Fraction of max health healed each second while outnumbered. */
+const OUTNUMBERED_REGEN = 0.01;
+
 export function newBossState(): BossState {
-  return { dash: null, nextAbilityAt: 0, abilityIndex: 0, cast: null, enraged: false, addsCalled: new Set() };
+  return { dash: null, nextAbilityAt: 0, abilityIndex: 0, cast: null, enraged: false, addsCalled: new Set(), nextRegenAt: 0, warnedAlone: false };
 }
 
 function announce(game: Game, message: string) {
   game.io.broadcast(Msg.Notice, { message, color: BOSS_NOTICE_COLOR } satisfies NoticeEvent);
+}
+
+/** A dungeon boss fought by too few players (living players on its threat table). */
+export function bossOutnumbered(game: Game, runtime: MobRuntime): boolean {
+  if (!runtime.boss || !game.zone.instanced) return false;
+  let fighters = 0;
+  for (const sessionId of runtime.threat.keys()) {
+    const player = game.state.players.get(sessionId);
+    if (player && !player.dead) fighters++;
+  }
+  return fighters < DUNGEON_BOSS_MIN_FIGHTERS;
+}
+
+/** Damage a boss actually takes from `amount` (less when outnumbered). */
+export function bossDamageTaken(game: Game, runtime: MobRuntime, amount: number): number {
+  return bossOutnumbered(game, runtime) ? Math.max(1, Math.round(amount * OUTNUMBERED_DAMAGE_TAKEN)) : amount;
+}
+
+function outnumberedTick(game: Game, mob: Mob, runtime: MobRuntime) {
+  const state = runtime.boss!;
+  if (!bossOutnumbered(game, runtime)) return;
+  if (!state.warnedAlone) {
+    state.warnedAlone = true;
+    const message = `${runtime.def.name} tek başına alt edilemez: yanına en az bir yoldaş al!`;
+    for (const sessionId of runtime.threat.keys()) game.io.send(sessionId, Msg.Notice, { message, color: BOSS_NOTICE_COLOR } satisfies NoticeEvent);
+  }
+  const now = game.now();
+  if (now < state.nextRegenAt) return;
+  state.nextRegenAt = now + 1000;
+  mob.hp = Math.min(mob.maxHp, mob.hp + Math.round(mob.maxHp * OUTNUMBERED_REGEN));
 }
 
 /** Runs every tick while the boss is fighting. Returns true when it is busy (casting) and must not move or swing. */
@@ -74,6 +115,7 @@ export function bossTick(game: Game, mobId: string, mob: Mob, runtime: MobRuntim
   const abilities = runtime.def.boss!.abilities;
   const now = game.now();
   if (state.nextAbilityAt === 0) state.nextAbilityAt = now + FIRST_ABILITY_DELAY_MS;
+  outnumberedTick(game, mob, runtime);
 
   if (state.dash) {
     advanceDash(game, mobId, mob, state);

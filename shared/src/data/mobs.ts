@@ -67,14 +67,18 @@ export const MOB_TUNING = {
   xp: 0.3,
   gold: 0.2,
   dropChance: 0.35,
+  /** Melee of dungeon bosses (the ones that never respawn), so the tank feels every swing. */
+  dungeonBossAttack: 1.5,
 };
 
 function tuned(mob: MobDef): MobDef {
   const [goldMin, goldMax] = mob.loot.gold;
   const min = Math.round(goldMin * MOB_TUNING.gold);
+  const dungeonBoss = mob.boss && mob.respawnMs === 0;
   return {
     ...mob,
     maxHp: Math.round(mob.maxHp * MOB_TUNING.maxHp),
+    attack: dungeonBoss ? Math.round(mob.attack * MOB_TUNING.dungeonBossAttack) : mob.attack,
     xp: Math.max(1, Math.round(mob.xp * MOB_TUNING.xp)),
     loot: {
       gold: [min, Math.max(min, Math.round(goldMax * MOB_TUNING.gold))],
