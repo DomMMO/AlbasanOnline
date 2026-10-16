@@ -327,6 +327,7 @@ async function start() {
     if (!me.isAdmin) throw new Error(`${me.username} hesabının GM yetkisi yok.`);
     $("admin-user").textContent = `Giriş: ${me.username}`;
     $("admin-main").hidden = false;
+    $("editor-link").hidden = false;
     renderCatalog();
     await search();
     setClock(await api<ClockInfo>("GET", "/admin/clock"));
