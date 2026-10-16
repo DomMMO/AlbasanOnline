@@ -16,6 +16,8 @@ export class Player extends Schema {
 
   @type("uint8") level = 1;
   @type("uint32") xp = 0;
+  /** XP needed for the next level; sent so the client never computes its own (and goes stale). */
+  @type("uint32") xpToNext = 0;
   @type("uint16") hp = 1;
   @type("uint16") maxHp = 1;
   /** Class id: warrior, mage, priest. */

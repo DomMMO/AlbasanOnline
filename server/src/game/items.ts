@@ -17,6 +17,7 @@ import {
   itemSellPrice,
   JEWEL_DROPS,
   MOB_TUNING,
+  xpToNextLevel,
   ranksToAffixes,
   MAX_AFFIXES,
   RARITY_COLORS,
@@ -76,6 +77,7 @@ export function refreshStats(game: Game, sessionId: string) {
     ranksToAffixes(player.cls, runtime.skillRanks),
   );
   player.maxHp = runtime.stats.maxHp;
+  player.xpToNext = xpToNextLevel(player.level);
   const cls = classOf(player.cls);
   player.maxResource = cls.maxResource(player.level) + (cls.resource === "mana" ? runtime.stats.manaBonus : 0);
   player.resource = Math.min(player.resource, player.maxResource);
