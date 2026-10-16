@@ -1,0 +1,67 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Town/Environment/Structures/Stations/Furnace/Bricks_02-Sheet.png" id="1_5otvi"]
+[ext_resource type="Script" path="res://scripts/map/map_light.gd" id="2_xj6km"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8gykb"]
+atlas = ExtResource("1_5otvi")
+region = Rect2(0, 0, 48, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hq3ep"]
+atlas = ExtResource("1_5otvi")
+region = Rect2(48, 0, 48, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_obr7c"]
+atlas = ExtResource("1_5otvi")
+region = Rect2(0, 64, 48, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_i2ssx"]
+atlas = ExtResource("1_5otvi")
+region = Rect2(48, 64, 48, 64)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_knsxv"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8gykb")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hq3ep")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_obr7c")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_i2ssx")
+}],
+"loop": 1,
+"name": &"default",
+"speed": 6.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_mf2mb"]
+size = Vector2(32, 16)
+
+[node name="Ocak" type="Node2D" unique_id=2105486627]
+
+[node name="Gorsel" type="AnimatedSprite2D" parent="." unique_id=1156676724]
+position = Vector2(-24, -64)
+sprite_frames = SubResource("SpriteFrames_knsxv")
+autoplay = "default"
+centered = false
+
+[node name="Lamba" type="Marker2D" parent="." unique_id=1088884367]
+position = Vector2(0, -16)
+script = ExtResource("2_xj6km")
+radius = 72.0
+color = Color(1, 0.5411765, 0.1882353, 1)
+flicker = 0.15
+lamp = false
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=724888139]
+collision_layer = 3
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=10879498]
+position = Vector2(0, -8)
+shape = SubResource("RectangleShape2D_mf2mb")

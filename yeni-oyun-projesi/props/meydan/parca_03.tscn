@@ -1,0 +1,62 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/meydan/parca_03.png" id="1_u3y7x"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ul30n"]
+size = Vector2(16, 10)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_kxvc5"]
+size = Vector2(16, 10)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_3msyg"]
+size = Vector2(16, 10)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_7yct8"]
+size = Vector2(16, 10)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_2jt88"]
+size = Vector2(16, 10)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ve1cy"]
+size = Vector2(16, 10)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_f8hmk"]
+size = Vector2(16, 10)
+
+[node name="Parca03" type="Node2D" unique_id=515557132]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=839790523]
+position = Vector2(-56, -128)
+texture = ExtResource("1_u3y7x")
+centered = false
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=922252253]
+collision_mask = 0
+
+[node name="@CollisionShape2D@10" type="CollisionShape2D" parent="Hitbox" unique_id=534320145]
+position = Vector2(-48, -5)
+shape = SubResource("RectangleShape2D_ul30n")
+
+[node name="@CollisionShape2D@11" type="CollisionShape2D" parent="Hitbox" unique_id=2016114780]
+position = Vector2(-32, -5)
+shape = SubResource("RectangleShape2D_kxvc5")
+
+[node name="@CollisionShape2D@12" type="CollisionShape2D" parent="Hitbox" unique_id=563044952]
+position = Vector2(-16, -5)
+shape = SubResource("RectangleShape2D_3msyg")
+
+[node name="@CollisionShape2D@13" type="CollisionShape2D" parent="Hitbox" unique_id=2034541289]
+position = Vector2(0, -5)
+shape = SubResource("RectangleShape2D_7yct8")
+
+[node name="@CollisionShape2D@14" type="CollisionShape2D" parent="Hitbox" unique_id=730394295]
+position = Vector2(16, -5)
+shape = SubResource("RectangleShape2D_2jt88")
+
+[node name="@CollisionShape2D@15" type="CollisionShape2D" parent="Hitbox" unique_id=117947327]
+position = Vector2(32, -5)
+shape = SubResource("RectangleShape2D_ve1cy")
+
+[node name="@CollisionShape2D@16" type="CollisionShape2D" parent="Hitbox" unique_id=946684118]
+position = Vector2(48, -5)
+shape = SubResource("RectangleShape2D_f8hmk")

@@ -1,0 +1,20 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/town/golge_orta.png" id="1_1emo0"]
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Forge/Assets/Tiles.png" id="2_10ve2"]
+
+[node name="HeykelKirik" type="Node2D" unique_id=573023109]
+
+[node name="Golge" type="Sprite2D" parent="." unique_id=512792052]
+modulate = Color(1, 1, 1, 0.6)
+z_index = -5
+z_as_relative = false
+position = Vector2(0, -3)
+texture = ExtResource("1_1emo0")
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1027625609]
+position = Vector2(-14, -44)
+texture = ExtResource("2_10ve2")
+centered = false
+region_enabled = true
+region_rect = Rect2(226, 164, 28, 44)

@@ -1,0 +1,18 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/props/abandoned_mine/art_18_golge.png" id="1_3ised"]
+[ext_resource type="Texture2D" path="res://assets/props/abandoned_mine/art_18.png" id="2_nh0pc"]
+
+[node name="Art18" type="Node2D" unique_id=1024357564]
+
+[node name="Golge" type="Sprite2D" parent="." unique_id=1150341224]
+z_index = -5
+z_as_relative = false
+position = Vector2(-5, -3)
+texture = ExtResource("1_3ised")
+centered = false
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=978847448]
+position = Vector2(-8, -17)
+texture = ExtResource("2_nh0pc")
+centered = false

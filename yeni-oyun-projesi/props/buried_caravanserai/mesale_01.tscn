@@ -1,0 +1,43 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/props/buried_caravanserai/mesale_01.png" id="1_c0csi"]
+[ext_resource type="Texture2D" path="res://assets/props/buried_caravanserai/mesale_01_isik1.png" id="2_vdcgj"]
+[ext_resource type="Script" path="res://scripts/map/night_glow.gd" id="3_gqse6"]
+[ext_resource type="Script" path="res://scripts/map/map_light.gd" id="4_ocb1a"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_wblyn"]
+blend_mode = 1
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_toeb5"]
+size = Vector2(16, 16)
+
+[node name="Mesale01" type="Node2D" unique_id=1654323295]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=224471308]
+position = Vector2(-5, -22)
+texture = ExtResource("1_c0csi")
+centered = false
+
+[node name="Isik1" type="Sprite2D" parent="." unique_id=61649611]
+material = SubResource("CanvasItemMaterial_wblyn")
+position = Vector2(-19, -44)
+texture = ExtResource("2_vdcgj")
+centered = false
+script = ExtResource("3_gqse6")
+base = 0.18
+flicker = 0.4
+
+[node name="Lamba1" type="Marker2D" parent="." unique_id=594560863]
+position = Vector2(0.5, -20)
+script = ExtResource("4_ocb1a")
+radius = 62.0
+color = Color(1, 0.65882355, 0.3137255, 1)
+flicker = 0.08
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=1247115022]
+collision_layer = 3
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=1558598858]
+position = Vector2(0, -8)
+shape = SubResource("RectangleShape2D_toeb5")

@@ -1,0 +1,22 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Cave/Assets/Props.png" id="1_bj7jh"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hf4hr"]
+size = Vector2(14, 8)
+
+[node name="MantarEgikBuz" type="Node2D" unique_id=1677164792]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=313374587]
+position = Vector2(-30, -96)
+texture = ExtResource("1_bj7jh")
+centered = false
+region_enabled = true
+region_rect = Rect2(226, 96, 60, 96)
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=1481023109]
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=983314909]
+position = Vector2(0, -4)
+shape = SubResource("RectangleShape2D_hf4hr")

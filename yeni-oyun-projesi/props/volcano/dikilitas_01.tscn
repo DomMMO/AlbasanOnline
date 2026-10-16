@@ -1,0 +1,21 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/props/volcano/dikilitas_01.png" id="1_uo5g5"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_7d0o0"]
+size = Vector2(16, 16)
+
+[node name="Dikilitas01" type="Node2D" unique_id=1068720138]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=173439503]
+position = Vector2(-15, -53)
+texture = ExtResource("1_uo5g5")
+centered = false
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=784289428]
+collision_layer = 3
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=527234690]
+position = Vector2(-8, -8)
+shape = SubResource("RectangleShape2D_7d0o0")

@@ -1,0 +1,22 @@
+[gd_scene format=3 uid="uid://chx1ki78ode8o"]
+
+[ext_resource type="Texture2D" uid="uid://pbfncgddt5vb" path="res://assetpack/ANOKOLISA/Pixel Crawler - Garden Environment/Assets/Tiles.png" id="1_ctuib"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_22god"]
+size = Vector2(14, 6)
+
+[node name="ServiSutun" type="Node2D" unique_id=1393084851]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1788093815]
+position = Vector2(-14, -95)
+texture = ExtResource("1_ctuib")
+centered = false
+region_enabled = true
+region_rect = Rect2(194, 269.79977, 28, 97.200226)
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=326982736]
+collision_mask = 0
+
+[node name="@CollisionShape2D@36" type="CollisionShape2D" parent="Hitbox" unique_id=477509479]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_22god")

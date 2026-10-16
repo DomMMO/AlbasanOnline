@@ -1,0 +1,22 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Town/Environment/Structures/Stations/Workbench/Workbench.png" id="1_fa202"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_4vjq2"]
+size = Vector2(68, 10)
+
+[node name="TezgahBuyuk" type="Node2D" unique_id=1845561761]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1095131404]
+position = Vector2(-36, -48)
+texture = ExtResource("1_fa202")
+centered = false
+region_enabled = true
+region_rect = Rect2(103, 64, 73, 48)
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=800680963]
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=2079683160]
+position = Vector2(0, -5)
+shape = SubResource("RectangleShape2D_4vjq2")

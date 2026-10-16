@@ -1,0 +1,10 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/props/sunken_temple/art_01.png" id="1_j8i5m"]
+
+[node name="Art01" type="Node2D" unique_id=874191754]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=394075646]
+position = Vector2(-7, -35)
+texture = ExtResource("1_j8i5m")
+centered = false

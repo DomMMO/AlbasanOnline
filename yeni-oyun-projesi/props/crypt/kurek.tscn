@@ -1,0 +1,12 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Cemetery/Environment/Props/Props.png" id="1_bqe56"]
+
+[node name="Kurek" type="Node2D" unique_id=1560783962]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1477542492]
+position = Vector2(-5, -31)
+texture = ExtResource("1_bqe56")
+centered = false
+region_enabled = true
+region_rect = Rect2(82, 49, 11, 31)

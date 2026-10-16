@@ -1,0 +1,10 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/town/mantar_06.png" id="1_4nsx0"]
+
+[node name="Mantar06" type="Node2D" unique_id=281750843]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1965810524]
+position = Vector2(-3, -4)
+texture = ExtResource("1_4nsx0")
+centered = false

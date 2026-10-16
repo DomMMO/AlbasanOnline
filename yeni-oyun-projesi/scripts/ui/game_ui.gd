@@ -234,7 +234,7 @@ func activate_hint(index: int) -> String:
 	if def.has("tool") and not def.get("fishingRod", false):
 		return "Sağ tık: meslek çantasındaki yuvasına tak"
 	if def.get("fishingRod", false):
-		return "Sağ tık: balık tut (suyun kenarında)" if world and world.zone.get("fishing", false) else "Liman'da balık tutmak için"
+		return "Sağ tık: balık tut (suyun kenarında)" if world and world.zone.get("fishing", false) else "Kasabanın iskelelerinde balık tutmak için"
 	if def.has("slot"):
 		return "Sağ tık: kuşan"
 	if def.has("jewel"):

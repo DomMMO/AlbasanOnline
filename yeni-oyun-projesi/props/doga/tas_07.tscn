@@ -1,0 +1,10 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/town/tas_07.png" id="1_qyodq"]
+
+[node name="Tas07" type="Node2D" unique_id=1061765202]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1540834751]
+position = Vector2(-4, -6)
+texture = ExtResource("1_qyodq")
+centered = false

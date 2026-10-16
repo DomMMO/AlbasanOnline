@@ -1,0 +1,22 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Hideout/Assets/Tiles.png" id="1_nupq6"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_724b7"]
+size = Vector2(14, 6)
+
+[node name="Cuval" type="Node2D" unique_id=1192461121]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=817364779]
+position = Vector2(-10, -34)
+texture = ExtResource("1_nupq6")
+centered = false
+region_enabled = true
+region_rect = Rect2(278, 57, 20, 34)
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=624205573]
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=240080642]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_724b7")

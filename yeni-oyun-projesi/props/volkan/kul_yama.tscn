@@ -1,0 +1,13 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/alan/kul_yama.png" id="1_1cy01"]
+
+[node name="KulYama" type="Node2D" unique_id=1004357717]
+z_index = -1
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1967654699]
+position = Vector2(-39, -78)
+texture = ExtResource("1_1cy01")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 0, 79, 78)

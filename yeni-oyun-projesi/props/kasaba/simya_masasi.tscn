@@ -1,0 +1,71 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Town/Environment/Structures/Stations/Alchemy/Alchemy_Table_01-Sheet.png" id="1_u83ud"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7dm4r"]
+atlas = ExtResource("1_u83ud")
+region = Rect2(0, 0, 32, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5kyqg"]
+atlas = ExtResource("1_u83ud")
+region = Rect2(32, 0, 32, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mv2nw"]
+atlas = ExtResource("1_u83ud")
+region = Rect2(64, 0, 32, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8ftie"]
+atlas = ExtResource("1_u83ud")
+region = Rect2(96, 0, 32, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_n46y7"]
+atlas = ExtResource("1_u83ud")
+region = Rect2(128, 0, 32, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0wrq3"]
+atlas = ExtResource("1_u83ud")
+region = Rect2(160, 0, 32, 64)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_oy0eo"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7dm4r")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5kyqg")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mv2nw")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8ftie")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_n46y7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0wrq3")
+}],
+"loop": 1,
+"name": &"default",
+"speed": 6.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_sdtis"]
+size = Vector2(28, 10)
+
+[node name="SimyaMasasi" type="Node2D" unique_id=591568551]
+
+[node name="Gorsel" type="AnimatedSprite2D" parent="." unique_id=615219765]
+position = Vector2(-16, -64)
+sprite_frames = SubResource("SpriteFrames_oy0eo")
+autoplay = "default"
+centered = false
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=1059632621]
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=900676946]
+position = Vector2(0, -5)
+shape = SubResource("RectangleShape2D_sdtis")

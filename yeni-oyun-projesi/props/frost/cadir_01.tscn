@@ -1,0 +1,21 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/props/frost/cadir_01.png" id="1_aw8si"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_p1xx4"]
+size = Vector2(48, 32)
+
+[node name="Cadir01" type="Node2D" unique_id=751189559]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1703529855]
+position = Vector2(-26, -45)
+texture = ExtResource("1_aw8si")
+centered = false
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=953466648]
+collision_layer = 3
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=495943446]
+position = Vector2(0, -16)
+shape = SubResource("RectangleShape2D_p1xx4")

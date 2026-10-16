@@ -8,6 +8,10 @@ size = Vector2(34, 50)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_62x7q"]
 size = Vector2(10, 6)
 
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_govde"]
+radius = 6.8
+height = 27.2
+
 [node name="WolfRiderUruk" type="Node2D" unique_id=592006467]
 
 [node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=612903420]
@@ -34,3 +38,14 @@ input_pickable = false
 position = Vector2(0, -3)
 shape = SubResource("RectangleShape2D_62x7q")
 debug_color = Color(1, 0.3, 0.2, 0.45)
+
+[node name="Govde" type="Area2D" parent="." unique_id=1205427471]
+collision_layer = 4
+collision_mask = 0
+monitoring = false
+monitorable = false
+
+[node name="Oval" type="CollisionShape2D" parent="Govde" unique_id=308169905]
+rotation = 1.5707964
+shape = SubResource("CapsuleShape2D_govde")
+debug_color = Color(1, 0.75, 0.2, 0.35)

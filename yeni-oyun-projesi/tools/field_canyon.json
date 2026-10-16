@@ -1,0 +1,300 @@
+{
+ "width": 128,
+ "height": 96,
+ "spawn": {
+  "x": 1784,
+  "y": 864
+ },
+ "npcs": {
+  "caravan_master": {
+   "x": 1656,
+   "y": 704
+  },
+  "canyon_scout": {
+   "x": 1784,
+   "y": 704
+  }
+ },
+ "portals": {
+  "red_caves_entrance": {
+   "x": 184,
+   "y": 736
+  },
+  "buried_caravanserai_entrance": {
+   "x": 1048,
+   "y": 160
+  },
+  "canyon_valley_gate": {
+   "x": 1976,
+   "y": 800
+  }
+ },
+ "arrivals": {
+  "world_canyon_gate": {
+   "x": 1848,
+   "y": 832
+  }
+ },
+ "spawnZones": [
+  {
+   "mob": "sand_slime",
+   "tx": 63,
+   "ty": 49,
+   "radius": 6,
+   "count": 7
+  },
+  {
+   "mob": "dune_wraith",
+   "tx": 63,
+   "ty": 49,
+   "radius": 6,
+   "count": 4
+  },
+  {
+   "mob": "hyena",
+   "tx": 81,
+   "ty": 25,
+   "radius": 6,
+   "count": 7
+  },
+  {
+   "mob": "canyon_jackal",
+   "tx": 89,
+   "ty": 75,
+   "radius": 5,
+   "count": 6
+  },
+  {
+   "mob": "blood_jackal",
+   "tx": 89,
+   "ty": 75,
+   "radius": 5,
+   "count": 3
+  },
+  {
+   "mob": "desert_raider",
+   "tx": 33,
+   "ty": 27,
+   "radius": 6,
+   "count": 6
+  },
+  {
+   "mob": "raider_veteran",
+   "tx": 33,
+   "ty": 23,
+   "radius": 5,
+   "count": 3
+  },
+  {
+   "mob": "sandstone_golem",
+   "tx": 29,
+   "ty": 73,
+   "radius": 4,
+   "count": 4
+  },
+  {
+   "mob": "canyon_minotaur",
+   "tx": 59,
+   "ty": 81,
+   "radius": 4,
+   "count": 4
+  },
+  {
+   "mob": "raider_bey_toygar",
+   "tx": 33,
+   "ty": 15,
+   "radius": 1,
+   "count": 1
+  },
+  {
+   "mob": "sand_slime",
+   "tx": 92,
+   "ty": 55,
+   "radius": 6,
+   "count": 7
+  },
+  {
+   "mob": "dune_wraith",
+   "tx": 92,
+   "ty": 55,
+   "radius": 6,
+   "count": 4
+  },
+  {
+   "mob": "sand_slime",
+   "tx": 80,
+   "ty": 43,
+   "radius": 6,
+   "count": 7
+  },
+  {
+   "mob": "dune_wraith",
+   "tx": 80,
+   "ty": 43,
+   "radius": 6,
+   "count": 4
+  },
+  {
+   "mob": "sand_slime",
+   "tx": 43,
+   "ty": 47,
+   "radius": 6,
+   "count": 7
+  },
+  {
+   "mob": "dune_wraith",
+   "tx": 43,
+   "ty": 47,
+   "radius": 6,
+   "count": 4
+  },
+  {
+   "mob": "hyena",
+   "tx": 89,
+   "ty": 9,
+   "radius": 6,
+   "count": 7
+  },
+  {
+   "mob": "hyena",
+   "tx": 57,
+   "ty": 18,
+   "radius": 6,
+   "count": 7
+  },
+  {
+   "mob": "hyena",
+   "tx": 105,
+   "ty": 13,
+   "radius": 6,
+   "count": 7
+  },
+  {
+   "mob": "canyon_jackal",
+   "tx": 105,
+   "ty": 68,
+   "radius": 5,
+   "count": 6
+  },
+  {
+   "mob": "blood_jackal",
+   "tx": 105,
+   "ty": 68,
+   "radius": 5,
+   "count": 3
+  },
+  {
+   "mob": "canyon_jackal",
+   "tx": 117,
+   "ty": 82,
+   "radius": 5,
+   "count": 6
+  },
+  {
+   "mob": "blood_jackal",
+   "tx": 117,
+   "ty": 82,
+   "radius": 5,
+   "count": 3
+  },
+  {
+   "mob": "canyon_jackal",
+   "tx": 77,
+   "ty": 62,
+   "radius": 5,
+   "count": 6
+  },
+  {
+   "mob": "blood_jackal",
+   "tx": 77,
+   "ty": 62,
+   "radius": 5,
+   "count": 3
+  },
+  {
+   "mob": "desert_raider",
+   "tx": 18,
+   "ty": 36,
+   "radius": 6,
+   "count": 6
+  },
+  {
+   "mob": "desert_raider",
+   "tx": 28,
+   "ty": 56,
+   "radius": 6,
+   "count": 6
+  },
+  {
+   "mob": "desert_raider",
+   "tx": 17,
+   "ty": 11,
+   "radius": 6,
+   "count": 6
+  },
+  {
+   "mob": "raider_veteran",
+   "tx": 53,
+   "ty": 34,
+   "radius": 5,
+   "count": 3
+  },
+  {
+   "mob": "raider_veteran",
+   "tx": 9,
+   "ty": 24,
+   "radius": 5,
+   "count": 3
+  },
+  {
+   "mob": "raider_veteran",
+   "tx": 47,
+   "ty": 9,
+   "radius": 5,
+   "count": 3
+  },
+  {
+   "mob": "sandstone_golem",
+   "tx": 46,
+   "ty": 68,
+   "radius": 4,
+   "count": 4
+  },
+  {
+   "mob": "sandstone_golem",
+   "tx": 12,
+   "ty": 77,
+   "radius": 4,
+   "count": 4
+  },
+  {
+   "mob": "sandstone_golem",
+   "tx": 39,
+   "ty": 86,
+   "radius": 4,
+   "count": 4
+  },
+  {
+   "mob": "canyon_minotaur",
+   "tx": 75,
+   "ty": 86,
+   "radius": 4,
+   "count": 4
+  },
+  {
+   "mob": "canyon_minotaur",
+   "tx": 62,
+   "ty": 67,
+   "radius": 4,
+   "count": 4
+  },
+  {
+   "mob": "canyon_minotaur",
+   "tx": 51,
+   "ty": 56,
+   "radius": 4,
+   "count": 4
+  }
+ ],
+ "nodes": []
+}

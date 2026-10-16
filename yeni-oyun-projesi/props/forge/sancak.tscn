@@ -1,0 +1,12 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Forge/Assets/Tiles.png" id="1_g1uk3"]
+
+[node name="Sancak" type="Node2D" unique_id=1238252802]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=720154961]
+position = Vector2(-11, -56)
+texture = ExtResource("1_g1uk3")
+centered = false
+region_enabled = true
+region_rect = Rect2(282, 8, 22, 56)

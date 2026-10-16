@@ -1,0 +1,28 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/town/golge_minik.png" id="1_bwbij"]
+[ext_resource type="Texture2D" path="res://assets/town/kup.png" id="2_oy4g7"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_sqrwf"]
+size = Vector2(10, 6)
+
+[node name="Kup" type="Node2D" unique_id=11808626]
+
+[node name="Golge" type="Sprite2D" parent="." unique_id=1152149234]
+modulate = Color(1, 1, 1, 0.55)
+z_index = -5
+z_as_relative = false
+position = Vector2(0, -2)
+texture = ExtResource("1_bwbij")
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1287060116]
+position = Vector2(-7, -16)
+texture = ExtResource("2_oy4g7")
+centered = false
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=139077469]
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=1971292502]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_sqrwf")

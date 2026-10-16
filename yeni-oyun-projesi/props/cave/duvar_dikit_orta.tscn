@@ -1,0 +1,12 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Cave/Assets/Tiles.png" id="1_jhy6i"]
+
+[node name="DuvarDikitOrta" type="Node2D" unique_id=616132998]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=925564877]
+position = Vector2(-6, -32)
+texture = ExtResource("1_jhy6i")
+centered = false
+region_enabled = true
+region_rect = Rect2(210, 16, 12, 32)

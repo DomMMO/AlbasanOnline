@@ -1,0 +1,37 @@
+[gd_scene format=3 uid="uid://dklsi5n6j4sw0"]
+
+[ext_resource type="Texture2D" uid="uid://bb438s1whvax7" path="res://assetpack/ANOKOLISA/Pixel Crawler - Town/Environment/Props/Static/Furniture.png" id="1_vbgkv"]
+[ext_resource type="Script" uid="uid://4t36m58u2tht" path="res://scripts/map/map_light.gd" id="2_qfrvs"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ycn2n"]
+size = Vector2(8, 6)
+
+[node name="Fener" type="Node2D" unique_id=1208710800]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1138317932]
+position = Vector2(-4, -46)
+texture = ExtResource("1_vbgkv")
+centered = false
+region_enabled = true
+region_rect = Rect2(147, 448, 27, 46)
+
+[node name="Fener" type="Sprite2D" parent="." unique_id=1814632993]
+position = Vector2(22, -43)
+texture = ExtResource("1_vbgkv")
+centered = false
+region_enabled = true
+region_rect = Rect2(179.05118, 451, 10.948822, 20)
+
+[node name="Lamba" type="Marker2D" parent="." unique_id=1827749767]
+position = Vector2(27, -27)
+script = ExtResource("2_qfrvs")
+radius = 64.0
+color = Color(1, 0.78431374, 0.47058824, 1)
+flicker = 0.08
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=265959559]
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=1382061713]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_ycn2n")

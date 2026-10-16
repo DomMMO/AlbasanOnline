@@ -1,0 +1,66 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Town/Environment/Structures/Stations/Cooking Station/Grill/Grill_01-Sheet.png" id="1_nl52f"]
+[ext_resource type="Script" path="res://scripts/map/map_light.gd" id="2_8slr6"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6lap7"]
+atlas = ExtResource("1_nl52f")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5sxdh"]
+atlas = ExtResource("1_nl52f")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5knso"]
+atlas = ExtResource("1_nl52f")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4r4ct"]
+atlas = ExtResource("1_nl52f")
+region = Rect2(192, 0, 64, 64)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_iyxlp"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6lap7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5sxdh")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5knso")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4r4ct")
+}],
+"loop": 1,
+"name": &"default",
+"speed": 6.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_g1jce"]
+size = Vector2(48, 10)
+
+[node name="SisMangal" type="Node2D" unique_id=973455006]
+
+[node name="Gorsel" type="AnimatedSprite2D" parent="." unique_id=128598770]
+position = Vector2(-32, -61)
+sprite_frames = SubResource("SpriteFrames_iyxlp")
+autoplay = "default"
+centered = false
+
+[node name="Lamba" type="Marker2D" parent="." unique_id=1037668508]
+position = Vector2(0, -10)
+script = ExtResource("2_8slr6")
+radius = 40.0
+color = Color(1, 0.5647059, 0.2509804, 1)
+flicker = 0.25
+lamp = false
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=1181453643]
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=275328826]
+position = Vector2(0, -5)
+shape = SubResource("RectangleShape2D_g1jce")

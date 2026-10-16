@@ -1,0 +1,22 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Fairy Forest 1.7/Assets/Tree.png" id="1_uqtl2"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_gtsox"]
+size = Vector2(30, 12)
+
+[node name="AgacTeal2" type="Node2D" unique_id=182485734]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1490317280]
+position = Vector2(-116, -215)
+texture = ExtResource("1_uqtl2")
+centered = false
+region_enabled = true
+region_rect = Rect2(626, 905, 186, 215)
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=822046369]
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=1721417680]
+position = Vector2(0, -6)
+shape = SubResource("RectangleShape2D_gtsox")

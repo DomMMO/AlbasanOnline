@@ -1,0 +1,66 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Town/Environment/Structures/Stations/Bonfire/Bonfire_03-Sheet.png" id="1_gxy8r"]
+[ext_resource type="Script" path="res://scripts/map/map_light.gd" id="2_5tnpa"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rdv35"]
+atlas = ExtResource("1_gxy8r")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xse8r"]
+atlas = ExtResource("1_gxy8r")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_icd82"]
+atlas = ExtResource("1_gxy8r")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jk1km"]
+atlas = ExtResource("1_gxy8r")
+region = Rect2(96, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_2ia44"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rdv35")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xse8r")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_icd82")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jk1km")
+}],
+"loop": 1,
+"name": &"default",
+"speed": 8.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_yil38"]
+size = Vector2(24, 10)
+
+[node name="Ates" type="Node2D" unique_id=1908639803]
+
+[node name="Gorsel" type="AnimatedSprite2D" parent="." unique_id=548459958]
+position = Vector2(-16, -32)
+sprite_frames = SubResource("SpriteFrames_2ia44")
+autoplay = "default"
+centered = false
+
+[node name="Lamba" type="Marker2D" parent="." unique_id=1702688328]
+position = Vector2(0, -14)
+script = ExtResource("2_5tnpa")
+radius = 80.0
+color = Color(1, 0.5647059, 0.2509804, 1)
+flicker = 0.22
+lamp = false
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=935509319]
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=11058543]
+position = Vector2(0, -5)
+shape = SubResource("RectangleShape2D_yil38")

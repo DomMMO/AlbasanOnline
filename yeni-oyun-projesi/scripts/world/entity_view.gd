@@ -14,9 +14,11 @@ signal hovered(view: EntityView, inside: bool)
 const HP_BAR_WIDTH := 16.0
 const SEAT_CROP := 3
 const SEAT_DROP := 1.0
-const HORSE_RIDER_LIFT := 14.0
-const HORSE_W := 39
-const HORSE_H := 30
+const HORSE_RIDER_LIFT := 20.0
+## The riding horse (assetpack/HORSE, Pixel Horse): 64 x 64 frames, side view facing right,
+## hooves on the frame's last row, the saddle's middle at x 32.
+const HORSE_SHEETS := "res://assetpack/HORSE/Horse I/Horse Black/64x64_Atlas_Horse_%s.png"
+const HORSE_FRAME := 64
 const SLASH_COLORS := {"normal": 0xe8e8f0, "heavy": 0xff7a3d, "spin": 0xffc04d}
 const Dir := ZoneMap.Dir
 
@@ -46,6 +48,7 @@ var _hurt_shape: CollisionShape2D
 var _horse: AnimatedSprite2D
 var _horse_w: Node2D
 var _horse_key := ""
+var _ride_left := false
 var _moving := false
 var _seated := false
 var _gallop_dust: CPUParticles2D
@@ -53,6 +56,8 @@ var _gallop_w: Node2D
 
 var _weapon: WeaponView
 var _weapon_key := ""
+## Hands and weapon of a mob drawn without them (the pack's enemies).
+var _rig: MobRig
 var _weapon_hidden := false
 
 var _crown: Node2D
@@ -63,6 +68,10 @@ var _gm_w: Node2D
 var _gm_bounce := 0.0
 
 var _action_until := 0
+## When it last moved: a mob keeps walking over the short gaps between position updates (it
+## would flicker between idle and walk otherwise, starting the walk over each time).
+var _moved_at := -10000
+const WALK_HOLD_MS := 180
 var _base_tint: Variant = null
 var _light_tint: Variant = null
 var _shadow: Depth.Painter
@@ -114,6 +123,12 @@ func _init(world_layer: Node2D, x: float, y: float, appearance: Dictionary, name
 	_hp_bar = Depth.Painter.new(_paint_hp)
 	_hp_bar.visible = false
 	_hp_w = Depth.wrap(layer, _hp_bar)
+	if set.kind == "image":
+		var meta := Sprites.sheet_meta(String(set.appearance.get("key", "")))
+		if meta.has("rig"):
+			_rig = MobRig.new(layer, meta, _scale)
+			sprite.frame_changed.connect(_layout_rig)
+			sprite.animation_changed.connect(_layout_rig)
 	set_position(x, y)
 
 
@@ -264,7 +279,6 @@ func set_seated(on: bool) -> void:
 
 func _apply_crop() -> void:
 	# Sitting: the lower legs are hidden under the seat.
-	sprite.region_enabled = false
 	if _seated:
 		var tex := sprite.sprite_frames.get_frame_texture(sprite.animation, sprite.frame)
 		if tex is AtlasTexture:
@@ -283,26 +297,23 @@ func _apply_crop() -> void:
 		set_animation(_facing, false)
 
 
-## The animations of a horse with this look (horse.ts, painted by HorsePainter; cached per look).
-static func horse_frames(look: Dictionary) -> SpriteFrames:
-	var key := HorsePainter.encode(look)
-	if _horse_frames.has(key):
-		return _horse_frames[key]
-	var tex := HorsePainter.sheet(look)
+## The riding horse's animations: "run" and "idle", side view (one horse for every breed and look
+## for now; its colours come later).
+static func horse_frames(_look: Dictionary) -> SpriteFrames:
+	if _horse_frames.has("pack"):
+		return _horse_frames["pack"]
 	var frames := SpriteFrames.new()
 	frames.remove_animation("default")
-	var cells := []
-	for i in 11:
-		var at := AtlasTexture.new()
-		at.atlas = tex
-		at.region = Rect2(i * HORSE_W, 0, HORSE_W, HORSE_H)
-		cells.append(at)
-	for spec in [["side", [1, 2, 3, 4], 10], ["down", [6, 7], 7], ["up", [9, 10], 7], ["still_side", [0], 1], ["still_down", [5], 1], ["still_up", [8], 1]]:
+	for spec in [["run", "Run", 6, 10.0], ["idle", "Idle", 5, 6.0]]:
+		var tex: Texture2D = load(HORSE_SHEETS % spec[1])
 		frames.add_animation(spec[0])
-		frames.set_animation_speed(spec[0], spec[2])
-		for i in spec[1]:
-			frames.add_frame(spec[0], cells[i])
-	_horse_frames[key] = frames
+		frames.set_animation_speed(spec[0], spec[3])
+		for i in int(spec[2]):
+			var at := AtlasTexture.new()
+			at.atlas = tex
+			at.region = Rect2((i % 3) * HORSE_FRAME, (i / 3) * HORSE_FRAME, HORSE_FRAME, HORSE_FRAME)
+			frames.add_frame(spec[0], at)
+	_horse_frames["pack"] = frames
 	return frames
 
 
@@ -326,9 +337,9 @@ func set_mounted(on: bool, look := "", breed := "village") -> void:
 	if on:
 		_horse = AnimatedSprite2D.new()
 		_horse.centered = false
-		_horse.offset = Vector2(-HORSE_W / 2.0, -HORSE_H)
+		_horse.offset = Vector2(-HORSE_FRAME / 2.0, -HORSE_FRAME)
 		_horse.sprite_frames = horse_frames(horse_look)
-		_horse.play("still_side")
+		_horse.play("idle")
 		_horse.modulate.a = sprite.modulate.a
 		_horse_w = Depth.wrap(layer, _horse)
 	set_animation(_facing, _moving)
@@ -458,7 +469,7 @@ func set_position(px_raw: float, py_raw: float) -> void:
 	var lift := _lift()
 	Depth.place(_sprite_w, px, py - lift, py)
 	if _horse:
-		Depth.place(_horse_w, px, py, py + 0.3 if _facing == Dir.DOWN else py - 0.2)
+		Depth.place(_horse_w, px, py, py - 0.2)
 		if _gallop_w:
 			Depth.place(_gallop_w, px, py - 2.0, py - 0.3)
 	var top := py - lift - set.height * _scale
@@ -468,6 +479,15 @@ func set_position(px_raw: float, py_raw: float) -> void:
 	_layout_overhead(px, py, top)
 	if _weapon:
 		_weapon.layout(px, py - lift, _facing)
+	_layout_rig()
+
+
+func _layout_rig() -> void:
+	if _rig == null or _destroyed:
+		return
+	var px := roundf(_raw.x + _offset.x)
+	var py := roundf(_raw.y + _offset.y)
+	_rig.layout(px, py - _lift(), sprite.flip_h, String(sprite.animation), sprite.frame, sprite.modulate)
 
 
 # ---- Look ----
@@ -568,7 +588,12 @@ func play_attack(kind: String, target: Variant = null) -> void:
 	var angle := atan2(dy, dx)
 	if set.kind == "humanoid":
 		_facing = ZoneMap.direction_toward(dx, dy, _facing)
-	if _weapon:
+	if _rig:
+		if dx != 0.0:
+			sprite.flip_h = dx < 0
+			_apply_origin()
+		_rig.swing_once(kind == "heavy", _layout_rig)
+	elif _weapon:
 		_weapon.swing_once(kind == "heavy")
 	elif set.kind == "image" and set.has_anim("attack"):
 		if dx != 0.0:
@@ -630,9 +655,13 @@ func set_animation(dir: int, moving: bool) -> void:
 			elif dir == Dir.RIGHT:
 				sprite.flip_h = false
 			_apply_origin()
-			if Time.get_ticks_msec() < _action_until:
+			_layout_rig()
+			var now := Time.get_ticks_msec()
+			if moving:
+				_moved_at = now
+			if now < _action_until:
 				return
-			_play("walk" if moving and set.has_anim("walk") else "idle")
+			_play("walk" if now - _moved_at < WALK_HOLD_MS and set.has_anim("walk") else "idle")
 			return
 		"chest", "portal":
 			return
@@ -656,13 +685,18 @@ func set_animation(dir: int, moving: bool) -> void:
 	_apply_origin()
 	_moving = moving
 	if _horse:
-		_horse.flip_h = dir == Dir.LEFT
-		if moving:
-			if _horse.animation != anim or not _horse.is_playing():
-				_horse.play(anim)
-		else:
-			_horse.play("still_" + anim)
-		moving = false
+		# The horse is drawn from the side only: going up or down, horse and rider keep facing the
+		# way they last went across.
+		if dir == Dir.LEFT or dir == Dir.RIGHT:
+			_ride_left = dir == Dir.LEFT
+		_horse.flip_h = _ride_left
+		sprite.flip_h = _ride_left
+		var gait := "run" if moving else "idle"
+		if _horse.animation != gait or not _horse.is_playing():
+			_horse.play(gait)
+		_play(_idle_name(Dir.RIGHT))
+		set_position(_raw.x, _raw.y)
+		return
 	if moving:
 		_play(anim)
 	else:
@@ -748,6 +782,7 @@ func _restore_tint() -> void:
 	sprite.modulate = Depth.c(int(tint)) if tint != null else Color.WHITE
 	sprite.modulate.a = a
 	_material.set_shader_parameter("flash", 0.0)
+	_layout_rig()
 
 
 ## A brief white flash when hit (art sheets also flinch).
@@ -773,6 +808,8 @@ func set_visible(visible: bool) -> void:
 	_hp_bar.visible = visible and _hp_visible
 	if _weapon:
 		_weapon.set_visible(visible and not _weapon_hidden)
+	if _rig:
+		_rig.set_visible(visible)
 
 
 func set_dimmed(dimmed: bool) -> void:
@@ -789,6 +826,7 @@ func set_alpha(alpha: float) -> void:
 	sprite.modulate.a = alpha
 	if _weapon:
 		_weapon.set_alpha(alpha)
+	_layout_rig()
 	if _horse:
 		_horse.modulate.a = alpha
 
@@ -806,6 +844,12 @@ func destroy(fade := false) -> void:
 			w.queue_free()
 	if _weapon:
 		_weapon.destroy()
+	if _rig:
+		if fade:
+			_rig.drop()
+		else:
+			_rig.destroy()
+		_rig = null
 	hurtbox.input_pickable = false
 	if fade and set.kind == "image" and set.has_anim("dead"):
 		# Art sheets play their death animation before fading out.

@@ -1,0 +1,10 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/props/orc_fortress/art_10.png" id="1_fq3hw"]
+
+[node name="Art10" type="Node2D" unique_id=191755483]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=2138424677]
+position = Vector2(-7, -32)
+texture = ExtResource("1_fq3hw")
+centered = false

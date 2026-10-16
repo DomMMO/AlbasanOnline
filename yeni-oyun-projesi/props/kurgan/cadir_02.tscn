@@ -1,0 +1,21 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/props/kurgan/cadir_02.png" id="1_nvrb1"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1lx8e"]
+size = Vector2(48, 32)
+
+[node name="Cadir02" type="Node2D" unique_id=1988151903]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1327601069]
+position = Vector2(-26, -45)
+texture = ExtResource("1_nvrb1")
+centered = false
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=529729390]
+collision_layer = 3
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=1921836797]
+position = Vector2(0, -16)
+shape = SubResource("RectangleShape2D_1lx8e")

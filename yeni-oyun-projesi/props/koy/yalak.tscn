@@ -1,0 +1,28 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/town/golge_kucuk.png" id="1_ju4us"]
+[ext_resource type="Texture2D" path="res://assets/town/yalak.png" id="2_2py2j"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_7vo0g"]
+size = Vector2(28, 6)
+
+[node name="Yalak" type="Node2D" unique_id=428256500]
+
+[node name="Golge" type="Sprite2D" parent="." unique_id=2133973826]
+modulate = Color(1, 1, 1, 0.55)
+z_index = -5
+z_as_relative = false
+position = Vector2(0, -2)
+texture = ExtResource("1_ju4us")
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1906364236]
+position = Vector2(-14, -11)
+texture = ExtResource("2_2py2j")
+centered = false
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=697152893]
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=868851600]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_7vo0g")

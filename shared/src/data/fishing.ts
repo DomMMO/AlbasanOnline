@@ -1,7 +1,7 @@
 import { TILE_SIZE } from "../constants";
 import { Tile, type WorldMap } from "../map";
 
-// Fishing at the harbour (Liman). With a rod in the bags, stand at the water's edge (shore
+// Fishing from the town island's piers. With a rod in the bags, stand at the water's edge (shore
 // or pier) and cast: a catch comes every few seconds until you walk away, so it works as
 // an AFK farm. Mostly fish to sell, now and then junk, and very rarely upgrade scrolls.
 

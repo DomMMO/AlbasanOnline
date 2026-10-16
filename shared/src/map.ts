@@ -84,10 +84,95 @@ export interface WorldMap {
    * blocked; 0 = open (an invisible blocker taken away).
    */
   blockMask?: Map<number, number>;
+  /**
+   * Maps made in Godot (shared/maps, version 2): what blocks is only `shapes` (the scene's
+   * collision shapes); the tiles say what the ground is, not whether it blocks.
+   */
+  shapesOnly?: boolean;
+  /** Blocking boxes and convex polygons in pixels (Godot collision shapes). */
+  shapes?: BlockShape[];
+}
+
+/** A box (x, y, w, h) or a convex polygon (`points`), blocking walking and/or sight. */
+export interface BlockShape {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  /** Convex polygon (x0, y0, x1, y1, ...), inside the box; none = the box itself. */
+  points?: number[];
+  walk: boolean;
+  sight: boolean;
 }
 
 /** Side of a blocking quarter, in pixels. */
 export const QUARTER = TILE_SIZE / 2;
+
+/** map.shapes by the tiles they touch, made the first time a map is asked. */
+const shapeIndex = new WeakMap<WorldMap, Map<number, BlockShape[]>>();
+
+function shapesByTile(map: WorldMap): Map<number, BlockShape[]> {
+  let index = shapeIndex.get(map);
+  if (index) return index;
+  index = new Map();
+  for (const s of map.shapes ?? []) {
+    for (let ty = Math.floor(s.y / TILE_SIZE); ty <= Math.floor((s.y + s.h - 0.001) / TILE_SIZE); ty++) {
+      for (let tx = Math.floor(s.x / TILE_SIZE); tx <= Math.floor((s.x + s.w - 0.001) / TILE_SIZE); tx++) {
+        const key = ty * map.width + tx;
+        const list = index.get(key);
+        if (list) list.push(s);
+        else index.set(key, [s]);
+      }
+    }
+  }
+  shapeIndex.set(map, index);
+  return index;
+}
+
+/** Whether the box [x0, x1) x [y0, y1) overlaps the convex polygon (separating axes; touching is not overlapping). */
+function boxHitsPolygon(p: number[], x0: number, y0: number, x1: number, y1: number): boolean {
+  const n = p.length / 2;
+  for (let i = 0; i < n; i++) {
+    const ax = p[i * 2];
+    const ay = p[i * 2 + 1];
+    const bx = p[((i + 1) % n) * 2];
+    const by = p[((i + 1) % n) * 2 + 1];
+    // The edge's normal as the axis.
+    const nx = by - ay;
+    const ny = ax - bx;
+    let pmin = Infinity;
+    let pmax = -Infinity;
+    for (let k = 0; k < n; k++) {
+      const d = p[k * 2] * nx + p[k * 2 + 1] * ny;
+      if (d < pmin) pmin = d;
+      if (d > pmax) pmax = d;
+    }
+    const c0 = x0 * nx + y0 * ny;
+    const c1 = x1 * nx + y0 * ny;
+    const c2 = x0 * nx + y1 * ny;
+    const c3 = x1 * nx + y1 * ny;
+    const bmin = Math.min(c0, c1, c2, c3);
+    const bmax = Math.max(c0, c1, c2, c3);
+    if (bmax <= pmin || pmax <= bmin) return false;
+  }
+  return true;
+}
+
+/** Whether the box [x0, x1) x [y0, y1) (pixels) overlaps a shape that blocks walking (or sight). */
+export function shapesBlock(map: WorldMap, x0: number, y0: number, x1: number, y1: number, sight = false): boolean {
+  if (!map.shapes || map.shapes.length === 0) return false;
+  const index = shapesByTile(map);
+  for (let ty = Math.floor(y0 / TILE_SIZE); ty <= Math.floor((y1 - 0.001) / TILE_SIZE); ty++) {
+    for (let tx = Math.floor(x0 / TILE_SIZE); tx <= Math.floor((x1 - 0.001) / TILE_SIZE); tx++) {
+      for (const s of index.get(ty * map.width + tx) ?? []) {
+        if (!(sight ? s.sight : s.walk)) continue;
+        if (!(s.x < x1 && s.x + s.w > x0 && s.y < y1 && s.y + s.h > y0)) continue;
+        if (!s.points || boxHitsPolygon(s.points, x0, y0, x1, y1)) return true;
+      }
+    }
+  }
+  return false;
+}
 
 export function isBlockingTile(tile: Tile): boolean {
   return BLOCKING.has(tile);
@@ -214,7 +299,12 @@ export function hasLineOfSight(map: WorldMap, a: { x: number; y: number }, b: { 
     const tx = Math.floor((ax + (dx * i) / steps) / TILE_SIZE);
     const ty = Math.floor((ay + (dy * i) / steps) / TILE_SIZE);
     // A blocker the map editor took away no longer hides anything.
-    if (OPAQUE.has(map.tiles[ty]?.[tx]) && map.blockMask?.get(ty * map.width + tx) !== 0) return false;
+    if (!map.shapesOnly && OPAQUE.has(map.tiles[ty]?.[tx]) && map.blockMask?.get(ty * map.width + tx) !== 0) return false;
+    if (map.shapes) {
+      const px = ax + (dx * i) / steps;
+      const py = ay + (dy * i) / steps;
+      if (shapesBlock(map, px, py, px + 0.001, py + 0.001, true)) return false;
+    }
   }
   return true;
 }
@@ -222,6 +312,7 @@ export function hasLineOfSight(map: WorldMap, a: { x: number; y: number }, b: { 
 /** Whether the whole tile blocks (a tile with blocking quarters only does not). */
 export function isBlockedTile(map: WorldMap, tx: number, ty: number): boolean {
   if (tx < 0 || ty < 0 || tx >= map.width || ty >= map.height) return true;
+  if (map.shapesOnly) return shapesBlock(map, tx * TILE_SIZE, ty * TILE_SIZE, (tx + 1) * TILE_SIZE, (ty + 1) * TILE_SIZE);
   const mask = map.blockMask?.get(ty * map.width + tx);
   if (mask !== undefined) return mask === 15;
   return BLOCKING.has(map.tiles[ty][tx]);
@@ -230,6 +321,8 @@ export function isBlockedTile(map: WorldMap, tx: number, ty: number): boolean {
 /** Whether the rect [x0, x1) x [y0, y1) (pixels) touches a blocked part of tile (tx, ty). */
 export function blocksRect(map: WorldMap, tx: number, ty: number, x0: number, y0: number, x1: number, y1: number): boolean {
   if (tx < 0 || ty < 0 || tx >= map.width || ty >= map.height) return true;
+  // Godot maps: only their shapes block (movement.ts checks them).
+  if (map.shapesOnly) return false;
   const mask = map.blockMask?.get(ty * map.width + tx);
   if (mask === undefined) return BLOCKING.has(map.tiles[ty][tx]);
   for (let q = 0; q < 4; q++) {

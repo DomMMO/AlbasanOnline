@@ -1,0 +1,22 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Desert/Assets/Props.png" id="1_ra7li"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_5w35m"]
+size = Vector2(22, 10)
+
+[node name="KuleKirik" type="Node2D" unique_id=1798336062]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=330057474]
+position = Vector2(-13, -36)
+texture = ExtResource("1_ra7li")
+centered = false
+region_enabled = true
+region_rect = Rect2(35, 140, 26, 36)
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=1975464240]
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=42408605]
+position = Vector2(0, -5)
+shape = SubResource("RectangleShape2D_5w35m")

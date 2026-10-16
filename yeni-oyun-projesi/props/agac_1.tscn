@@ -1,0 +1,30 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/town/golge_kucuk.png" id="1_mm6t7"]
+[ext_resource type="Texture2D" path="res://assetpack/WORLD ELEMENT/Environment/Props/Static/Trees/Model_01/Size_03.png" id="2_mm6t7"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_kcy1v"]
+size = Vector2(13, 41)
+
+[node name="Agac1" type="Node2D" unique_id=1907009067]
+
+[node name="Golge" type="Sprite2D" parent="." unique_id=1620726019]
+modulate = Color(1, 1, 1, 0.6)
+z_index = -5
+z_as_relative = false
+position = Vector2(0, -3)
+texture = ExtResource("1_mm6t7")
+
+[node name="Size03" type="Sprite2D" parent="." unique_id=2010014920]
+position = Vector2(0, -39)
+texture = ExtResource("2_mm6t7")
+region_enabled = true
+region_rect = Rect2(48, 0, 48, 96)
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=1058216162]
+collision_layer = 3
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=915394863]
+position = Vector2(0.5, -11.5)
+shape = SubResource("RectangleShape2D_kcy1v")

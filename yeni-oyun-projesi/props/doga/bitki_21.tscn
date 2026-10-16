@@ -1,0 +1,10 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/town/bitki_21.png" id="1_vkn3y"]
+
+[node name="Bitki21" type="Node2D" unique_id=1112650721]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=2005288669]
+position = Vector2(-4, -11)
+texture = ExtResource("1_vkn3y")
+centered = false

@@ -1,0 +1,12 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Fairy Forest 1.7/Assets/Props.png" id="1_7xc5h"]
+
+[node name="Cakil2" type="Node2D" unique_id=379817612]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=145723489]
+position = Vector2(-7, -10)
+texture = ExtResource("1_7xc5h")
+centered = false
+region_enabled = true
+region_rect = Rect2(81, 322, 14, 10)

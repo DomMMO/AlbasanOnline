@@ -1,0 +1,34 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/meydan/parca_10.png" id="1_ssbeo"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_psu2l"]
+size = Vector2(16, 10)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_y3nvh"]
+size = Vector2(16, 10)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_727ac"]
+size = Vector2(16, 10)
+
+[node name="Parca10" type="Node2D" unique_id=1654642818]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=249266259]
+position = Vector2(-21, -32)
+texture = ExtResource("1_ssbeo")
+centered = false
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=1234142893]
+collision_mask = 0
+
+[node name="@CollisionShape2D@32" type="CollisionShape2D" parent="Hitbox" unique_id=1641653020]
+position = Vector2(-16, -5)
+shape = SubResource("RectangleShape2D_psu2l")
+
+[node name="@CollisionShape2D@33" type="CollisionShape2D" parent="Hitbox" unique_id=1552591794]
+position = Vector2(0, -5)
+shape = SubResource("RectangleShape2D_y3nvh")
+
+[node name="@CollisionShape2D@34" type="CollisionShape2D" parent="Hitbox" unique_id=1712773573]
+position = Vector2(16, -5)
+shape = SubResource("RectangleShape2D_727ac")

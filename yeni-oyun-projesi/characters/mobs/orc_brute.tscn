@@ -3,34 +3,49 @@
 [ext_resource type="SpriteFrames" path="res://characters/mobs/orc_brute.tres" id="1_owmj0"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_xm0uo"]
-size = Vector2(25, 35)
+size = Vector2(21, 32)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_yrvoo"]
 size = Vector2(10, 6)
 
-[node name="OrcBrute" type="Node2D" unique_id=1806184106]
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_govde"]
+radius = 4.2
+height = 16.8
 
-[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=34673613]
+[node name="OrcBrute" type="Node2D" unique_id=413750557]
+
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1115796145]
 sprite_frames = ExtResource("1_owmj0")
 animation = &"idle"
 autoplay = "idle"
 centered = false
-offset = Vector2(-23.177, -38.2448)
+offset = Vector2(-32, -64)
 
-[node name="Hurtbox" type="Area2D" parent="." unique_id=1554570308]
+[node name="Hurtbox" type="Area2D" parent="." unique_id=757102864]
 collision_mask = 0
 
-[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1482433302]
-position = Vector2(-0.6769995, -15.7448)
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=585753067]
+position = Vector2(-1.5, -16)
 shape = SubResource("RectangleShape2D_xm0uo")
 debug_color = Color(0.2, 0.6, 1, 0.35)
 
-[node name="Feet" type="Area2D" parent="." unique_id=1468664215]
+[node name="Feet" type="Area2D" parent="." unique_id=408913942]
 collision_layer = 2
 collision_mask = 0
 input_pickable = false
 
-[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=642498053]
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1978705755]
 position = Vector2(0, -3)
 shape = SubResource("RectangleShape2D_yrvoo")
 debug_color = Color(1, 0.3, 0.2, 0.45)
+
+[node name="Govde" type="Area2D" parent="." unique_id=141891631]
+collision_layer = 4
+collision_mask = 0
+monitoring = false
+monitorable = false
+
+[node name="Oval" type="CollisionShape2D" parent="Govde" unique_id=1919774533]
+rotation = 1.5707964
+shape = SubResource("CapsuleShape2D_govde")
+debug_color = Color(1, 0.75, 0.2, 0.35)

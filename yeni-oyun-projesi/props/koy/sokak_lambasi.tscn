@@ -1,0 +1,39 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/town/sokak_lambasi.png" id="1_polgc"]
+[ext_resource type="Texture2D" path="res://assets/town/isik_halesi.png" id="2_ep5e2"]
+[ext_resource type="Script" path="res://scripts/map/night_glow.gd" id="3_idhrv"]
+[ext_resource type="Script" path="res://scripts/map/map_light.gd" id="4_5q6ls"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_8ib8h"]
+blend_mode = 1
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hqmf0"]
+size = Vector2(6, 4)
+
+[node name="SokakLambasi" type="Node2D" unique_id=877031368]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1839869546]
+position = Vector2(-5, -46)
+texture = ExtResource("1_polgc")
+centered = false
+
+[node name="Hale" type="Sprite2D" parent="." unique_id=513835834]
+material = SubResource("CanvasItemMaterial_8ib8h")
+position = Vector2(27.546513, -34.029068)
+texture = ExtResource("2_ep5e2")
+script = ExtResource("3_idhrv")
+flicker = 0.1
+
+[node name="Isik" type="Marker2D" parent="." unique_id=1129465280]
+position = Vector2(27.546513, -28.029068)
+script = ExtResource("4_5q6ls")
+radius = 62.0
+flicker = 0.05
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=1637142801]
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=1008191178]
+position = Vector2(0, -2)
+shape = SubResource("RectangleShape2D_hqmf0")

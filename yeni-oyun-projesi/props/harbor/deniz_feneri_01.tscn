@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/props/harbor/deniz_feneri_01.png" id="1_7rov1"]
+[ext_resource type="Texture2D" path="res://assets/props/harbor/deniz_feneri_01_ek1.png" id="2_jwe36"]
+[ext_resource type="Texture2D" path="res://assets/props/harbor/deniz_feneri_01_ek2.png" id="3_1nv50"]
+[ext_resource type="Script" path="res://scripts/map/map_light.gd" id="4_c0c8x"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_pnrih"]
+blend_mode = 1
+
+[node name="DenizFeneri01" type="Node2D" unique_id=1175184941]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=827812578]
+position = Vector2(-23, -110)
+texture = ExtResource("1_7rov1")
+centered = false
+
+[node name="Ek1" type="Sprite2D" parent="." unique_id=600022802]
+modulate = Color(1, 1, 1, 0.609)
+material = SubResource("CanvasItemMaterial_pnrih")
+position = Vector2(-12, -110)
+texture = ExtResource("2_jwe36")
+centered = false
+
+[node name="Ek2" type="Sprite2D" parent="." unique_id=2064487920]
+material = SubResource("CanvasItemMaterial_pnrih")
+position = Vector2(6, -93)
+texture = ExtResource("3_1nv50")
+centered = false
+
+[node name="Lamba1" type="Marker2D" parent="." unique_id=1862382183]
+position = Vector2(4, -94)
+script = ExtResource("4_c0c8x")
+radius = 90.0
+color = Color(1, 0.9411765, 0.6901961, 1)
+flicker = 0.02

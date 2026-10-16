@@ -1,0 +1,67 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Town/Environment/Structures/Stations/Furnace/Iron_02-Sheet.png" id="1_4nwcx"]
+[ext_resource type="Script" path="res://scripts/map/map_light.gd" id="2_h847q"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wqouv"]
+atlas = ExtResource("1_4nwcx")
+region = Rect2(0, 0, 48, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ow2xs"]
+atlas = ExtResource("1_4nwcx")
+region = Rect2(48, 0, 48, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_d1guo"]
+atlas = ExtResource("1_4nwcx")
+region = Rect2(0, 64, 48, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_p6frr"]
+atlas = ExtResource("1_4nwcx")
+region = Rect2(48, 64, 48, 64)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_jse8h"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_wqouv")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ow2xs")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_d1guo")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_p6frr")
+}],
+"loop": 1,
+"name": &"default",
+"speed": 6.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wmxt5"]
+size = Vector2(32, 16)
+
+[node name="OcakDemir" type="Node2D" unique_id=1728156699]
+
+[node name="Gorsel" type="AnimatedSprite2D" parent="." unique_id=1569767272]
+position = Vector2(-24, -64)
+sprite_frames = SubResource("SpriteFrames_jse8h")
+autoplay = "default"
+centered = false
+
+[node name="Lamba" type="Marker2D" parent="." unique_id=686406871]
+position = Vector2(0, -16)
+script = ExtResource("2_h847q")
+radius = 72.0
+color = Color(1, 0.5411765, 0.1882353, 1)
+flicker = 0.15
+lamp = false
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=818774866]
+collision_layer = 3
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=1222590416]
+position = Vector2(0, -8)
+shape = SubResource("RectangleShape2D_wmxt5")

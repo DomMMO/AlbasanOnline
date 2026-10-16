@@ -74,6 +74,85 @@ Oyuncular zırh/saç/ten renklerine göre çalışma anında boyanır (`scripts/
 web'deki `humanoid.ts` + `textures.ts` ile birebir). Hitbox'ları görmek için:
 Hata Ayıklama > Görünür Çarpışma Şekilleri.
 
+## Haritalar (Godot sahneleri)
+
+Bütün bölge haritaları normal Godot sahneleridir: `maps/<bölge>.tscn` (24 bölge). Zemin, eşya ve
+ağaçlar WORLD ELEMENT paketinden (`assetpack/`); paketin karşılığı olmayanlar (kar, kül, lav,
+bataklık, kurak bozkır zeminleri; çadır, iskele, gemi, deniz feneri, kolezyum, sütun, araba,
+meşale, kale, çeşme, kuyu) şimdilik eski çizim (`tilesets/zemin.tres` kaynak 10, `props/*.tscn`).
+
+| Klasör | İçinde |
+| --- | --- |
+| `maps/` | Harita sahneleri (kök düğüm `GameMap`: bölge, boyut, arka plan rengi) |
+| `tilesets/zemin.tres` | Zemin TileSet'i: fizik katmanı 0 **yürümeyi**, 1 **görüşü** (menzilli saldırı) engeller; `tile` özel verisi karenin ne olduğu (map.ts `Tile`: su, gökyüzü…) |
+| `assets/tiles/` | Zemin kareleri ve çimen/taş kenar geçişleri (PNG, Aseprite'ta açılır) |
+| `props/ev/`, `props/koy/`, `props/doga/` | Eşya sahneleri (WORLD ELEMENT paketiyle): 6 ev tipi, sokak lambası, çit/ağıl, fıçı, sandık, sancak…; çalı, ot, çiçek, mantar, taş (`Sprite2D` + `StaticBody2D` hitbox + `MapLight` + `NightGlow`) |
+| `assets/town/` | Bu eşyaların PNG'leri, paketten tek tek kesilmiş (evler paketin çatı/duvar/kapı/pencere parçalarından birleştirildi; `ev_N_isik.png` gece yanan pencereler) |
+| `props/*.tscn`, `assets/props/` | Henüz paket karşılığı olmayan eski eşyalar: kale, çeşme, kuyu, araba, meşale, atlar |
+| `scripts/map/` | `GameMap`, `MapSpot`, `MapLight`, `NightGlow`, `DriftingClouds`, `MapExport` |
+
+Düzenlemek, Godot'da her 2D haritada olduğu gibi:
+
+- **Zemin:** `Zemin` (TileMapLayer) alttaki toprak/taş/su/duvar; çimen, kum ve buz kendi katmanında
+  (`Cimen`, `Kum`, `Buz`). Kenarlar paketin geçiş parçalarıyla: TileMap panelinin **Terrains**
+  sekmesinde "Çimen" terrain'iyle boyarsan kenarları Godot kendisi seçer. Bir haritanın kenarlarını
+  baştan hesaplamak: `godot --headless --path . -s res://tools/terrain_floors.gd -- map <bölge>`.
+- **Eşya:** FileSystem'den `props/` altındaki sahneyi haritadaki `Esyalar` düğümüne sürükle.
+  Kendi çizdiğin bir eşya için: PNG'yi `assets/props/`'a koy, Godot'da yeni sahne (Node2D kök,
+  altında Sprite2D), hitbox için `StaticBody2D` + `CollisionShape2D` ya da `CollisionPolygon2D`.
+  Kökün konumu eşyanın **ayak hizası** olsun (karakterlerle y'ye göre sıralanır). Mevcut bir
+  eşyanın görselini değiştirmek için PNG'sini Aseprite'ta açıp kaydetmek yeter.
+- **Hitbox (engel):** her şekil olur: dikdörtgen, daire, kapsül, istediğin gibi çizilmiş çokgen.
+  `StaticBody2D`'nin Collision Layer'ı: **1 = yürünmez**, **2 = görüşü keser** (ikisi = ev, duvar;
+  sadece 1 = su, çit). Bir eşyaya bağlı olmayan duvarlar haritadaki `Engeller` gibi StaticBody2D'lere.
+  Kareler için TileSet editöründe fizik katmanına çokgen çiz.
+- **NPC, portal, doğuş, yaratık:** `Noktalar` altındaki `MapSpot`'lar (Inspector: tür, kimlik,
+  adet, yarıçap). Sürükleyerek taşı. `arrival` türü: başka bir bölgenin portalından (kimlik = o
+  portalın id'si) gelen oyuncunun bu haritada nereye düşeceği.
+- **Ağaçlar:** `props/doga/agac_*`, `cam*` (paketin ağaçları). Ormanın engeli haritanın `Orman`
+  StaticBody2D'si.
+- **Gece ışığı:** `MapLight` (yarıçap, renk, titreme, lamba mı); gece yanan pencereler `NightGlow`.
+
+`Ctrl+S`: **Harita Dışa Aktarma** eklentisi (Proje Ayarları > Eklentiler'de açık olmalı) sunucunun
+okuduğu `shared/maps/<bölge>.json`'u yazar. Bir eşya sahnesi ya da TileSet kaydedilince bütün
+haritalar yeniden yazılır. Dosyada sadece sunucunun ihtiyacı var: kare türleri, engel şekilleri
+(tam piksel), noktalar. Oyun haritayı sahneden yükler, çarpışmayı aynı `MapExport` ile kurar;
+şekiller sunucuda ve oyunda aynı kodla (`shared/src/map.ts` `shapesBlock`, `scripts/core/zone_map.gd`)
+kontrol edilir. Pişirmeye gerek yok, F5 yeter (yerel sunucu `npm run dev` ile açıksa dosya
+değişince kendini yeniden başlatır). Canlıya çıkmak için sahneyi ve JSON'u commit'le.
+
+Kontrol: `godot --headless --path . res://tools/check_maps.tscn` (her haritanın JSON'u sahnesiyle
+aynı mı). Bütün JSON'ları sahnelerden yeniden yazmak: `-s res://tools/export_maps.gd`. Evleri
+çakışmalardan ayırmak: `-s res://tools/settle_houses.gd -- <bölge>`.
+
+**Zindan temaları** (`assetpack/ANOKOLISA`, Pixel Crawler paketleri; lisansı paketin kendisini
+yeniden dağıtmayı yasaklar, herkese açık bir depoya konmamalı): `tools/dungeon_theme.gd` bir zindanın duvarını (üst + tuğla yüz), zeminini ve
+lavını temanın karolarıyla yeniden boyar, eski eşyalarını temanınkilerle değiştirir. Kare türleri ve
+engeller birebir aynı kalır (sunucu dosyası değişmez). `build` ise zindanı baştan kurar
+(`BUILDS`: 20 eşit oda, 5/10/15/20. odalarda boss, çeşitli oda biçimleri ve düzenleri, her eşya bir
+odada en fazla 2 kez) ve doğuştan her noktaya yol olduğunu kontrol eder. Forge: magma_forges,
+ash_temple, dragon_lair.
+
+```
+godot --headless --path . -s res://tools/dungeon_theme.gd -- lava forge      # lav sayfası (assets/zindan/)
+godot --headless --path . --import
+godot --headless --path . -s res://tools/dungeon_theme.gd -- tileset forge   # TileSet kaynakları 11, 12
+godot --headless --path . -s res://tools/dungeon_theme.gd -- scenes forge    # props/forge/
+godot --headless --path . -s res://tools/dungeon_theme.gd -- build forge <bölge> ...
+```
+
+**Bir bölgeyi Godot'ya taşımak** (bir kerelik; görseller bake'teki çizimden PNG olarak çıkar):
+
+```
+npx tsx tools/godot/import-zone.mts <bölge> --edits <web-editör-json>   # ya da --api ...
+node tools/godot/bake.mjs --zones <bölge> --quick
+godot --headless --path . -s res://tools/migrate_map.gd -- <bölge> images
+godot --headless --path . --import
+godot --headless --path . -s res://tools/migrate_map.gd -- <bölge> scenes
+```
+
+Sonra `maps/<bölge>.tscn`'i aç, kaydet (JSON sahneden yazılır).
+
 ## Testler
 
 - `godot --headless --path . -s res://tools/check_scripts.gd` — bütün betikleri derler.
@@ -101,9 +180,8 @@ Courier Prime, Noto Symbols) kullanılır.
 ## Web istemcisinden farklar / henüz yapılmayanlar
 
 - Dokunmatik kontroller (telefon joystick'i) yok: Godot istemcisi masaüstü için.
-- GM paneli ve harita editörü web'de kalıyor (sunucu verisini düzenleyen araçlar).
-- Harita editörü bir bölgeyi değiştirince (`mapChanged`) bake yeniden çalıştırılmalı; web
-  istemcisi bunu canlı yapıyor.
+- GM paneli web'de kalıyor. Haritalar Godot sahnesi (yukarıda); henüz taşınmamış bölgeler için web
+  editörü de duruyor, onunla değişen bölgede bake yeniden çalıştırılmalı.
 - Boss müziği `.ogg`/`.mp3` ister (`art/licensed/music/<mob>.ogg`); web'deki `.weba` dosyasını
   dönüştür: `ffmpeg -i elder_dragon.weba elder_dragon.ogg`.
 - Dekor animasyonları (çeşme dalgaları, bayrak dalgalanması, kıvılcım parçacıkları) pişirilirken

@@ -1,0 +1,31 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Sewer/Assets/Props.png" id="1_tvkfw"]
+[ext_resource type="Script" path="res://scripts/map/map_light.gd" id="2_3hhbd"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_g3eyj"]
+size = Vector2(8, 6)
+
+[node name="Lamba" type="Node2D" unique_id=1933788855]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1922549951]
+position = Vector2(-4, -20)
+texture = ExtResource("1_tvkfw")
+centered = false
+region_enabled = true
+region_rect = Rect2(100, 5, 9, 20)
+
+[node name="Lamba" type="Marker2D" parent="." unique_id=1954005583]
+position = Vector2(0, -16)
+script = ExtResource("2_3hhbd")
+radius = 48.0
+color = Color(0.72156864, 1, 0.6039216, 1)
+flicker = 0.1
+lamp = false
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=1086823639]
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=183970570]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_g3eyj")

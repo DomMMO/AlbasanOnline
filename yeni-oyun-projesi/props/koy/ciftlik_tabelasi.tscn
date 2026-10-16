@@ -1,0 +1,49 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/town/direk.png" id="1_ktd40"]
+[ext_resource type="Texture2D" path="res://assets/town/tabela.png" id="2_aff54"]
+[ext_resource type="FontFile" path="res://art/fonts/CourierPrime-Bold.ttf" id="3_iip3r"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_rp4k3"]
+font = ExtResource("3_iip3r")
+font_size = 7
+font_color = Color(0.9529412, 0.8862745, 0.72156864, 1)
+outline_size = 2
+outline_color = Color(0.22745098, 0.14117648, 0.078431375, 1)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ygaxn"]
+size = Vector2(6, 4)
+
+[node name="CiftlikTabelasi" type="Node2D" unique_id=150533646]
+
+[node name="SolDirek" type="Sprite2D" parent="." unique_id=331495507]
+position = Vector2(-26, -23)
+texture = ExtResource("1_ktd40")
+centered = false
+
+[node name="SagDirek" type="Sprite2D" parent="." unique_id=875309091]
+position = Vector2(18, -23)
+texture = ExtResource("1_ktd40")
+centered = false
+
+[node name="Tabela" type="Sprite2D" parent="." unique_id=92755189]
+position = Vector2(-22, -37)
+texture = ExtResource("2_aff54")
+centered = false
+
+[node name="Yazi" type="Label" parent="." unique_id=1383696028]
+offset_left = -26.0
+offset_top = -29.0
+offset_right = 26.0
+offset_bottom = -17.0
+text = "AT ÇİFTLİĞİ"
+label_settings = SubResource("LabelSettings_rp4k3")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=348818931]
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=68961077]
+position = Vector2(-22, -2)
+shape = SubResource("RectangleShape2D_ygaxn")

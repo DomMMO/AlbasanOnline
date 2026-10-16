@@ -97,9 +97,9 @@ export const TOWN_SPOTS = {
   fieldGate: px(139, 58),
   /** Where you appear when you come back from the hunting grounds: on the road, facing the town. */
   fromField: px(133, 58),
-  /** Teleport gate to the harbour, on the south headland. */
-  harborGate: px(74, 115),
-  fromHarbor: px(74, 111),
+  /** The south pier (the fisherman by its foot). The map file has the real spots. */
+  pier: px(100, 177),
+  fisherman: px(103, 173),
   /** The keep's front door (into the great hall) and where you come out of it. */
   keepDoor: { x: (KEEP.tx + KEEP.w / 2) * TILE_SIZE, y: (KEEP.ty + KEEP.h) * TILE_SIZE + 6 },
   fromKeep: px(KEEP.tx + 7, KEEP.ty + KEEP.h + 2),

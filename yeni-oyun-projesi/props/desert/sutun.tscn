@@ -1,0 +1,22 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Desert/Assets/Ground.png" id="1_mlayt"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_orjm4"]
+size = Vector2(14, 10)
+
+[node name="Sutun" type="Node2D" unique_id=2114885170]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1605080252]
+position = Vector2(-8, -64)
+texture = ExtResource("1_mlayt")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 240, 16, 64)
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=829475957]
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=2095674593]
+position = Vector2(0, -5)
+shape = SubResource("RectangleShape2D_orjm4")

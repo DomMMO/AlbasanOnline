@@ -1,0 +1,18 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/props/harbor/art_02_golge.png" id="1_qn22s"]
+[ext_resource type="Texture2D" path="res://assets/props/harbor/art_02.png" id="2_r5n26"]
+
+[node name="Art02" type="Node2D" unique_id=466264944]
+
+[node name="Golge" type="Sprite2D" parent="." unique_id=1731320886]
+z_index = -5
+z_as_relative = false
+position = Vector2(-15, -11)
+texture = ExtResource("1_qn22s")
+centered = false
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1013823042]
+position = Vector2(-30, -65)
+texture = ExtResource("2_r5n26")
+centered = false

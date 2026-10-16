@@ -1,0 +1,20 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/town/golge_kucuk.png" id="1_ejkot"]
+[ext_resource type="Texture2D" path="res://assetpack/WORLD ELEMENT/Environment/Props/Static/Trees/Model_02/Size_03.png" id="2_x7tia"]
+
+[node name="CamMavi" type="Node2D" unique_id=813393922]
+
+[node name="Golge" type="Sprite2D" parent="." unique_id=1676172530]
+modulate = Color(1, 1, 1, 0.6)
+z_index = -5
+z_as_relative = false
+position = Vector2(0, -3)
+texture = ExtResource("1_ejkot")
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1226171289]
+position = Vector2(-19, -76)
+texture = ExtResource("2_x7tia")
+centered = false
+region_enabled = true
+region_rect = Rect2(4, 4, 37, 76)

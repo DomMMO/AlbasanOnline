@@ -1,0 +1,21 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/props/canyon/cadir_03.png" id="1_3oqhc"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_84fcs"]
+size = Vector2(48, 32)
+
+[node name="Cadir03" type="Node2D" unique_id=1232528134]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1631350246]
+position = Vector2(-26, -45)
+texture = ExtResource("1_3oqhc")
+centered = false
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=1528543900]
+collision_layer = 3
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=128487632]
+position = Vector2(0, -16)
+shape = SubResource("RectangleShape2D_84fcs")

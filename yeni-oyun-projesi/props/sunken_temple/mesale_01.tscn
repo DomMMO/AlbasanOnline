@@ -1,0 +1,43 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/props/sunken_temple/mesale_01.png" id="1_i7kcu"]
+[ext_resource type="Texture2D" path="res://assets/props/sunken_temple/mesale_01_isik1.png" id="2_y7qve"]
+[ext_resource type="Script" path="res://scripts/map/night_glow.gd" id="3_4u3w1"]
+[ext_resource type="Script" path="res://scripts/map/map_light.gd" id="4_5ktkd"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_1thyi"]
+blend_mode = 1
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_5hodr"]
+size = Vector2(16, 16)
+
+[node name="Mesale01" type="Node2D" unique_id=309260877]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=329465712]
+position = Vector2(-5, -22)
+texture = ExtResource("1_i7kcu")
+centered = false
+
+[node name="Isik1" type="Sprite2D" parent="." unique_id=176061544]
+material = SubResource("CanvasItemMaterial_1thyi")
+position = Vector2(-19, -44)
+texture = ExtResource("2_y7qve")
+centered = false
+script = ExtResource("3_4u3w1")
+base = 0.18
+flicker = 0.4
+
+[node name="Lamba1" type="Marker2D" parent="." unique_id=2117973663]
+position = Vector2(0.5, -20)
+script = ExtResource("4_5ktkd")
+radius = 62.0
+color = Color(1, 0.65882355, 0.3137255, 1)
+flicker = 0.08
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=1740017912]
+collision_layer = 3
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=1506741804]
+position = Vector2(0, -8)
+shape = SubResource("RectangleShape2D_5hodr")

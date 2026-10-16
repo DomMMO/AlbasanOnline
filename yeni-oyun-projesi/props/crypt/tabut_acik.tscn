@@ -1,0 +1,22 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Cemetery/Environment/Props/Props.png" id="1_iqgqf"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_a8i68"]
+size = Vector2(18, 18)
+
+[node name="TabutAcik" type="Node2D" unique_id=695322495]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1817410805]
+position = Vector2(-10, -31)
+texture = ExtResource("1_iqgqf")
+centered = false
+region_enabled = true
+region_rect = Rect2(182, 7, 20, 31)
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=587104422]
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=1399905313]
+position = Vector2(0, -9)
+shape = SubResource("RectangleShape2D_a8i68")

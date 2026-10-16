@@ -1,0 +1,22 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Town/Environment/Props/Static/Trees/Model_01/Size_05.png" id="1_gbjvo"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_mdkro"]
+size = Vector2(36, 12)
+
+[node name="KutukYosun" type="Node2D" unique_id=609938120]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1300873397]
+position = Vector2(-26, -42)
+texture = ExtResource("1_gbjvo")
+centered = false
+region_enabled = true
+region_rect = Rect2(359, 326, 61, 42)
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=604766138]
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=1595224134]
+position = Vector2(0, -6)
+shape = SubResource("RectangleShape2D_mdkro")

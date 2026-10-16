@@ -1,0 +1,13 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/alan/cakil_yama.png" id="1_60gw8"]
+
+[node name="CakilYama" type="Node2D" unique_id=2140539987]
+z_index = -1
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1489910330]
+position = Vector2(-39, -78)
+texture = ExtResource("1_60gw8")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 0, 79, 78)

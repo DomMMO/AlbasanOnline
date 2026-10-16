@@ -1,0 +1,20 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/town/golge_minik.png" id="1_mfd8y"]
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Forge/Assets/Tiles.png" id="2_w8kn1"]
+
+[node name="FiciKurukafa" type="Node2D" unique_id=1306322418]
+
+[node name="Golge" type="Sprite2D" parent="." unique_id=1337872497]
+modulate = Color(1, 1, 1, 0.6)
+z_index = -5
+z_as_relative = false
+position = Vector2(0, -3)
+texture = ExtResource("1_mfd8y")
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=893609182]
+position = Vector2(-8, -22)
+texture = ExtResource("2_w8kn1")
+centered = false
+region_enabled = true
+region_rect = Rect2(112, 250, 16, 22)

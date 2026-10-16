@@ -575,6 +575,8 @@ Jack'in görselleri hazır bir sprite paketinden gelir (`client/src/assets/`, ka
 
 ### Harita editörü
 
+> **Ana Merkez (town) artık bir Godot sahnesi:** `yeni-oyun-projesi/maps/town.tscn`, Godot editöründe düzenlenir; kaydedince sunucunun okuduğu `shared/maps/town.json` yazılır (bkz. `yeni-oyun-projesi/README.md`, "Haritalar"). Godot'ya taşınan bölgeleri bu web editörü kaydetmez; aşağıdakiler henüz taşınmamış bölgeler için geçerli.
+
 `http://localhost:5173/editor.html` (GM panelindeki **Harita Editörü** bağlantısı). Bölgenin kodda üretilen haritası altta çizilir; editörde konan objeler üç katmanda üstüne serilir: **Zemin** (çimen, yol, kaldırım…), **Engel** (duvar, ağaç, kaya, su, görünmez engel) ve **Doğuş** (oyuncu doğuşu, yaratık doğuşu: yaratık, adet, yarıçap).
 
 - Paletten sürükle-bırak ya da paletten seçip haritada sürükleyerek boya; 16/32/64 px ızgaraya oturur. `Q` farenin altındaki kareyi/objeyi paletten seçer (pipet). Tıkla seç, sürükle taşı; `Delete` sil, `R` döndür, `Ctrl+Z` geri al, `Ctrl+D` kopyala, oklar kaydır, `Ctrl+S` kaydet. Katmanlar gizlenebilir/kilitlenebilir; JSON olarak indirilip yüklenebilir.

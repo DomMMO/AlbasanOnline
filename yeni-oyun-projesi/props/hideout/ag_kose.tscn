@@ -1,0 +1,12 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Hideout/Assets/Tiles.png" id="1_o0jef"]
+
+[node name="AgKose" type="Node2D" unique_id=536597884]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1371481611]
+position = Vector2(-24, -64)
+texture = ExtResource("1_o0jef")
+centered = false
+region_enabled = true
+region_rect = Rect2(48, 336, 48, 64)

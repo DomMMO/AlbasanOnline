@@ -1,0 +1,22 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Desert/Assets/Props.png" id="1_ahxyg"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_23iyd"]
+size = Vector2(16, 8)
+
+[node name="Boynuz" type="Node2D" unique_id=2018320134]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1116005672]
+position = Vector2(-19, -48)
+texture = ExtResource("1_ahxyg")
+centered = false
+region_enabled = true
+region_rect = Rect2(68, 176, 39, 48)
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=1732030593]
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=570484707]
+position = Vector2(0, -4)
+shape = SubResource("RectangleShape2D_23iyd")

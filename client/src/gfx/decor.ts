@@ -34,9 +34,11 @@ function iconTexture(scene: Phaser.Scene, shape: IconShape, color: number) {
   return key;
 }
 
-export function drawDecor(scene: Phaser.Scene, decor: Decor[]) {
+/** `onPiece` is told before each piece is drawn (its index), so callers can tell whose objects are whose. */
+export function drawDecor(scene: Phaser.Scene, decor: Decor[], onPiece?: (index: number) => void) {
   ensureDot(scene);
-  for (const piece of decor) {
+  for (const [index, piece] of decor.entries()) {
+    onPiece?.(index);
     switch (piece.kind) {
       case "building":
         building(scene, piece);

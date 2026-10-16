@@ -1,0 +1,30 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/town/golge_minik.png" id="1_eyn1y"]
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Castle Environment 0.3/Assets/Tiles.png" id="2_kbj1r"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1mhmy"]
+size = Vector2(14, 8)
+
+[node name="Bust" type="Node2D" unique_id=2026270450]
+
+[node name="Golge" type="Sprite2D" parent="." unique_id=1326556526]
+modulate = Color(1, 1, 1, 0.6)
+z_index = -5
+z_as_relative = false
+position = Vector2(0, -3)
+texture = ExtResource("1_eyn1y")
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1734642683]
+position = Vector2(-9, -32)
+texture = ExtResource("2_kbj1r")
+centered = false
+region_enabled = true
+region_rect = Rect2(279, 123, 18, 32)
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=368932853]
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=1312562961]
+position = Vector2(0, -4)
+shape = SubResource("RectangleShape2D_1mhmy")

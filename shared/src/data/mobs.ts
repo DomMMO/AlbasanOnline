@@ -155,7 +155,7 @@ const BASE_MOBS: Record<string, MobDef> = {
     xp: 55,
     aggroRange: 72,
     respawnMs: 20_000,
-    appearance: { type: "image", key: "goblin" },
+    appearance: { type: "image", key: "ork_goblin" },
     loot: {
       gold: [6, 14],
       drops: [
@@ -274,7 +274,7 @@ const BASE_MOBS: Record<string, MobDef> = {
     xp: 75,
     aggroRange: 72,
     respawnMs: 0,
-    appearance: { type: "image", key: "goblin", tint: 0xb8c0c8 },
+    appearance: { type: "image", key: "ork_goblin", tint: 0xc8d0d8 },
     loot: {
       gold: [10, 20],
       drops: [
@@ -301,7 +301,7 @@ const BASE_MOBS: Record<string, MobDef> = {
     aggroRange: 96,
     respawnMs: 0,
     scale: 1,
-    appearance: { type: "image", key: "goblin_big" },
+    appearance: { type: "image", key: "ork_goblin_sef", tint: 0xffe6a0 },
     loot: {
       gold: [80, 150],
       drops: [
@@ -488,7 +488,7 @@ const BASE_MOBS: Record<string, MobDef> = {
     xp: 250,
     aggroRange: 80,
     respawnMs: 20_000,
-    appearance: { type: "image", key: "orc" },
+    appearance: { type: "image", key: "ork_yagmaci" },
     loot: {
       gold: [22, 42],
       drops: [

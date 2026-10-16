@@ -1,0 +1,18 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/props/frost_citadel/art_08_golge.png" id="1_jaypa"]
+[ext_resource type="Texture2D" path="res://assets/props/frost_citadel/art_08.png" id="2_bryuu"]
+
+[node name="Art08" type="Node2D" unique_id=1231081769]
+
+[node name="Golge" type="Sprite2D" parent="." unique_id=1942234972]
+z_index = -5
+z_as_relative = false
+position = Vector2(-5, -3)
+texture = ExtResource("1_jaypa")
+centered = false
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1111579942]
+position = Vector2(-11, -32)
+texture = ExtResource("2_bryuu")
+centered = false

@@ -1,0 +1,12 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Cave/Assets/Props.png" id="1_gj2ej"]
+
+[node name="MantarKucukBuz2" type="Node2D" unique_id=687313531]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1267716366]
+position = Vector2(-13, -28)
+texture = ExtResource("1_gj2ej")
+centered = false
+region_enabled = true
+region_rect = Rect2(322, 34, 27, 28)

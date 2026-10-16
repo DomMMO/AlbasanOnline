@@ -1,0 +1,21 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/props/harbor/araba_01.png" id="1_5rlv6"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1hoke"]
+size = Vector2(16, 16)
+
+[node name="Araba01" type="Node2D" unique_id=1768315856]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=2041002672]
+position = Vector2(-10, -17)
+texture = ExtResource("1_5rlv6")
+centered = false
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=1907373387]
+collision_layer = 3
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=776405463]
+position = Vector2(-2, -8)
+shape = SubResource("RectangleShape2D_1hoke")

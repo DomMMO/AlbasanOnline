@@ -1,0 +1,18 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/props/buried_caravanserai/art_02_golge.png" id="1_7pe2j"]
+[ext_resource type="Texture2D" path="res://assets/props/buried_caravanserai/art_02.png" id="2_caf78"]
+
+[node name="Art02" type="Node2D" unique_id=598528208]
+
+[node name="Golge" type="Sprite2D" parent="." unique_id=492321135]
+z_index = -5
+z_as_relative = false
+position = Vector2(-5, -3)
+texture = ExtResource("1_7pe2j")
+centered = false
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1515539194]
+position = Vector2(-8, -17)
+texture = ExtResource("2_caf78")
+centered = false

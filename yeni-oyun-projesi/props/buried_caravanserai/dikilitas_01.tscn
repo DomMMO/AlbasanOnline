@@ -1,0 +1,21 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/props/buried_caravanserai/dikilitas_01.png" id="1_oj5vg"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_fsmx6"]
+size = Vector2(16, 16)
+
+[node name="Dikilitas01" type="Node2D" unique_id=1228365818]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1036913365]
+position = Vector2(-15, -53)
+texture = ExtResource("1_oj5vg")
+centered = false
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=251140818]
+collision_layer = 3
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=2036433010]
+position = Vector2(-8, -8)
+shape = SubResource("RectangleShape2D_fsmx6")

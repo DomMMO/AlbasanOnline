@@ -1,0 +1,30 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/town/golge_orta.png" id="1_gcwfx"]
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Forge/Assets/Tiles.png" id="2_g3kon"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_5bm3e"]
+size = Vector2(44, 10)
+
+[node name="Kasa" type="Node2D" unique_id=1279163649]
+
+[node name="Golge" type="Sprite2D" parent="." unique_id=988699805]
+modulate = Color(1, 1, 1, 0.6)
+z_index = -5
+z_as_relative = false
+position = Vector2(0, -3)
+texture = ExtResource("1_gcwfx")
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1840835311]
+position = Vector2(-24, -23)
+texture = ExtResource("2_g3kon")
+centered = false
+region_enabled = true
+region_rect = Rect2(160, 249, 48, 23)
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=922696104]
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=1337897800]
+position = Vector2(0, -5)
+shape = SubResource("RectangleShape2D_5bm3e")

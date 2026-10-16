@@ -1,0 +1,22 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Town/Environment/Props/Static/Rocks.png" id="1_3hbor"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wc6l5"]
+size = Vector2(22, 10)
+
+[node name="Kaya" type="Node2D" unique_id=337504608]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=646909026]
+position = Vector2(-13, -27)
+texture = ExtResource("1_3hbor")
+centered = false
+region_enabled = true
+region_rect = Rect2(35, 19, 26, 27)
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=1586256814]
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=1357925204]
+position = Vector2(0, -5)
+shape = SubResource("RectangleShape2D_wc6l5")

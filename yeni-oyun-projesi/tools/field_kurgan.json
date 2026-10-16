@@ -1,0 +1,282 @@
+{
+ "width": 144,
+ "height": 112,
+ "spawn": {
+  "x": 376,
+  "y": 288
+ },
+ "npcs": {
+  "barrow_trader": {
+   "x": 248,
+   "y": 288
+  },
+  "old_kam": {
+   "x": 504,
+   "y": 320
+  }
+ },
+ "portals": {
+  "khan_barrow_entrance": {
+   "x": 600,
+   "y": 832
+  },
+  "kurgan_volcano_gate": {
+   "x": 360,
+   "y": 96
+  }
+ },
+ "arrivals": {
+  "volcano_kurgan_gate": {
+   "x": 344,
+   "y": 192
+  }
+ },
+ "spawnZones": [
+  {
+   "mob": "plague_villager",
+   "tx": 105,
+   "ty": 25,
+   "radius": 8,
+   "count": 7
+  },
+  {
+   "mob": "pale_villager",
+   "tx": 105,
+   "ty": 25,
+   "radius": 8,
+   "count": 5
+  },
+  {
+   "mob": "night_walker",
+   "tx": 105,
+   "ty": 25,
+   "radius": 8,
+   "count": 4
+  },
+  {
+   "mob": "grave_sentry",
+   "tx": 79,
+   "ty": 61,
+   "radius": 5,
+   "count": 6
+  },
+  {
+   "mob": "barrow_skeleton",
+   "tx": 37,
+   "ty": 63,
+   "radius": 7,
+   "count": 7
+  },
+  {
+   "mob": "barrow_wraith",
+   "tx": 37,
+   "ty": 63,
+   "radius": 7,
+   "count": 3
+  },
+  {
+   "mob": "dark_oracle",
+   "tx": 61,
+   "ty": 95,
+   "radius": 4,
+   "count": 6
+  },
+  {
+   "mob": "fallen_knight",
+   "tx": 117,
+   "ty": 77,
+   "radius": 4,
+   "count": 5
+  },
+  {
+   "mob": "black_guard",
+   "tx": 105,
+   "ty": 97,
+   "radius": 2,
+   "count": 2
+  },
+  {
+   "mob": "black_guard",
+   "tx": 129,
+   "ty": 97,
+   "radius": 2,
+   "count": 2
+  },
+  {
+   "mob": "fallen_commander_karacor",
+   "tx": 117,
+   "ty": 83,
+   "radius": 1,
+   "count": 1
+  },
+  {
+   "mob": "plague_villager",
+   "tx": 91,
+   "ty": 34,
+   "radius": 8,
+   "count": 7
+  },
+  {
+   "mob": "pale_villager",
+   "tx": 91,
+   "ty": 34,
+   "radius": 8,
+   "count": 5
+  },
+  {
+   "mob": "night_walker",
+   "tx": 91,
+   "ty": 34,
+   "radius": 8,
+   "count": 4
+  },
+  {
+   "mob": "plague_villager",
+   "tx": 127,
+   "ty": 30,
+   "radius": 8,
+   "count": 7
+  },
+  {
+   "mob": "pale_villager",
+   "tx": 127,
+   "ty": 30,
+   "radius": 8,
+   "count": 5
+  },
+  {
+   "mob": "night_walker",
+   "tx": 127,
+   "ty": 30,
+   "radius": 8,
+   "count": 4
+  },
+  {
+   "mob": "plague_villager",
+   "tx": 112,
+   "ty": 46,
+   "radius": 8,
+   "count": 7
+  },
+  {
+   "mob": "pale_villager",
+   "tx": 112,
+   "ty": 46,
+   "radius": 8,
+   "count": 5
+  },
+  {
+   "mob": "night_walker",
+   "tx": 112,
+   "ty": 46,
+   "radius": 8,
+   "count": 4
+  },
+  {
+   "mob": "grave_sentry",
+   "tx": 58,
+   "ty": 43,
+   "radius": 5,
+   "count": 6
+  },
+  {
+   "mob": "grave_sentry",
+   "tx": 54,
+   "ty": 67,
+   "radius": 5,
+   "count": 6
+  },
+  {
+   "mob": "grave_sentry",
+   "tx": 79,
+   "ty": 79,
+   "radius": 5,
+   "count": 6
+  },
+  {
+   "mob": "barrow_skeleton",
+   "tx": 10,
+   "ty": 68,
+   "radius": 7,
+   "count": 7
+  },
+  {
+   "mob": "barrow_wraith",
+   "tx": 10,
+   "ty": 68,
+   "radius": 7,
+   "count": 3
+  },
+  {
+   "mob": "barrow_skeleton",
+   "tx": 36,
+   "ty": 80,
+   "radius": 7,
+   "count": 7
+  },
+  {
+   "mob": "barrow_wraith",
+   "tx": 36,
+   "ty": 80,
+   "radius": 7,
+   "count": 3
+  },
+  {
+   "mob": "barrow_skeleton",
+   "tx": 27,
+   "ty": 49,
+   "radius": 7,
+   "count": 7
+  },
+  {
+   "mob": "barrow_wraith",
+   "tx": 27,
+   "ty": 49,
+   "radius": 7,
+   "count": 3
+  },
+  {
+   "mob": "dark_oracle",
+   "tx": 79,
+   "ty": 95,
+   "radius": 4,
+   "count": 6
+  },
+  {
+   "mob": "dark_oracle",
+   "tx": 38,
+   "ty": 102,
+   "radius": 4,
+   "count": 6
+  },
+  {
+   "mob": "dark_oracle",
+   "tx": 62,
+   "ty": 80,
+   "radius": 4,
+   "count": 6
+  },
+  {
+   "mob": "fallen_knight",
+   "tx": 96,
+   "ty": 74,
+   "radius": 4,
+   "count": 5
+  },
+  {
+   "mob": "fallen_knight",
+   "tx": 126,
+   "ty": 58,
+   "radius": 4,
+   "count": 5
+  },
+  {
+   "mob": "fallen_knight",
+   "tx": 134,
+   "ty": 75,
+   "radius": 4,
+   "count": 5
+  }
+ ],
+ "nodes": []
+}

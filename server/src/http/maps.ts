@@ -1,5 +1,5 @@
 import express, { type NextFunction, type Request, type Response } from "express";
-import { baseZoneLayout, isZoneId, setZoneEdits, validateMapEdits, zoneSizeProblem, ZONES, type MapEdits, type ZoneId } from "../../../shared/src";
+import { baseZoneLayout, isFileZone, isZoneId, setZoneEdits, validateMapEdits, zoneSizeProblem, ZONES, type MapEdits, type ZoneId } from "../../../shared/src";
 import { pool } from "../db/pool";
 import { zoneMapChanged } from "../game/liveMaps";
 import { requireAdmin } from "./admin";
@@ -12,6 +12,9 @@ import { fail, requireAuth, type AuthedRequest } from "./api";
 //                      map when entering it (players see the map anyway).
 // Saved edits apply to rooms created from then on; a room already running keeps its map, so
 // players inside never disagree with the server about walls.
+// Zones kept as a file (shared/maps, edited in the Godot editor) take no edits from here.
+
+const FILE_ZONE = "Bu bölge artık Godot harita editöründe düzenleniyor (yeni-oyun-projesi/maps)";
 
 interface MapRow {
   zone: string;
@@ -77,6 +80,7 @@ export function createMapsAdminRouter() {
   router.put("/:zone", async (req, res) => {
     const zone = zoneParam(req);
     if (!zone) return fail(res, 404, "Böyle bir bölge yok");
+    if (isFileZone(zone)) return fail(res, 409, FILE_ZONE);
     const checked = checkEdits(req.body, zone);
     if (!checked.ok) return fail(res, 400, checked.error);
     const account = (req as unknown as AuthedRequest).account;
@@ -95,6 +99,7 @@ export function createMapsAdminRouter() {
   router.delete("/:zone", async (req, res) => {
     const zone = zoneParam(req);
     if (!zone) return fail(res, 404, "Böyle bir bölge yok");
+    if (isFileZone(zone)) return fail(res, 409, FILE_ZONE);
     await pool.query("DELETE FROM map_edits WHERE zone = $1", [zone]);
     setZoneEdits(zone, null);
     zoneMapChanged(zone);
@@ -116,6 +121,7 @@ export function createMapsPublicRouter() {
     try {
       const zone = zoneParam(req);
       if (!zone) return fail(res, 404, "Böyle bir bölge yok");
+      if (isFileZone(zone)) return void res.json({ zone, edits: null });
       const { rows } = await pool.query<{ data: MapEdits }>("SELECT data FROM map_edits WHERE zone = $1", [zone]);
       res.json({ zone, edits: rows[0]?.data ?? null });
     } catch (error) {

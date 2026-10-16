@@ -1,0 +1,21 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/orman/run_tasi_kucuk.png" id="1_426p1"]
+[ext_resource type="Script" path="res://scripts/map/map_light.gd" id="2_s0tv6"]
+
+[node name="RunTasiKucuk" type="Node2D" unique_id=406273518]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1164380518]
+position = Vector2(-7, -16)
+texture = ExtResource("1_426p1")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 0, 15, 16)
+
+[node name="Lamba" type="Marker2D" parent="." unique_id=884598516]
+position = Vector2(0, -8)
+script = ExtResource("2_s0tv6")
+radius = 30.0
+color = Color(0.3137255, 0.8784314, 1, 1)
+flicker = 0.05
+lamp = false

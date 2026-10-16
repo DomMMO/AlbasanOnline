@@ -1,0 +1,18 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/props/khan_barrow/art_03_golge.png" id="1_nfvp4"]
+[ext_resource type="Texture2D" path="res://assets/props/khan_barrow/art_03.png" id="2_dtguj"]
+
+[node name="Art03" type="Node2D" unique_id=1230635823]
+
+[node name="Golge" type="Sprite2D" parent="." unique_id=1384200665]
+z_index = -5
+z_as_relative = false
+position = Vector2(-5, -3)
+texture = ExtResource("1_nfvp4")
+centered = false
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1140974014]
+position = Vector2(-9, -13)
+texture = ExtResource("2_dtguj")
+centered = false

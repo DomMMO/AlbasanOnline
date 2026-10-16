@@ -1,0 +1,22 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Town/Environment/Props/Static/Furniture.png" id="1_c724m"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_qwdc8"]
+size = Vector2(14, 8)
+
+[node name="SandikAcik" type="Node2D" unique_id=1368047045]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=474614053]
+position = Vector2(-8, -23)
+texture = ExtResource("1_c724m")
+centered = false
+region_enabled = true
+region_rect = Rect2(720, 73, 16, 23)
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=807910305]
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=1232185896]
+position = Vector2(0, -4)
+shape = SubResource("RectangleShape2D_qwdc8")

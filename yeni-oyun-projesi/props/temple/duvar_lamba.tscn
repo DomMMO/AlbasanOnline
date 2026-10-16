@@ -1,0 +1,21 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Sewer/Assets/Props.png" id="1_gil17"]
+[ext_resource type="Script" path="res://scripts/map/map_light.gd" id="2_jm38d"]
+
+[node name="DuvarLamba" type="Node2D" unique_id=424609673]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1917300963]
+position = Vector2(-4, -20)
+texture = ExtResource("1_gil17")
+centered = false
+region_enabled = true
+region_rect = Rect2(116, 5, 9, 20)
+
+[node name="Lamba" type="Marker2D" parent="." unique_id=1071551287]
+position = Vector2(0, -16)
+script = ExtResource("2_jm38d")
+radius = 44.0
+color = Color(0.72156864, 1, 0.6039216, 1)
+flicker = 0.1
+lamp = false

@@ -200,8 +200,8 @@ export const ITEMS: Record<string, ItemDef> = Object.fromEntries(
     def({ id: "upgrade_scroll_high", name: "Yüksek Sınıf Yükseltme Parşömeni", rarity: "rare", level: 1, maxStack: 50, sellPrice: 80, icon: { shape: "scroll", color: 0xb65cff }, description: "Ekipmanı +8'den +10'a kadar yükseltir. Demirciye götür." }),
     def({ id: "protection_charm", name: "Koruma Tılsımı", rarity: "epic", level: 1, maxStack: 20, sellPrice: 100, icon: { shape: "gem", color: 0xe0a83f }, description: "Yükseltme başarısız olursa item yanmaz." }),
 
-    // ---- Fishing (Liman, see data/fishing.ts)
-    def({ id: "fishing_rod", tool: "rod", name: "Olta", rarity: "common", level: 1, fishingRod: true, maxStack: 1, buyPrice: 250, sellPrice: 50, icon: { shape: "rod", color: 0x8a5a2b }, description: "Limanda suyun kenarında balık tutmak için. Sağ tık ya da Balık Tut düğmesi." }),
+    // ---- Fishing (the town's piers, see data/fishing.ts)
+    def({ id: "fishing_rod", tool: "rod", name: "Olta", rarity: "common", level: 1, fishingRod: true, maxStack: 1, buyPrice: 250, sellPrice: 50, icon: { shape: "rod", color: 0x8a5a2b }, description: "Kasabanın iskelelerinde, suyun kenarında balık tutmak için. Sağ tık ya da Balık Tut düğmesi." }),
     def({ id: "fish_anchovy", profession: true, name: "Hamsi", rarity: "common", level: 1, maxStack: 50, sellPrice: 2, icon: { shape: "fish", color: 0x8fa8c0 } }),
     def({ id: "fish_horse_mackerel", profession: true, name: "İstavrit", rarity: "common", level: 1, maxStack: 50, sellPrice: 3, icon: { shape: "fish", color: 0x9cb87a } }),
     def({ id: "fish_seabass", profession: true, name: "Levrek", rarity: "uncommon", level: 1, maxStack: 50, sellPrice: 7, icon: { shape: "fish", color: 0xb0b4bc } }),

@@ -1,0 +1,64 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/HORSE/Horse I/Horse Black/64x64_Atlas_Horse_Idle.png" id="1_q8fq5"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_imbx0"]
+atlas = ExtResource("1_q8fq5")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_17y7k"]
+atlas = ExtResource("1_q8fq5")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c5wsf"]
+atlas = ExtResource("1_q8fq5")
+region = Rect2(128, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hs02y"]
+atlas = ExtResource("1_q8fq5")
+region = Rect2(0, 64, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bc2q1"]
+atlas = ExtResource("1_q8fq5")
+region = Rect2(64, 64, 64, 64)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_a6wgt"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_imbx0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_17y7k")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_c5wsf")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hs02y")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bc2q1")
+}],
+"loop": 1,
+"name": &"default",
+"speed": 6.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wqcq4"]
+size = Vector2(36, 8)
+
+[node name="At" type="Node2D" unique_id=263044856]
+
+[node name="Gorsel" type="AnimatedSprite2D" parent="." unique_id=1998331388]
+position = Vector2(-32, -63)
+sprite_frames = SubResource("SpriteFrames_a6wgt")
+autoplay = "default"
+centered = false
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=792936308]
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=858563480]
+position = Vector2(0, -4)
+shape = SubResource("RectangleShape2D_wqcq4")

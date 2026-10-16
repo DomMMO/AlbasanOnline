@@ -1,0 +1,12 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/props/pvp_arena/colosseum_01_golge.png" id="1_yvufy"]
+
+[node name="Colosseum01" type="Node2D" unique_id=1902151627]
+
+[node name="Golge" type="Sprite2D" parent="." unique_id=1493140600]
+z_index = -5
+z_as_relative = false
+position = Vector2(-448, 32.6)
+texture = ExtResource("1_yvufy")
+centered = false

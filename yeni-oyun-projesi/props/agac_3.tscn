@@ -1,0 +1,40 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/town/golge_kucuk.png" id="1_tqmmq"]
+[ext_resource type="Texture2D" path="res://assetpack/WORLD ELEMENT/Environment/Props/Static/Trees/Model_01/Size_02.png" id="2_tqmmq"]
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_jgycy"]
+load_path = "res://.godot/imported/agac_3.png-f994418e0594711b83daa966c9d0122e.ctex"
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_lj6pv"]
+size = Vector2(11, 22)
+
+[node name="Agac3" type="Node2D" unique_id=1888380127]
+
+[node name="Golge" type="Sprite2D" parent="." unique_id=2004643379]
+visible = false
+modulate = Color(1, 1, 1, 0.6)
+z_index = -5
+z_as_relative = false
+position = Vector2(0, -3)
+texture = ExtResource("1_tqmmq")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=471271476]
+position = Vector2(0, -31)
+texture = ExtResource("2_tqmmq")
+region_enabled = true
+region_rect = Rect2(31.902588, -0.46675205, 33.179726, 65.81756)
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=220924079]
+visible = false
+position = Vector2(-31, -65)
+texture = SubResource("CompressedTexture2D_jgycy")
+centered = false
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=456087750]
+collision_layer = 3
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=1819069524]
+position = Vector2(-0.5, -10)
+shape = SubResource("RectangleShape2D_lj6pv")

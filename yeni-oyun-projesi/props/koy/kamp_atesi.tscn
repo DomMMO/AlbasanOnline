@@ -1,0 +1,65 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/WORLD ELEMENT/Environment/Structures/Stations/Bonfire/Bonfire_01-Sheet.png" id="1_cjx17"]
+[ext_resource type="Script" path="res://scripts/map/map_light.gd" id="2_5e8rv"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_87jbt"]
+atlas = ExtResource("1_cjx17")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_k8tlo"]
+atlas = ExtResource("1_cjx17")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mi3qx"]
+atlas = ExtResource("1_cjx17")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_l4e7c"]
+atlas = ExtResource("1_cjx17")
+region = Rect2(96, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_w5gs7"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_87jbt")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_k8tlo")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mi3qx")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_l4e7c")
+}],
+"loop": 1,
+"name": &"default",
+"speed": 8.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_53v3c"]
+size = Vector2(20, 8)
+
+[node name="KampAtesi" type="Node2D" unique_id=915226629]
+
+[node name="Ates" type="AnimatedSprite2D" parent="." unique_id=770911070]
+position = Vector2(0, -14)
+sprite_frames = SubResource("SpriteFrames_w5gs7")
+autoplay = "default"
+
+[node name="Isik" type="Marker2D" parent="." unique_id=1602264731]
+position = Vector2(0, -10)
+script = ExtResource("2_5e8rv")
+radius = 72.0
+color = Color(1, 0.627451, 0.3137255, 1)
+flicker = 0.12
+lamp = false
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=1401499997]
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox" unique_id=262887920]
+position = Vector2(0, -4)
+shape = SubResource("RectangleShape2D_53v3c")

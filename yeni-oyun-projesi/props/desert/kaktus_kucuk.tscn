@@ -1,0 +1,12 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Desert/Assets/Ground.png" id="1_dhvib"]
+
+[node name="KaktusKucuk" type="Node2D" unique_id=459295330]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=58811927]
+position = Vector2(-8, -26)
+texture = ExtResource("1_dhvib")
+centered = false
+region_enabled = true
+region_rect = Rect2(128, 229, 16, 26)

@@ -1,0 +1,35 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/town/ev_10.png" id="1_tex"]
+[ext_resource type="Texture2D" path="res://assets/town/ev_10_isik.png" id="2_glow"]
+[ext_resource type="Script" path="res://scripts/map/night_glow.gd" id="3_glow"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_add"]
+blend_mode = 1
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_box"]
+size = Vector2(170, 56)
+
+[node name="Ev10" type="Node2D"]
+
+[node name="Gorsel" type="Sprite2D" parent="."]
+position = Vector2(-109, -209)
+texture = ExtResource("1_tex")
+centered = false
+
+[node name="Pencereler" type="Sprite2D" parent="."]
+material = SubResource("CanvasItemMaterial_add")
+position = Vector2(-109, -209)
+texture = ExtResource("2_glow")
+centered = false
+script = ExtResource("3_glow")
+base = 0.85
+flicker = 0.08
+
+[node name="Hitbox" type="StaticBody2D" parent="."]
+collision_layer = 3
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox"]
+position = Vector2(-2, -28)
+shape = SubResource("RectangleShape2D_box")

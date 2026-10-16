@@ -1,0 +1,30 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/town/golge_kucuk.png" id="1_qlj3x"]
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Garden Environment/Assets/Tiles.png" id="2_y14pr"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_l0qo5"]
+size = Vector2(20, 8)
+
+[node name="Heykel" type="Node2D" unique_id=1961011337]
+
+[node name="Golge" type="Sprite2D" parent="." unique_id=1761828680]
+modulate = Color(1, 1, 1, 0.6)
+z_index = -5
+z_as_relative = false
+position = Vector2(0, -3)
+texture = ExtResource("1_qlj3x")
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=914820776]
+position = Vector2(-14, -54)
+texture = ExtResource("2_y14pr")
+centered = false
+region_enabled = true
+region_rect = Rect2(418, 420, 28, 54)
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=1819243267]
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=485678589]
+position = Vector2(0, -4)
+shape = SubResource("RectangleShape2D_l0qo5")

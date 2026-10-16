@@ -1,0 +1,12 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Town/Environment/Props/Static/Vegetation.png" id="1_pj1uw"]
+
+[node name="Egrelti" type="Node2D" unique_id=1255684734]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1191676483]
+position = Vector2(-15, -25)
+texture = ExtResource("1_pj1uw")
+centered = false
+region_enabled = true
+region_rect = Rect2(80, 147, 31, 25)

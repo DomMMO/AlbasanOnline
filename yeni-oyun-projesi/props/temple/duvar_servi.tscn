@@ -1,0 +1,12 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Garden Environment/Assets/Tiles.png" id="1_qb13o"]
+
+[node name="DuvarServi" type="Node2D" unique_id=62985745]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1181084916]
+position = Vector2(-8, -30)
+texture = ExtResource("1_qb13o")
+centered = false
+region_enabled = true
+region_rect = Rect2(128, 320, 16, 30)

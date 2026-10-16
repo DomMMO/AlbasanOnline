@@ -29,6 +29,10 @@ window/size/viewport_width=1280
 window/size/viewport_height=720
 window/stretch/aspect="expand"
 
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/zone_editor/plugin.cfg")
+
 [physics]
 
 3d/physics_engine="Jolt Physics"

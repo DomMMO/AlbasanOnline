@@ -1,0 +1,34 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/town/golge_minik.png" id="1_773gp"]
+[ext_resource type="Texture2D" path="res://assets/town/direk.png" id="2_ovrdl"]
+[ext_resource type="Texture2D" path="res://assets/town/sancak_3.png" id="3_xs0gr"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ok8ng"]
+size = Vector2(6, 4)
+
+[node name="Sancak3" type="Node2D" unique_id=208545560]
+
+[node name="Golge" type="Sprite2D" parent="." unique_id=1294421613]
+modulate = Color(1, 1, 1, 0.55)
+z_index = -5
+z_as_relative = false
+position = Vector2(0, -2)
+texture = ExtResource("1_773gp")
+
+[node name="Direk" type="Sprite2D" parent="." unique_id=329415678]
+position = Vector2(-4, -23)
+texture = ExtResource("2_ovrdl")
+centered = false
+
+[node name="Sancak" type="Sprite2D" parent="." unique_id=79740385]
+position = Vector2(4, -39)
+texture = ExtResource("3_xs0gr")
+centered = false
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=556007994]
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=1196075769]
+position = Vector2(0, -2)
+shape = SubResource("RectangleShape2D_ok8ng")
