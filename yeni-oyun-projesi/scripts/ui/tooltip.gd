@@ -79,7 +79,7 @@ func show_item(d: Dictionary, ctx: Dictionary, anchor: Control) -> void:
 	custom_minimum_size = Vector2(220, 0)
 	for line in Items.tooltip_lines(d, ctx):
 		_line(line[0], line[1], line[2])
-	var comparable := not _is_compare and not ctx.get("equipped", false) and _worn(d) != null
+	var comparable: bool = not _is_compare and not ctx.get("equipped", false) and _worn(d) != null
 	if comparable:
 		_line("Shift: kuşanılanla kıyasla", UiTheme.MUTED, "muted")
 	_item_shown = {"d": d, "anchor": anchor, "playerLevel": ctx.get("playerLevel", 1)} if comparable else {}

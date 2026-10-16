@@ -1369,7 +1369,7 @@ func refresh_local_ui() -> void:
 		"hp": int(f(p, "hp")), "maxHp": int(f(p, "maxHp", 1)),
 		"resource": int(f(p, "resource")), "maxResource": int(f(p, "maxResource", 100)),
 		"resourceType": cls.get("resource", "rage"), "shield": int(f(p, "shield")),
-		"xp": int(f(p, "xp")), "xpToNext": GameData.xp_to_next_level(level),
+		"xp": int(f(p, "xp")), "xpToNext": int(f(p, "xpToNext", 0)) if int(f(p, "xpToNext", 0)) > 0 else GameData.xp_to_next_level(level),
 	})
 	var dead: bool = f(p, "dead", false)
 	hud.set_death_panel(dead)
