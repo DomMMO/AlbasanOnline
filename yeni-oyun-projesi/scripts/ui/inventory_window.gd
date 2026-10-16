@@ -6,6 +6,8 @@ extends GameWindow
 ## equip, sell or put away (whatever window is open next to it), sort button. A bag item dragged
 ## out over the world is dropped on the ground, one dragged onto the bin is destroyed (both ask first).
 
+## Bag slot size; the trade window uses it too so items look the same in both.
+const SLOT_SIZE := 38
 const EQUIP_LAYOUT := [["earring", "head"], ["weapon", "chest"], ["neck", "legs"], ["ring", "feet"]]
 
 var ui: GameUi
@@ -49,7 +51,7 @@ func _init(owner_ui: GameUi) -> void:
 	grid.add_theme_constant_override("v_separation", 4)
 	body.add_child(grid)
 	for i in int(GameData.get_value("INVENTORY_SIZE", 32)):
-		var s := ItemSlot.new({"area": "inv", "index": i}, 38)
+		var s := ItemSlot.new({"area": "inv", "index": i}, SLOT_SIZE)
 		_wire(s)
 		grid.add_child(s)
 		_bag.append(s)

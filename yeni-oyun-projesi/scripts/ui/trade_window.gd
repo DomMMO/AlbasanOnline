@@ -38,7 +38,7 @@ func _init(owner_ui: GameUi) -> void:
 		grid.add_theme_constant_override("v_separation", 4)
 		side.add_child(grid)
 		for i in slots:
-			var s := ItemSlot.new({"area": "trade", "index": i}, 40)
+			var s := ItemSlot.new({"area": "trade", "index": i}, InventoryWindow.SLOT_SIZE)
 			s.hovered.connect(func(inside):
 				if not inside or s.item == null:
 					ui.tooltip.hide_tip()
