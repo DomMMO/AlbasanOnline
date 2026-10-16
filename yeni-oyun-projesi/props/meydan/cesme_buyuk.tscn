@@ -1,0 +1,22 @@
+[gd_scene format=3 uid="uid://cl81vvest7c5l"]
+
+[ext_resource type="Texture2D" uid="uid://pbfncgddt5vb" path="res://assetpack/ANOKOLISA/Pixel Crawler - Garden Environment/Assets/Tiles.png" id="1_ni4tw"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_j8nm6"]
+radius = 38.0
+
+[node name="CesmeBuyuk" type="Node2D" unique_id=358853324]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1256876813]
+position = Vector2(-40, -94)
+texture = ExtResource("1_ni4tw")
+centered = false
+region_enabled = true
+region_rect = Rect2(400, 2, 80, 94)
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=821447688]
+collision_mask = 0
+
+[node name="@CollisionShape2D@38" type="CollisionShape2D" parent="Hitbox" unique_id=1575866331]
+position = Vector2(0, -40)
+shape = SubResource("CircleShape2D_j8nm6")

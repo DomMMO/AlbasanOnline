@@ -142,7 +142,7 @@ export const EDITABLE_DECOR = new Set<Decor["kind"]>([
 ]);
 
 /** Decor that stands on solid ground (you walk round it); plants, bushes and signboards you walk through. */
-const SOLID_DECOR = new Set<Decor["kind"]>(["building", "fountain", "lamp", "anvil", "banner", "campfire", "tent", "grave", "torch", "prop", "horse", "trough", "bigTree"]);
+export const SOLID_DECOR = new Set<Decor["kind"]>(["building", "fountain", "lamp", "anvil", "banner", "campfire", "tent", "grave", "torch", "prop", "horse", "trough", "bigTree"]);
 
 /** A name for a piece of the map's own decor: its kind and its spot. */
 export function decorRef(d: Decor): string | null {
@@ -331,7 +331,7 @@ const LAYER_ORDER: Record<MapLayer, number> = { ground: 0, collider: 1, decor: 2
 const FLOORS = new Set<Tile>([Tile.Grass, Tile.GrassAlt, Tile.Flower, Tile.DarkGrass, Tile.Cobble, Tile.Plaza, Tile.Path, Tile.Market]);
 
 /** The floor nearest a tile (what to put back where a building stood). */
-function floorNear(tiles: Tile[][], x: number, y: number): Tile {
+export function floorNear(tiles: Tile[][], x: number, y: number): Tile {
   for (let r = 1; r < 8; r++) {
     for (const [dx, dy] of [[0, r], [-r, 0], [r, 0], [0, -r], [r, r], [-r, r], [r, -r], [-r, -r]]) {
       const t = tiles[y + dy]?.[x + dx];

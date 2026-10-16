@@ -1,0 +1,31 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Town/Environment/Props/Static/Rocks.png" id="1_o8pmq"]
+[ext_resource type="Script" path="res://scripts/map/map_light.gd" id="2_qtrwp"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_nn2xj"]
+size = Vector2(10, 6)
+
+[node name="Kristal" type="Node2D" unique_id=554946317]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=72982719]
+position = Vector2(-6, -25)
+texture = ExtResource("1_o8pmq")
+centered = false
+region_enabled = true
+region_rect = Rect2(146, 279, 12, 25)
+
+[node name="Lamba" type="Marker2D" parent="." unique_id=1726450697]
+position = Vector2(0, -12)
+script = ExtResource("2_qtrwp")
+radius = 34.0
+color = Color(0.5019608, 0.78431374, 1, 1)
+flicker = 0.04
+lamp = false
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=1856164428]
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=1434120931]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_nn2xj")

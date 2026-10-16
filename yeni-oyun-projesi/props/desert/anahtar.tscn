@@ -1,0 +1,12 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Town/Environment/Props/Static/Resources.png" id="1_h773b"]
+
+[node name="Anahtar" type="Node2D" unique_id=866783670]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1600905596]
+position = Vector2(-6, -7)
+texture = ExtResource("1_h773b")
+centered = false
+region_enabled = true
+region_rect = Rect2(98, 52, 12, 7)

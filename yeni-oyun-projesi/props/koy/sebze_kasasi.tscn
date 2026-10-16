@@ -1,0 +1,28 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/town/golge_minik.png" id="1_armb1"]
+[ext_resource type="Texture2D" path="res://assets/town/sebze_kasasi.png" id="2_4siho"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_vp0nc"]
+size = Vector2(14, 8)
+
+[node name="SebzeKasasi" type="Node2D" unique_id=972137078]
+
+[node name="Golge" type="Sprite2D" parent="." unique_id=393089463]
+modulate = Color(1, 1, 1, 0.55)
+z_index = -5
+z_as_relative = false
+position = Vector2(0, -2)
+texture = ExtResource("1_armb1")
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1545442747]
+position = Vector2(-8, -32)
+texture = ExtResource("2_4siho")
+centered = false
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=2012631101]
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=2085172199]
+position = Vector2(0, -4)
+shape = SubResource("RectangleShape2D_vp0nc")

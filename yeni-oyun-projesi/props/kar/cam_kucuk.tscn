@@ -1,0 +1,22 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Town/Environment/Props/Static/Trees/Model_02/Size_04.png" id="1_avvsd"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hnphb"]
+size = Vector2(10, 6)
+
+[node name="CamKucuk" type="Node2D" unique_id=1955518058]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1707806235]
+position = Vector2(-27, -103)
+texture = ExtResource("1_avvsd")
+centered = false
+region_enabled = true
+region_rect = Rect2(4, 9, 54, 103)
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=47103757]
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=735352686]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_hnphb")

@@ -1,0 +1,10 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/props/harbor/iskele_03.png" id="1_bp08n"]
+
+[node name="Iskele03" type="Node2D" unique_id=644410590]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1015206676]
+position = Vector2(-92, 1)
+texture = ExtResource("1_bp08n")
+centered = false

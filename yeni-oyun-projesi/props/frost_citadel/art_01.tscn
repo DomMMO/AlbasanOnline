@@ -1,0 +1,10 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/props/frost_citadel/art_01.png" id="1_2jofh"]
+
+[node name="Art01" type="Node2D" unique_id=364455946]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=221649161]
+position = Vector2(-17, -34)
+texture = ExtResource("1_2jofh")
+centered = false

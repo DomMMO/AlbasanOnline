@@ -1,0 +1,21 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Cave/Assets/Tiles.png" id="1_3sgsw"]
+[ext_resource type="Script" path="res://scripts/map/map_light.gd" id="2_u1pn1"]
+
+[node name="DuvarFiliz" type="Node2D" unique_id=1519422246]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=50128639]
+position = Vector2(-6, -32)
+texture = ExtResource("1_3sgsw")
+centered = false
+region_enabled = true
+region_rect = Rect2(240, 0, 13, 32)
+
+[node name="Lamba" type="Marker2D" parent="." unique_id=1257159844]
+position = Vector2(1, -26)
+script = ExtResource("2_u1pn1")
+radius = 34.0
+color = Color(0.3764706, 0.9098039, 0.8156863, 1)
+flicker = 0.05
+lamp = false

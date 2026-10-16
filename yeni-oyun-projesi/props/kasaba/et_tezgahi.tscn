@@ -1,0 +1,22 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Town/Environment/Structures/Stations/Cooking Station/Cooking Station.png" id="1_6r5c7"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_477ox"]
+size = Vector2(52, 10)
+
+[node name="EtTezgahi" type="Node2D" unique_id=2146925946]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=862657104]
+position = Vector2(-28, -40)
+texture = ExtResource("1_6r5c7")
+centered = false
+region_enabled = true
+region_rect = Rect2(144, 20, 56, 40)
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=1615806978]
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=1845790866]
+position = Vector2(0, -5)
+shape = SubResource("RectangleShape2D_477ox")

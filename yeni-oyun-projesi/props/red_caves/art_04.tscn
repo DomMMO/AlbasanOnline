@@ -1,0 +1,10 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/props/red_caves/art_04.png" id="1_xv1do"]
+
+[node name="Art04" type="Node2D" unique_id=680110364]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=247416003]
+position = Vector2(-7, -24)
+texture = ExtResource("1_xv1do")
+centered = false

@@ -1,0 +1,10 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/town/cicek_17.png" id="1_yrhrx"]
+
+[node name="Cicek17" type="Node2D" unique_id=601124319]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=29757556]
+position = Vector2(-4, -6)
+texture = ExtResource("1_yrhrx")
+centered = false

@@ -1,6 +1,6 @@
 import type Phaser from "phaser";
 import { Tile, TILE_SIZE, type DungeonLayout } from "../../../shared/src";
-import { resetLights } from "../fx/nightLights";
+import { lightsOf, resetLights } from "../fx/nightLights";
 import { drawDecor } from "./decor";
 import { createGroundLayer, renderTiles } from "./textures";
 import { FRINGE_SIDES, FRINGE_VARIANTS, paintGrassFringe, paintStoneFringe } from "./tilePainter";
@@ -53,6 +53,10 @@ export interface Ground {
   layer: Phaser.Tilemaps.TilemapLayer;
   objects: Phaser.GameObjects.GameObject[];
   timers: Phaser.Time.TimerEvent[];
+  /** Which piece of layout.decor (its index) drew each decor object. */
+  owners: Map<Phaser.GameObjects.GameObject, number>;
+  /** Which piece of layout.decor added each light (lightsOf(scene) order). */
+  lightOwners: number[];
 }
 
 export function destroyGround(scene: Phaser.Scene, ground: Ground) {
@@ -76,6 +80,8 @@ export function buildGround(scene: Phaser.Scene, layout: DungeonLayout): Ground 
   }
   // Decor animates on timers (fountain ripples, sparks...): note them so a rebuild stops them.
   const timers: Phaser.Time.TimerEvent[] = [];
+  const owners = new Map<Phaser.GameObjects.GameObject, number>();
+  const lightOwners: number[] = [];
   const addEvent = scene.time.addEvent;
   scene.time.addEvent = (config) => {
     const timer = addEvent.call(scene.time, config);
@@ -85,9 +91,22 @@ export function buildGround(scene: Phaser.Scene, layout: DungeonLayout): Ground 
   try {
     // Decor registers its lights for the night layer: start the list again with it.
     resetLights(scene);
-    if (layout.decor) drawDecor(scene, layout.decor);
+    let current = -1;
+    let seen = new Set(scene.children.list);
+    const note = () => {
+      for (const o of scene.children.list) if (!seen.has(o) && current >= 0) owners.set(o, current);
+      seen = new Set(scene.children.list);
+      while (lightOwners.length < lightsOf(scene).length) lightOwners.push(current);
+    };
+    if (layout.decor) {
+      drawDecor(scene, layout.decor, (index) => {
+        note();
+        current = index;
+      });
+      note();
+    }
   } finally {
     scene.time.addEvent = addEvent;
   }
-  return { layer, objects: scene.children.list.filter((o) => !before.has(o) && o !== layer), timers };
+  return { layer, objects: scene.children.list.filter((o) => !before.has(o) && o !== layer), timers, owners, lightOwners };
 }

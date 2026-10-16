@@ -1,0 +1,10 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/props/volcano/kopru_01.png" id="1_tjhau"]
+
+[node name="Kopru01" type="Node2D" unique_id=1922214157]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=706249555]
+position = Vector2(-21, -5)
+texture = ExtResource("1_tjhau")
+centered = false

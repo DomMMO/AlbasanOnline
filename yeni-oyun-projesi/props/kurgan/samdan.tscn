@@ -1,0 +1,30 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Hideout/Assets/Tiles.png" id="1_aaixs"]
+[ext_resource type="Script" path="res://scripts/map/map_light.gd" id="2_qf2d7"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ts7wu"]
+size = Vector2(8, 6)
+
+[node name="Samdan" type="Node2D" unique_id=1210369473]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1681705299]
+position = Vector2(-4, -16)
+texture = ExtResource("1_aaixs")
+centered = false
+region_enabled = true
+region_rect = Rect2(404, 40, 8, 16)
+
+[node name="Lamba" type="Marker2D" parent="." unique_id=597805485]
+position = Vector2(0, -14)
+script = ExtResource("2_qf2d7")
+radius = 52.0
+flicker = 0.12
+lamp = false
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=828858861]
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=801353895]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_ts7wu")

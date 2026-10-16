@@ -15,12 +15,12 @@ const px = (tx: number, ty: number) => ({ x: (tx + 0.5) * TILE_SIZE, y: (ty + 1)
 
 export const FOREST_SPOTS = {
   /** Teleport gate back to the valley, at the south edge. */
-  valleyGate: px(32, 45),
+  valleyGate: px(65, 91),
   /** Where you appear coming from the valley. */
-  fromValley: px(32, 42),
-  spawn: px(32, 41),
-  ranger: px(29, 40),
-  peddler: px(36, 40),
+  fromValley: px(65, 85),
+  spawn: px(65, 83),
+  ranger: px(59, 81),
+  peddler: px(73, 81),
 };
 
 const AREAS = {

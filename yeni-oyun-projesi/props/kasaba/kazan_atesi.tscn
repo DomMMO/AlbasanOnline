@@ -1,0 +1,80 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Town/Environment/Structures/Stations/Cooking Station/Cooker/Cooker_03-Sheet.png" id="1_2h8nv"]
+[ext_resource type="Script" path="res://scripts/map/map_light.gd" id="2_vj2kx"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3aqfy"]
+atlas = ExtResource("1_2h8nv")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8eyxh"]
+atlas = ExtResource("1_2h8nv")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fm4aw"]
+atlas = ExtResource("1_2h8nv")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nr6tw"]
+atlas = ExtResource("1_2h8nv")
+region = Rect2(96, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_i0blb"]
+atlas = ExtResource("1_2h8nv")
+region = Rect2(128, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_40rn1"]
+atlas = ExtResource("1_2h8nv")
+region = Rect2(160, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_4b3km"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3aqfy")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8eyxh")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fm4aw")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_nr6tw")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_i0blb")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_40rn1")
+}],
+"loop": 1,
+"name": &"default",
+"speed": 8.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_4sspq"]
+size = Vector2(20, 8)
+
+[node name="KazanAtesi" type="Node2D" unique_id=160594224]
+
+[node name="Gorsel" type="AnimatedSprite2D" parent="." unique_id=1661134595]
+position = Vector2(-16, -32)
+sprite_frames = SubResource("SpriteFrames_4b3km")
+autoplay = "default"
+centered = false
+
+[node name="Lamba" type="Marker2D" parent="." unique_id=1400429348]
+position = Vector2(0, -6)
+script = ExtResource("2_vj2kx")
+radius = 36.0
+color = Color(1, 0.5647059, 0.2509804, 1)
+flicker = 0.25
+lamp = false
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=899422559]
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=873270082]
+position = Vector2(0, -4)
+shape = SubResource("RectangleShape2D_4sspq")

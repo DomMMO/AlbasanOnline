@@ -1,0 +1,30 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/town/golge_minik.png" id="1_7m8uh"]
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Garden Environment/Assets/Tiles.png" id="2_uv7jw"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_705rq"]
+size = Vector2(10, 6)
+
+[node name="VazoKirik" type="Node2D" unique_id=1483183668]
+
+[node name="Golge" type="Sprite2D" parent="." unique_id=1486793104]
+modulate = Color(1, 1, 1, 0.6)
+z_index = -5
+z_as_relative = false
+position = Vector2(0, -3)
+texture = ExtResource("1_7m8uh")
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1315938044]
+position = Vector2(-8, -21)
+texture = ExtResource("2_uv7jw")
+centered = false
+region_enabled = true
+region_rect = Rect2(400, 363, 16, 21)
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=77284619]
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=1222194621]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_705rq")

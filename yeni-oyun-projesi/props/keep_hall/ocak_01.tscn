@@ -1,0 +1,29 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/props/keep_hall/ocak_01.png" id="1_dt03u"]
+[ext_resource type="Texture2D" path="res://assets/props/keep_hall/ocak_01_ek1.png" id="2_5vkf8"]
+[ext_resource type="Script" path="res://scripts/map/map_light.gd" id="3_lbn3j"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_ti0cq"]
+blend_mode = 1
+
+[node name="Ocak01" type="Node2D" unique_id=1270895389]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1836681191]
+position = Vector2(-17, -8)
+texture = ExtResource("1_dt03u")
+centered = false
+
+[node name="Ek1" type="Sprite2D" parent="." unique_id=1734999326]
+modulate = Color(1, 1, 1, 0.144)
+material = SubResource("CanvasItemMaterial_ti0cq")
+position = Vector2(-30, -32)
+texture = ExtResource("2_5vkf8")
+centered = false
+
+[node name="Lamba1" type="Marker2D" parent="." unique_id=1006695669]
+position = Vector2(0, -2)
+script = ExtResource("3_lbn3j")
+radius = 120.0
+color = Color(1, 0.65882355, 0.3137255, 1)
+flicker = 0.07

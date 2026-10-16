@@ -1,0 +1,21 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Forge/Assets/Tiles.png" id="1_pr0fn"]
+[ext_resource type="Script" path="res://scripts/map/map_light.gd" id="2_6cuda"]
+
+[node name="DuvarSutunu" type="Node2D" unique_id=2144794864]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1902063742]
+position = Vector2(-8, -73)
+texture = ExtResource("1_pr0fn")
+centered = false
+region_enabled = true
+region_rect = Rect2(144, 0, 16, 73)
+
+[node name="Lamba" type="Marker2D" parent="." unique_id=541485807]
+position = Vector2(0.5, -49)
+script = ExtResource("2_6cuda")
+radius = 56.0
+color = Color(1, 0.65882355, 0.3137255, 1)
+flicker = 0.08
+lamp = false

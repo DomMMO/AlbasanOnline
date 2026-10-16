@@ -1,0 +1,10 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/meydan/parca_00.png" id="1_fcu7n"]
+
+[node name="Parca00" type="Node2D" unique_id=1073110937]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=979939300]
+position = Vector2(-15, -23)
+texture = ExtResource("1_fcu7n")
+centered = false

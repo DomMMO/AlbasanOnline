@@ -1,0 +1,18 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/props/red_caves/art_03_golge.png" id="1_moqtg"]
+[ext_resource type="Texture2D" path="res://assets/props/red_caves/art_03.png" id="2_16lvc"]
+
+[node name="Art03" type="Node2D" unique_id=868498028]
+
+[node name="Golge" type="Sprite2D" parent="." unique_id=864629440]
+z_index = -5
+z_as_relative = false
+position = Vector2(-5, -3)
+texture = ExtResource("1_moqtg")
+centered = false
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=157462166]
+position = Vector2(-8, -17)
+texture = ExtResource("2_16lvc")
+centered = false

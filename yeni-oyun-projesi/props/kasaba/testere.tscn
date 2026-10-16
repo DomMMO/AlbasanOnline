@@ -1,0 +1,22 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Town/Environment/Structures/Stations/Sawmill/Base.png" id="1_hhbum"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_y37ir"]
+size = Vector2(48, 12)
+
+[node name="Testere" type="Node2D" unique_id=1578130279]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1548537770]
+position = Vector2(-26, -54)
+texture = ExtResource("1_hhbum")
+centered = false
+region_enabled = true
+region_rect = Rect2(48, 3, 52, 54)
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=1448045998]
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=181853470]
+position = Vector2(0, -6)
+shape = SubResource("RectangleShape2D_y37ir")

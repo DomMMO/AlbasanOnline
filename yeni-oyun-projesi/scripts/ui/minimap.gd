@@ -12,7 +12,7 @@ const SIZE := 128
 ## Colours that read better from far away than the tiles' own (map.ts Tile ids).
 const MINIMAP_COLORS := {4: "#2b5422", 17: "#8ec8ee", 12: "#5a4636", 11: "#4d483f", 10: "#d9a441", 26: "#2a221c"}
 const DOT_STYLE := {
-	"portal": ["#c084fc", 2.5, 0],
+	"portal": ["#8be04e", 2.5, 0],
 	"npc": ["#74c0fc", 2.0, 1],
 	"player": ["#ffffff", 2.0, 2],
 	"enemy": ["#ff5a5a", 2.5, 3],

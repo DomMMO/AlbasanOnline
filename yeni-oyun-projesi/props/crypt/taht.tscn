@@ -1,0 +1,22 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Castle Environment 0.3/Assets/Tiles.png" id="1_o5hqk"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_gdnbr"]
+size = Vector2(18, 10)
+
+[node name="Taht" type="Node2D" unique_id=397157932]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1333466928]
+position = Vector2(-10, -51)
+texture = ExtResource("1_o5hqk")
+centered = false
+region_enabled = true
+region_rect = Rect2(278, 13, 20, 51)
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=1154571712]
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=416018298]
+position = Vector2(0, -5)
+shape = SubResource("RectangleShape2D_gdnbr")

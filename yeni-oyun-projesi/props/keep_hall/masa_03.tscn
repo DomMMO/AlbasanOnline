@@ -1,0 +1,10 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/props/keep_hall/masa_03.png" id="1_dunfp"]
+
+[node name="Masa03" type="Node2D" unique_id=1428701525]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1189823360]
+position = Vector2(-40, -54)
+texture = ExtResource("1_dunfp")
+centered = false

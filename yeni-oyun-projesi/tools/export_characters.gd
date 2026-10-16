@@ -151,6 +151,11 @@ func _write_resources(e: Dictionary, dir: String, sheet_path: String, w: int, h:
 	frames.remove_animation("default")
 	var fps := {"down": 8, "up": 8, "side": 8, "idle": 3 if String(appearance.get("type", "")) == "slime" else 8, "walk": 14, "attack": 18, "hurt": 16, "dead": 14}
 	var once := ["attack", "hurt", "dead", "jump"]
+	# Sheets that know their own frame rates (the pack's mobs) keep them.
+	if String(appearance.get("type", "")) == "image":
+		var own: Dictionary = Sprites.sheet_meta(String(appearance.key)).get("fps", {})
+		for name in own:
+			fps[name] = float(own[name])
 	for name in anims:
 		frames.add_animation(name)
 		frames.set_animation_speed(name, fps.get(name, 10))

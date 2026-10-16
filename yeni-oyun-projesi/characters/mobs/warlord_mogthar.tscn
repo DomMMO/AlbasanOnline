@@ -3,34 +3,49 @@
 [ext_resource type="SpriteFrames" path="res://characters/mobs/warlord_mogthar.tres" id="1_vir5i"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_xpxg1"]
-size = Vector2(34, 50)
+size = Vector2(42, 64)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_bo4py"]
 size = Vector2(10, 6)
 
-[node name="WarlordMogthar" type="Node2D" unique_id=1643418235]
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_govde"]
+radius = 8.4
+height = 33.6
 
-[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1859139290]
+[node name="WarlordMogthar" type="Node2D" unique_id=622181975]
+
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1494013433]
 sprite_frames = ExtResource("1_vir5i")
 animation = &"idle"
 autoplay = "idle"
 centered = false
-offset = Vector2(-35.8056, -56.3072)
+offset = Vector2(-64, -128)
 
-[node name="Hurtbox" type="Area2D" parent="." unique_id=2117338594]
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1972615056]
 collision_mask = 0
 
-[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=715770026]
-position = Vector2(-1.8055999, -24.307201)
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=143764473]
+position = Vector2(-3, -32)
 shape = SubResource("RectangleShape2D_xpxg1")
 debug_color = Color(0.2, 0.6, 1, 0.35)
 
-[node name="Feet" type="Area2D" parent="." unique_id=2122254142]
+[node name="Feet" type="Area2D" parent="." unique_id=273413014]
 collision_layer = 2
 collision_mask = 0
 input_pickable = false
 
-[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1130246950]
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=310933959]
 position = Vector2(0, -3)
 shape = SubResource("RectangleShape2D_bo4py")
 debug_color = Color(1, 0.3, 0.2, 0.45)
+
+[node name="Govde" type="Area2D" parent="." unique_id=184726406]
+collision_layer = 4
+collision_mask = 0
+monitoring = false
+monitorable = false
+
+[node name="Oval" type="CollisionShape2D" parent="Govde" unique_id=1858146242]
+rotation = 1.5707964
+shape = SubResource("CapsuleShape2D_govde")
+debug_color = Color(1, 0.75, 0.2, 0.35)

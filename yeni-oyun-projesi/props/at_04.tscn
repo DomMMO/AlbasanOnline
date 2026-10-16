@@ -1,0 +1,21 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/props/at_04.png" id="1_avorf"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_jjpyi"]
+size = Vector2(16, 16)
+
+[node name="At04" type="Node2D" unique_id=357969310]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1811794681]
+position = Vector2(-17, -30)
+texture = ExtResource("1_avorf")
+centered = false
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=1033748133]
+collision_layer = 3
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=1164395057]
+position = Vector2(3, -8)
+shape = SubResource("RectangleShape2D_jjpyi")

@@ -375,6 +375,9 @@ static func _fallback_looks() -> Array:
 
 
 static func _sheet_paths(key: String) -> Array:
+	# The Pixel Crawler pack's enemies (tools/mob_sheets.py), with their hand-and-weapon rig.
+	if FileAccess.file_exists("res://assets/moblar/%s.json" % key):
+		return ["res://assets/moblar/%s.png" % key, "res://assets/moblar/%s.json" % key]
 	if key == "jack":
 		return ["res://art/licensed/bosses/jack.png", "res://art/licensed/bosses/jack.json"]
 	return ["res://art/licensed/mobs/%s.png" % key, "res://art/licensed/mobs/%s.json" % key]
@@ -462,6 +465,8 @@ static func sprite_set(appearance: Dictionary, asset := "") -> SpriteSet:
 	set.frames.remove_animation("default")
 	if set.kind == "image":
 		_build_sheet(set, String(a.key))
+	elif set.kind == "portal" and String(a.get("style", "")) != "door":
+		_build_portal(set, String(a.get("style", "")) == "town")
 	else:
 		_build_template(set, a)
 	_cache[key] = set
@@ -512,6 +517,28 @@ static func _build_template(set: SpriteSet, a: Dictionary) -> void:
 				_add_anim(set.frames, "idle", [cells[0], cells[1]], 4, true)
 
 
+## The pack's portals: the green one is every portal of the game, the blue one a player's own
+## (town portal). Frames looped; the foot point at the swirl's bottom.
+const GREEN_PORTAL := "res://assets/portal/yesil_portal.png"
+const BLUE_PORTAL := "res://assets/portal/mavi_portal.png"
+
+
+static func _build_portal(set: SpriteSet, blue: bool) -> void:
+	var tex: Texture2D = load(BLUE_PORTAL if blue else GREEN_PORTAL)
+	var size := 32
+	set.texture = tex
+	set.width = size
+	set.height = size
+	set.origin = Vector2(0.5, 0.98) if blue else Vector2(0.53, 0.98)
+	var cols := tex.get_width() / size
+	var cells := []
+	for i in cols * (tex.get_height() / size):
+		cells.append(_atlas(tex, (i % cols) * size, (i / cols) * size, size, size))
+	for f in cells.size():
+		_add_anim(set.frames, "frame%d" % f, [cells[f]], 1, false)
+	_add_anim(set.frames, "idle", cells, 8.0, true)
+
+
 static func _build_sheet(set: SpriteSet, key: String) -> void:
 	var meta := sheet_meta(key)
 	var tex: Texture2D = load(_sheet_paths(key)[0])
@@ -521,7 +548,7 @@ static func _build_sheet(set: SpriteSet, key: String) -> void:
 	set.height = int(meta.frameHeight)
 	set.origin = Vector2(float(meta.originX), float(meta.originY))
 	var cols := maxi(1, tex.get_width() / set.width)
-	var fps: Dictionary = JACK_FPS if key == "jack" else MOB_FPS
+	var fps: Dictionary = JACK_FPS if key == "jack" else meta.get("fps", MOB_FPS)
 	var once: Array = JACK_ONCE if key == "jack" else MOB_ONCE
 	var anims: Dictionary = meta.get("anims", {})
 	for name in anims.keys():

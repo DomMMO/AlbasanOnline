@@ -1,0 +1,29 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/props/kuyu_01_golge.png" id="1_yooky"]
+[ext_resource type="Texture2D" path="res://assets/props/kuyu_01.png" id="2_q3di7"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_yok1x"]
+size = Vector2(32, 32)
+
+[node name="Kuyu01" type="Node2D" unique_id=2011383283]
+
+[node name="Golge" type="Sprite2D" parent="." unique_id=1253819768]
+z_index = -5
+z_as_relative = false
+position = Vector2(-14, -6)
+texture = ExtResource("1_yooky")
+centered = false
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=384910647]
+position = Vector2(-17, -41)
+texture = ExtResource("2_q3di7")
+centered = false
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=1448015871]
+collision_layer = 3
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=823906813]
+position = Vector2(-1, -16)
+shape = SubResource("RectangleShape2D_yok1x")

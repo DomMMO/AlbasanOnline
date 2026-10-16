@@ -1,0 +1,13 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/alan/camur_yama_2.png" id="1_vkqs6"]
+
+[node name="CamurYama2" type="Node2D" unique_id=1480789827]
+z_index = -1
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=279730960]
+position = Vector2(-36, -69)
+texture = ExtResource("1_vkqs6")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 0, 72, 69)

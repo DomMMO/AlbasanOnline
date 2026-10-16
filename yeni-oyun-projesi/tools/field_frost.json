@@ -1,0 +1,272 @@
+{
+ "width": 128,
+ "height": 96,
+ "spawn": {
+  "x": 280,
+  "y": 864
+ },
+ "npcs": {
+  "furrier": {
+   "x": 344,
+   "y": 704
+  },
+  "mountain_guide": {
+   "x": 216,
+   "y": 704
+  }
+ },
+ "portals": {
+  "frost_cavern_entrance": {
+   "x": 1848,
+   "y": 256
+  },
+  "frost_citadel_entrance": {
+   "x": 1816,
+   "y": 1312
+  },
+  "frost_valley_gate": {
+   "x": 88,
+   "y": 800
+  }
+ },
+ "arrivals": {
+  "world_frost_gate": {
+   "x": 216,
+   "y": 832
+  }
+ },
+ "spawnZones": [
+  {
+   "mob": "snow_slime",
+   "tx": 47,
+   "ty": 73,
+   "radius": 6,
+   "count": 7
+  },
+  {
+   "mob": "frost_wolf",
+   "tx": 45,
+   "ty": 25,
+   "radius": 6,
+   "count": 7
+  },
+  {
+   "mob": "white_wolf",
+   "tx": 45,
+   "ty": 25,
+   "radius": 6,
+   "count": 3
+  },
+  {
+   "mob": "mountain_raider",
+   "tx": 77,
+   "ty": 51,
+   "radius": 6,
+   "count": 7
+  },
+  {
+   "mob": "yeti",
+   "tx": 89,
+   "ty": 19,
+   "radius": 4,
+   "count": 4
+  },
+  {
+   "mob": "frost_wraith",
+   "tx": 77,
+   "ty": 81,
+   "radius": 5,
+   "count": 5
+  },
+  {
+   "mob": "blizzard_spirit",
+   "tx": 77,
+   "ty": 81,
+   "radius": 5,
+   "count": 3
+  },
+  {
+   "mob": "ice_golem",
+   "tx": 101,
+   "ty": 65,
+   "radius": 4,
+   "count": 4
+  },
+  {
+   "mob": "frost_giant_ayazhan",
+   "tx": 111,
+   "ty": 43,
+   "radius": 1,
+   "count": 1
+  },
+  {
+   "mob": "snow_slime",
+   "tx": 28,
+   "ty": 86,
+   "radius": 6,
+   "count": 7
+  },
+  {
+   "mob": "snow_slime",
+   "tx": 42,
+   "ty": 47,
+   "radius": 6,
+   "count": 7
+  },
+  {
+   "mob": "snow_slime",
+   "tx": 63,
+   "ty": 66,
+   "radius": 6,
+   "count": 7
+  },
+  {
+   "mob": "frost_wolf",
+   "tx": 63,
+   "ty": 27,
+   "radius": 6,
+   "count": 7
+  },
+  {
+   "mob": "white_wolf",
+   "tx": 63,
+   "ty": 27,
+   "radius": 6,
+   "count": 3
+  },
+  {
+   "mob": "frost_wolf",
+   "tx": 20,
+   "ty": 11,
+   "radius": 6,
+   "count": 7
+  },
+  {
+   "mob": "white_wolf",
+   "tx": 20,
+   "ty": 11,
+   "radius": 6,
+   "count": 3
+  },
+  {
+   "mob": "frost_wolf",
+   "tx": 29,
+   "ty": 36,
+   "radius": 6,
+   "count": 7
+  },
+  {
+   "mob": "white_wolf",
+   "tx": 29,
+   "ty": 36,
+   "radius": 6,
+   "count": 3
+  },
+  {
+   "mob": "mountain_raider",
+   "tx": 61,
+   "ty": 50,
+   "radius": 6,
+   "count": 7
+  },
+  {
+   "mob": "mountain_raider",
+   "tx": 87,
+   "ty": 35,
+   "radius": 6,
+   "count": 7
+  },
+  {
+   "mob": "mountain_raider",
+   "tx": 95,
+   "ty": 49,
+   "radius": 6,
+   "count": 7
+  },
+  {
+   "mob": "yeti",
+   "tx": 109,
+   "ty": 27,
+   "radius": 4,
+   "count": 4
+  },
+  {
+   "mob": "yeti",
+   "tx": 64,
+   "ty": 10,
+   "radius": 4,
+   "count": 4
+  },
+  {
+   "mob": "yeti",
+   "tx": 103,
+   "ty": 11,
+   "radius": 4,
+   "count": 4
+  },
+  {
+   "mob": "frost_wraith",
+   "tx": 102,
+   "ty": 85,
+   "radius": 5,
+   "count": 5
+  },
+  {
+   "mob": "blizzard_spirit",
+   "tx": 102,
+   "ty": 85,
+   "radius": 5,
+   "count": 3
+  },
+  {
+   "mob": "frost_wraith",
+   "tx": 60,
+   "ty": 85,
+   "radius": 5,
+   "count": 5
+  },
+  {
+   "mob": "blizzard_spirit",
+   "tx": 60,
+   "ty": 85,
+   "radius": 5,
+   "count": 3
+  },
+  {
+   "mob": "frost_wraith",
+   "tx": 80,
+   "ty": 66,
+   "radius": 5,
+   "count": 5
+  },
+  {
+   "mob": "blizzard_spirit",
+   "tx": 80,
+   "ty": 66,
+   "radius": 5,
+   "count": 3
+  },
+  {
+   "mob": "ice_golem",
+   "tx": 118,
+   "ty": 70,
+   "radius": 4,
+   "count": 4
+  },
+  {
+   "mob": "ice_golem",
+   "tx": 91,
+   "ty": 76,
+   "radius": 4,
+   "count": 4
+  },
+  {
+   "mob": "ice_golem",
+   "tx": 118,
+   "ty": 56,
+   "radius": 4,
+   "count": 4
+  }
+ ],
+ "nodes": []
+}

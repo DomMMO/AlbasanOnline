@@ -1,0 +1,22 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Town/Environment/Props/Static/Trees/Model_01/Size_04.png" id="1_u12du"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_jwp8j"]
+size = Vector2(15, 10)
+
+[node name="KuruMeseOrta2" type="Node2D" unique_id=1604427215]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=877267463]
+position = Vector2(-34, -126)
+texture = ExtResource("1_u12du")
+centered = false
+region_enabled = true
+region_rect = Rect2(166, 130, 69, 126)
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=164973884]
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=1571319320]
+position = Vector2(0, -5)
+shape = SubResource("RectangleShape2D_jwp8j")

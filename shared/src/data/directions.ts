@@ -35,7 +35,7 @@ export const TOWN_PLACES: TownPlace[] = [
   { id: "pets", name: "Petçi", ...TOWN_SPOTS.petKeeper, hint: "At çiftliğinin kapısının birkaç adım batısında. Petçi Nuri ganimet toplayan evcil hayvanlar satar." },
   { id: "arena", name: "Kan Arenası", ...TOWN_SPOTS.pvpPortal, hint: "Kalenin batısındaki kum avluda, kırmızı portal. 5. seviyeden önce içeri alınmazsın." },
   { id: "field", name: "Vadi kapısı", ...TOWN_SPOTS.fieldGate, hint: "Doğu kapısından çık, yolu adanın doğu ucuna kadar yürü; ışınlanma kapısı Başlangıç Vadisi'ne açılır." },
-  { id: "harbor", name: "Liman", ...TOWN_SPOTS.harborGate, hint: "Doğu kapısından çıkınca güneye kıvrılan Arnavut kaldırımı yolu izle; adanın güney ucundaki kapı Liman'a çıkar." },
+  { id: "pier", name: "İskele", ...TOWN_SPOTS.pier, hint: "Çeşmeden güneye inen yolu adanın ucuna kadar izle; iskelenin başında Balıkçı Rıfat olta satar. Batı ve doğu yollarının sonunda da birer iskele var." },
 ];
 
 const COMPASS = ["doğuda", "güneydoğuda", "güneyde", "güneybatıda", "batıda", "kuzeybatıda", "kuzeyde", "kuzeydoğuda"];

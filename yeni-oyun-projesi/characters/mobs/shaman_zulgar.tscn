@@ -3,34 +3,49 @@
 [ext_resource type="SpriteFrames" path="res://characters/mobs/shaman_zulgar.tres" id="1_drjcw"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_06qpn"]
-size = Vector2(34, 50)
+size = Vector2(46, 50)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_qwkwn"]
 size = Vector2(10, 6)
 
-[node name="ShamanZulgar" type="Node2D" unique_id=1430384684]
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_govde"]
+radius = 9.2
+height = 36.8
 
-[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1220822240]
+[node name="ShamanZulgar" type="Node2D" unique_id=2125000519]
+
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1949303817]
 sprite_frames = ExtResource("1_drjcw")
 animation = &"idle"
 autoplay = "idle"
 centered = false
-offset = Vector2(-35.8056, -56.3072)
+offset = Vector2(-64, -128)
 
-[node name="Hurtbox" type="Area2D" parent="." unique_id=1883729994]
+[node name="Hurtbox" type="Area2D" parent="." unique_id=80201716]
 collision_mask = 0
 
-[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=540114184]
-position = Vector2(-1.8055999, -24.307201)
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1097244760]
+position = Vector2(5, -25)
 shape = SubResource("RectangleShape2D_06qpn")
 debug_color = Color(0.2, 0.6, 1, 0.35)
 
-[node name="Feet" type="Area2D" parent="." unique_id=2128145139]
+[node name="Feet" type="Area2D" parent="." unique_id=1784554983]
 collision_layer = 2
 collision_mask = 0
 input_pickable = false
 
-[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=2116133076]
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=2099615690]
 position = Vector2(0, -3)
 shape = SubResource("RectangleShape2D_qwkwn")
 debug_color = Color(1, 0.3, 0.2, 0.45)
+
+[node name="Govde" type="Area2D" parent="." unique_id=352515909]
+collision_layer = 4
+collision_mask = 0
+monitoring = false
+monitorable = false
+
+[node name="Oval" type="CollisionShape2D" parent="Govde" unique_id=870239956]
+rotation = 1.5707964
+shape = SubResource("CapsuleShape2D_govde")
+debug_color = Color(1, 0.75, 0.2, 0.35)

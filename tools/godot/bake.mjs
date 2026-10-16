@@ -1,5 +1,6 @@
 // Bakes the game's art and data for the Godot client (yeni-oyun-projesi):
-//   node tools/godot/bake.mjs [--zones town,world] [--api https://albasanonline.com]
+//   node tools/godot/bake.mjs [--zones town,world] [--quick] [--api https://albasanonline.com]
+// --quick skips the icons and UI pictures (the map editor bakes a zone this way).
 // Starts a Vite server for client/bake.html, opens it in headless Chrome (the page draws every
 // zone with the Phaser code and posts the results back), waits until it is done, then copies
 // the third-party art sheets (mobs, items, decor, fonts) into the Godot project.
@@ -20,6 +21,7 @@ const arg = (name) => {
 };
 const zones = arg("zones");
 const api = arg("api") ?? "https://albasanonline.com";
+const quick = args.includes("--quick");
 
 const CHROME = [
   "C:/Program Files/Google/Chrome/Application/chrome.exe",
@@ -83,7 +85,7 @@ try {
   mkdirSync(profile, { recursive: true });
   // The page echoes this id into the done marker, so a stale marker is never taken for this run.
   const runId = String(Date.now());
-  const url = `http://localhost:5190/bake.html?run=${runId}${zones ? `&zones=${zones}` : ""}`;
+  const url = `http://localhost:5190/bake.html?run=${runId}${zones ? `&zones=${zones}` : ""}${quick ? "&quick=1" : ""}`;
   chrome = spawn(
     CHROME,
     ["--headless=new", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--disable-gpu-sandbox", `--user-data-dir=${profile}`, "--window-size=800,600", "--remote-debugging-port=9333", url],

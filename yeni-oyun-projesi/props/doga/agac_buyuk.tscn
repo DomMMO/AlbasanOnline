@@ -1,0 +1,20 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/town/golge_orta.png" id="1_i2i8y"]
+[ext_resource type="Texture2D" path="res://assetpack/WORLD ELEMENT/Environment/Props/Static/Trees/Model_01/Size_04.png" id="2_flif1"]
+
+[node name="AgacBuyuk" type="Node2D" unique_id=2053551874]
+
+[node name="Golge" type="Sprite2D" parent="." unique_id=648312323]
+modulate = Color(1, 1, 1, 0.6)
+z_index = -5
+z_as_relative = false
+position = Vector2(0, -3)
+texture = ExtResource("1_i2i8y")
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=122407845]
+position = Vector2(-37, -126)
+texture = ExtResource("2_flif1")
+centered = false
+region_enabled = true
+region_rect = Rect2(3, 2, 73, 126)

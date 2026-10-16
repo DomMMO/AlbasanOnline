@@ -101,5 +101,5 @@ func _tool_hint(s: ItemSlot) -> String:
 	if s.item == null:
 		return ""
 	if Items.def(s.item.defId).get("fishingRod", false):
-		return "Sağ tık: balık tut (suyun kenarında)" if ui.world and ui.world.zone.get("fishing", false) else "Liman'da balık tutmak için"
+		return "Sağ tık: balık tut (suyun kenarında)" if ui.world and ui.world.zone.get("fishing", false) else "Kasabanın iskelelerinde balık tutmak için"
 	return "Burada dururken kullanılır · Sağ tık: çantaya al"

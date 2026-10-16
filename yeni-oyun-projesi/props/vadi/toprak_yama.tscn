@@ -1,0 +1,13 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/alan/toprak_yama.png" id="1_xntyc"]
+
+[node name="ToprakYama" type="Node2D" unique_id=842217859]
+z_index = -1
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1960832712]
+position = Vector2(-39, -78)
+texture = ExtResource("1_xntyc")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 0, 79, 78)

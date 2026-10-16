@@ -1,0 +1,22 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Cemetery/Environment/Props/Tree.png" id="1_eglxe"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_xrne1"]
+size = Vector2(10, 10)
+
+[node name="KoknarFidan" type="Node2D" unique_id=2087501106]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=63407380]
+position = Vector2(-16, -64)
+texture = ExtResource("1_eglxe")
+centered = false
+region_enabled = true
+region_rect = Rect2(208, 144, 32, 64)
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=854781746]
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=204117601]
+position = Vector2(0, -5)
+shape = SubResource("RectangleShape2D_xrne1")

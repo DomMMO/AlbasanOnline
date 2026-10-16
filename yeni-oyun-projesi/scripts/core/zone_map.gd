@@ -19,6 +19,11 @@ var height := 0
 var tiles := PackedInt32Array()
 ## Map editor: tiles blocked by quarters, key y * width + x -> bits (1 TL, 2 TR, 4 BL, 8 BR).
 var block_mask := {}
+## Maps made in Godot (map.ts WorldMap.shapesOnly): only `shapes` block, not tiles.
+var shapes_only := false
+## Blocking shapes (map.ts BlockShape) by the tiles they touch: {x, y, w, h, points
+## (PackedFloat64Array, empty for a box), walk, sight}.
+var shapes_by_tile := {}
 var spawn := Vector2.ZERO
 var blocking := {}
 var hitbox_half_width := 5.0
@@ -36,6 +41,8 @@ static func from_zone_data(zone: Dictionary) -> ZoneMap:
 		m.tiles[i] = int(raw[i])
 	for entry in zone.get("blockMask", []):
 		m.block_mask[int(entry[0])] = int(entry[1])
+	for r in zone.get("rects", []):
+		m._add_shape({"x": float(r[0]), "y": float(r[1]), "w": float(r[2]), "h": float(r[3]), "points": PackedFloat64Array(), "walk": true, "sight": true})
 	var s: Dictionary = zone.get("spawn", {"x": 0, "y": 0})
 	m.spawn = Vector2(float(s.x), float(s.y))
 	var list: Array = GameData.get_value("BLOCKING_TILES", FALLBACK_BLOCKING)
@@ -45,6 +52,58 @@ static func from_zone_data(zone: Dictionary) -> ZoneMap:
 	m.hitbox_half_width = float(hb.halfWidth)
 	m.hitbox_height = float(hb.height)
 	return m
+
+
+## A map made in Godot, from its MapExport (the same data the server reads, shared/maps/<zone>.json).
+static func from_export(file: Dictionary) -> ZoneMap:
+	var m := ZoneMap.new()
+	m.id = String(file.zone)
+	m.width = int(file.width)
+	m.height = int(file.height)
+	m.shapes_only = true
+	m.tiles.resize(m.width * m.height)
+	for y in m.height:
+		var row: String = file.tiles[y]
+		for x in m.width:
+			var c := row.unicode_at(x)
+			m.tiles[y * m.width + x] = c - 48 if c <= 57 else c - 87
+	m.spawn = Vector2(float(file.spawn.x), float(file.spawn.y))
+	for s in file.shapes:
+		var f := int(s.f)
+		var shape := {"points": PackedFloat64Array(), "walk": (f & 1) != 0, "sight": (f & 2) != 0}
+		if s.has("r"):
+			shape.merge({"x": float(s.r[0]), "y": float(s.r[1]), "w": float(s.r[2]), "h": float(s.r[3])})
+		else:
+			var pts := PackedFloat64Array()
+			var x0 := INF
+			var y0 := INF
+			var x1 := -INF
+			var y1 := -INF
+			for k in s.p.size():
+				var v := float(s.p[k])
+				pts.append(v)
+				if k % 2 == 0:
+					x0 = minf(x0, v)
+					x1 = maxf(x1, v)
+				else:
+					y0 = minf(y0, v)
+					y1 = maxf(y1, v)
+			shape.merge({"x": x0, "y": y0, "w": x1 - x0, "h": y1 - y0, "points": pts}, true)
+		m._add_shape(shape)
+	var hb: Dictionary = GameData.get_value("PLAYER_HITBOX", {"halfWidth": 5, "height": 6})
+	m.hitbox_half_width = float(hb.halfWidth)
+	m.hitbox_height = float(hb.height)
+	return m
+
+
+func _add_shape(s: Dictionary) -> void:
+	var ts := float(GameData.TILE_SIZE)
+	for ty in range(int(floor(s.y / ts)), int(floor((s.y + s.h - 0.001) / ts)) + 1):
+		for tx in range(int(floor(s.x / ts)), int(floor((s.x + s.w - 0.001) / ts)) + 1):
+			var key := ty * width + tx
+			if not shapes_by_tile.has(key):
+				shapes_by_tile[key] = []
+			shapes_by_tile[key].append(s)
 
 
 func tile_at(tx: int, ty: int) -> int:
@@ -57,6 +116,9 @@ func tile_at(tx: int, ty: int) -> int:
 func is_blocked_tile(tx: int, ty: int) -> bool:
 	if tx < 0 or ty < 0 or tx >= width or ty >= height:
 		return true
+	if shapes_only:
+		var ts := float(GameData.TILE_SIZE)
+		return shapes_block(tx * ts, ty * ts, (tx + 1) * ts, (ty + 1) * ts)
 	var key := ty * width + tx
 	if block_mask.has(key):
 		return block_mask[key] == 15
@@ -67,6 +129,8 @@ func is_blocked_tile(tx: int, ty: int) -> bool:
 func blocks_rect(tx: int, ty: int, x0: float, y0: float, x1: float, y1: float) -> bool:
 	if tx < 0 or ty < 0 or tx >= width or ty >= height:
 		return true
+	if shapes_only:
+		return false
 	var key := ty * width + tx
 	if not block_mask.has(key):
 		return blocking.has(tiles[key])
@@ -82,6 +146,52 @@ func blocks_rect(tx: int, ty: int, x0: float, y0: float, x1: float, y1: float) -
 	return false
 
 
+## map.ts boxHitsPolygon(): separating axes; touching is not overlapping.
+static func _box_hits_polygon(p: PackedFloat64Array, x0: float, y0: float, x1: float, y1: float) -> bool:
+	var n := p.size() / 2
+	for i in n:
+		var ax := p[i * 2]
+		var ay := p[i * 2 + 1]
+		var bx := p[((i + 1) % n) * 2]
+		var by := p[((i + 1) % n) * 2 + 1]
+		var nx := by - ay
+		var ny := ax - bx
+		var pmin := INF
+		var pmax := -INF
+		for k in n:
+			var d := p[k * 2] * nx + p[k * 2 + 1] * ny
+			if d < pmin:
+				pmin = d
+			if d > pmax:
+				pmax = d
+		var c0 := x0 * nx + y0 * ny
+		var c1 := x1 * nx + y0 * ny
+		var c2 := x0 * nx + y1 * ny
+		var c3 := x1 * nx + y1 * ny
+		var bmin := minf(minf(c0, c1), minf(c2, c3))
+		var bmax := maxf(maxf(c0, c1), maxf(c2, c3))
+		if bmax <= pmin or pmax <= bmin:
+			return false
+	return true
+
+
+## map.ts shapesBlock(): whether [x0, x1) x [y0, y1) overlaps a shape blocking walking (or sight).
+func shapes_block(x0: float, y0: float, x1: float, y1: float, sight := false) -> bool:
+	if shapes_by_tile.is_empty():
+		return false
+	var ts := float(GameData.TILE_SIZE)
+	for ty in range(int(floor(y0 / ts)), int(floor((y1 - 0.001) / ts)) + 1):
+		for tx in range(int(floor(x0 / ts)), int(floor((x1 - 0.001) / ts)) + 1):
+			for s in shapes_by_tile.get(ty * width + tx, []):
+				if not (s.sight if sight else s.walk):
+					continue
+				if not (s.x < x1 and s.x + s.w > x0 and s.y < y1 and s.y + s.h > y0):
+					continue
+				if s.points.is_empty() or _box_hits_polygon(s.points, x0, y0, x1, y1):
+					return true
+	return false
+
+
 ## map.ts hasLineOfSight()
 func has_line_of_sight(a: Vector2, b: Vector2) -> bool:
 	var ts := float(GameData.TILE_SIZE)
@@ -94,8 +204,13 @@ func has_line_of_sight(a: Vector2, b: Vector2) -> bool:
 		var tx := int(floor((ax + dx * i / steps) / ts))
 		var ty := int(floor((ay + dy * i / steps) / ts))
 		var t := tile_at(tx, ty)
-		if t in OPAQUE and block_mask.get(ty * width + tx, -1) != 0:
+		if not shapes_only and t in OPAQUE and block_mask.get(ty * width + tx, -1) != 0:
 			return false
+		if not shapes_by_tile.is_empty():
+			var px := ax + dx * i / steps
+			var py := ay + dy * i / steps
+			if shapes_block(px, py, px + 0.001, py + 0.001, true):
+				return false
 	return true
 
 
@@ -115,7 +230,8 @@ func collides(x: float, y: float) -> bool:
 		for tx in range(left, right + 1):
 			if blocks_rect(tx, ty, x0, y0, x1, y):
 				return true
-	return false
+	# Collision shapes of maps made in Godot.
+	return shapes_block(x0, y0, x1, y)
 
 
 ## Moves along (vx, vy), a unit vector, by `distance`, sliding along walls (each axis alone).

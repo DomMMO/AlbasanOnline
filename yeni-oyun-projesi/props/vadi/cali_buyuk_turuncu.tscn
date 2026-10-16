@@ -1,0 +1,22 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Town/Environment/Props/Static/Vegetation.png" id="1_78i0n"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_a0vyf"]
+size = Vector2(26, 10)
+
+[node name="CaliBuyukTuruncu" type="Node2D" unique_id=233875893]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=560823076]
+position = Vector2(-21, -43)
+texture = ExtResource("1_78i0n")
+centered = false
+region_enabled = true
+region_rect = Rect2(146, 99, 43, 43)
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=1742117510]
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=341414154]
+position = Vector2(0, -5)
+shape = SubResource("RectangleShape2D_a0vyf")

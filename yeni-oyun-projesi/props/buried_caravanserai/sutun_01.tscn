@@ -1,0 +1,10 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/props/buried_caravanserai/sutun_01.png" id="1_y3apn"]
+
+[node name="Sutun01" type="Node2D" unique_id=2083788832]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1438209029]
+position = Vector2(-7, -35)
+texture = ExtResource("1_y3apn")
+centered = false

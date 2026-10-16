@@ -1,0 +1,13 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Town/Environment/Props/Static/Furniture.png" id="1_y5l03"]
+
+[node name="Tahta2" type="Node2D" unique_id=1481738419]
+z_index = -5
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1353245135]
+position = Vector2(-14, -29)
+texture = ExtResource("1_y5l03")
+centered = false
+region_enabled = true
+region_rect = Rect2(82, 593, 29, 29)

@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 import * as shared from "../../../shared/src";
-import { AFFIXES, isBlockingTile, ITEMS, NODES, RARITY_COLORS, SKILLS, TILE_COUNT, TILE_SIZE, ZONES, HORSE_BREEDS, zoneLayout, type ZoneId } from "../../../shared/src";
+import { AFFIXES, isBlockingTile, ITEMS, NODES, RARITY_COLORS, SKILLS, Tile, TILE_COUNT, TILE_SIZE, ZONE_FILES, ZONES, HORSE_BREEDS, zoneLayout, type DungeonLayout, type ZoneId } from "../../../shared/src";
 import { buildGround } from "../gfx/ground";
 import { preloadDecorArt } from "../gfx/decorArt";
 import { loadTileArt, tileArt, tileArtResolution } from "../gfx/tileArt";
@@ -13,7 +13,23 @@ import { nodeTexture } from "../gfx/nodeTextures";
 import { CROWN_KEY, ensureCrown } from "../gfx/overhead";
 import { ensureHorse, horseIconUrl } from "../gfx/horse";
 import { cursor, type CursorKind } from "../gfx/cursors";
-import { buildTileset, tileBaseColor, RENDER_TILE_COUNT, TILESET_COLUMNS } from "../gfx/tilePainter";
+import {
+  buildTileset,
+  CLIFF_TILES,
+  FALL_TILES,
+  FRINGE_VARIANTS,
+  paintGrassFringe,
+  paintStoneFringe,
+  renderTiles,
+  tileBase,
+  tileBaseColor,
+  tileCell,
+  TOWN_WALL_FACE_TILE,
+  WALL_FACE_TILE,
+  WOOD_WALL_FACE_TILE,
+  RENDER_TILE_COUNT,
+  TILESET_COLUMNS,
+} from "../gfx/tilePainter";
 import { itemImage } from "../gfx/itemImages";
 import { loadTitleFont } from "../gfx/fonts";
 import { installGlobeFrame } from "../ui/globeFrame";
@@ -25,6 +41,12 @@ import { installGlobeFrame } from "../ui/globeFrame";
 //   art/zones/<id>/g_*.png  the ground (tiles, fringes, ground decor) in 1024 px chunks
 //   art/decor/<hash>.png    every standing decor piece (y-sorted against characters in Godot)
 //   art/items, art/held, art/skills, art/nodes, art/horses, art/cursors, art/ui
+// For moving a zone into a Godot map scene (tools/migrate_map.gd), zones kept as files (version 1):
+//   data/zones/<id>.decor.json   every piece of every decor (ground-level ones too) and its lights,
+//                                by decor index
+//   data/zones/<id>.ground.json  the tileset index of every cell and the grass/cobble edges
+//   art/ui/tileset_1x.png, fringe_*.png, data/tileset_meta.json  the ground pictures
+// Zones made in Godot (version 2) are not baked: Godot draws their map scene itself.
 
 const CHUNK = 1024;
 const logEl = document.getElementById("log")!;
@@ -284,6 +306,95 @@ async function saveDecor(canvas: HTMLCanvasElement): Promise<string> {
 
 const isEmitter = (o: unknown) => o instanceof Phaser.GameObjects.Particles.ParticleEmitter;
 
+/** One decor object as a picture (written to art/decor) and its placement, or null when it draws nothing. */
+async function bakePiece(scene: Phaser.Scene, obj: Obj, glows: Map<unknown, { base: number; flicker: number }>): Promise<Record<string, unknown> | null> {
+  if (obj.visible === false) return null;
+  const glow = glows.get(obj);
+  const alpha = obj.alpha ?? 1;
+  if (alpha <= 0.001 && !glow) return null;
+  const bounds = boundsOf(obj);
+  if (!bounds || bounds.w <= 0 || bounds.h <= 0) return null;
+  const bx = Math.floor(bounds.x);
+  const by = Math.floor(bounds.y);
+  const w = Math.min(4096, Math.ceil(bounds.x + bounds.w) - bx);
+  const h = Math.min(4096, Math.ceil(bounds.y + bounds.h) - by);
+  const blend = obj.blendMode;
+  const additive = blend === Phaser.BlendModes.ADD || blend === "ADD";
+  // Drawn at full strength with normal blending; Godot applies the alpha and blend itself.
+  obj.setAlpha?.(1);
+  if (additive) obj.setBlendMode?.(Phaser.BlendModes.NORMAL);
+  const size = Math.max(64, 2 ** Math.ceil(Math.log2(Math.max(w, h))));
+  const canvas = await render(scene, [obj], bx, by, size, size);
+  obj.setAlpha?.(alpha);
+  if (additive) obj.setBlendMode?.(Phaser.BlendModes.ADD);
+  const box = alphaBox(crop(canvas, { x: 0, y: 0, w, h }));
+  if (!box) return null;
+  const hash = await saveDecor(crop(canvas, box));
+  const entry: Record<string, unknown> = { t: hash, x: bx + box.x, y: by + box.y, d: Math.round(obj.depth * 1000) / 1000 };
+  if (alpha !== 1 && !glow) entry.a = Math.round(alpha * 1000) / 1000;
+  if (additive) entry.b = "add";
+  if (glow) entry.g = [glow.base, glow.flicker];
+  if (obj.depth < -1.5) entry.u = 1;
+  return entry;
+}
+
+function teardown(scene: Phaser.Scene, ground: ReturnType<typeof buildGround>) {
+  for (const obj of ground.objects) scene.tweens.killTweensOf(obj);
+  ground.layer.tilemap.destroy();
+  for (const timer of ground.timers) timer.remove(false);
+  for (const obj of ground.objects) obj.destroy();
+  for (const obj of [...scene.children.list]) if (isEmitter(obj)) obj.destroy();
+}
+
+const GREEN = new Set<number>([Tile.Grass, Tile.GrassAlt, Tile.Flower, Tile.DarkGrass]);
+const HARD = new Set<number>([Tile.Cobble, Tile.Plaza, Tile.Path, Tile.Market]);
+const SIDES: [number, number][] = [[0, -1], [1, 0], [0, 1], [-1, 0]];
+
+/**
+ * What the ground of a zone shows, cell by cell, for moving it into a Godot TileMap: the
+ * tileset index of every cell (-1 = nothing, open sky) and the edges grass and cobbles spill
+ * over (ground.ts grassFringe): per cell a bit mask of sides (1 n, 2 e, 4 s, 8 w) and the
+ * cell's variant, for grass and for stones.
+ */
+function groundCells(layout: DungeonLayout) {
+  const tiles = layout.map.tiles;
+  const grass: [number, number, number, number][] = [];
+  const stones: [number, number, number, number][] = [];
+  for (let y = 0; y < tiles.length; y++) {
+    for (let x = 0; x < tiles[y].length; x++) {
+      const tile = tiles[y][x];
+      if (!HARD.has(tile)) continue;
+      let g = 0;
+      let s = 0;
+      SIDES.forEach(([dx, dy], side) => {
+        const next = tiles[y + dy]?.[x + dx];
+        if (GREEN.has(next)) g |= 1 << side;
+        else if (tile === Tile.Plaza && next === Tile.Cobble) s |= 1 << side;
+      });
+      const variant = (x * 7 + y * 13) % FRINGE_VARIANTS;
+      if (g) grass.push([x, y, g, variant]);
+      if (s) stones.push([x, y, s, variant]);
+    }
+  }
+  return { render: renderTiles(tiles), rotations: layout.rotations ?? {}, grass, stones };
+}
+
+/**
+ * The ground pictures for moving maps into Godot: the whole tileset at 1x, which Tile each of
+ * its slots is (variants, wall faces, the cliff under the sky island), and the edge pieces.
+ */
+async function bakeGroundArt() {
+  await put("art/ui/tileset_1x.png", await canvasBlob(buildTileset(tileArt, 1)));
+  const base = Array.from({ length: RENDER_TILE_COUNT }, (_, i) => tileBase(i));
+  base[WALL_FACE_TILE] = Tile.CaveWall;
+  base[TOWN_WALL_FACE_TILE] = Tile.Wall;
+  base[WOOD_WALL_FACE_TILE] = Tile.WoodWall;
+  for (const i of [...CLIFF_TILES, ...FALL_TILES]) base[i] = Tile.Sky;
+  await put("data/tileset_meta.json", json({ columns: TILESET_COLUMNS, count: RENDER_TILE_COUNT, base, blocking: base.map((t) => isBlockingTile(t)) }));
+  await put("art/ui/fringe_grass.png", await canvasBlob(paintGrassFringe()));
+  await put("art/ui/fringe_stone.png", await canvasBlob(paintStoneFringe()));
+}
+
 async function bakeZone(scene: Phaser.Scene, zone: ZoneId) {
   await loadZoneEdits(zone);
   const layout = zoneLayout(zone);
@@ -324,39 +435,29 @@ async function bakeZone(scene: Phaser.Scene, zone: ZoneId) {
   // Standing decor: one picture per piece, placed and y-sorted by its Phaser depth.
   const objects: Record<string, unknown>[] = [];
   const effects: Record<string, unknown>[] = [];
+  const baked = new Map<Obj, Record<string, unknown> | null>();
   for (const obj of standing) {
     if (isEmitter(obj)) {
       effects.push({ kind: "particles", x: Math.round(obj.x ?? 0), y: Math.round(obj.y ?? 0), d: obj.depth });
       continue;
     }
-    if (obj.visible === false) continue;
-    const glow = glows.get(obj);
-    const alpha = obj.alpha ?? 1;
-    if (alpha <= 0.001 && !glow) continue;
-    const bounds = boundsOf(obj);
-    if (!bounds || bounds.w <= 0 || bounds.h <= 0) continue;
-    const bx = Math.floor(bounds.x);
-    const by = Math.floor(bounds.y);
-    const w = Math.min(4096, Math.ceil(bounds.x + bounds.w) - bx);
-    const h = Math.min(4096, Math.ceil(bounds.y + bounds.h) - by);
-    const blend = obj.blendMode;
-    const additive = blend === Phaser.BlendModes.ADD || blend === "ADD";
-    // Drawn at full strength with normal blending; Godot applies the alpha and blend itself.
-    obj.setAlpha?.(1);
-    if (additive) obj.setBlendMode?.(Phaser.BlendModes.NORMAL);
-    const size = Math.max(64, 2 ** Math.ceil(Math.log2(Math.max(w, h))));
-    const canvas = await render(scene, [obj], bx, by, size, size);
-    obj.setAlpha?.(alpha);
-    if (additive) obj.setBlendMode?.(Phaser.BlendModes.ADD);
-    const box = alphaBox(crop(canvas, { x: 0, y: 0, w, h }));
-    if (!box) continue;
-    const hash = await saveDecor(crop(canvas, box));
-    const entry: Record<string, unknown> = { t: hash, x: bx + box.x, y: by + box.y, d: Math.round(obj.depth * 1000) / 1000 };
-    if (alpha !== 1 && !glow) entry.a = Math.round(alpha * 1000) / 1000;
-    if (additive) entry.b = "add";
-    if (glow) entry.g = [glow.base, glow.flicker];
-    if (obj.depth < -1.5) entry.u = 1;
-    objects.push(entry);
+    const entry = await bakePiece(scene, obj, glows);
+    baked.set(obj, entry);
+    if (entry) objects.push(entry);
+  }
+
+  // The map editor's view of the decor: each piece's pictures, ground-level ones included.
+  if (ZONE_FILES[zone]) {
+    const pieces: Record<string, unknown>[] = [];
+    for (const obj of all) {
+      const index = ground.owners.get(obj);
+      if (index === undefined || isEmitter(obj)) continue;
+      const entry = baked.has(obj) ? baked.get(obj) : await bakePiece(scene, obj, glows);
+      if (entry) pieces.push({ i: index, ...entry });
+    }
+    const decorLights = lights.map((l, k) => ({ i: ground.lightOwners[k] ?? -1, ...l }));
+    await put(`data/zones/${zone}.decor.json`, json({ zone, count: layout.decor?.length ?? 0, pieces, lights: decorLights }));
+    await put(`data/zones/${zone}.ground.json`, json(groundCells(layout)));
   }
 
   const blockMask = map.blockMask ? [...map.blockMask.entries()] : [];
@@ -366,6 +467,7 @@ async function bakeZone(scene: Phaser.Scene, zone: ZoneId) {
     height: map.height,
     tiles: map.tiles.flat(),
     blockMask,
+    ...(map.shapes?.length ? { rects: map.shapes.map((r) => [r.x, r.y, r.w, r.h]) } : {}),
     spawn: map.spawn,
     background: background.alpha > 0 ? background.color : null,
     chunk: CHUNK,
@@ -378,11 +480,7 @@ async function bakeZone(scene: Phaser.Scene, zone: ZoneId) {
   log(`${zone}: ${map.width}x${map.height}, ${chunks.length} chunks, ${objects.length} objects, ${lights.length} lights`);
 
   // Tear down for the next zone.
-  for (const obj of ground.objects) scene.tweens.killTweensOf(obj);
-  ground.layer.tilemap.destroy();
-  for (const timer of ground.timers) timer.remove(false);
-  for (const obj of ground.objects) obj.destroy();
-  for (const obj of [...scene.children.list]) if (isEmitter(obj)) obj.destroy();
+  teardown(scene, ground);
 }
 
 // ---- Icons and small textures ---------------------------------------------------------------
@@ -486,9 +584,14 @@ async function run(scene: Phaser.Scene) {
   try {
     await Promise.all([loadTileArt(), loadTitleFont()]);
     await bakeSharedData();
-    await bakeIcons(scene);
-    await bakeGlobeFrames();
-    const zones = (Object.keys(ZONES) as ZoneId[]).filter((z) => !only || only.includes(z));
+    // quick: only the zones (the map editor's "Pişir"); icons and frames stay as they were.
+    if (!params.has("quick")) {
+      await bakeIcons(scene);
+      await bakeGlobeFrames();
+    }
+    await bakeGroundArt();
+    // Zones made in Godot (map scenes) are drawn by Godot itself.
+    const zones = (Object.keys(ZONES) as ZoneId[]).filter((z) => (!only || only.includes(z)) && ZONE_FILES[z]?.version !== 2);
     for (const zone of zones) await bakeZone(scene, zone);
     await put("data/zones/index.json", json(Object.keys(ZONES)));
     await fetch("/__bake/done", { method: "POST", body: `${runId} ok` });

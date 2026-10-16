@@ -156,14 +156,14 @@ const list: MobDef[] = [
   boss({ id: "lich_azgor", name: "Lich Azgor", level: 18, final: true, scale: 1, appearance: { type: "image", key: "wraith_purple_big" }, abilities: [leap(18), slam(18)], addMob: "grave_wraith", addsAt: [0.75, 0.5, 0.25], extraDrops: [{ item: "dragon_eye_necklace", chance: 0.3 }, { item: "moonstone_earring", chance: 0.3 }] }),
 
   // ---- 4. Ork Kalesi (Orc Fortress), Sv 18-21
-  trash({ id: "orc_warrior", name: "Ork Savaşçı", level: 18, hp: 1.2, appearance: { type: "image", key: "orc", tint: 0xe8a090 }, material: "orc_tusk" }),
-  trash({ id: "orc_shaman", name: "Ork Şaman", level: 19, hp: 0.9, attack: 1.3, appearance: { type: "image", key: "orc", tint: 0xc0a8ff }, material: "orc_tusk" }),
+  trash({ id: "orc_warrior", name: "Ork Savaşçı", level: 18, hp: 1.2, appearance: { type: "image", key: "ork_savasci" }, material: "orc_tusk" }),
+  trash({ id: "orc_shaman", name: "Ork Şaman", level: 19, hp: 0.9, attack: 1.3, appearance: { type: "image", key: "ork_saman" }, material: "orc_tusk" }),
   trash({ id: "war_wolf", name: "Savaş Kurdu", level: 19, attack: 1.1, speed: 76, attackSpeedMs: 1600, appearance: { type: "wolf", fur: 0x3a2a1a }, material: "dark_wolf_pelt" }),
-  trash({ id: "orc_brute", name: "Ork Zorba", level: 20, hp: 1.6, attack: 1.15, speed: 52, appearance: { type: "image", key: "ogre" }, material: "orc_tusk" }),
-  boss({ id: "gate_keeper_grom", name: "Kapı Bekçisi Grom", level: 19, scale: 1, appearance: { type: "image", key: "ogre_big" }, abilities: [slam(19)], addMob: "orc_warrior", extraDrops: [{ item: "moonstone_earring", chance: 0.2 }] }),
+  trash({ id: "orc_brute", name: "Ork Zorba", level: 20, hp: 1.6, attack: 1.15, speed: 52, appearance: { type: "image", key: "ork_savasci", tint: 0xe0c8a0 }, material: "orc_tusk" }),
+  boss({ id: "gate_keeper_grom", name: "Kapı Bekçisi Grom", level: 19, scale: 1, appearance: { type: "image", key: "ork_bekci", tint: 0xd8c0a0 }, abilities: [slam(19)], addMob: "orc_warrior", extraDrops: [{ item: "moonstone_earring", chance: 0.2 }] }),
   boss({ id: "wolf_rider_uruk", name: "Kurt Binicisi Uruk", level: 20, appearance: { type: "wolf", fur: 0x2a1a0a }, abilities: [charge(20), charge(20, 7000)], addMob: "war_wolf", extraDrops: [{ item: "sapphire_ring", chance: 0.25 }] }),
-  boss({ id: "shaman_zulgar", name: "Şaman Zulgar", level: 20, scale: 1, appearance: { type: "image", key: "orc_big", tint: 0xc0a8ff }, abilities: [leap(20), slam(20, 13_000)], addMob: "orc_shaman", extraDrops: [{ item: "dragon_eye_necklace", chance: 0.25 }] }),
-  boss({ id: "warlord_mogthar", name: "Savaş Lordu Mog'Thar", level: 21, final: true, scale: 1, appearance: { type: "image", key: "orc_big" }, abilities: [slam(21), charge(21), leap(21, 14_000)], addMob: "orc_brute", extraDrops: [{ item: "might_ring", chance: 0.15 }, { item: "seal_necklace", chance: 0.15 }] }),
+  boss({ id: "shaman_zulgar", name: "Şaman Zulgar", level: 20, scale: 1, appearance: { type: "image", key: "ork_saman_buyuk", tint: 0xc8b0ff }, abilities: [leap(20), slam(20, 13_000)], addMob: "orc_shaman", extraDrops: [{ item: "dragon_eye_necklace", chance: 0.25 }] }),
+  boss({ id: "warlord_mogthar", name: "Savaş Lordu Mog'Thar", level: 21, final: true, scale: 1, appearance: { type: "image", key: "ork_lord", tint: 0xffa898 }, abilities: [slam(21), charge(21), leap(21, 14_000)], addMob: "orc_brute", extraDrops: [{ item: "might_ring", chance: 0.15 }, { item: "seal_necklace", chance: 0.15 }] }),
 
   // ---- 5. Ejder İni (Dragon's Lair), Sv 21-24
   trash({ id: "dragon_cultist", name: "Ejder Tapıcısı", level: 21, appearance: { type: "image", key: "oracle_1" }, material: "spirit_stone", extraDrops: [{ item: "red_dragon_earring", chance: 0.004 }] }),

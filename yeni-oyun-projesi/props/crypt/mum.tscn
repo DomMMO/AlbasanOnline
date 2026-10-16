@@ -1,0 +1,20 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Hideout/Assets/Tiles.png" id="1_jns1y"]
+[ext_resource type="Script" path="res://scripts/map/map_light.gd" id="2_j7spj"]
+
+[node name="Mum" type="Node2D" unique_id=2128714160]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1885772618]
+position = Vector2(-4, -16)
+texture = ExtResource("1_jns1y")
+centered = false
+region_enabled = true
+region_rect = Rect2(404, 8, 8, 16)
+
+[node name="Lamba" type="Marker2D" parent="." unique_id=1636404868]
+position = Vector2(0, -14)
+script = ExtResource("2_j7spj")
+radius = 30.0
+flicker = 0.15
+lamp = false

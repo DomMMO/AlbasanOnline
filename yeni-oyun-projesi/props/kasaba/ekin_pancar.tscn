@@ -1,0 +1,12 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Town/Environment/Props/Static/Farm.png" id="1_ly8qm"]
+
+[node name="EkinPancar" type="Node2D" unique_id=738532480]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1046168983]
+position = Vector2(-8, -16)
+texture = ExtResource("1_ly8qm")
+centered = false
+region_enabled = true
+region_rect = Rect2(80, 48, 16, 16)

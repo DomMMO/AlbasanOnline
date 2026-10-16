@@ -1,0 +1,31 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/orman/run_tasi_buyuk.png" id="1_tpt75"]
+[ext_resource type="Script" path="res://scripts/map/map_light.gd" id="2_h3lk4"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_4lx7o"]
+size = Vector2(32, 10)
+
+[node name="RunTasiBuyuk" type="Node2D" unique_id=782044669]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1665022185]
+position = Vector2(-21, -40)
+texture = ExtResource("1_tpt75")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 0, 42, 40)
+
+[node name="Lamba" type="Marker2D" parent="." unique_id=1379219489]
+position = Vector2(0, -20)
+script = ExtResource("2_h3lk4")
+radius = 72.0
+color = Color(0.3137255, 0.8784314, 1, 1)
+flicker = 0.05
+lamp = false
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=215693334]
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=729425806]
+position = Vector2(0, -5)
+shape = SubResource("RectangleShape2D_4lx7o")

@@ -1,0 +1,28 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/town/golge_orta.png" id="1_77xic"]
+[ext_resource type="Texture2D" path="res://assets/town/ors.png" id="2_q8awi"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_12mbn"]
+size = Vector2(52, 14)
+
+[node name="Ors" type="Node2D" unique_id=155746731]
+
+[node name="Golge" type="Sprite2D" parent="." unique_id=1623271427]
+modulate = Color(1, 1, 1, 0.55)
+z_index = -5
+z_as_relative = false
+position = Vector2(0, -2)
+texture = ExtResource("1_77xic")
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=415856953]
+position = Vector2(-27, -34)
+texture = ExtResource("2_q8awi")
+centered = false
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=189282780]
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=1466902775]
+position = Vector2(0, -7)
+shape = SubResource("RectangleShape2D_12mbn")

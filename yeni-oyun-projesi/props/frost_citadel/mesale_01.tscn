@@ -1,0 +1,43 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/props/frost_citadel/mesale_01.png" id="1_kmrvm"]
+[ext_resource type="Texture2D" path="res://assets/props/frost_citadel/mesale_01_isik1.png" id="2_cqe1q"]
+[ext_resource type="Script" path="res://scripts/map/night_glow.gd" id="3_7a8ot"]
+[ext_resource type="Script" path="res://scripts/map/map_light.gd" id="4_dldhu"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_lh0vs"]
+blend_mode = 1
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_tu8xx"]
+size = Vector2(16, 16)
+
+[node name="Mesale01" type="Node2D" unique_id=988390799]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=368872971]
+position = Vector2(-5, -22)
+texture = ExtResource("1_kmrvm")
+centered = false
+
+[node name="Isik1" type="Sprite2D" parent="." unique_id=1437512571]
+material = SubResource("CanvasItemMaterial_lh0vs")
+position = Vector2(-19, -44)
+texture = ExtResource("2_cqe1q")
+centered = false
+script = ExtResource("3_7a8ot")
+base = 0.18
+flicker = 0.4
+
+[node name="Lamba1" type="Marker2D" parent="." unique_id=869217763]
+position = Vector2(0.5, -20)
+script = ExtResource("4_dldhu")
+radius = 62.0
+color = Color(1, 0.65882355, 0.3137255, 1)
+flicker = 0.08
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=1061129320]
+collision_layer = 3
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=478905535]
+position = Vector2(0, -8)
+shape = SubResource("RectangleShape2D_tu8xx")

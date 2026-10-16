@@ -54,7 +54,7 @@ export function toggleFishing(game: Game, sessionId: string) {
   const runtime = game.playerRuntime.get(sessionId);
   if (!player || !runtime) return;
   if (runtime.fishing) return stopFishing(game, sessionId, "Oltayı topladın");
-  if (!game.zone.fishing) return notice(game, sessionId, "Balık ancak Liman'da tutulur");
+  if (!game.zone.fishing) return notice(game, sessionId, "Balık ancak kasabanın iskelelerinde tutulur");
   if (player.dead) return;
   if (!hasRod(game, sessionId)) return notice(game, sessionId, "Oltan yok. Balıkçı Rıfat'tan alabilirsin");
   if (runtime.stall || runtime.trade) return notice(game, sessionId, "Şu an balık tutamazsın");
@@ -107,6 +107,6 @@ export function updateFishing(game: Game) {
     sendInventory(game, sessionId);
     notice(game, sessionId, `Balık tuttun: ${def.name}`, RARITY_COLORS[def.rarity]);
     game.io.broadcast(Msg.FishCatch, { sessionId, item: caught.item } satisfies FishCatchEvent);
-    if (caught.announce) broadcastSystem(`${player.name} Liman'da oltasıyla ${def.name} çıkardı!`);
+    if (caught.announce) broadcastSystem(`${player.name} iskelede oltasıyla ${def.name} çıkardı!`);
   }
 }

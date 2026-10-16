@@ -1,0 +1,30 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/town/golge_kucuk.png" id="1_uggsu"]
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Cemetery/Environment/Props/Graves.png" id="2_1v8gy"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_4o3h3"]
+size = Vector2(16, 8)
+
+[node name="HeykelAzrail" type="Node2D" unique_id=1692790321]
+
+[node name="Golge" type="Sprite2D" parent="." unique_id=651052189]
+modulate = Color(1, 1, 1, 0.6)
+z_index = -5
+z_as_relative = false
+position = Vector2(0, -3)
+texture = ExtResource("1_uggsu")
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1210868295]
+position = Vector2(-15, -43)
+texture = ExtResource("2_1v8gy")
+centered = false
+region_enabled = true
+region_rect = Rect2(65, 192, 30, 43)
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=490344948]
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=371553591]
+position = Vector2(0, -4)
+shape = SubResource("RectangleShape2D_4o3h3")

@@ -1,0 +1,430 @@
+{
+ "width": 128,
+ "height": 96,
+ "spawn": {
+  "x": 1064,
+  "y": 800
+ },
+ "npcs": {
+  "hunter": {
+   "x": 1144,
+   "y": 704
+  }
+ },
+ "portals": {
+  "world_town_gate": {
+   "x": 952,
+   "y": 704
+  },
+  "world_forest_gate": {
+   "x": 1064,
+   "y": 160
+  },
+  "world_canyon_gate": {
+   "x": 120,
+   "y": 800
+  },
+  "world_frost_gate": {
+   "x": 1944,
+   "y": 800
+  },
+  "world_volcano_gate": {
+   "x": 1064,
+   "y": 1472
+  },
+  "goblin_cave_entrance": {
+   "x": 360,
+   "y": 1408
+  }
+ },
+ "arrivals": {
+  "town_field_gate": {
+   "x": 1048,
+   "y": 768
+  },
+  "forest_valley_gate": {
+   "x": 1064,
+   "y": 256
+  },
+  "canyon_valley_gate": {
+   "x": 216,
+   "y": 800
+  },
+  "frost_valley_gate": {
+   "x": 1848,
+   "y": 800
+  },
+  "volcano_valley_gate": {
+   "x": 1064,
+   "y": 1376
+  }
+ },
+ "spawnZones": [
+  {
+   "mob": "slime",
+   "tx": 49,
+   "ty": 35,
+   "radius": 6,
+   "count": 6
+  },
+  {
+   "mob": "shadow_slime",
+   "tx": 49,
+   "ty": 35,
+   "radius": 6,
+   "count": 3
+  },
+  {
+   "mob": "slime",
+   "tx": 83,
+   "ty": 63,
+   "radius": 6,
+   "count": 5
+  },
+  {
+   "mob": "shadow_slime",
+   "tx": 83,
+   "ty": 63,
+   "radius": 6,
+   "count": 3
+  },
+  {
+   "mob": "wolf",
+   "tx": 101,
+   "ty": 23,
+   "radius": 7,
+   "count": 5
+  },
+  {
+   "mob": "ghost_wolf",
+   "tx": 101,
+   "ty": 23,
+   "radius": 7,
+   "count": 3
+  },
+  {
+   "mob": "goblin",
+   "tx": 27,
+   "ty": 75,
+   "radius": 7,
+   "count": 5
+  },
+  {
+   "mob": "slime",
+   "tx": 34,
+   "ty": 27,
+   "radius": 6,
+   "count": 6
+  },
+  {
+   "mob": "shadow_slime",
+   "tx": 34,
+   "ty": 27,
+   "radius": 6,
+   "count": 3
+  },
+  {
+   "mob": "slime",
+   "tx": 77,
+   "ty": 29,
+   "radius": 6,
+   "count": 6
+  },
+  {
+   "mob": "shadow_slime",
+   "tx": 77,
+   "ty": 29,
+   "radius": 6,
+   "count": 3
+  },
+  {
+   "mob": "slime",
+   "tx": 53,
+   "ty": 52,
+   "radius": 6,
+   "count": 6
+  },
+  {
+   "mob": "shadow_slime",
+   "tx": 53,
+   "ty": 52,
+   "radius": 6,
+   "count": 3
+  },
+  {
+   "mob": "slime",
+   "tx": 98,
+   "ty": 70,
+   "radius": 6,
+   "count": 5
+  },
+  {
+   "mob": "shadow_slime",
+   "tx": 98,
+   "ty": 70,
+   "radius": 6,
+   "count": 3
+  },
+  {
+   "mob": "slime",
+   "tx": 69,
+   "ty": 73,
+   "radius": 6,
+   "count": 5
+  },
+  {
+   "mob": "shadow_slime",
+   "tx": 69,
+   "ty": 73,
+   "radius": 6,
+   "count": 3
+  },
+  {
+   "mob": "slime",
+   "tx": 98,
+   "ty": 49,
+   "radius": 6,
+   "count": 5
+  },
+  {
+   "mob": "shadow_slime",
+   "tx": 98,
+   "ty": 49,
+   "radius": 6,
+   "count": 3
+  },
+  {
+   "mob": "wolf",
+   "tx": 109,
+   "ty": 9,
+   "radius": 7,
+   "count": 5
+  },
+  {
+   "mob": "ghost_wolf",
+   "tx": 109,
+   "ty": 9,
+   "radius": 7,
+   "count": 3
+  },
+  {
+   "mob": "wolf",
+   "tx": 112,
+   "ty": 36,
+   "radius": 7,
+   "count": 5
+  },
+  {
+   "mob": "ghost_wolf",
+   "tx": 112,
+   "ty": 36,
+   "radius": 7,
+   "count": 3
+  },
+  {
+   "mob": "wolf",
+   "tx": 89,
+   "ty": 12,
+   "radius": 7,
+   "count": 5
+  },
+  {
+   "mob": "ghost_wolf",
+   "tx": 89,
+   "ty": 12,
+   "radius": 7,
+   "count": 3
+  },
+  {
+   "mob": "goblin",
+   "tx": 27,
+   "ty": 47,
+   "radius": 7,
+   "count": 5
+  },
+  {
+   "mob": "goblin",
+   "tx": 50,
+   "ty": 84,
+   "radius": 7,
+   "count": 5
+  },
+  {
+   "mob": "goblin",
+   "tx": 9,
+   "ty": 74,
+   "radius": 7,
+   "count": 5
+  }
+ ],
+ "nodes": [
+  {
+   "node": "copper_vein",
+   "tx": 49,
+   "ty": 35,
+   "radius": 6,
+   "count": 3
+  },
+  {
+   "node": "healing_herb_node",
+   "tx": 49,
+   "ty": 35,
+   "radius": 6,
+   "count": 3
+  },
+  {
+   "node": "copper_vein",
+   "tx": 83,
+   "ty": 63,
+   "radius": 6,
+   "count": 3
+  },
+  {
+   "node": "healing_herb_node",
+   "tx": 83,
+   "ty": 63,
+   "radius": 6,
+   "count": 3
+  },
+  {
+   "node": "lavender_node",
+   "tx": 101,
+   "ty": 23,
+   "radius": 6,
+   "count": 4
+  },
+  {
+   "node": "iron_vein",
+   "tx": 27,
+   "ty": 75,
+   "radius": 6,
+   "count": 3
+  },
+  {
+   "node": "copper_vein",
+   "tx": 34,
+   "ty": 27,
+   "radius": 6,
+   "count": 3
+  },
+  {
+   "node": "healing_herb_node",
+   "tx": 34,
+   "ty": 27,
+   "radius": 6,
+   "count": 3
+  },
+  {
+   "node": "copper_vein",
+   "tx": 77,
+   "ty": 29,
+   "radius": 6,
+   "count": 3
+  },
+  {
+   "node": "healing_herb_node",
+   "tx": 77,
+   "ty": 29,
+   "radius": 6,
+   "count": 3
+  },
+  {
+   "node": "copper_vein",
+   "tx": 53,
+   "ty": 52,
+   "radius": 6,
+   "count": 3
+  },
+  {
+   "node": "healing_herb_node",
+   "tx": 53,
+   "ty": 52,
+   "radius": 6,
+   "count": 3
+  },
+  {
+   "node": "copper_vein",
+   "tx": 98,
+   "ty": 70,
+   "radius": 6,
+   "count": 3
+  },
+  {
+   "node": "healing_herb_node",
+   "tx": 98,
+   "ty": 70,
+   "radius": 6,
+   "count": 3
+  },
+  {
+   "node": "copper_vein",
+   "tx": 69,
+   "ty": 73,
+   "radius": 6,
+   "count": 3
+  },
+  {
+   "node": "healing_herb_node",
+   "tx": 69,
+   "ty": 73,
+   "radius": 6,
+   "count": 3
+  },
+  {
+   "node": "copper_vein",
+   "tx": 98,
+   "ty": 49,
+   "radius": 6,
+   "count": 3
+  },
+  {
+   "node": "healing_herb_node",
+   "tx": 98,
+   "ty": 49,
+   "radius": 6,
+   "count": 3
+  },
+  {
+   "node": "lavender_node",
+   "tx": 109,
+   "ty": 9,
+   "radius": 6,
+   "count": 4
+  },
+  {
+   "node": "lavender_node",
+   "tx": 112,
+   "ty": 36,
+   "radius": 6,
+   "count": 4
+  },
+  {
+   "node": "lavender_node",
+   "tx": 89,
+   "ty": 12,
+   "radius": 6,
+   "count": 4
+  },
+  {
+   "node": "iron_vein",
+   "tx": 27,
+   "ty": 47,
+   "radius": 6,
+   "count": 3
+  },
+  {
+   "node": "iron_vein",
+   "tx": 50,
+   "ty": 84,
+   "radius": 6,
+   "count": 3
+  },
+  {
+   "node": "iron_vein",
+   "tx": 9,
+   "ty": 74,
+   "radius": 6,
+   "count": 3
+  }
+ ]
+}

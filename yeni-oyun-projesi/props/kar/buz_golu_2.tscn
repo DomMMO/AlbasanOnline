@@ -1,0 +1,13 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/kar/buz_golu_2.png" id="1_7yrb8"]
+
+[node name="BuzGolu2" type="Node2D" unique_id=889349654]
+z_index = -1
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1913951650]
+position = Vector2(-40, -80)
+texture = ExtResource("1_7yrb8")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 0, 80, 80)

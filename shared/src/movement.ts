@@ -1,5 +1,5 @@
 import { GALLOP_SPEED_MULTIPLIER, MOUNT_SPEED_MULTIPLIER, PLAYER_SPEED, TILE_SIZE } from "./constants";
-import { blocksRect, type WorldMap } from "./map";
+import { blocksRect, shapesBlock, type WorldMap } from "./map";
 import { Direction, type Axis } from "./protocol";
 
 // The single movement function used by both the server (authoritative) and the
@@ -23,7 +23,8 @@ export function collides(map: WorldMap, x: number, y: number): boolean {
       if (blocksRect(map, tx, ty, x0, y0, x1, y)) return true;
     }
   }
-  return false;
+  // Collision shapes of maps made in Godot.
+  return shapesBlock(map, x0, y0, x1, y);
 }
 
 /** Moves along (vx, vy) — a unit vector — by `distance`, sliding along walls. */

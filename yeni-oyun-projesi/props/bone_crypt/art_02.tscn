@@ -1,0 +1,18 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/props/bone_crypt/art_02_golge.png" id="1_xkmg3"]
+[ext_resource type="Texture2D" path="res://assets/props/bone_crypt/art_02.png" id="2_aeace"]
+
+[node name="Art02" type="Node2D" unique_id=1655196220]
+
+[node name="Golge" type="Sprite2D" parent="." unique_id=1284645305]
+z_index = -5
+z_as_relative = false
+position = Vector2(-5, -3)
+texture = ExtResource("1_xkmg3")
+centered = false
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1146505338]
+position = Vector2(-9, -13)
+texture = ExtResource("2_aeace")
+centered = false

@@ -272,8 +272,8 @@ func _gate_aura(at: Vector2) -> void:
 	p.scale_amount_min = 0.8
 	p.scale_amount_max = 0.8
 	var grad := Gradient.new()
-	grad.set_color(0, Color("#c8f0ff"))
-	grad.set_color(1, Color("#6f5bd9", 0.0))
+	grad.set_color(0, Color("#e4ffb8"))
+	grad.set_color(1, Color("#5fbf3a", 0.0))
 	p.color_ramp = grad
 	var mat := CanvasItemMaterial.new()
 	mat.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
@@ -478,7 +478,8 @@ func _on_mob_add(mob: Schema.Struct, mob_id: String) -> void:
 	if def.is_empty():
 		return
 	var scale := float(def.get("scale", 1))
-	var boss: bool = def.get("boss", false)
+	# A boss has its boss behaviour (an object) in its definition; others none.
+	var boss: bool = def.get("boss") != null
 	var view := EntityView.new(sorted, float(f(mob, "x")), float(f(mob, "y")), def.appearance, String(def.name) if boss else "", Color("#ff8c1a"), scale, "mobs/%s" % f(mob, "kind", ""))
 	entities.add_child(view)
 	if boss:
@@ -587,7 +588,7 @@ func _on_town_portal_add(portal: Schema.Struct, portal_id: String) -> void:
 		town_portals[portal_id].view.destroy(true)
 	var to := String(f(portal, "to", ""))
 	var label := "%s → %s" % [f(portal, "owner", ""), GameData.zone(to).get("name", to)]
-	var view := EntityView.new(sorted, float(f(portal, "x")), float(f(portal, "y")), {"type": "portal", "style": "exit" if f(portal, "back", false) else "gate"}, label, Color("#74c0fc"))
+	var view := EntityView.new(sorted, float(f(portal, "x")), float(f(portal, "y")), {"type": "portal", "style": "town"}, label, Color("#74c0fc"))
 	entities.add_child(view)
 	view.clicked.connect(func(_v, ev: InputEventMouseButton):
 		if ev.alt_pressed or not town_portals.has(portal_id):

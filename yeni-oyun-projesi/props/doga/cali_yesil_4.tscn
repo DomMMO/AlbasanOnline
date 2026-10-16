@@ -1,0 +1,18 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/town/golge_kucuk.png" id="1_vpfo8"]
+[ext_resource type="Texture2D" path="res://assets/town/cali_yesil_4.png" id="2_7vapx"]
+
+[node name="CaliYesil4" type="Node2D" unique_id=1047315759]
+
+[node name="Golge" type="Sprite2D" parent="." unique_id=448598786]
+modulate = Color(1, 1, 1, 0.55)
+z_index = -5
+z_as_relative = false
+position = Vector2(0, -2)
+texture = ExtResource("1_vpfo8")
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=945926635]
+position = Vector2(-22, -43)
+texture = ExtResource("2_7vapx")
+centered = false

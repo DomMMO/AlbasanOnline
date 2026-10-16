@@ -1,10 +1,12 @@
 class_name ZoneView
 extends Node2D
 
-## A zone's ground and decor, from the bake (data/zones/<id>.json + art/): the ground in
-## 1024 px chunks under everything, standing decor in the shared y-sorted layer (so characters
-## walk behind and in front of it), drifting clouds under the sky island, and the
-## lights and lamp glows for the night layer.
+## A zone's ground and decor. Zones made in Godot are their map scene (maps/<id>.tscn, a GameMap):
+## its tile layers under everything, its props moved into the shared y-sorted layer (so characters
+## walk behind and in front of them), its MapLights and NightGlows for the night layer, and the
+## collision map made from it by MapExport (what the server reads). Zones not yet moved to Godot
+## come from the bake (data/zones/<id>.json + art/): the ground in 1024 px chunks, standing decor,
+## drifting clouds, lights and glows.
 
 var map: ZoneMap
 var data := {}
@@ -26,6 +28,10 @@ static func load_data(zone_id: String) -> Dictionary:
 
 ## Builds the zone. `sorted` is the y-sorted layer shared with the characters.
 func build(zone_id: String, sorted: Node2D) -> void:
+	var scene_path := "res://maps/%s.tscn" % zone_id
+	if ResourceLoader.exists(scene_path):
+		_build_scene(load(scene_path), sorted)
+		return
 	data = load_data(zone_id)
 	if data.is_empty():
 		return
@@ -77,6 +83,28 @@ func build(zone_id: String, sorted: Node2D) -> void:
 	for l in data.get("lights", []):
 		lights.append({"x": float(l.x), "y": float(l.y), "r": float(l.r), "c": GameData.rgb(l.c), "f": float(l.f), "lamp": bool(l.lamp)})
 	set_process(not _clouds.is_empty())
+
+
+func _build_scene(packed: PackedScene, sorted: Node2D) -> void:
+	var root: GameMap = packed.instantiate()
+	map = ZoneMap.from_export(MapExport.export_map(root))
+	_width_px = map.width * GameData.TILE_SIZE
+	var bg := root.background
+	background = (int(bg.r8) << 16 | int(bg.g8) << 8 | int(bg.b8)) if bg.a > 0.0 else null
+	add_child(root)
+	for light: MapLight in root.find_children("*", "MapLight", true, false):
+		var at := light.global_position
+		lights.append({"x": at.x, "y": at.y, "r": light.radius, "c": light.color, "f": light.flicker, "lamp": light.lamp})
+	for glow: NightGlow in root.find_children("*", "NightGlow", true, false):
+		glows.append({"node": glow, "base": glow.base, "flicker": glow.flicker})
+	# Props sort with the characters: everything in a y-sorted node of the map joins their layer.
+	for holder: Node2D in root.find_children("*", "Node2D", true, false):
+		if not holder.y_sort_enabled or holder is TileMapLayer:
+			continue
+		for child in holder.get_children():
+			if child is Node2D:
+				child.reparent(sorted)
+				_decor.append(child)
 
 
 func _process(delta: float) -> void:

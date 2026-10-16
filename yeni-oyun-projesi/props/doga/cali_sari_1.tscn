@@ -1,0 +1,18 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/town/golge_minik.png" id="1_5nj4o"]
+[ext_resource type="Texture2D" path="res://assets/town/cali_sari_1.png" id="2_qjcyt"]
+
+[node name="CaliSari1" type="Node2D" unique_id=628614133]
+
+[node name="Golge" type="Sprite2D" parent="." unique_id=730963813]
+modulate = Color(1, 1, 1, 0.55)
+z_index = -5
+z_as_relative = false
+position = Vector2(0, -2)
+texture = ExtResource("1_5nj4o")
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=627584265]
+position = Vector2(-15, -27)
+texture = ExtResource("2_qjcyt")
+centered = false

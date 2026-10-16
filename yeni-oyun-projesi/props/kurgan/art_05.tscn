@@ -1,0 +1,10 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/props/kurgan/art_05.png" id="1_j1w1r"]
+
+[node name="Art05" type="Node2D" unique_id=1859351178]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1124082374]
+position = Vector2(-15, -53)
+texture = ExtResource("1_j1w1r")
+centered = false

@@ -1,0 +1,29 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/props/orc_fortress/kukla_01_golge.png" id="1_e4gve"]
+[ext_resource type="Texture2D" path="res://assets/props/orc_fortress/kukla_01.png" id="2_88a7p"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_6d0w1"]
+size = Vector2(16, 16)
+
+[node name="Kukla01" type="Node2D" unique_id=1605423256]
+
+[node name="Golge" type="Sprite2D" parent="." unique_id=1012116957]
+z_index = -5
+z_as_relative = false
+position = Vector2(-5, -3)
+texture = ExtResource("1_e4gve")
+centered = false
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=2137448393]
+position = Vector2(-11, -32)
+texture = ExtResource("2_88a7p")
+centered = false
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=868627526]
+collision_layer = 3
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=1565836484]
+position = Vector2(0, -8)
+shape = SubResource("RectangleShape2D_6d0w1")

@@ -4,6 +4,8 @@ import { buildForest, FOREST_SPOTS } from "./forest";
 import { NODE_SPAWNS } from "./data/gathering";
 import { NPCS } from "./data/npcs";
 import { applyMapEdits, type MapEdits } from "./mapEdits";
+import { layoutFromFile } from "./zoneFile";
+import { ZONE_FILES } from "./zoneFiles";
 import { BIG_DUNGEON_IDS, BIG_DUNGEONS, bigDungeonEntrance, dungeonsIn, type BigDungeonId, type DungeonHost } from "./bigDungeons";
 import { buildCanyon, CANYON_SPOTS } from "./canyon";
 import { buildFrost, FROST_SPOTS } from "./frost";
@@ -11,7 +13,6 @@ import { buildVolcano, VOLCANO_SPOTS } from "./volcano";
 import { buildKurgan, KURGAN_SPOTS } from "./kurgan";
 import { CAVE_BRIDGE, CAVE_ENTRANCE_TILE, CAVE_TORCHES, generateWorldMap, type WorldMap } from "./map";
 import { buildTown, TOWN_SPOTS } from "./town";
-import { buildHarbor, HARBOR_SPOTS } from "./harbor";
 import { buildKeepHall, KEEP_HALL_SPOTS } from "./keepHall";
 
 // A zone is one map with its own room on the server: the main town, the open hunting
@@ -20,7 +21,7 @@ import { buildKeepHall, KEEP_HALL_SPOTS } from "./keepHall";
 // there and you log back in where you left. Every other zone is entered through a portal
 // and leaving it puts you back at the portal you used.
 
-export type ZoneId = "town" | "world" | "forest" | "canyon" | "frost" | "volcano" | "kurgan" | "harbor" | "keep_hall" | "goblin_cave" | "jack_lair" | "pvp_arena" | BigDungeonId;
+export type ZoneId = "town" | "world" | "forest" | "canyon" | "frost" | "volcano" | "kurgan" | "keep_hall" | "goblin_cave" | "jack_lair" | "pvp_arena" | BigDungeonId;
 
 /** New characters start here; the zone anyone can join without a portal ticket. */
 export const HOME_ZONE: ZoneId = "town";
@@ -114,7 +115,10 @@ export const ZONES: Record<ZoneId, ZoneDef> = {
     instanced: false,
     persistent: true,
     market: true,
+    // Players with a rod fish from the island's piers.
+    fishing: true,
     npcs: [
+      "fisherman",
       "weaponsmith",
       "armorer",
       "scribe",
@@ -144,15 +148,6 @@ export const ZONES: Record<ZoneId, ZoneDef> = {
         style: "gate",
         auto: true,
         arriveAt: { x: worldTownGate.x + TILE_SIZE * 3, y: worldTownGate.y + TILE_SIZE * 2 },
-      },
-      {
-        id: "town_harbor_gate",
-        ...TOWN_SPOTS.harborGate,
-        to: "harbor",
-        label: "Liman",
-        style: "gate",
-        auto: true,
-        arriveAt: HARBOR_SPOTS.fromTown,
       },
       {
         id: "town_keep_door",
@@ -350,19 +345,6 @@ export const ZONES: Record<ZoneId, ZoneDef> = {
       },
     ],
   },
-  harbor: {
-    id: "harbor",
-    outdoor: true,
-    name: "Liman",
-    instanced: false,
-    persistent: true,
-    fishing: true,
-    npcs: ["fisherman"],
-    respawnText: "Limanda yeniden doğacaksın.",
-    portals: [
-      { id: "harbor_town_gate", ...HARBOR_SPOTS.townGate, to: "town", label: "Ana Merkez", style: "gate", auto: true, arriveAt: TOWN_SPOTS.fromHarbor },
-    ],
-  },
   keep_hall: {
     id: "keep_hall",
     name: "İç Kale",
@@ -452,7 +434,6 @@ const BUILDERS: Record<ZoneId, () => DungeonLayout> = {
   frost: buildFrost,
   volcano: buildVolcano,
   kurgan: buildKurgan,
-  harbor: buildHarbor,
   keep_hall: buildKeepHall,
   goblin_cave: buildGoblinCave,
   jack_lair: buildJackLair,
@@ -467,7 +448,9 @@ const zoneEdits = new Map<ZoneId, MapEdits>();
 export function zoneLayout(zone: ZoneId): DungeonLayout & { map: WorldMap } {
   let layout = layouts.get(zone);
   if (!layout) {
-    layout = applyMapEdits(BUILDERS[zone]() as DungeonLayout & { map: WorldMap }, zoneEdits.get(zone));
+    const file = ZONE_FILES[zone];
+    // A zone kept as a file is edited in the Godot editor: web editor changes don't apply.
+    layout = file ? layoutFromFile(file) : applyMapEdits(BUILDERS[zone]() as DungeonLayout & { map: WorldMap }, zoneEdits.get(zone));
     layouts.set(zone, layout);
   }
   return layout as DungeonLayout & { map: WorldMap };
@@ -475,7 +458,40 @@ export function zoneLayout(zone: ZoneId): DungeonLayout & { map: WorldMap } {
 
 /** The zone as generated in code, without map editor changes (the editor draws its edits over this). */
 export function baseZoneLayout(zone: ZoneId): DungeonLayout & { map: WorldMap } {
+  const file = ZONE_FILES[zone];
+  return file ? layoutFromFile(file) : (BUILDERS[zone]() as DungeonLayout & { map: WorldMap });
+}
+
+/** The zone as generated in code, even when it is kept as a file (for moving a zone over). */
+export function codeZoneLayout(zone: ZoneId): DungeonLayout & { map: WorldMap } {
   return BUILDERS[zone]() as DungeonLayout & { map: WorldMap };
+}
+
+/** Whether a zone's map is a file made in the Godot editor (the web editor can't change it). */
+export function isFileZone(zone: ZoneId): boolean {
+  return ZONE_FILES[zone] !== undefined;
+}
+
+// NPCs and portals of the zones kept as files stand where the file puts them.
+for (const [zone, file] of Object.entries(ZONE_FILES)) {
+  for (const [id, pos] of Object.entries(file?.npcs ?? {})) if (NPCS[id]) Object.assign(NPCS[id], { x: pos.x, y: pos.y });
+  for (const portal of ZONES[zone as ZoneId]?.portals ?? []) {
+    const pos = file?.portals?.[portal.id];
+    if (!pos) continue;
+    // Where you come back to from behind the portal moves along with it.
+    if (portal.returnTo) portal.returnTo = { x: portal.returnTo.x + pos.x - portal.x, y: portal.returnTo.y + pos.y - portal.y };
+    Object.assign(portal, { x: pos.x, y: pos.y });
+  }
+}
+// Arrival spots a map sets for portals of other zones leading into it.
+for (const [zone, file] of Object.entries(ZONE_FILES)) {
+  if (!file || file.version !== 2 || !file.arrivals) continue;
+  for (const def of Object.values(ZONES)) {
+    for (const portal of def.portals) {
+      const at = file.arrivals[portal.id];
+      if (at && portal.to === zone) portal.arriveAt = { x: at.x, y: at.y };
+    }
+  }
 }
 
 /**

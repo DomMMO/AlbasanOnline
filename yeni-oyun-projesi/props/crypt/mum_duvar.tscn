@@ -1,0 +1,20 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Castle Environment 0.3/Assets/Tiles.png" id="1_udo7x"]
+[ext_resource type="Script" path="res://scripts/map/map_light.gd" id="2_vs4ay"]
+
+[node name="MumDuvar" type="Node2D" unique_id=346381127]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1562469381]
+position = Vector2(-5, -11)
+texture = ExtResource("1_udo7x")
+centered = false
+region_enabled = true
+region_rect = Rect2(339, 178, 10, 11)
+
+[node name="Lamba" type="Marker2D" parent="." unique_id=916111545]
+position = Vector2(0, -8)
+script = ExtResource("2_vs4ay")
+radius = 36.0
+flicker = 0.12
+lamp = false

@@ -1,0 +1,538 @@
+{
+ "width": 128,
+ "height": 96,
+ "spawn": {
+  "x": 1048,
+  "y": 1344
+ },
+ "npcs": {
+  "ranger": {
+   "x": 952,
+   "y": 1312
+  },
+  "peddler": {
+   "x": 1176,
+   "y": 1312
+  }
+ },
+ "portals": {
+  "abandoned_mine_entrance": {
+   "x": 248,
+   "y": 800
+  },
+  "sunken_temple_entrance": {
+   "x": 824,
+   "y": 640
+  },
+  "bone_crypt_entrance": {
+   "x": 472,
+   "y": 192
+  },
+  "orc_fortress_entrance": {
+   "x": 280,
+   "y": 1216
+  },
+  "dragon_lair_entrance": {
+   "x": 1048,
+   "y": 160
+  },
+  "forest_valley_gate": {
+   "x": 1048,
+   "y": 1472
+  }
+ },
+ "spawnZones": [
+  {
+   "mob": "dark_wolf",
+   "tx": 83,
+   "ty": 55,
+   "radius": 6,
+   "count": 7
+  },
+  {
+   "mob": "moon_wolf",
+   "tx": 83,
+   "ty": 55,
+   "radius": 6,
+   "count": 3
+  },
+  {
+   "mob": "poison_slime",
+   "tx": 43,
+   "ty": 45,
+   "radius": 6,
+   "count": 7
+  },
+  {
+   "mob": "bandit",
+   "tx": 97,
+   "ty": 29,
+   "radius": 6,
+   "count": 8
+  },
+  {
+   "mob": "skeleton",
+   "tx": 29,
+   "ty": 23,
+   "radius": 6,
+   "count": 8
+  },
+  {
+   "mob": "night_wraith",
+   "tx": 29,
+   "ty": 23,
+   "radius": 6,
+   "count": 4
+  },
+  {
+   "mob": "orc",
+   "tx": 25,
+   "ty": 67,
+   "radius": 6,
+   "count": 7
+  },
+  {
+   "mob": "dire_bear",
+   "tx": 105,
+   "ty": 71,
+   "radius": 4,
+   "count": 3
+  },
+  {
+   "mob": "satyr_warrior",
+   "tx": 113,
+   "ty": 49,
+   "radius": 4,
+   "count": 5
+  },
+  {
+   "mob": "satyr_spearman",
+   "tx": 113,
+   "ty": 49,
+   "radius": 4,
+   "count": 4
+  },
+  {
+   "mob": "satyr_chief",
+   "tx": 113,
+   "ty": 49,
+   "radius": 1,
+   "count": 1
+  },
+  {
+   "mob": "moss_golem",
+   "tx": 55,
+   "ty": 61,
+   "radius": 3,
+   "count": 3
+  },
+  {
+   "mob": "bandit_chief",
+   "tx": 97,
+   "ty": 19,
+   "radius": 1,
+   "count": 1
+  },
+  {
+   "mob": "dark_wolf",
+   "tx": 76,
+   "ty": 70,
+   "radius": 6,
+   "count": 7
+  },
+  {
+   "mob": "moon_wolf",
+   "tx": 76,
+   "ty": 70,
+   "radius": 6,
+   "count": 3
+  },
+  {
+   "mob": "dark_wolf",
+   "tx": 74,
+   "ty": 40,
+   "radius": 6,
+   "count": 7
+  },
+  {
+   "mob": "moon_wolf",
+   "tx": 74,
+   "ty": 40,
+   "radius": 6,
+   "count": 3
+  },
+  {
+   "mob": "dark_wolf",
+   "tx": 87,
+   "ty": 82,
+   "radius": 6,
+   "count": 7
+  },
+  {
+   "mob": "moon_wolf",
+   "tx": 87,
+   "ty": 82,
+   "radius": 6,
+   "count": 3
+  },
+  {
+   "mob": "poison_slime",
+   "tx": 40,
+   "ty": 73,
+   "radius": 6,
+   "count": 7
+  },
+  {
+   "mob": "poison_slime",
+   "tx": 57,
+   "ty": 20,
+   "radius": 6,
+   "count": 7
+  },
+  {
+   "mob": "poison_slime",
+   "tx": 25,
+   "ty": 48,
+   "radius": 6,
+   "count": 7
+  },
+  {
+   "mob": "bandit",
+   "tx": 97,
+   "ty": 47,
+   "radius": 6,
+   "count": 8
+  },
+  {
+   "mob": "bandit",
+   "tx": 76,
+   "ty": 20,
+   "radius": 6,
+   "count": 8
+  },
+  {
+   "mob": "bandit",
+   "tx": 112,
+   "ty": 9,
+   "radius": 6,
+   "count": 8
+  },
+  {
+   "mob": "skeleton",
+   "tx": 12,
+   "ty": 16,
+   "radius": 6,
+   "count": 8
+  },
+  {
+   "mob": "night_wraith",
+   "tx": 12,
+   "ty": 16,
+   "radius": 6,
+   "count": 4
+  },
+  {
+   "mob": "skeleton",
+   "tx": 14,
+   "ty": 35,
+   "radius": 6,
+   "count": 8
+  },
+  {
+   "mob": "night_wraith",
+   "tx": 14,
+   "ty": 35,
+   "radius": 6,
+   "count": 4
+  },
+  {
+   "mob": "skeleton",
+   "tx": 43,
+   "ty": 12,
+   "radius": 6,
+   "count": 8
+  },
+  {
+   "mob": "night_wraith",
+   "tx": 43,
+   "ty": 12,
+   "radius": 6,
+   "count": 4
+  },
+  {
+   "mob": "orc",
+   "tx": 11,
+   "ty": 85,
+   "radius": 6,
+   "count": 7
+  },
+  {
+   "mob": "orc",
+   "tx": 10,
+   "ty": 61,
+   "radius": 6,
+   "count": 7
+  },
+  {
+   "mob": "orc",
+   "tx": 28,
+   "ty": 86,
+   "radius": 6,
+   "count": 7
+  },
+  {
+   "mob": "dire_bear",
+   "tx": 117,
+   "ty": 84,
+   "radius": 4,
+   "count": 3
+  },
+  {
+   "mob": "dire_bear",
+   "tx": 101,
+   "ty": 85,
+   "radius": 4,
+   "count": 3
+  },
+  {
+   "mob": "dire_bear",
+   "tx": 91,
+   "ty": 68,
+   "radius": 4,
+   "count": 3
+  },
+  {
+   "mob": "satyr_warrior",
+   "tx": 116,
+   "ty": 26,
+   "radius": 4,
+   "count": 5
+  },
+  {
+   "mob": "satyr_spearman",
+   "tx": 116,
+   "ty": 26,
+   "radius": 4,
+   "count": 4
+  },
+  {
+   "mob": "satyr_warrior",
+   "tx": 118,
+   "ty": 65,
+   "radius": 4,
+   "count": 5
+  },
+  {
+   "mob": "satyr_spearman",
+   "tx": 118,
+   "ty": 65,
+   "radius": 4,
+   "count": 4
+  },
+  {
+   "mob": "satyr_warrior",
+   "tx": 100,
+   "ty": 60,
+   "radius": 4,
+   "count": 5
+  },
+  {
+   "mob": "satyr_spearman",
+   "tx": 100,
+   "ty": 60,
+   "radius": 4,
+   "count": 4
+  },
+  {
+   "mob": "moss_golem",
+   "tx": 50,
+   "ty": 86,
+   "radius": 3,
+   "count": 3
+  },
+  {
+   "mob": "moss_golem",
+   "tx": 37,
+   "ty": 58,
+   "radius": 3,
+   "count": 3
+  },
+  {
+   "mob": "moss_golem",
+   "tx": 63,
+   "ty": 49,
+   "radius": 3,
+   "count": 3
+  }
+ ],
+ "nodes": [
+  {
+   "node": "silver_vein",
+   "tx": 83,
+   "ty": 55,
+   "radius": 5.0,
+   "count": 2
+  },
+  {
+   "node": "night_bloom_node",
+   "tx": 43,
+   "ty": 45,
+   "radius": 5.0,
+   "count": 4
+  },
+  {
+   "node": "iron_vein",
+   "tx": 97,
+   "ty": 29,
+   "radius": 5.0,
+   "count": 2
+  },
+  {
+   "node": "dragon_thorn_node",
+   "tx": 29,
+   "ty": 23,
+   "radius": 5.0,
+   "count": 3
+  },
+  {
+   "node": "silver_vein",
+   "tx": 25,
+   "ty": 67,
+   "radius": 5.0,
+   "count": 3
+  },
+  {
+   "node": "mithril_vein",
+   "tx": 105,
+   "ty": 71,
+   "radius": 4.0,
+   "count": 3
+  },
+  {
+   "node": "silver_vein",
+   "tx": 76,
+   "ty": 70,
+   "radius": 5.0,
+   "count": 2
+  },
+  {
+   "node": "silver_vein",
+   "tx": 74,
+   "ty": 40,
+   "radius": 5.0,
+   "count": 2
+  },
+  {
+   "node": "silver_vein",
+   "tx": 87,
+   "ty": 82,
+   "radius": 5.0,
+   "count": 2
+  },
+  {
+   "node": "night_bloom_node",
+   "tx": 40,
+   "ty": 73,
+   "radius": 5.0,
+   "count": 4
+  },
+  {
+   "node": "night_bloom_node",
+   "tx": 57,
+   "ty": 20,
+   "radius": 5.0,
+   "count": 4
+  },
+  {
+   "node": "night_bloom_node",
+   "tx": 25,
+   "ty": 48,
+   "radius": 5.0,
+   "count": 4
+  },
+  {
+   "node": "iron_vein",
+   "tx": 97,
+   "ty": 47,
+   "radius": 5.0,
+   "count": 2
+  },
+  {
+   "node": "iron_vein",
+   "tx": 76,
+   "ty": 20,
+   "radius": 5.0,
+   "count": 2
+  },
+  {
+   "node": "iron_vein",
+   "tx": 112,
+   "ty": 9,
+   "radius": 5.0,
+   "count": 2
+  },
+  {
+   "node": "dragon_thorn_node",
+   "tx": 12,
+   "ty": 16,
+   "radius": 5.0,
+   "count": 3
+  },
+  {
+   "node": "dragon_thorn_node",
+   "tx": 14,
+   "ty": 35,
+   "radius": 5.0,
+   "count": 3
+  },
+  {
+   "node": "dragon_thorn_node",
+   "tx": 43,
+   "ty": 12,
+   "radius": 5.0,
+   "count": 3
+  },
+  {
+   "node": "silver_vein",
+   "tx": 11,
+   "ty": 85,
+   "radius": 5.0,
+   "count": 3
+  },
+  {
+   "node": "silver_vein",
+   "tx": 10,
+   "ty": 61,
+   "radius": 5.0,
+   "count": 3
+  },
+  {
+   "node": "silver_vein",
+   "tx": 28,
+   "ty": 86,
+   "radius": 5.0,
+   "count": 3
+  },
+  {
+   "node": "mithril_vein",
+   "tx": 117,
+   "ty": 84,
+   "radius": 4.0,
+   "count": 3
+  },
+  {
+   "node": "mithril_vein",
+   "tx": 101,
+   "ty": 85,
+   "radius": 4.0,
+   "count": 3
+  },
+  {
+   "node": "mithril_vein",
+   "tx": 91,
+   "ty": 68,
+   "radius": 4.0,
+   "count": 3
+  }
+ ]
+}

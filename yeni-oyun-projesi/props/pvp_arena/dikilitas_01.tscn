@@ -1,0 +1,21 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/props/pvp_arena/dikilitas_01.png" id="1_hogva"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ptfju"]
+size = Vector2(16, 16)
+
+[node name="Dikilitas01" type="Node2D" unique_id=105408815]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=515163652]
+position = Vector2(-15, -53)
+texture = ExtResource("1_hogva")
+centered = false
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=1944455110]
+collision_layer = 3
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=1475435026]
+position = Vector2(-8, -8)
+shape = SubResource("RectangleShape2D_ptfju")

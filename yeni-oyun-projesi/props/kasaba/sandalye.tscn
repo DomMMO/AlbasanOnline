@@ -1,0 +1,12 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Town/Environment/Props/Static/Furniture.png" id="1_8okgr"]
+
+[node name="Sandalye" type="Node2D" unique_id=1408804334]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1147674051]
+position = Vector2(-6, -16)
+texture = ExtResource("1_8okgr")
+centered = false
+region_enabled = true
+region_rect = Rect2(114, 489, 12, 16)

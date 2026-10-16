@@ -1,0 +1,22 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Cemetery/Environment/Props/Graves.png" id="1_u2vof"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_40brs"]
+size = Vector2(28, 44)
+
+[node name="TurbeKuru" type="Node2D" unique_id=1989478504]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=113901650]
+position = Vector2(-15, -100)
+texture = ExtResource("1_u2vof")
+centered = false
+region_enabled = true
+region_rect = Rect2(193, 92, 30, 100)
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=1110582196]
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=1832514032]
+position = Vector2(0, -22)
+shape = SubResource("RectangleShape2D_40brs")

@@ -1,0 +1,21 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Town/Environment/Props/Static/Resources.png" id="1_0dfda"]
+[ext_resource type="Script" path="res://scripts/map/map_light.gd" id="2_5bpal"]
+
+[node name="Cevher" type="Node2D" unique_id=1768540104]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=621459065]
+position = Vector2(-3, -9)
+texture = ExtResource("1_0dfda")
+centered = false
+region_enabled = true
+region_rect = Rect2(68, 20, 7, 9)
+
+[node name="Lamba" type="Marker2D" parent="." unique_id=1749135415]
+position = Vector2(0, -6)
+script = ExtResource("2_5bpal")
+radius = 22.0
+color = Color(0.4392157, 0.78431374, 1, 1)
+flicker = 0.04
+lamp = false

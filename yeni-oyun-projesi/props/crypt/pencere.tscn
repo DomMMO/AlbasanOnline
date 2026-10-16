@@ -1,0 +1,12 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Castle Environment 0.3/Assets/Tiles.png" id="1_evetp"]
+
+[node name="Pencere" type="Node2D" unique_id=1158029521]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=943499997]
+position = Vector2(-6, -22)
+texture = ExtResource("1_evetp")
+centered = false
+region_enabled = true
+region_rect = Rect2(194, 133, 12, 22)

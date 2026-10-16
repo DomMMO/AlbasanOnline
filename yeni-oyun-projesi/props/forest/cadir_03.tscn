@@ -1,0 +1,21 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/props/forest/cadir_03.png" id="1_43sbu"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_x08ao"]
+size = Vector2(48, 32)
+
+[node name="Cadir03" type="Node2D" unique_id=837507869]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1274412834]
+position = Vector2(-26, -45)
+texture = ExtResource("1_43sbu")
+centered = false
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=869579372]
+collision_layer = 3
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=1531050304]
+position = Vector2(0, -16)
+shape = SubResource("RectangleShape2D_x08ao")

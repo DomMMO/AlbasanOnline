@@ -1,0 +1,280 @@
+{
+ "width": 128,
+ "height": 96,
+ "spawn": {
+  "x": 1016,
+  "y": 256
+ },
+ "npcs": {
+  "ember_trader": {
+   "x": 920,
+   "y": 224
+  },
+  "ash_sentinel": {
+   "x": 1176,
+   "y": 224
+  }
+ },
+ "portals": {
+  "magma_forges_entrance": {
+   "x": 1880,
+   "y": 928
+  },
+  "ash_temple_entrance": {
+   "x": 216,
+   "y": 512
+  },
+  "volcano_valley_gate": {
+   "x": 1048,
+   "y": 96
+  },
+  "volcano_kurgan_gate": {
+   "x": 1064,
+   "y": 1472
+  }
+ },
+ "arrivals": {
+  "world_volcano_gate": {
+   "x": 1048,
+   "y": 192
+  },
+  "kurgan_volcano_gate": {
+   "x": 1064,
+   "y": 1344
+  }
+ },
+ "spawnZones": [
+  {
+   "mob": "magma_slime",
+   "tx": 35,
+   "ty": 25,
+   "radius": 6,
+   "count": 7
+  },
+  {
+   "mob": "ember_wolf",
+   "tx": 95,
+   "ty": 25,
+   "radius": 6,
+   "count": 7
+  },
+  {
+   "mob": "hellhound",
+   "tx": 95,
+   "ty": 25,
+   "radius": 6,
+   "count": 3
+  },
+  {
+   "mob": "ash_cultist",
+   "tx": 25,
+   "ty": 67,
+   "radius": 5,
+   "count": 7
+  },
+  {
+   "mob": "fire_elemental",
+   "tx": 61,
+   "ty": 63,
+   "radius": 5,
+   "count": 5
+  },
+  {
+   "mob": "ash_ghost",
+   "tx": 61,
+   "ty": 63,
+   "radius": 5,
+   "count": 3
+  },
+  {
+   "mob": "lava_salamander",
+   "tx": 101,
+   "ty": 63,
+   "radius": 5,
+   "count": 5
+  },
+  {
+   "mob": "lava_golem",
+   "tx": 81,
+   "ty": 83,
+   "radius": 4,
+   "count": 4
+  },
+  {
+   "mob": "ember_giant_atesan",
+   "tx": 45,
+   "ty": 85,
+   "radius": 1,
+   "count": 1
+  },
+  {
+   "mob": "magma_slime",
+   "tx": 52,
+   "ty": 36,
+   "radius": 6,
+   "count": 7
+  },
+  {
+   "mob": "magma_slime",
+   "tx": 19,
+   "ty": 14,
+   "radius": 6,
+   "count": 7
+  },
+  {
+   "mob": "magma_slime",
+   "tx": 21,
+   "ty": 48,
+   "radius": 6,
+   "count": 7
+  },
+  {
+   "mob": "ember_wolf",
+   "tx": 88,
+   "ty": 50,
+   "radius": 6,
+   "count": 7
+  },
+  {
+   "mob": "hellhound",
+   "tx": 88,
+   "ty": 50,
+   "radius": 6,
+   "count": 3
+  },
+  {
+   "mob": "ember_wolf",
+   "tx": 112,
+   "ty": 23,
+   "radius": 6,
+   "count": 7
+  },
+  {
+   "mob": "hellhound",
+   "tx": 112,
+   "ty": 23,
+   "radius": 6,
+   "count": 3
+  },
+  {
+   "mob": "ember_wolf",
+   "tx": 78,
+   "ty": 24,
+   "radius": 6,
+   "count": 7
+  },
+  {
+   "mob": "hellhound",
+   "tx": 78,
+   "ty": 24,
+   "radius": 6,
+   "count": 3
+  },
+  {
+   "mob": "ash_cultist",
+   "tx": 41,
+   "ty": 66,
+   "radius": 5,
+   "count": 7
+  },
+  {
+   "mob": "ash_cultist",
+   "tx": 9,
+   "ty": 75,
+   "radius": 5,
+   "count": 7
+  },
+  {
+   "mob": "ash_cultist",
+   "tx": 23,
+   "ty": 83,
+   "radius": 5,
+   "count": 7
+  },
+  {
+   "mob": "fire_elemental",
+   "tx": 67,
+   "ty": 42,
+   "radius": 5,
+   "count": 5
+  },
+  {
+   "mob": "ash_ghost",
+   "tx": 67,
+   "ty": 42,
+   "radius": 5,
+   "count": 3
+  },
+  {
+   "mob": "fire_elemental",
+   "tx": 78,
+   "ty": 66,
+   "radius": 5,
+   "count": 5
+  },
+  {
+   "mob": "ash_ghost",
+   "tx": 78,
+   "ty": 66,
+   "radius": 5,
+   "count": 3
+  },
+  {
+   "mob": "fire_elemental",
+   "tx": 38,
+   "ty": 49,
+   "radius": 5,
+   "count": 5
+  },
+  {
+   "mob": "ash_ghost",
+   "tx": 38,
+   "ty": 49,
+   "radius": 5,
+   "count": 3
+  },
+  {
+   "mob": "lava_salamander",
+   "tx": 98,
+   "ty": 84,
+   "radius": 5,
+   "count": 5
+  },
+  {
+   "mob": "lava_salamander",
+   "tx": 113,
+   "ty": 47,
+   "radius": 5,
+   "count": 5
+  },
+  {
+   "mob": "lava_salamander",
+   "tx": 115,
+   "ty": 71,
+   "radius": 5,
+   "count": 5
+  },
+  {
+   "mob": "lava_golem",
+   "tx": 58,
+   "ty": 76,
+   "radius": 4,
+   "count": 4
+  },
+  {
+   "mob": "lava_golem",
+   "tx": 72,
+   "ty": 54,
+   "radius": 4,
+   "count": 4
+  },
+  {
+   "mob": "lava_golem",
+   "tx": 90,
+   "ty": 69,
+   "radius": 4,
+   "count": 4
+  }
+ ],
+ "nodes": []
+}

@@ -1,0 +1,408 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/props/ic_kale_01_golge.png" id="1_kdfuy"]
+[ext_resource type="Texture2D" path="res://assets/props/ic_kale_01.png" id="2_va8ln"]
+[ext_resource type="Texture2D" path="res://assets/props/ic_kale_01_isik1.png" id="3_7qlc3"]
+[ext_resource type="Script" path="res://scripts/map/night_glow.gd" id="4_rf05h"]
+[ext_resource type="Texture2D" path="res://assets/props/ic_kale_01_isik2.png" id="5_hntk6"]
+[ext_resource type="Texture2D" path="res://assets/props/ic_kale_01_isik3.png" id="6_on1jv"]
+[ext_resource type="Texture2D" path="res://assets/props/ic_kale_01_isik4.png" id="7_skx6s"]
+[ext_resource type="Texture2D" path="res://assets/props/ic_kale_01_isik5.png" id="8_efeg8"]
+[ext_resource type="Texture2D" path="res://assets/props/ic_kale_01_isik6.png" id="9_n1j3j"]
+[ext_resource type="Texture2D" path="res://assets/props/ic_kale_01_isik7.png" id="10_w5sgk"]
+[ext_resource type="Texture2D" path="res://assets/props/ic_kale_01_isik8.png" id="11_p8hib"]
+[ext_resource type="Texture2D" path="res://assets/props/ic_kale_01_isik9.png" id="12_x4oca"]
+[ext_resource type="Texture2D" path="res://assets/props/ic_kale_01_isik10.png" id="13_msm4u"]
+[ext_resource type="Texture2D" path="res://assets/props/ic_kale_01_isik11.png" id="14_t334n"]
+[ext_resource type="Texture2D" path="res://assets/props/ic_kale_01_isik12.png" id="15_ftvgs"]
+[ext_resource type="Texture2D" path="res://assets/props/ic_kale_01_isik13.png" id="16_xx34g"]
+[ext_resource type="Texture2D" path="res://assets/props/ic_kale_01_isik14.png" id="17_umke4"]
+[ext_resource type="Texture2D" path="res://assets/props/ic_kale_01_isik15.png" id="18_ql8cm"]
+[ext_resource type="Texture2D" path="res://assets/props/ic_kale_01_isik16.png" id="19_jbg8q"]
+[ext_resource type="Texture2D" path="res://assets/props/ic_kale_01_isik17.png" id="20_oy6j0"]
+[ext_resource type="Texture2D" path="res://assets/props/ic_kale_01_isik18.png" id="21_e17rj"]
+[ext_resource type="Texture2D" path="res://assets/props/ic_kale_01_isik19.png" id="22_ro2pg"]
+[ext_resource type="Texture2D" path="res://assets/props/ic_kale_01_isik20.png" id="23_jqskv"]
+[ext_resource type="Texture2D" path="res://assets/props/ic_kale_01_isik21.png" id="24_5mylo"]
+[ext_resource type="Texture2D" path="res://assets/props/ic_kale_01_isik22.png" id="25_ebcpw"]
+[ext_resource type="Texture2D" path="res://assets/props/ic_kale_01_isik23.png" id="26_j6n7q"]
+[ext_resource type="Texture2D" path="res://assets/props/ic_kale_01_isik24.png" id="27_n3twx"]
+[ext_resource type="Texture2D" path="res://assets/props/ic_kale_01_isik25.png" id="28_j273f"]
+[ext_resource type="Texture2D" path="res://assets/props/ic_kale_01_isik26.png" id="29_m4h6v"]
+[ext_resource type="Texture2D" path="res://assets/props/ic_kale_01_isik27.png" id="30_o7ykj"]
+[ext_resource type="Texture2D" path="res://assets/props/ic_kale_01_isik28.png" id="31_kqvs0"]
+[ext_resource type="Texture2D" path="res://assets/props/ic_kale_01_isik29.png" id="32_8x3wi"]
+[ext_resource type="Texture2D" path="res://assets/props/ic_kale_01_isik30.png" id="33_ivfwp"]
+[ext_resource type="Texture2D" path="res://assets/props/ic_kale_01_isik31.png" id="34_jmw21"]
+[ext_resource type="Texture2D" path="res://assets/props/ic_kale_01_isik32.png" id="35_8e0gu"]
+[ext_resource type="Texture2D" path="res://assets/props/ic_kale_01_isik33.png" id="36_0yh1f"]
+[ext_resource type="Texture2D" path="res://assets/props/ic_kale_01_isik34.png" id="37_hehuf"]
+[ext_resource type="Texture2D" path="res://assets/props/ic_kale_01_isik35.png" id="38_bkfd4"]
+[ext_resource type="Texture2D" path="res://assets/props/ic_kale_01_isik36.png" id="39_ny4nh"]
+[ext_resource type="Texture2D" path="res://assets/props/ic_kale_01_isik37.png" id="40_kdunm"]
+[ext_resource type="Texture2D" path="res://assets/props/ic_kale_01_isik38.png" id="41_dceku"]
+[ext_resource type="Texture2D" path="res://assets/props/ic_kale_01_isik39.png" id="42_n0utt"]
+[ext_resource type="Texture2D" path="res://assets/props/ic_kale_01_isik40.png" id="43_uoumn"]
+[ext_resource type="Texture2D" path="res://assets/props/ic_kale_01_isik41.png" id="44_0vlto"]
+[ext_resource type="Script" path="res://scripts/map/map_light.gd" id="45_2nd0u"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_viif3"]
+blend_mode = 1
+
+[node name="IcKale01" type="Node2D" unique_id=692471117]
+
+[node name="Golge" type="Sprite2D" parent="." unique_id=1925071808]
+z_index = -5
+z_as_relative = false
+position = Vector2(-117, -6)
+texture = ExtResource("1_kdfuy")
+centered = false
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1393466087]
+position = Vector2(-116, -309)
+texture = ExtResource("2_va8ln")
+centered = false
+
+[node name="Isik1" type="Sprite2D" parent="." unique_id=1131576502]
+material = SubResource("CanvasItemMaterial_viif3")
+position = Vector2(-52, -141)
+texture = ExtResource("3_7qlc3")
+centered = false
+script = ExtResource("4_rf05h")
+flicker = 0.08
+
+[node name="Isik2" type="Sprite2D" parent="." unique_id=442018553]
+material = SubResource("CanvasItemMaterial_viif3")
+position = Vector2(-52, -123)
+texture = ExtResource("5_hntk6")
+centered = false
+script = ExtResource("4_rf05h")
+flicker = 0.08
+
+[node name="Isik3" type="Sprite2D" parent="." unique_id=1485485432]
+material = SubResource("CanvasItemMaterial_viif3")
+position = Vector2(-52, -105)
+texture = ExtResource("6_on1jv")
+centered = false
+script = ExtResource("4_rf05h")
+flicker = 0.08
+
+[node name="Isik4" type="Sprite2D" parent="." unique_id=1121474983]
+material = SubResource("CanvasItemMaterial_viif3")
+position = Vector2(-52, -87)
+texture = ExtResource("7_skx6s")
+centered = false
+script = ExtResource("4_rf05h")
+flicker = 0.08
+
+[node name="Isik5" type="Sprite2D" parent="." unique_id=263410677]
+material = SubResource("CanvasItemMaterial_viif3")
+position = Vector2(48, -141)
+texture = ExtResource("8_efeg8")
+centered = false
+script = ExtResource("4_rf05h")
+flicker = 0.08
+
+[node name="Isik6" type="Sprite2D" parent="." unique_id=1044695487]
+material = SubResource("CanvasItemMaterial_viif3")
+position = Vector2(48, -123)
+texture = ExtResource("9_n1j3j")
+centered = false
+script = ExtResource("4_rf05h")
+flicker = 0.08
+
+[node name="Isik7" type="Sprite2D" parent="." unique_id=771940680]
+material = SubResource("CanvasItemMaterial_viif3")
+position = Vector2(48, -105)
+texture = ExtResource("10_w5sgk")
+centered = false
+script = ExtResource("4_rf05h")
+flicker = 0.08
+
+[node name="Isik8" type="Sprite2D" parent="." unique_id=274566994]
+material = SubResource("CanvasItemMaterial_viif3")
+position = Vector2(48, -87)
+texture = ExtResource("11_p8hib")
+centered = false
+script = ExtResource("4_rf05h")
+flicker = 0.08
+
+[node name="Isik9" type="Sprite2D" parent="." unique_id=2044284316]
+material = SubResource("CanvasItemMaterial_viif3")
+position = Vector2(-2, -175)
+texture = ExtResource("12_x4oca")
+centered = false
+script = ExtResource("4_rf05h")
+flicker = 0.08
+
+[node name="Isik10" type="Sprite2D" parent="." unique_id=642002368]
+material = SubResource("CanvasItemMaterial_viif3")
+position = Vector2(-2, -157)
+texture = ExtResource("13_msm4u")
+centered = false
+script = ExtResource("4_rf05h")
+flicker = 0.08
+
+[node name="Isik11" type="Sprite2D" parent="." unique_id=322857140]
+material = SubResource("CanvasItemMaterial_viif3")
+position = Vector2(-2, -139)
+texture = ExtResource("14_t334n")
+centered = false
+script = ExtResource("4_rf05h")
+flicker = 0.08
+
+[node name="Isik12" type="Sprite2D" parent="." unique_id=1982310850]
+material = SubResource("CanvasItemMaterial_viif3")
+position = Vector2(-2, -121)
+texture = ExtResource("15_ftvgs")
+centered = false
+script = ExtResource("4_rf05h")
+flicker = 0.08
+
+[node name="Isik13" type="Sprite2D" parent="." unique_id=1727145598]
+material = SubResource("CanvasItemMaterial_viif3")
+position = Vector2(-2, -103)
+texture = ExtResource("16_xx34g")
+centered = false
+script = ExtResource("4_rf05h")
+flicker = 0.08
+
+[node name="Isik14" type="Sprite2D" parent="." unique_id=1337352079]
+material = SubResource("CanvasItemMaterial_viif3")
+position = Vector2(-2, -85)
+texture = ExtResource("17_umke4")
+centered = false
+script = ExtResource("4_rf05h")
+flicker = 0.08
+
+[node name="Isik15" type="Sprite2D" parent="." unique_id=213970847]
+material = SubResource("CanvasItemMaterial_viif3")
+position = Vector2(-48, -83)
+texture = ExtResource("18_ql8cm")
+centered = false
+script = ExtResource("4_rf05h")
+flicker = 0.08
+
+[node name="Isik16" type="Sprite2D" parent="." unique_id=2062983100]
+material = SubResource("CanvasItemMaterial_viif3")
+position = Vector2(-48, -59)
+texture = ExtResource("19_jbg8q")
+centered = false
+script = ExtResource("4_rf05h")
+flicker = 0.08
+
+[node name="Isik17" type="Sprite2D" parent="." unique_id=344314273]
+material = SubResource("CanvasItemMaterial_viif3")
+position = Vector2(-26, -83)
+texture = ExtResource("20_oy6j0")
+centered = false
+script = ExtResource("4_rf05h")
+flicker = 0.08
+
+[node name="Isik18" type="Sprite2D" parent="." unique_id=1432288004]
+material = SubResource("CanvasItemMaterial_viif3")
+position = Vector2(-26, -59)
+texture = ExtResource("21_e17rj")
+centered = false
+script = ExtResource("4_rf05h")
+flicker = 0.08
+
+[node name="Isik19" type="Sprite2D" parent="." unique_id=2060671708]
+material = SubResource("CanvasItemMaterial_viif3")
+position = Vector2(18, -83)
+texture = ExtResource("22_ro2pg")
+centered = false
+script = ExtResource("4_rf05h")
+flicker = 0.08
+
+[node name="Isik20" type="Sprite2D" parent="." unique_id=1567662193]
+material = SubResource("CanvasItemMaterial_viif3")
+position = Vector2(18, -59)
+texture = ExtResource("23_jqskv")
+centered = false
+script = ExtResource("4_rf05h")
+flicker = 0.08
+
+[node name="Isik21" type="Sprite2D" parent="." unique_id=2141442215]
+material = SubResource("CanvasItemMaterial_viif3")
+position = Vector2(40, -83)
+texture = ExtResource("24_5mylo")
+centered = false
+script = ExtResource("4_rf05h")
+flicker = 0.08
+
+[node name="Isik22" type="Sprite2D" parent="." unique_id=1755340802]
+material = SubResource("CanvasItemMaterial_viif3")
+position = Vector2(40, -59)
+texture = ExtResource("25_ebcpw")
+centered = false
+script = ExtResource("4_rf05h")
+flicker = 0.08
+
+[node name="Isik23" type="Sprite2D" parent="." unique_id=1891497637]
+material = SubResource("CanvasItemMaterial_viif3")
+position = Vector2(-7, -85)
+texture = ExtResource("26_j6n7q")
+centered = false
+script = ExtResource("4_rf05h")
+flicker = 0.08
+
+[node name="Isik24" type="Sprite2D" parent="." unique_id=1230268009]
+material = SubResource("CanvasItemMaterial_viif3")
+position = Vector2(-27, -53)
+texture = ExtResource("27_n3twx")
+centered = false
+script = ExtResource("4_rf05h")
+flicker = 0.08
+
+[node name="Isik25" type="Sprite2D" parent="." unique_id=1899332116]
+material = SubResource("CanvasItemMaterial_viif3")
+position = Vector2(-27, -35)
+texture = ExtResource("28_j273f")
+centered = false
+script = ExtResource("4_rf05h")
+flicker = 0.08
+
+[node name="Isik26" type="Sprite2D" parent="." unique_id=138827710]
+material = SubResource("CanvasItemMaterial_viif3")
+position = Vector2(-27, -17)
+texture = ExtResource("29_m4h6v")
+centered = false
+script = ExtResource("4_rf05h")
+flicker = 0.08
+
+[node name="Isik27" type="Sprite2D" parent="." unique_id=1601715958]
+material = SubResource("CanvasItemMaterial_viif3")
+position = Vector2(23, -53)
+texture = ExtResource("30_o7ykj")
+centered = false
+script = ExtResource("4_rf05h")
+flicker = 0.08
+
+[node name="Isik28" type="Sprite2D" parent="." unique_id=1499181011]
+material = SubResource("CanvasItemMaterial_viif3")
+position = Vector2(23, -35)
+texture = ExtResource("31_kqvs0")
+centered = false
+script = ExtResource("4_rf05h")
+flicker = 0.08
+
+[node name="Isik29" type="Sprite2D" parent="." unique_id=1748823859]
+material = SubResource("CanvasItemMaterial_viif3")
+position = Vector2(23, -17)
+texture = ExtResource("32_8x3wi")
+centered = false
+script = ExtResource("4_rf05h")
+flicker = 0.08
+
+[node name="Isik30" type="Sprite2D" parent="." unique_id=968656274]
+material = SubResource("CanvasItemMaterial_viif3")
+position = Vector2(-97, -81)
+texture = ExtResource("33_ivfwp")
+centered = false
+script = ExtResource("4_rf05h")
+flicker = 0.08
+
+[node name="Isik31" type="Sprite2D" parent="." unique_id=1623739327]
+material = SubResource("CanvasItemMaterial_viif3")
+position = Vector2(-97, -63)
+texture = ExtResource("34_jmw21")
+centered = false
+script = ExtResource("4_rf05h")
+flicker = 0.08
+
+[node name="Isik32" type="Sprite2D" parent="." unique_id=1891698533]
+material = SubResource("CanvasItemMaterial_viif3")
+position = Vector2(-97, -45)
+texture = ExtResource("35_8e0gu")
+centered = false
+script = ExtResource("4_rf05h")
+flicker = 0.08
+
+[node name="Isik33" type="Sprite2D" parent="." unique_id=1555926432]
+material = SubResource("CanvasItemMaterial_viif3")
+position = Vector2(-97, -27)
+texture = ExtResource("36_0yh1f")
+centered = false
+script = ExtResource("4_rf05h")
+flicker = 0.08
+
+[node name="Isik34" type="Sprite2D" parent="." unique_id=2093776391]
+material = SubResource("CanvasItemMaterial_viif3")
+position = Vector2(93, -81)
+texture = ExtResource("37_hehuf")
+centered = false
+script = ExtResource("4_rf05h")
+flicker = 0.08
+
+[node name="Isik35" type="Sprite2D" parent="." unique_id=874912791]
+material = SubResource("CanvasItemMaterial_viif3")
+position = Vector2(93, -63)
+texture = ExtResource("38_bkfd4")
+centered = false
+script = ExtResource("4_rf05h")
+flicker = 0.08
+
+[node name="Isik36" type="Sprite2D" parent="." unique_id=1724701813]
+material = SubResource("CanvasItemMaterial_viif3")
+position = Vector2(93, -45)
+texture = ExtResource("39_ny4nh")
+centered = false
+script = ExtResource("4_rf05h")
+flicker = 0.08
+
+[node name="Isik37" type="Sprite2D" parent="." unique_id=1552642697]
+material = SubResource("CanvasItemMaterial_viif3")
+position = Vector2(93, -27)
+texture = ExtResource("40_kdunm")
+centered = false
+script = ExtResource("4_rf05h")
+flicker = 0.08
+
+[node name="Isik38" type="Sprite2D" parent="." unique_id=572804097]
+position = Vector2(-19, -23)
+texture = ExtResource("41_dceku")
+centered = false
+script = ExtResource("4_rf05h")
+base = 1.0
+flicker = 0.1
+
+[node name="Isik39" type="Sprite2D" parent="." unique_id=67934097]
+material = SubResource("CanvasItemMaterial_viif3")
+position = Vector2(-31, -34)
+texture = ExtResource("42_n0utt")
+centered = false
+script = ExtResource("4_rf05h")
+base = 0.3
+flicker = 0.25
+
+[node name="Isik40" type="Sprite2D" parent="." unique_id=704292566]
+position = Vector2(14, -23)
+texture = ExtResource("43_uoumn")
+centered = false
+script = ExtResource("4_rf05h")
+base = 1.0
+flicker = 0.1
+
+[node name="Isik41" type="Sprite2D" parent="." unique_id=637588209]
+material = SubResource("CanvasItemMaterial_viif3")
+position = Vector2(2, -34)
+texture = ExtResource("44_0vlto")
+centered = false
+script = ExtResource("4_rf05h")
+base = 0.3
+flicker = 0.25
+
+[node name="Lamba1" type="Marker2D" parent="." unique_id=1306038975]
+position = Vector2(-17.5, -13)
+script = ExtResource("45_2nd0u")
+radius = 72.0
+color = Color(1, 0.8156863, 0.5411765, 1)
+flicker = 0.05
+
+[node name="Lamba2" type="Marker2D" parent="." unique_id=1371760567]
+position = Vector2(15.5, -13)
+script = ExtResource("45_2nd0u")
+radius = 72.0
+color = Color(1, 0.8156863, 0.5411765, 1)
+flicker = 0.05

@@ -1,7 +1,6 @@
 import { CANYON_SPOTS } from "../canyon";
 import { FOREST_SPOTS } from "../forest";
 import { FROST_SPOTS } from "../frost";
-import { HARBOR_SPOTS } from "../harbor";
 import { KEEP_HALL_SPOTS } from "../keepHall";
 import { TOWN_SPOTS } from "../town";
 import { VOLCANO_SPOTS } from "../volcano";
@@ -187,7 +186,7 @@ export const NPCS: Record<string, NpcDef> = {
   fisherman: {
     id: "fisherman",
     name: "Balıkçı Rıfat",
-    ...HARBOR_SPOTS.fisherman,
+    ...TOWN_SPOTS.fisherman,
     appearance: { type: "humanoid", tunic: 0x2f6b8a, hair: 0x9a9a9a, skin: 0xc68a5a, headwear: { color: 0xc9b48a, style: "hat" } },
     role: "merchant",
     shop: ["fishing_rod", "minor_hp_potion", "minor_mana_potion"],

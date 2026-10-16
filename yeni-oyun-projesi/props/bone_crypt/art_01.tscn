@@ -1,0 +1,10 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/props/bone_crypt/art_01.png" id="1_1is5i"]
+
+[node name="Art01" type="Node2D" unique_id=557956390]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=805107852]
+position = Vector2(-7, -24)
+texture = ExtResource("1_1is5i")
+centered = false

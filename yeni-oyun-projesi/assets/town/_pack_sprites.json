@@ -1,0 +1,111 @@
+{
+ "agac_yesil": {
+  "sheet": "res://assetpack/WORLD ELEMENT/Environment/Props/Static/Trees/Model_01/Size_03.png",
+  "rect": [
+   0,
+   0,
+   48,
+   96
+  ]
+ },
+ "agac_sari": {
+  "sheet": "res://assetpack/WORLD ELEMENT/Environment/Props/Static/Trees/Model_01/Size_03.png",
+  "rect": [
+   48,
+   0,
+   48,
+   96
+  ]
+ },
+ "agac_turuncu": {
+  "sheet": "res://assetpack/WORLD ELEMENT/Environment/Props/Static/Trees/Model_01/Size_03.png",
+  "rect": [
+   0,
+   96,
+   48,
+   96
+  ]
+ },
+ "agac_kuru": {
+  "sheet": "res://assetpack/WORLD ELEMENT/Environment/Props/Static/Trees/Model_01/Size_03.png",
+  "rect": [
+   96,
+   0,
+   48,
+   96
+  ]
+ },
+ "agac_karli": {
+  "sheet": "res://assetpack/WORLD ELEMENT/Environment/Props/Static/Trees/Model_01/Size_03.png",
+  "rect": [
+   144,
+   0,
+   48,
+   96
+  ]
+ },
+ "agac_buyuk": {
+  "sheet": "res://assetpack/WORLD ELEMENT/Environment/Props/Static/Trees/Model_01/Size_04.png",
+  "rect": [
+   3,
+   2,
+   73,
+   126
+  ]
+ },
+ "cam": {
+  "sheet": "res://assetpack/WORLD ELEMENT/Environment/Props/Static/Trees/Model_02/Size_03.png",
+  "rect": [
+   4,
+   84,
+   37,
+   76
+  ]
+ },
+ "cam_2": {
+  "sheet": "res://assetpack/WORLD ELEMENT/Environment/Props/Static/Trees/Model_02/Size_03.png",
+  "rect": [
+   52,
+   84,
+   37,
+   76
+  ]
+ },
+ "cam_mavi": {
+  "sheet": "res://assetpack/WORLD ELEMENT/Environment/Props/Static/Trees/Model_02/Size_03.png",
+  "rect": [
+   4,
+   4,
+   37,
+   76
+  ]
+ },
+ "cam_kuru": {
+  "sheet": "res://assetpack/WORLD ELEMENT/Environment/Props/Static/Trees/Model_02/Size_03.png",
+  "rect": [
+   99,
+   6,
+   40,
+   74
+  ]
+ },
+ "mezar": {
+  "sheet": "res://assetpack/WORLD ELEMENT/Environment/Props/Static/Dungeon_Props.png",
+  "rect": [
+   97,
+   1,
+   14,
+   21
+  ]
+ },
+ "kamp_atesi": {
+  "sheet": "res://assetpack/WORLD ELEMENT/Environment/Structures/Stations/Bonfire/Bonfire_01-Sheet.png",
+  "rect": [
+   0,
+   0,
+   32,
+   32
+  ],
+  "frames": 4
+ }
+}

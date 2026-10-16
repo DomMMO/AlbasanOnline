@@ -1,0 +1,22 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Town/Environment/Props/Static/Furniture.png" id="1_4k64i"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ea8k8"]
+size = Vector2(6, 4)
+
+[node name="DirekHalat" type="Node2D" unique_id=1819708950]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1021584721]
+position = Vector2(-6, -23)
+texture = ExtResource("1_4k64i")
+centered = false
+region_enabled = true
+region_rect = Rect2(162, 422, 12, 23)
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=1863277262]
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=1109476659]
+position = Vector2(0, -2)
+shape = SubResource("RectangleShape2D_ea8k8")

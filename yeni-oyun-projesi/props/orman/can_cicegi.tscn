@@ -1,0 +1,31 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Fairy Forest 1.7/Assets/Props.png" id="1_6qs2c"]
+[ext_resource type="Script" path="res://scripts/map/map_light.gd" id="2_jgj7x"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_4hv3r"]
+size = Vector2(16, 8)
+
+[node name="CanCicegi" type="Node2D" unique_id=1998356509]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=233897594]
+position = Vector2(-19, -48)
+texture = ExtResource("1_6qs2c")
+centered = false
+region_enabled = true
+region_rect = Rect2(293, 48, 38, 48)
+
+[node name="Lamba" type="Marker2D" parent="." unique_id=446986682]
+position = Vector2(0, -38)
+script = ExtResource("2_jgj7x")
+radius = 30.0
+color = Color(0.7529412, 0.5647059, 1, 1)
+flicker = 0.05
+lamp = false
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=1941404738]
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=1272900812]
+position = Vector2(0, -4)
+shape = SubResource("RectangleShape2D_4hv3r")

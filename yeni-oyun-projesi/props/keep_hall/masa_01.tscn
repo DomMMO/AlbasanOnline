@@ -1,0 +1,25 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/props/keep_hall/masa_01.png" id="1_3ntjg"]
+[ext_resource type="Script" path="res://scripts/map/map_light.gd" id="2_qxghq"]
+
+[node name="Masa01" type="Node2D" unique_id=1903345814]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1175096287]
+position = Vector2(-40, -38)
+texture = ExtResource("1_3ntjg")
+centered = false
+
+[node name="Lamba1" type="Marker2D" parent="." unique_id=410143868]
+position = Vector2(-27, -38)
+script = ExtResource("2_qxghq")
+radius = 30.0
+color = Color(1, 0.8156863, 0.5411765, 1)
+flicker = 0.1
+
+[node name="Lamba2" type="Marker2D" parent="." unique_id=364655996]
+position = Vector2(29, -38)
+script = ExtResource("2_qxghq")
+radius = 30.0
+color = Color(1, 0.8156863, 0.5411765, 1)
+flicker = 0.1

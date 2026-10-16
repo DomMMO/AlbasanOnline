@@ -1,0 +1,18 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/town/golge_kucuk.png" id="1_ll5cu"]
+[ext_resource type="Texture2D" path="res://assets/town/bank.png" id="2_um456"]
+
+[node name="Bank" type="Node2D" unique_id=1047160617]
+
+[node name="Golge" type="Sprite2D" parent="." unique_id=62629638]
+modulate = Color(1, 1, 1, 0.55)
+z_index = -5
+z_as_relative = false
+position = Vector2(0, -2)
+texture = ExtResource("1_ll5cu")
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=1336138193]
+position = Vector2(-29, -32)
+texture = ExtResource("2_um456")
+centered = false

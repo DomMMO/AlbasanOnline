@@ -1,0 +1,12 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Town/Environment/Props/Static/Rocks.png" id="1_ee2qo"]
+
+[node name="Tas3" type="Node2D" unique_id=928386478]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=21942648]
+position = Vector2(-7, -10)
+texture = ExtResource("1_ee2qo")
+centered = false
+region_enabled = true
+region_rect = Rect2(48, 51, 15, 10)

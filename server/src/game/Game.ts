@@ -162,6 +162,8 @@ export interface MobRuntime {
   def: MobDef;
   /** Respawn area; null = never respawns (dungeon mobs, boss adds). */
   zone: SpawnZone | null;
+  /** The pack it belongs to: pull one and the whole pack comes (null = on its own). */
+  pack: string | null;
   home: { x: number; y: number };
   mode: MobMode;
   /** sessionId -> threat. Highest threat is the target; this is what party tanking builds on. */

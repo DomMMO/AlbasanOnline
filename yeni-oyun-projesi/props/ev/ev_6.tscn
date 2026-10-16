@@ -1,0 +1,35 @@
+[gd_scene format=3 uid="uid://csi13mnwijjw"]
+
+[ext_resource type="Texture2D" uid="uid://cdb8s08uwmyw1" path="res://assets/town/ev_6.png" id="1_jaex5"]
+[ext_resource type="Texture2D" uid="uid://d2rd71dnh7w1t" path="res://assets/town/ev_6_isik.png" id="2_77ha0"]
+[ext_resource type="Script" uid="uid://cqagslactqmxy" path="res://scripts/map/night_glow.gd" id="3_lkcju"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_5ucs6"]
+blend_mode = 1
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_el0vv"]
+size = Vector2(120, 60)
+
+[node name="Ev6" type="Node2D" unique_id=606364370]
+
+[node name="Pencereler" type="Sprite2D" parent="." unique_id=1546654162]
+material = SubResource("CanvasItemMaterial_5ucs6")
+position = Vector2(-80, -133)
+texture = ExtResource("2_77ha0")
+centered = false
+script = ExtResource("3_lkcju")
+base = 0.85
+flicker = 0.08
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=860410119]
+position = Vector2(-80, -133)
+texture = ExtResource("1_jaex5")
+centered = false
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=27418932]
+collision_layer = 3
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=1622439569]
+position = Vector2(0, -32)
+shape = SubResource("RectangleShape2D_el0vv")

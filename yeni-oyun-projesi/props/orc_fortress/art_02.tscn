@@ -1,0 +1,18 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/props/orc_fortress/art_02_golge.png" id="1_07ym6"]
+[ext_resource type="Texture2D" path="res://assets/props/orc_fortress/art_02.png" id="2_hnwh1"]
+
+[node name="Art02" type="Node2D" unique_id=1681408362]
+
+[node name="Golge" type="Sprite2D" parent="." unique_id=153849782]
+z_index = -5
+z_as_relative = false
+position = Vector2(-5, -3)
+texture = ExtResource("1_07ym6")
+centered = false
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=447763406]
+position = Vector2(-8, -17)
+texture = ExtResource("2_hnwh1")
+centered = false

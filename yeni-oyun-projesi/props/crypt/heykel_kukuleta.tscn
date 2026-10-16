@@ -1,0 +1,30 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/town/golge_kucuk.png" id="1_frqv1"]
+[ext_resource type="Texture2D" path="res://assetpack/ANOKOLISA/Pixel Crawler - Cemetery/Environment/Props/Graves.png" id="2_ftylm"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_mdo82"]
+size = Vector2(12, 8)
+
+[node name="HeykelKukuleta" type="Node2D" unique_id=1019986991]
+
+[node name="Golge" type="Sprite2D" parent="." unique_id=840361630]
+modulate = Color(1, 1, 1, 0.6)
+z_index = -5
+z_as_relative = false
+position = Vector2(0, -3)
+texture = ExtResource("1_frqv1")
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=395631246]
+position = Vector2(-8, -34)
+texture = ExtResource("2_ftylm")
+centered = false
+region_enabled = true
+region_rect = Rect2(8, 200, 16, 34)
+
+[node name="Hitbox" type="StaticBody2D" parent="." unique_id=2063342847]
+collision_mask = 0
+
+[node name="Kutu" type="CollisionShape2D" parent="Hitbox" unique_id=1395539141]
+position = Vector2(0, -4)
+shape = SubResource("RectangleShape2D_mdo82")

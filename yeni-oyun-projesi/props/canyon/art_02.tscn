@@ -1,0 +1,10 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/props/canyon/art_02.png" id="1_ogv8x"]
+
+[node name="Art02" type="Node2D" unique_id=1935141809]
+
+[node name="Gorsel" type="Sprite2D" parent="." unique_id=764162041]
+position = Vector2(-7, -35)
+texture = ExtResource("1_ogv8x")
+centered = false
