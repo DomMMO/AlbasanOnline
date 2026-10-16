@@ -16,6 +16,7 @@ import {
   itemRarity,
   itemSellPrice,
   JEWEL_DROPS,
+  MOB_TUNING,
   ranksToAffixes,
   MAX_AFFIXES,
   RARITY_COLORS,
@@ -309,9 +310,9 @@ export function dropLoot(game: Game, x: number, y: number, mobDef: MobDef, owner
   }
   // Passive tree jewels can drop from anything; their effects scale with the mob's level.
   const jewelOdds = mobDef.boss ? JEWEL_DROPS.boss : (mobDef.scale ?? 1) > 1 ? JEWEL_DROPS.elite : JEWEL_DROPS.normal;
-  if (game.random() < jewelOdds.minor * power) contents.items.push(newStack("minor_jewel", 1, 0, { level: mobDef.level, luck: power }));
-  if (game.random() < jewelOdds.major * power) contents.items.push(newStack("major_jewel", 1, 0, { level: mobDef.level, luck: power }));
-  if (game.random() < jewelOdds.greater * power) contents.items.push(newStack("greater_jewel", 1, 0, { level: mobDef.level, luck: power }));
+  if (game.random() < jewelOdds.minor * power * MOB_TUNING.dropChance) contents.items.push(newStack("minor_jewel", 1, 0, { level: mobDef.level, luck: power }));
+  if (game.random() < jewelOdds.major * power * MOB_TUNING.dropChance) contents.items.push(newStack("major_jewel", 1, 0, { level: mobDef.level, luck: power }));
+  if (game.random() < jewelOdds.greater * power * MOB_TUNING.dropChance) contents.items.push(newStack("greater_jewel", 1, 0, { level: mobDef.level, luck: power }));
 
   // A party's kill belongs to the whole party ("party:<id>"), otherwise to the killer.
   const ownerParty = ownerId ? partyIdOf(game.playerRuntime.get(ownerId)?.characterId ?? -1) : null;

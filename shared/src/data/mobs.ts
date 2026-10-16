@@ -1,6 +1,7 @@
 import type { Appearance } from "./appearance";
 import { DUNGEON_MOBS } from "./dungeonMobs";
 import { FRONTIER_MOBS } from "./frontierMobs";
+import { ITEMS } from "./items";
 import { gearDrops } from "./loot";
 
 export interface LootTable {
@@ -56,7 +57,33 @@ export interface MobDef {
   nightOnly?: boolean;
 }
 
-export const MOBS: Record<string, MobDef> = {
+/**
+ * Global difficulty knobs, applied on top of every table below (dungeon and frontier mobs
+ * too): tougher mobs that pay out less, so levelling is a long grind. Quest items always drop
+ * at their listed chance. dropChance also scales the jewel odds (see dropLoot).
+ */
+export const MOB_TUNING = {
+  maxHp: 3,
+  xp: 0.3,
+  gold: 0.2,
+  dropChance: 0.35,
+};
+
+function tuned(mob: MobDef): MobDef {
+  const [goldMin, goldMax] = mob.loot.gold;
+  const min = Math.round(goldMin * MOB_TUNING.gold);
+  return {
+    ...mob,
+    maxHp: Math.round(mob.maxHp * MOB_TUNING.maxHp),
+    xp: Math.max(1, Math.round(mob.xp * MOB_TUNING.xp)),
+    loot: {
+      gold: [min, Math.max(min, Math.round(goldMax * MOB_TUNING.gold))],
+      drops: mob.loot.drops.map((drop) => (ITEMS[drop.item]?.questItem ? drop : { ...drop, chance: drop.chance * MOB_TUNING.dropChance })),
+    },
+  };
+}
+
+const BASE_MOBS: Record<string, MobDef> = {
   slime: {
     id: "slime",
     name: "Balçık",
@@ -723,3 +750,5 @@ export const MOBS: Record<string, MobDef> = {
   ...DUNGEON_MOBS,
   ...FRONTIER_MOBS,
 };
+
+export const MOBS: Record<string, MobDef> = Object.fromEntries(Object.entries(BASE_MOBS).map(([id, mob]) => [id, tuned(mob)]));

@@ -101,7 +101,7 @@ func class_of(id: String) -> Dictionary:
 
 ## progression.ts xpToNextLevel()
 func xp_to_next_level(level: int) -> int:
-	return int(round(50.0 * pow(level, 1.6)))
+	return int(round(150.0 * pow(level, 1.6)))
 
 
 ## upgrade.ts glowTier()
