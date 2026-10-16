@@ -8,7 +8,7 @@ import { sumAffixes, type Affix, type AttributeId } from "./affixes";
 export const MAX_LEVEL = 60;
 
 export function xpToNextLevel(level: number): number {
-  return Math.round(50 * Math.pow(level, 1.6));
+  return Math.round(150 * Math.pow(level, 1.6));
 }
 
 export interface CombatStats {

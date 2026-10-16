@@ -43,7 +43,7 @@ import type { ActiveBuff, Game, MobRuntime, PlayerRuntime } from "./Game";
 import { sendSkillRanks } from "./talents";
 import { syncAuras } from "./auras";
 import { cancelGather } from "./gathering";
-import { bossDamaged, bossDefeated } from "./boss";
+import { bossDamaged, bossDamageTaken, bossDefeated } from "./boss";
 import { dropLoot, refreshStats } from "./items";
 import { questKill } from "./quests";
 import { addThreat, spawnMob } from "./mobs";
@@ -685,6 +685,7 @@ function damageMob(game: Game, sessionId: string, mobId: string, mob: Mob, amoun
   const runtime = game.mobRuntime.get(mobId);
   // Mobs walking home after a leash are immune ("evade").
   if (!runtime || runtime.mode === "return" || mob.hp === 0) return;
+  if (runtime.boss) amount = bossDamageTaken(game, runtime, amount);
 
   const dealt = Math.min(amount, mob.hp);
   mob.hp -= dealt;
