@@ -78,8 +78,8 @@ export class Mob extends Schema {
   @type("uint8") dir: Direction = Direction.Down;
   @type("boolean") moving = false;
   @type("uint8") level = 1;
-  @type("uint16") hp = 1;
-  @type("uint16") maxHp = 1;
+  @type("uint32") hp = 1;
+  @type("uint32") maxHp = 1;
   @type("boolean") enraged = false;
   /** Frozen in place (Frost Nova). */
   @type("boolean") rooted = false;
