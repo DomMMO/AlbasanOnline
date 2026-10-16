@@ -153,7 +153,8 @@ func show_skill(skill: Dictionary, ctx: Dictionary, anchor: Control) -> void:
 	var resource := String(GameData.class_of(String(ctx.get("playerClass", "novice"))).get("resource", "rage"))
 	var resource_name: String = {"rage": "öfke", "mana": "mana", "energy": "enerji"}.get(resource, resource)
 	var facts: Array = []
-	facts.append(("%d %s" % [int(skill.cost), resource_name]) if int(skill.get("cost", 0)) > 0 else "Bedelsiz")
+	var cost := GameData.skill_cost(skill, resource, int(ctx.get("playerLevel", 1)))
+	facts.append(("%d %s" % [cost, resource_name]) if cost > 0 else "Bedelsiz")
 	facts.append(("%s büyü (yürürsen bozulur)" % _sec(skill.castMs)) if int(skill.get("castMs", 0)) > 0 else "Anında")
 	facts.append(("%s bekleme" % _sec(skill.cooldownMs)) if int(skill.get("cooldownMs", 0)) > 0 else "Bekleme yok")
 	var range_px := float(skill.get("range", 0))

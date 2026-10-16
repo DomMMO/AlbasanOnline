@@ -33,6 +33,7 @@ import {
   type CastStartEvent,
   type CombatEvent,
   type LevelUpEvent,
+  skillCostAt,
   type SkillDef,
   type SkillErrorEvent,
   type SkillUsedEvent,
@@ -198,7 +199,7 @@ export function useSkill(game: Game, sessionId: string, skillId: string, aim?: {
   if (now < (runtime.cooldowns.get(skill.id) ?? 0)) return fail(game, sessionId, "Henüz hazır değil");
   const resolved = resolveTarget(game, sessionId, player, runtime, skill);
   if (typeof resolved === "string") return fail(game, sessionId, resolved);
-  if (player.resource < skillCost(runtime, skill)) return fail(game, sessionId, `Yeterli ${{ rage: "öfke", mana: "mana", energy: "enerji" }[classOf(player.cls).resource]} yok`);
+  if (player.resource < skillCost(player, runtime, skill)) return fail(game, sessionId, `Yeterli ${{ rage: "öfke", mana: "mana", energy: "enerji" }[classOf(player.cls).resource]} yok`);
 
   if (skill.castMs > 0) {
     // Cast time: start now, resolve in updatePlayerCombat. Moving cancels it.
@@ -217,8 +218,8 @@ export function useSkill(game: Game, sessionId: string, skillId: string, aim?: {
 }
 
 /** Rage / mana a skill costs this player (passive tree jewels can lower it). */
-function skillCost(runtime: PlayerRuntime, skill: SkillDef): number {
-  return Math.ceil(skill.cost * (1 - runtime.stats.costReduction));
+function skillCost(player: Player, runtime: PlayerRuntime, skill: SkillDef): number {
+  return Math.ceil(skillCostAt(skill, classOf(player.cls).resource, player.level) * (1 - runtime.stats.costReduction));
 }
 
 /** Applies a skill's effect, pays its cost and starts its cooldown. */
@@ -419,7 +420,7 @@ function performSkill(
     }
   }
 
-  player.resource = Math.max(0, player.resource - skillCost(runtime, skill));
+  player.resource = Math.max(0, player.resource - skillCost(player, runtime, skill));
   const cooldownMs = Math.round(skill.cooldownMs * (1 - runtime.stats.cooldownReduction));
   if (cooldownMs > 0) runtime.cooldowns.set(skill.id, now + cooldownMs);
   game.io.send(sessionId, Msg.SkillUsed, {
@@ -448,7 +449,7 @@ function finishCast(game: Game, sessionId: string, player: Player, runtime: Play
   const resolved = resolveTarget(game, sessionId, player, runtime, skill, CAST_RANGE_TOLERANCE);
   runtime.targetId = savedTarget;
   if (typeof resolved === "string") return cancelCast(game, sessionId, resolved);
-  if (player.resource < skillCost(runtime, skill)) return cancelCast(game, sessionId, "Yeterli mana yok");
+  if (player.resource < skillCost(player, runtime, skill)) return cancelCast(game, sessionId, "Yeterli mana yok");
 
   runtime.casting = null;
   game.io.broadcast(Msg.CastEnd, { sourceId: sessionId, interrupted: false } satisfies CastEndEvent);

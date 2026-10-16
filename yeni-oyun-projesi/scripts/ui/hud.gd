@@ -39,6 +39,8 @@ var _cooldowns := {}  # id -> [until_ms, length_ms]
 var _gcd_until := 0.0
 var _gcd_length := 1.0
 var _current_resource := 0
+var _current_level := 1
+var _resource_type := "rage"
 var _count_item: Callable = func(_id): return 0
 var _potion_slots: Array[SlotButton] = []
 var _potions: Array = ["", ""]
@@ -442,6 +444,8 @@ func update_player_frame(d: Dictionary) -> void:
 	_res_globe.set_value(d.resource, d.maxResource, "%d / %d" % [d.resource, d.maxResource])
 	_xp.set_value(d.xp, d.xpToNext, "XP %d / %d" % [d.xp, d.xpToNext])
 	_current_resource = int(d.resource)
+	_current_level = int(d.level)
+	_resource_type = res_kind
 
 
 func start_cast_bar(name: String, cast_ms: float, color: String) -> void:
@@ -560,7 +564,7 @@ func _process(_delta: float) -> void:
 				fraction = gcd / _gcd_length
 			# Only the skill's own cooldown gets a number; the short global cooldown is just the sweep.
 			left = own
-			s.dimmed = bool(entry.get("locked", false)) or _current_resource < int(skill.get("cost", 0))
+			s.dimmed = bool(entry.get("locked", false)) or _current_resource < GameData.skill_cost(skill, _resource_type, _current_level)
 		s.sweep = clampf(fraction, 0.0, 1.0)
 		s.cooldown_text = _cooldown_text(left)
 	for i in _potion_slots.size():

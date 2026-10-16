@@ -188,7 +188,8 @@ func render() -> void:
 			continue
 		var r := rank(String(id))
 		var bonus := (" · +%%%d etki" % (bonus_step * (r - 1))) if r > 1 else ""
-		var cost := ("%d %s" % [int(skill.cost), res_name]) if int(skill.get("cost", 0)) > 0 else "bedelsiz"
+		var cost_now := GameData.skill_cost(skill, String(cdef.get("resource", "rage")), ui.player_level())
+		var cost := ("%d %s" % [cost_now, res_name]) if cost_now > 0 else "bedelsiz"
 		var cooldown := (" · %s sn bekleme" % Tooltip._num(float(skill.cooldownMs) / 1000.0)) if int(skill.get("cooldownMs", 0)) > 0 else ""
 		active.append(_row({"id": id, "skill": skill, "name": skill.name, "tag": cats.get(String(skill.get("category", "")), ""), "description": skill.get("description", ""), "detail": "%s · %s%s · her derece +%%%d" % ["Öğrenilmedi" if r == 0 else "Derece %d%s" % [r, bonus], cost, cooldown, bonus_step], "rank": r, "max": max_rank, "level": int(skill.get("level", 1))}))
 	var passives: Array = []
