@@ -40,9 +40,10 @@ export function mobBody(mobId: string): MobBody {
 """
 open("../shared/src/data/mobBodies.ts", "w", encoding="utf-8", newline="\n").write(out)
 
-rng = random.Random(4417)
 scenes = 0
 for mob, (rx, ry) in bodies.items():
+    # Node ids from the mob's own name: the same every run, whatever other mobs come and go.
+    rng = random.Random(f"govde:{mob}")
     path = f"characters/mobs/{mob}.tscn"
     try:
         text = open(path, encoding="utf-8").read()

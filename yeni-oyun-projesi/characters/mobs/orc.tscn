@@ -3,7 +3,7 @@
 [ext_resource type="SpriteFrames" path="res://characters/mobs/orc.tres" id="1_bmsm2"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_q01b8"]
-size = Vector2(20, 30)
+size = Vector2(20, 31)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ofmv0"]
 size = Vector2(10, 6)
@@ -12,40 +12,40 @@ size = Vector2(10, 6)
 radius = 4.0
 height = 16.0
 
-[node name="Orc" type="Node2D" unique_id=1694313533]
+[node name="Orc" type="Node2D" unique_id=1203400139]
 
-[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1280290277]
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=350363119]
 sprite_frames = ExtResource("1_bmsm2")
 animation = &"idle"
 autoplay = "idle"
 centered = false
 offset = Vector2(-32, -64)
 
-[node name="Hurtbox" type="Area2D" parent="." unique_id=236300805]
+[node name="Hurtbox" type="Area2D" parent="." unique_id=270318983]
 collision_mask = 0
 
-[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=692638026]
-position = Vector2(-1, -15)
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=551436700]
+position = Vector2(0, -15.5)
 shape = SubResource("RectangleShape2D_q01b8")
 debug_color = Color(0.2, 0.6, 1, 0.35)
 
-[node name="Feet" type="Area2D" parent="." unique_id=770016135]
+[node name="Feet" type="Area2D" parent="." unique_id=1966205334]
 collision_layer = 2
 collision_mask = 0
 input_pickable = false
 
-[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1888994649]
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=427883361]
 position = Vector2(0, -3)
 shape = SubResource("RectangleShape2D_ofmv0")
 debug_color = Color(1, 0.3, 0.2, 0.45)
 
-[node name="Govde" type="Area2D" parent="." unique_id=197912700]
+[node name="Govde" type="Area2D" parent="." unique_id=720895300]
 collision_layer = 4
 collision_mask = 0
 monitoring = false
 monitorable = false
 
-[node name="Oval" type="CollisionShape2D" parent="Govde" unique_id=1124028857]
+[node name="Oval" type="CollisionShape2D" parent="Govde" unique_id=346748062]
 rotation = 1.5707964
 shape = SubResource("CapsuleShape2D_govde")
 debug_color = Color(1, 0.75, 0.2, 0.35)

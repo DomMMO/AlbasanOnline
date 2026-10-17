@@ -90,6 +90,11 @@ func player_class() -> String:
 	return String(World.f(world.local.state, "cls", "novice")) if world and world.local else "novice"
 
 
+## "damage", "tank" or "" (no spec, or not chosen yet).
+func player_spec() -> String:
+	return String(World.f(world.local.state, "spec", "")) if world and world.local else ""
+
+
 func inventory_state() -> Variant:
 	return inventory.state
 

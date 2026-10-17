@@ -22,6 +22,8 @@ export class Player extends Schema {
   @type("uint16") maxHp = 1;
   /** Class id: warrior, mage, priest. */
   @type("string") cls = "warrior";
+  /** "damage" or "tank" for classes with specs; "" = none or not chosen yet. */
+  @type("string") spec = "";
   /** Rage or mana, depending on class. */
   @type("uint16") resource = 0;
   @type("uint16") maxResource = 100;

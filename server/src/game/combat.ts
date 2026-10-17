@@ -10,6 +10,10 @@ import {
   MAX_LEVEL,
   HEAL_THREAT,
   MELEE_RANGE,
+  MOB_ARROW_DRAW_MS,
+  MOB_ARROW_SPEED,
+  MOB_BOLT_CAST_MS,
+  MOB_BOLT_SPEED,
   Msg,
   PARTY_XP_BONUS,
   PARTY_XP_RANGE,
@@ -38,6 +42,8 @@ import {
   type SkillErrorEvent,
   type SkillUsedEvent,
   type XpGainedEvent,
+  isTank,
+  TANK_SPEC,
 } from "../../../shared/src";
 import type { Mob, Player } from "../rooms/schema/WorldState";
 import type { ActiveBuff, Game, MobRuntime, PlayerRuntime } from "./Game";
@@ -45,13 +51,15 @@ import { sendSkillRanks } from "./talents";
 import { syncAuras } from "./auras";
 import { cancelGather } from "./gathering";
 import { bossDamaged, bossDamageTaken, bossDefeated } from "./boss";
-import { dropLoot, refreshStats } from "./items";
+import { dropLoot, notice, refreshStats } from "./items";
 import { questKill } from "./quests";
-import { addThreat, spawnMob } from "./mobs";
+import { addThreat, packMemberDied } from "./mobs";
 import { sameParty } from "./party";
 import { recordPvpKill } from "./pvp";
 import { isDueling, loseDuel } from "./duel";
 import { dismissMinions, summonMinion } from "./minions";
+import { enrageOf, interruptMob, stopMobCast } from "./mobCasts";
+import { groupDamage, groupDrops, groupHp } from "./partyScale";
 
 // All damage, healing, XP and death go through this file. The client never
 // decides any of it; it only asks ("use skill X") and displays the results.
@@ -187,11 +195,14 @@ export function useSkill(game: Game, sessionId: string, skillId: string, aim?: {
   const player = game.state.players.get(sessionId);
   const runtime = game.playerRuntime.get(sessionId);
   const skill = SKILLS[skillId];
-  if (!player || !runtime || !skill || !classOf(player.cls).skills.includes(skill.id)) return;
+  const cls = player ? classOf(player.cls) : undefined;
+  // The class's interrupt is innate: known from its level, no skill points.
+  const innate = skill !== undefined && cls?.interrupt === skill.id;
+  if (!player || !runtime || !skill || !cls || !(cls.skills.includes(skill.id) || innate)) return;
   const now = game.now();
 
   if (player.dead) return fail(game, sessionId, "Ölüyken yapamazsın");
-  if ((runtime.skillRanks[skill.id] ?? 0) < 1) return fail(game, sessionId, "Bu yeteneği henüz öğrenmedin (K)");
+  if (innate ? player.level < skill.level : (runtime.skillRanks[skill.id] ?? 0) < 1) return fail(game, sessionId, "Bu yeteneği henüz öğrenmedin (K)");
   if (now < runtime.stunnedUntil) return fail(game, sessionId, "Sersemlemiş durumdasın");
   // Spamming a key during the GCD is normal; ignore it silently.
   if (skill.triggersGcd && now < runtime.gcdUntil) return;
@@ -273,6 +284,23 @@ function performSkill(
       runtime.lastCombatAt = now;
       hitEnemy(game, sessionId, enemy, attack * effect.multiplier + effect.bonus * power);
       stunEnemy(game, enemy, effect.stunMs);
+      break;
+    }
+    case "interrupt": {
+      const enemy = enemyAt(game, sessionId, targetId);
+      if (!enemy) return fail(game, sessionId, "Hedef yok");
+      dropProtection(game, sessionId);
+      broadcastAttack(game, player, { ...self, targetId: enemy.id, targetKind: enemy.kind }, enemy.entity);
+      runtime.lastCombatAt = now;
+      if (enemy.kind === "mob") {
+        const result = interruptMob(game, enemy.id);
+        if (result === "interrupted") notice(game, sessionId, "Kesildi!", "#ffd43b");
+        else if (result === "physical") notice(game, sessionId, "Bu hareket kesilemez: sersemlet!", "#adb5bd");
+      } else if (game.playerRuntime.get(enemy.id)?.casting) {
+        cancelCast(game, enemy.id, "Büyün kesildi");
+        notice(game, sessionId, "Kesildi!", "#ffd43b");
+      }
+      hitEnemy(game, sessionId, enemy, attack * effect.multiplier + effect.bonus * power);
       break;
     }
     case "blast": {
@@ -557,6 +585,8 @@ function stunEnemy(game: Game, enemy: Enemy, durationMs: number) {
   if (enemy.kind === "mob") {
     const runtime = game.mobRuntime.get(enemy.id);
     if (!runtime || runtime.boss || runtime.mode === "return") return;
+    // A stun stops any cast, magic or physical (on its normal cooldown, no lock).
+    stopMobCast(game, enemy.id, runtime);
     runtime.stunnedUntil = Math.max(runtime.stunnedUntil, now + durationMs);
     enemy.entity.stunned = true;
     enemy.entity.moving = false;
@@ -642,9 +672,32 @@ function rootMob(game: Game, mobId: string, mob: Mob, durationMs: number) {
 export function mobAttackPlayer(game: Game, mobId: string, mobRuntime: MobRuntime, sessionId: string, player: Player) {
   const runtime = game.playerRuntime.get(sessionId);
   if (!runtime || player.dead) return;
-  const hit = rollDamage(mobRuntime.def.attack * mobRuntime.power, runtime.stats.defense, game.random);
-  game.io.broadcast(Msg.Attack, { sourceId: mobId, sourceKind: "mob", targetId: sessionId, targetKind: "player" } satisfies AttackEvent);
+  const hit = rollDamage(mobRuntime.def.attack * mobRuntime.power * groupDamage(game) * enrageOf(game, mobRuntime).attack, runtime.stats.defense, game.random);
+  const kind = mobRuntime.def.ranged ? (mobRuntime.def.ranged.kind ?? "arrow") : null;
+  const ranged = kind ? { ranged: kind } : {};
+  game.io.broadcast(Msg.Attack, { sourceId: mobId, sourceKind: "mob", targetId: sessionId, targetKind: "player", ...ranged } satisfies AttackEvent);
+  if (kind) {
+    // An archer or a caster: the hit lands when the arrow or the bolt does (the bow is drawn or
+    // the staff raised first, then it flies).
+    const mob = game.state.mobs.get(mobId);
+    const bolt = kind === "bolt";
+    const flight = mob ? (distance(mob, player) / (bolt ? MOB_BOLT_SPEED : MOB_ARROW_SPEED)) * 1000 : 0;
+    game.arrows.push({ mobId, sessionId, at: game.now() + (bolt ? MOB_BOLT_CAST_MS : MOB_ARROW_DRAW_MS) + flight, amount: hit.amount, crit: hit.crit });
+    return;
+  }
   hitPlayer(game, mobId, sessionId, player, hit.amount, hit.crit);
+}
+
+/** Arrows that have arrived hit their players (the arrow homes in, so it hits wherever they went). */
+export function landArrows(game: Game) {
+  const now = game.now();
+  for (let i = game.arrows.length - 1; i >= 0; i--) {
+    const arrow = game.arrows[i];
+    if (arrow.at > now) continue;
+    game.arrows.splice(i, 1);
+    const player = game.state.players.get(arrow.sessionId);
+    if (player && !player.dead) hitPlayer(game, arrow.mobId, arrow.sessionId, player, arrow.amount, arrow.crit);
+  }
 }
 
 /** Applies damage from a mob to a player (melee or boss ability). Shields absorb first. */
@@ -656,7 +709,7 @@ export function hitPlayer(game: Game, sourceId: string, sessionId: string, playe
   // Tanks shrug off part of every hit; Kalkan Duvarı, the passive tree and buffs on top of that.
   const guard = game.now() < runtime.guardUntil ? 1 - runtime.guardReduction : 1;
   const buffed = 1 - Math.min(0.6, buffTotals(runtime, game.now()).reductionPct);
-  amount = Math.max(1, Math.round(amount * (classOf(player.cls).damageTaken ?? 1) * guard * buffed * (1 - runtime.stats.damageReduction)));
+  amount = Math.max(1, Math.round(amount * (isTank(player.cls, player.spec) ? TANK_SPEC.damageTaken : 1) * guard * buffed * (1 - runtime.stats.damageReduction)));
   // Getting hit breaks a gather in progress.
   if (runtime.gathering) cancelGather(game, sessionId, "Toplama yarıda kaldı");
   const absorbed = Math.min(player.shield, amount);
@@ -693,8 +746,8 @@ function damageMob(game: Game, sessionId: string, mobId: string, mob: Mob, amoun
   runtime.taggedBy ??= sessionId;
   // Warriors are the tanks: their damage holds aggro better.
   const attacker = game.state.players.get(sessionId);
-  // Guardians taunt: any hit puts them on top of the threat table at once.
-  if (attacker && classOf(attacker.cls).tauntOnHit) {
+  // Tanks taunt: any hit puts them on top of the threat table at once.
+  if (attacker && isTank(attacker.cls, attacker.spec)) {
     const top = Math.max(0, ...[...runtime.threat].filter(([id]) => id !== sessionId).map(([, threat]) => threat));
     if ((runtime.threat.get(sessionId) ?? 0) <= top) runtime.threat.set(sessionId, top + 1);
   }
@@ -743,7 +796,7 @@ function killMob(game: Game, mobId: string, mob: Mob, runtime: MobRuntime, kille
     for (const sessionId of recipients) {
       const player = game.state.players.get(sessionId)!;
       const xpBonus = 1 + (game.playerRuntime.get(sessionId)?.stats.xpBonus ?? 0);
-      grantXp(game, sessionId, player, Math.floor(xpForKill(runtime.def.xp * runtime.power, mob.level, player.level) * share * xpBonus));
+      grantXp(game, sessionId, player, Math.floor(xpForKill(runtime.def.xp * runtime.power * groupHp(game), mob.level, player.level) * share * xpBonus));
       questKill(game, sessionId, runtime.def.id);
     }
   }
@@ -754,12 +807,19 @@ function killMob(game: Game, mobId: string, mob: Mob, runtime: MobRuntime, kille
       playerRuntime.attacking = false;
     }
   }
-  dropLoot(game, mob.x, mob.y, runtime.def, runtime.taggedBy, runtime.power);
+  if (game.zone.instanced && runtime.taggedBy) {
+    // Dungeons: personal loot. Every member near the kill gets their own roll, at the party's drop chance.
+    const recipients = xpRecipients(game, runtime.taggedBy, mob);
+    recipients.forEach((sessionId, i) => {
+      const angle = (i / recipients.length) * Math.PI * 2;
+      const spread = recipients.length > 1 ? 10 : 0;
+      dropLoot(game, mob.x + Math.cos(angle) * spread, mob.y + Math.sin(angle) * spread, runtime.def, sessionId, runtime.power, { chance: groupDrops(game), personal: true });
+    });
+  } else dropLoot(game, mob.x, mob.y, runtime.def, runtime.taggedBy, runtime.power);
   game.state.mobs.delete(mobId);
   game.mobRuntime.delete(mobId);
   if (runtime.boss) bossDefeated(game, runtime);
-  const zone = runtime.zone;
-  if (zone) game.after(runtime.def.respawnMs, () => spawnMob(game, zone));
+  if (runtime.zone) packMemberDied(game, runtime);
 }
 
 function killPlayer(game: Game, sessionId: string, player: Player, runtime: PlayerRuntime) {

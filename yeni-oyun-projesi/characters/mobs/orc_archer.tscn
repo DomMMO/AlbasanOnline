@@ -1,0 +1,51 @@
+[gd_scene format=3]
+
+[ext_resource type="SpriteFrames" path="res://characters/mobs/orc_archer.tres" id="1_av8n2"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ja7bw"]
+size = Vector2(20, 30)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_vkc2o"]
+size = Vector2(10, 6)
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_govde"]
+radius = 4.0
+height = 16.0
+
+[node name="OrcArcher" type="Node2D" unique_id=612847382]
+
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1333590308]
+sprite_frames = ExtResource("1_av8n2")
+animation = &"idle"
+autoplay = "idle"
+centered = false
+offset = Vector2(-32, -64)
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1047759147]
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=613039375]
+position = Vector2(-1, -15)
+shape = SubResource("RectangleShape2D_ja7bw")
+debug_color = Color(0.2, 0.6, 1, 0.35)
+
+[node name="Feet" type="Area2D" parent="." unique_id=943891386]
+collision_layer = 2
+collision_mask = 0
+input_pickable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=179472142]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_vkc2o")
+debug_color = Color(1, 0.3, 0.2, 0.45)
+
+[node name="Govde" type="Area2D" parent="." unique_id=968818845]
+collision_layer = 4
+collision_mask = 0
+monitoring = false
+monitorable = false
+
+[node name="Oval" type="CollisionShape2D" parent="Govde" unique_id=418887245]
+rotation = 1.5707964
+shape = SubResource("CapsuleShape2D_govde")
+debug_color = Color(1, 0.75, 0.2, 0.35)

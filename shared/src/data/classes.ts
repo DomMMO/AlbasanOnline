@@ -12,6 +12,22 @@ import type { CombatStats } from "./progression";
 export type ClassId = "novice" | "warrior" | "shaman" | "rogue" | "archer" | "druid" | "priest" | "necromancer";
 /** Rage fills from fighting, mana regenerates slowly, energy regenerates quickly. */
 export type ResourceType = "rage" | "mana" | "energy";
+/** Classes with `specs` choose one at their master: a damage dealer or a tank. "" = not chosen yet. */
+export type SpecId = "damage" | "tank";
+
+export interface SpecDef {
+  name: string;
+  description: string;
+}
+
+/** What the tank spec does (DENGE.md, bölüm 6). */
+export const TANK_SPEC = {
+  /** Fraction of incoming damage actually taken. */
+  damageTaken: 0.6,
+  hpPct: 0.3,
+  /** Tanks hit softer. */
+  attackPct: -0.25,
+} as const;
 
 export interface ClassDef {
   id: ClassId;
@@ -26,6 +42,8 @@ export interface ClassDef {
   autoAttack: { range: number; multiplier: number; ranged: boolean };
   /** Active skills in hotbar order (see SkillDef.level for when each can be learned). */
   skills: string[];
+  /** Its interrupt (Kesme): known from its level without points, not in the skill ranks. */
+  interrupt?: string;
   /** Hotbar slots after the skills. */
   potions: string[];
   starterEquipment: Partial<Record<EquipSlot, string>>;
@@ -36,10 +54,8 @@ export interface ClassDef {
   color: string;
   /** Gets this class's class-specific quest rewards when a quest has none of its own. */
   rewardsLike?: ClassId;
-  /** Tank: every hit pulls the mob's aggro off other players. */
-  tauntOnHit?: boolean;
-  /** Fraction of incoming damage actually taken (tanks < 1). */
-  damageTaken?: number;
+  /** Its two paths, chosen at the master. The tank pulls every mob it hits onto itself (TANK_SPEC). */
+  specs?: Record<SpecId, SpecDef>;
 }
 
 export const CLASSES: Record<ClassId, ClassDef> = {
@@ -66,6 +82,11 @@ export const CLASSES: Record<ClassId, ClassDef> = {
     maxResource: () => 100,
     autoAttack: { range: MELEE_RANGE, multiplier: 1, ranged: false },
     skills: ["heroicStrike", "whirlwind", "secondWind", "hamstring", "leapSlam", "battleShout"],
+    interrupt: "pummel",
+    specs: {
+      damage: { name: "Akıncı", description: "Öne atılır, sert vurur. Grubun hasarına omuz verir." },
+      tank: { name: "Kalkan Eri", description: "Grubun önünde durur: vurduğu mobu üstüne çeker, aldığı hasar %40 az, canı %30 fazla; hasarı %25 düşük." },
+    },
     potions: ["minor_hp_potion", "hp_potion"],
     starterEquipment: { weapon: "rusty_sword", chest: "cloth_shirt" },
     starterInventory: [{ defId: "minor_hp_potion", qty: 5 }],
@@ -80,6 +101,7 @@ export const CLASSES: Record<ClassId, ClassDef> = {
     maxResource: (level) => 125 + (level - 1) * 12,
     autoAttack: { range: TILE_SIZE * 7, multiplier: 0.5, ranged: true },
     skills: ["skyLash", "thunderDrum", "ancestorSpirit", "spiritBind", "windWalk", "skyBlessing"],
+    interrupt: "windShear",
     potions: ["minor_hp_potion", "minor_mana_potion"],
     starterEquipment: { weapon: "apprentice_staff", chest: "cloth_shirt" },
     starterInventory: [
@@ -98,6 +120,7 @@ export const CLASSES: Record<ClassId, ClassDef> = {
     maxResource: () => 100,
     autoAttack: { range: MELEE_RANGE, multiplier: 0.9, ranged: false },
     skills: ["sinisterStrike", "fanOfKnives", "eviscerate", "blind", "shadowStep", "adrenaline"],
+    interrupt: "throatKick",
     potions: ["minor_hp_potion", "hp_potion"],
     starterEquipment: { weapon: "rusty_sword", chest: "cloth_shirt" },
     starterInventory: [{ defId: "minor_hp_potion", qty: 5 }],
@@ -114,6 +137,7 @@ export const CLASSES: Record<ClassId, ClassDef> = {
     maxResource: () => 100,
     autoAttack: { range: TILE_SIZE * 7, multiplier: 0.75, ranged: true },
     skills: ["aimedShot", "arrowRain", "quickShot", "pinningShot", "hawkLeap", "eagleEye"],
+    interrupt: "silencingShot",
     potions: ["minor_hp_potion", "hp_potion"],
     starterEquipment: { weapon: "short_bow", chest: "cloth_shirt" },
     starterInventory: [{ defId: "minor_hp_potion", qty: 5 }],
@@ -130,6 +154,11 @@ export const CLASSES: Record<ClassId, ClassDef> = {
     maxResource: (level) => 125 + (level - 1) * 12,
     autoAttack: { range: TILE_SIZE * 7, multiplier: 0.45, ranged: true },
     skills: ["thornLash", "entangle", "rejuvenate", "barkskin", "wildCharge", "springTide"],
+    interrupt: "thornGag",
+    specs: {
+      damage: { name: "Orman Gazabı", description: "Diken ve kökle uzaktan vurur, gerekince yaralıyı sarar." },
+      tank: { name: "Ayı Ruhu", description: "Ayının ruhunu taşır: vurduğu mobu üstüne çeker, aldığı hasar %40 az, canı %30 fazla; hasarı %25 düşük." },
+    },
     potions: ["minor_hp_potion", "minor_mana_potion"],
     starterEquipment: { weapon: "apprentice_staff", chest: "cloth_shirt" },
     starterInventory: [
@@ -149,6 +178,7 @@ export const CLASSES: Record<ClassId, ClassDef> = {
     maxResource: (level) => 130 + (level - 1) * 12,
     autoAttack: { range: TILE_SIZE * 7, multiplier: 0.45, ranged: true },
     skills: ["smite", "heal", "shield", "holyNova", "holyChains", "lightStep", "divineSpirit"],
+    interrupt: "holySilence",
     potions: ["minor_hp_potion", "minor_mana_potion"],
     starterEquipment: { weapon: "apprentice_staff", chest: "cloth_shirt" },
     starterInventory: [
@@ -167,6 +197,7 @@ export const CLASSES: Record<ClassId, ClassDef> = {
     maxResource: (level) => 125 + (level - 1) * 12,
     autoAttack: { range: TILE_SIZE * 7, multiplier: 0.45, ranged: true },
     skills: ["drainLife", "boneNova", "summonSkeleton", "terror", "soulStep", "darkPact"],
+    interrupt: "soulLock",
     potions: ["minor_hp_potion", "minor_mana_potion"],
     starterEquipment: { weapon: "apprentice_staff", chest: "cloth_shirt" },
     starterInventory: [
@@ -197,6 +228,15 @@ export function classQuestItems(quest: QuestDef, classId: string) {
   const cls = classOf(classId);
   const items = quest.reward.classItems;
   return items?.[cls.id] ?? (cls.rewardsLike ? items?.[cls.rewardsLike] : undefined) ?? [];
+}
+
+export function isSpecId(value: unknown): value is SpecId {
+  return value === "damage" || value === "tank";
+}
+
+/** Whether this class and spec is a tank. */
+export function isTank(cls: string, spec: string): boolean {
+  return spec === "tank" && !!classOf(cls).specs;
 }
 
 /** Unknown or retired classes count as a novice (they choose again at the keep). */

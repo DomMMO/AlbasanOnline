@@ -133,7 +133,8 @@ export function bossTick(game: Game, mobId: string, mob: Mob, runtime: MobRuntim
     return true;
   }
 
-  if (now < state.nextAbilityAt || abilities.length === 0) return false;
+  // Not while a spell with a cast bar is going (mobCasts.ts).
+  if (now < state.nextAbilityAt || abilities.length === 0 || runtime.cast) return false;
   const ability = abilities[state.abilityIndex % abilities.length];
   state.abilityIndex++;
   state.cast = startCast(game, mobId, mob, ability, target);

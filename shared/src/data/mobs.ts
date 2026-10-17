@@ -47,6 +47,11 @@ export interface MobDef {
   xp: number;
   /** 0 = passive (only fights back when attacked). */
   aggroRange: number;
+  /** Shoots instead of swinging: stops within `range` pixels of its target (in clear sight) and
+   *  looses an arrow, or (kind "bolt") casts a bolt from its staff. Absent: a melee mob. */
+  ranged?: { range: number; kind?: "arrow" | "bolt" };
+  /** Its abilities with a cast bar (MOB_CASTS ids); by its role when absent (see castsOf). */
+  casts?: string[];
   respawnMs: number;
   appearance: Appearance;
   loot: LootTable;
@@ -367,7 +372,7 @@ const BASE_MOBS: Record<string, MobDef> = {
   // ---- Dark Forest (Kara Orman), levels 10-20 ----
   dark_wolf: {
     id: "dark_wolf",
-    name: "Kara Kurt",
+    name: "Elf İzci",
     level: 10,
     maxHp: 300,
     attack: 30,
@@ -377,7 +382,7 @@ const BASE_MOBS: Record<string, MobDef> = {
     xp: 120,
     aggroRange: 64,
     respawnMs: 15_000,
-    appearance: { type: "wolf", fur: 0x34343e },
+    appearance: { type: "image", key: "elf_izci" },
     loot: {
       gold: [10, 20],
       drops: [
@@ -394,7 +399,7 @@ const BASE_MOBS: Record<string, MobDef> = {
   },
   poison_slime: {
     id: "poison_slime",
-    name: "Zehir Balçığı",
+    name: "Elf Zehirci",
     level: 11,
     maxHp: 340,
     attack: 32,
@@ -403,8 +408,9 @@ const BASE_MOBS: Record<string, MobDef> = {
     speed: 36,
     xp: 135,
     aggroRange: 48,
+    ranged: { range: 120, kind: "bolt" },
     respawnMs: 15_000,
-    appearance: { type: "slime", color: 0x9bd13a },
+    appearance: { type: "image", key: "elf_druid", tint: 0xc8f0a0 },
     loot: {
       gold: [10, 22],
       drops: [
@@ -421,7 +427,7 @@ const BASE_MOBS: Record<string, MobDef> = {
   },
   bandit: {
     id: "bandit",
-    name: "Haydut",
+    name: "Elf Haydut",
     level: 12,
     maxHp: 420,
     attack: 36,
@@ -431,7 +437,7 @@ const BASE_MOBS: Record<string, MobDef> = {
     xp: 160,
     aggroRange: 72,
     respawnMs: 18_000,
-    appearance: { type: "humanoid", tunic: 0x5a1e1e, hair: 0x1a1a1a, gear: { head: "leather_cap", chest: "leather_vest" } },
+    appearance: { type: "image", key: "elf_koruyucu" },
     loot: {
       gold: [15, 30],
       drops: [
@@ -450,7 +456,7 @@ const BASE_MOBS: Record<string, MobDef> = {
   },
   skeleton: {
     id: "skeleton",
-    name: "İskelet Savaşçı",
+    name: "Mezar Soyguncusu",
     level: 14,
     maxHp: 500,
     attack: 42,
@@ -460,7 +466,7 @@ const BASE_MOBS: Record<string, MobDef> = {
     xp: 200,
     aggroRange: 72,
     respawnMs: 18_000,
-    appearance: { type: "image", key: "skeleton_1" },
+    appearance: { type: "image", key: "elf_izci", tint: 0xd8d4c4 },
     loot: {
       gold: [18, 35],
       drops: [
@@ -478,7 +484,7 @@ const BASE_MOBS: Record<string, MobDef> = {
   },
   orc: {
     id: "orc",
-    name: "Ork Yağmacı",
+    name: "Elf Yağmacı",
     level: 16,
     maxHp: 640,
     attack: 50,
@@ -487,8 +493,9 @@ const BASE_MOBS: Record<string, MobDef> = {
     speed: 58,
     xp: 250,
     aggroRange: 80,
+    ranged: { range: 112 },
     respawnMs: 20_000,
-    appearance: { type: "image", key: "ork_yagmaci" },
+    appearance: { type: "image", key: "elf_avci", tint: 0xf0c8a8 },
     loot: {
       gold: [22, 42],
       drops: [
@@ -507,7 +514,7 @@ const BASE_MOBS: Record<string, MobDef> = {
   },
   dire_bear: {
     id: "dire_bear",
-    name: "Boz Ayı",
+    name: "Elf Vahşisi",
     level: 18,
     maxHp: 1500,
     attack: 62,
@@ -518,7 +525,7 @@ const BASE_MOBS: Record<string, MobDef> = {
     aggroRange: 64,
     respawnMs: 60_000,
     scale: 2,
-    appearance: { type: "wolf", fur: 0x6b4a2b },
+    appearance: { type: "image", key: "elf_koruyucu", tint: 0xd0a080 },
     loot: {
       gold: [50, 90],
       drops: [
@@ -535,10 +542,10 @@ const BASE_MOBS: Record<string, MobDef> = {
       ],
     },
   },
-  // ---- Satyr Grove, Dark Forest (art: CraftPix satyrs and golem) ----
+  // ---- Satyr Grove, Dark Forest (the elves of the Fairy Forest pack) ----
   satyr_warrior: {
     id: "satyr_warrior",
-    name: "Satir Savaşçı",
+    name: "Elf Akıncı",
     level: 12,
     maxHp: 400,
     attack: 35,
@@ -548,7 +555,7 @@ const BASE_MOBS: Record<string, MobDef> = {
     xp: 158,
     aggroRange: 72,
     respawnMs: 18_000,
-    appearance: { type: "image", key: "satyr_horned" },
+    appearance: { type: "image", key: "elf_koruyucu", tint: 0xd8e0c0 },
     loot: {
       gold: [14, 28],
       drops: [
@@ -565,7 +572,7 @@ const BASE_MOBS: Record<string, MobDef> = {
   },
   satyr_spearman: {
     id: "satyr_spearman",
-    name: "Satir Mızrakçı",
+    name: "Elf Avcı",
     level: 13,
     maxHp: 430,
     attack: 40,
@@ -574,8 +581,9 @@ const BASE_MOBS: Record<string, MobDef> = {
     speed: 66,
     xp: 180,
     aggroRange: 80,
+    ranged: { range: 112 },
     respawnMs: 18_000,
-    appearance: { type: "image", key: "satyr_spear" },
+    appearance: { type: "image", key: "elf_avci" },
     loot: {
       gold: [16, 32],
       drops: [
@@ -592,7 +600,7 @@ const BASE_MOBS: Record<string, MobDef> = {
   },
   satyr_chief: {
     id: "satyr_chief",
-    name: "Satir Reisi",
+    name: "Akıncı Başı",
     level: 15,
     maxHp: 1100,
     attack: 50,
@@ -602,7 +610,7 @@ const BASE_MOBS: Record<string, MobDef> = {
     xp: 420,
     aggroRange: 80,
     respawnMs: 45_000,
-    appearance: { type: "image", key: "satyr_chief" },
+    appearance: { type: "image", key: "elf_koruyucu", tint: 0xffe090 },
     loot: {
       gold: [40, 75],
       drops: [
@@ -620,7 +628,7 @@ const BASE_MOBS: Record<string, MobDef> = {
   },
   moss_golem: {
     id: "moss_golem",
-    name: "Yosun Golemi",
+    name: "Yosun Druidi",
     level: 17,
     maxHp: 1350,
     attack: 58,
@@ -629,8 +637,9 @@ const BASE_MOBS: Record<string, MobDef> = {
     speed: 46,
     xp: 540,
     aggroRange: 56,
+    ranged: { range: 120, kind: "bolt" },
     respawnMs: 50_000,
-    appearance: { type: "image", key: "golem_earth" },
+    appearance: { type: "image", key: "elf_druid", tint: 0xa8d090 },
     loot: {
       gold: [45, 85],
       drops: [
@@ -650,7 +659,7 @@ const BASE_MOBS: Record<string, MobDef> = {
   // ---- Night only, Dark Forest ----
   night_wraith: {
     id: "night_wraith",
-    name: "Gece Hortlağı",
+    name: "Gece Druidi",
     level: 13,
     maxHp: 460,
     attack: 40,
@@ -659,9 +668,10 @@ const BASE_MOBS: Record<string, MobDef> = {
     speed: 56,
     xp: 185,
     aggroRange: 72,
+    ranged: { range: 120, kind: "bolt" },
     respawnMs: 20_000,
     nightOnly: true,
-    appearance: { type: "image", key: "wraith_teal" },
+    appearance: { type: "image", key: "elf_druid", tint: 0xb8a8f0 },
     loot: {
       gold: [16, 32],
       drops: [
@@ -680,7 +690,7 @@ const BASE_MOBS: Record<string, MobDef> = {
   },
   moon_wolf: {
     id: "moon_wolf",
-    name: "Ay Kurdu",
+    name: "Gece İzcisi",
     level: 16,
     maxHp: 600,
     attack: 48,
@@ -691,7 +701,7 @@ const BASE_MOBS: Record<string, MobDef> = {
     aggroRange: 72,
     respawnMs: 25_000,
     nightOnly: true,
-    appearance: { type: "wolf", fur: 0x9aa8d8 },
+    appearance: { type: "image", key: "elf_izci", tint: 0xa8b8f0 },
     loot: {
       gold: [20, 40],
       drops: [
@@ -720,9 +730,10 @@ const BASE_MOBS: Record<string, MobDef> = {
     speed: 60,
     xp: 2500,
     aggroRange: 96,
+    ranged: { range: 112 },
     respawnMs: 300_000,
     scale: 2,
-    appearance: { type: "humanoid", tunic: 0x2a0a0a, hair: 0x1a1a1a, skin: 0xc68a5a, gear: { head: "chieftain_helm", chest: "chainmail", legs: "wolf_hide_leggings" } },
+    appearance: { type: "image", key: "elf_avci", tint: 0xc08070 },
     loot: {
       gold: [300, 600],
       drops: [

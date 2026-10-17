@@ -4,11 +4,11 @@ import {
   MAX_INPUT_BURST,
   classOf,
   MAX_LEVEL,
-  PARTY_BOSS_HP_PER_PLAYER,
   SPAWN_PROTECTION_MS,
   stepMovement,
   TICK_MS,
   statsWithEquipment,
+  isSpecId,
   sanitizeRanks,
   sanitizeLook,
   sanitizeHorse,
@@ -38,6 +38,7 @@ import { fromStored, toStored, type InventoryData, type StoredItem } from "./inv
 import { refreshStats, sendInventory, type LootContents } from "./items";
 import { sendHorseState, syncHorse } from "./stable";
 import type { BossState } from "./boss";
+import type { MobCastState, MobEnrage } from "./mobCasts";
 import { closeStall, type StallState } from "./market";
 import { questsFromStored, sendQuestLog } from "./quests";
 import { nightChanged, spawnInitialMobs, updateMobs } from "./mobs";
@@ -164,6 +165,10 @@ export interface MobRuntime {
   zone: SpawnZone | null;
   /** The pack it belongs to: pull one and the whole pack comes (null = on its own). */
   pack: string | null;
+  /** Chasing round obstacles: the waypoints left, where the target was when they were found, when. */
+  path: { x: number; y: number }[] | null;
+  pathGoal: { x: number; y: number } | null;
+  pathAt: number;
   home: { x: number; y: number };
   mode: MobMode;
   /** sessionId -> threat. Highest threat is the target; this is what party tanking builds on. */
@@ -178,6 +183,12 @@ export interface MobRuntime {
   /** Stun skills: can't move or attack until then. */
   stunnedUntil: number;
   boss?: BossState;
+  /** The ability with a cast bar it is casting now (mobCasts.ts). */
+  cast: MobCastState | null;
+  /** When each of its abilities can be cast next (set when the fight begins; null out of combat). */
+  castReady: Map<string, number> | null;
+  /** Hiddet: harder, faster swings for a while. */
+  enrage: MobEnrage | null;
   /** Stat and reward multiplier: 1, NIGHT_POWER at night outdoors, NIGHT_ONLY_POWER for night creatures. */
   power: number;
 }
@@ -188,6 +199,8 @@ export class Game {
   map: WorldMap;
   readonly playerRuntime = new Map<string, PlayerRuntime>();
   readonly mobRuntime = new Map<string, MobRuntime>();
+  /** Mob arrows in flight: each hits its player when it arrives (combat.ts, landArrows). */
+  readonly arrows: { mobId: string; sessionId: string; at: number; amount: number; crit: boolean }[] = [];
   readonly lootContents = new Map<string, LootContents>();
   readonly minionRuntime = new Map<string, MinionRuntime>();
   readonly random = Math.random;
@@ -195,10 +208,12 @@ export class Game {
   night = false;
   /** Spawn areas of night-only creatures waiting for dark. */
   readonly dormantSpawns: SpawnZone[] = [];
+  /** Open world: the dead of a pack still fighting (pack -> their areas); they come back together once it is all dead. */
+  readonly deadPacks = new Map<string, SpawnZone[]>();
 
   private time = 0;
-  /** Most players this (instanced) zone has had at once; bosses are scaled to it. */
-  private groupSize = 1;
+  /** Most players this (instanced) zone has had at once; its mobs are scaled to it (partyScale.ts). */
+  groupSize = 1;
   private timers: { at: number; fn: () => void }[] = [];
   private nextEntityId = 1;
 
@@ -253,6 +268,7 @@ export class Game {
     player.name = character.name;
     player.color = character.color;
     player.cls = classOf(character.class).id;
+    player.spec = classOf(player.cls).specs && isSpecId(character.spec) ? character.spec : "";
     player.level = Math.min(Math.max(1, character.level), MAX_LEVEL);
     player.xp = character.xp;
     player.pvpRating = character.pvpRating;
@@ -332,7 +348,7 @@ export class Game {
     // Rage starts empty, mana full.
     player.resource = classOf(player.cls).resource === "rage" ? 0 : player.maxResource;
     this.protectSpawn(sessionId);
-    if (this.zone.instanced) this.scaleBossesForGroup(this.state.players.size);
+    if (this.zone.instanced) this.scaleMobsForGroup(this.state.players.size);
     sendInventory(this, sessionId);
     sendQuestLog(this, sessionId);
     sendSkillRanks(this, sessionId);
@@ -354,6 +370,7 @@ export class Game {
       characterId: runtime.characterId,
       progress: {
         cls: player.cls,
+        spec: player.spec,
         level: player.level,
         xp: player.xp,
         hp: player.dead ? 0 : player.hp,
@@ -400,15 +417,15 @@ export class Game {
     runtime.inputQueue.push(input);
   }
 
-  /** Dungeon bosses get tougher as more party members come in (never weaker when someone leaves). */
-  private scaleBossesForGroup(players: number) {
+  /** Dungeon mobs get N times the health as more party members come in (never weaker when someone leaves). */
+  private scaleMobsForGroup(players: number) {
     if (players <= this.groupSize) return;
-    const before = 1 + PARTY_BOSS_HP_PER_PLAYER * (this.groupSize - 1);
-    const after = 1 + PARTY_BOSS_HP_PER_PLAYER * (players - 1);
+    const before = this.groupSize;
+    const after = players;
     this.groupSize = players;
-    for (const [id, runtime] of this.mobRuntime) {
+    for (const id of this.mobRuntime.keys()) {
       const mob = this.state.mobs.get(id);
-      if (!runtime.boss || !mob) continue;
+      if (!mob) continue;
       const fraction = mob.hp / mob.maxHp;
       mob.maxHp = Math.round((mob.maxHp / before) * after);
       mob.hp = Math.max(1, Math.round(mob.maxHp * fraction));

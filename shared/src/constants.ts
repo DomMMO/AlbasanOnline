@@ -32,9 +32,18 @@ export const MAX_NAME_LENGTH = 16;
 export const MELEE_RANGE = 26;
 /** Mobs stop chasing at this distance and start swinging. */
 export const MOB_ATTACK_RANGE = 18;
-/** A mob that gets this far from its spawn point gives up and walks home at full health. */
-export const MOB_LEASH_RANGE = TILE_SIZE * 18;
-/** Players this many levels above a mob are left alone: it won't attack them and shies away a little. */
+/** A mob archer's shot: drawing the bow takes this long, then the arrow flies at this speed
+ *  (pixels per second); the hit lands when it arrives. The client's animation matches it. */
+export const MOB_ARROW_DRAW_MS = 260;
+export const MOB_ARROW_SPEED = 240;
+/** A mob caster's bolt: the staff is raised this long, then the bolt flies at this speed. */
+export const MOB_BOLT_CAST_MS = 420;
+export const MOB_BOLT_SPEED = 200;
+/** Open world: a mob that gets this far from its spawn point gives up and walks home at full
+ *  health. Dungeon mobs never give up. */
+export const MOB_LEASH_RANGE = TILE_SIZE * 28;
+/** Open world: players this many levels above a mob are left alone: it won't attack them and
+ *  shies away a little. Dungeon mobs attack anyone. */
 export const MOB_FEAR_LEVEL_GAP = 5;
 
 export const GLOBAL_COOLDOWN_MS = 1000;
@@ -50,8 +59,14 @@ export const MAX_FRIENDS = 50;
 export const PARTY_XP_RANGE = TILE_SIZE * 40;
 /** XP bonus per extra member who shares a kill (grouping is rewarded). */
 export const PARTY_XP_BONUS = 0.2;
-/** Bosses in a dungeon instance get this much more health per extra player. */
-export const PARTY_BOSS_HP_PER_PLAYER = 0.6;
+// Dungeon party scaling (DENGE.md, bölüm 6). N = most players the instance has had (never drops).
+// Mobs get N times the health and XP; these are the per-extra-player steps of the rest.
+/** Mob plain hits: +25% per extra player (×2 at 5). Ability (cast) damage stays the same. */
+export const PARTY_MOB_DAMAGE_PER_PLAYER = 0.25;
+/** Mob abilities come this much more often per extra player (×1.6 at 5). */
+export const PARTY_CAST_RATE_PER_PLAYER = 0.15;
+/** Drop chances: +31.25% per extra player (+125% at 5), rolled for every member on their own. */
+export const PARTY_DROP_PER_PLAYER = 0.3125;
 /** Warriors generate this much more threat (they are the tanks). */
 export const WARRIOR_THREAT_MULTIPLIER = 2;
 /** Threat per point healed, spread to the mobs fighting the healed player. */

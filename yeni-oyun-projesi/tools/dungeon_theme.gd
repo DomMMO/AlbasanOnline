@@ -1167,18 +1167,20 @@ const BUILDS := {
 	},
 	"orc_fortress": {
 		"seed": 570, "wall": WALL, "floor": PATH,
+		# Orcs only, of every class: melee, archers, casters (shamans), rogues (cutthroats); packs
+		# all of one class or mixed. The first kinds stand in the pack's middle, the last round it.
 		"packs": [
-			[["orc_warrior", 3], ["war_wolf", 2]],
-			[["orc_shaman", 2], ["orc_warrior", 3]],
-			[["orc_brute", 2], ["war_wolf", 3]],
-			[["orc_warrior", 4], ["orc_shaman", 1]],
-			[["war_wolf", 3], ["orc_brute", 2]],
-			[["orc_shaman", 3], ["orc_warrior", 2]],
-			[["orc_brute", 3], ["orc_warrior", 2]],
+			[["orc_warrior", 3], ["orc_brute", 2]],
+			[["orc_archer", 5]],
+			[["orc_warrior", 2], ["orc_shaman", 1], ["orc_archer", 2]],
+			[["orc_warrior", 2], ["orc_shaman", 3]],
+			[["orc_cutthroat", 4], ["orc_archer", 1]],
+			[["orc_brute", 3], ["orc_shaman", 2]],
+			[["orc_warrior", 1], ["orc_brute", 1], ["orc_cutthroat", 1], ["orc_shaman", 1], ["orc_archer", 1]],
 		],
 		"bosses": [
 			["gate_keeper_grom", [["orc_warrior", 2]]],
-			["wolf_rider_uruk", [["war_wolf", 2]]],
+			["wolf_rider_uruk", [["orc_archer", 2]]],
 			["shaman_zulgar", [["orc_shaman", 2]]],
 			["warlord_mogthar", [["orc_brute", 2]]],
 		],

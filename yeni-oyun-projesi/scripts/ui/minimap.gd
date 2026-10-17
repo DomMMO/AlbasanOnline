@@ -27,6 +27,8 @@ var zone_label: Label
 ## The zone's ground, one pixel per tile (the big map draws it too).
 var ground: ImageTexture
 var map_size := Vector2i.ZERO
+## The zone itself drawn small (MapPicture), once it is ready; the tile colours until then.
+var picture: Texture2D
 var _canvas: Control
 var _dots: Array = []
 
@@ -75,6 +77,13 @@ func set_zone(map: ZoneMap, zone_name: String) -> void:
 			image.set_pixel(x, y, Color(hex))
 	ground = ImageTexture.create_from_image(image)
 	map_size = Vector2i(map.width, map.height)
+	picture = null
+
+
+## The zone's picture (MapPicture) instead of the tile colours.
+func set_picture(texture: Texture2D) -> void:
+	picture = texture
+	_canvas.queue_redraw()
 
 
 ## dots: [{x, y, kind}] in world pixels.
@@ -101,9 +110,19 @@ func _draw_map() -> void:
 	var sy := maxf(0.0, top)
 	var ex := minf(map_size.x, left + span)
 	var ey := minf(map_size.y, top + span)
-	ci.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	if ex > sx and ey > sy:
-		ci.draw_texture_rect_region(ground, Rect2((sx - left) * per_tile, (sy - top) * per_tile, (ex - sx) * per_tile, (ey - sy) * per_tile), Rect2(sx, sy, ex - sx, ey - sy))
+		var dest := Rect2((sx - left) * per_tile, (sy - top) * per_tile, (ex - sx) * per_tile, (ey - sy) * per_tile)
+		if picture:
+			# The picture's own pixels per tile (it may be drawn smaller for a huge map).
+			var k := float(picture.get_width()) / map_size.x
+			ci.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+			ci.draw_texture_rect_region(picture, dest, Rect2(sx * k, sy * k, (ex - sx) * k, (ey - sy) * k))
+		else:
+			ci.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+			ci.draw_texture_rect_region(ground, dest, Rect2(sx, sy, ex - sx, ey - sy))
+	# A soft dark edge, so the dots in the middle stand out.
+	for i in 6:
+		ci.draw_rect(Rect2(i, i, SIZE - i * 2, SIZE - i * 2), Color(0, 0, 0, 0.16 - i * 0.025), false, 1.0)
 	var pulse := 0.65 + 0.35 * sin(Time.get_ticks_msec() / 180.0)
 	var centre := SIZE / 2.0
 	var sorted := _dots.duplicate()

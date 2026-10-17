@@ -8,6 +8,8 @@ const SCREEN_SHARE := 0.75
 
 var _canvas: Control
 var _ground: Texture2D
+## The zone itself drawn small (MapPicture), once it is ready.
+var _picture: Texture2D
 var _map_size := Vector2i.ZERO
 var _dots: Array = []
 
@@ -32,10 +34,17 @@ func _init() -> void:
 ## Call when entering a zone (the minimap's ground image).
 func set_zone(ground: Texture2D, map_size: Vector2i, zone_name: String) -> void:
 	_ground = ground
+	_picture = null
 	_map_size = map_size
 	title_label.text = zone_name
 	if visible:
 		_fit()
+
+
+## The zone's picture (MapPicture) instead of the tile colours.
+func set_picture(texture: Texture2D) -> void:
+	_picture = texture
+	_canvas.queue_redraw()
 
 
 func open() -> void:
@@ -68,8 +77,12 @@ func _draw_map() -> void:
 	if _ground == null:
 		return
 	var per_tile := _scale()
-	_canvas.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	_canvas.draw_texture_rect(_ground, Rect2(Vector2.ZERO, Vector2(_map_size) * per_tile), false)
+	if _picture:
+		_canvas.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+		_canvas.draw_texture_rect(_picture, Rect2(Vector2.ZERO, Vector2(_map_size) * per_tile), false)
+	else:
+		_canvas.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		_canvas.draw_texture_rect(_ground, Rect2(Vector2.ZERO, Vector2(_map_size) * per_tile), false)
 	var ts := float(GameData.TILE_SIZE)
 	var sorted := _dots.duplicate()
 	sorted.sort_custom(func(a, b): return Minimap.DOT_STYLE[a.kind][2] < Minimap.DOT_STYLE[b.kind][2])

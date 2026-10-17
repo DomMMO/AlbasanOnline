@@ -39,13 +39,13 @@ position = Vector2(0, -3)
 shape = SubResource("RectangleShape2D_r0f30")
 debug_color = Color(1, 0.3, 0.2, 0.45)
 
-[node name="Govde" type="Area2D" parent="." unique_id=763275792]
+[node name="Govde" type="Area2D" parent="." unique_id=2075630076]
 collision_layer = 4
 collision_mask = 0
 monitoring = false
 monitorable = false
 
-[node name="Oval" type="CollisionShape2D" parent="Govde" unique_id=1988020175]
+[node name="Oval" type="CollisionShape2D" parent="Govde" unique_id=971448894]
 rotation = 1.5707964
 shape = SubResource("CapsuleShape2D_govde")
 debug_color = Color(1, 0.75, 0.2, 0.35)

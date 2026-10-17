@@ -109,6 +109,8 @@ export const Msg = {
   /** The map editor changed this zone's map: fetch the edits again and rebuild the ground. */
   MapChanged: "mapChanged",
   BossCast: "bossCast",
+  MobCastStart: "mobCastStart",
+  MobCastEnd: "mobCastEnd",
   CastStart: "castStart",
   CastEnd: "castEnd",
   ChatMessage: "chatMessage",
@@ -299,6 +301,22 @@ export interface BossCastEvent {
   castMs: number;
 }
 
+/** A mob begins an ability with a cast bar (MOB_CASTS); area ones mark where they will land. */
+export interface MobCastStartEvent {
+  mobId: string;
+  castId: string;
+  castMs: number;
+  x?: number;
+  y?: number;
+  radius?: number;
+}
+
+/** A mob's cast is over: done, or stopped (interrupted / stunned / its target gone). */
+export interface MobCastEndEvent {
+  mobId: string;
+  interrupted: boolean;
+}
+
 /** WebSocket close code used when the same character logs in from somewhere else. */
 export const CLOSE_LOGGED_IN_ELSEWHERE = 4001;
 
@@ -340,6 +358,8 @@ export interface AttackEvent {
   /** Dashes: where the caster set off from (its new position arrives with the state). */
   fromX?: number;
   fromY?: number;
+  /** A mob's shot from afar instead of a swing: an arrow, or a caster's bolt. */
+  ranged?: "arrow" | "bolt";
 }
 
 /** Someone started a spell with a cast time (everyone sees it; the caster also gets a cast bar). */

@@ -3,49 +3,50 @@
 [ext_resource type="SpriteFrames" path="res://characters/mobs/bandit_chief.tres" id="1_a6apc"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_c7j3o"]
-size = Vector2(28, 46)
+size = Vector2(40, 62)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_u7ipo"]
 size = Vector2(10, 6)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_govde"]
-radius = 5.6
-height = 22.4
+radius = 8.0
+height = 32.0
 
-[node name="BanditChief" type="Node2D" unique_id=510566398]
+[node name="BanditChief" type="Node2D" unique_id=313780009]
 
-[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1936438113]
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1838657028]
+scale = Vector2(2, 2)
 sprite_frames = ExtResource("1_a6apc")
 animation = &"idle"
 autoplay = "idle"
 centered = false
-offset = Vector2(-20.1782, -45.5787)
+offset = Vector2(-32, -64)
 
-[node name="Hurtbox" type="Area2D" parent="." unique_id=656071600]
+[node name="Hurtbox" type="Area2D" parent="." unique_id=779978285]
 collision_mask = 0
 
-[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1136491363]
-position = Vector2(-1.1781999, -21.578701)
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=815818504]
+position = Vector2(0, -31)
 shape = SubResource("RectangleShape2D_c7j3o")
 debug_color = Color(0.2, 0.6, 1, 0.35)
 
-[node name="Feet" type="Area2D" parent="." unique_id=1591880561]
+[node name="Feet" type="Area2D" parent="." unique_id=1195424056]
 collision_layer = 2
 collision_mask = 0
 input_pickable = false
 
-[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1156920417]
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=559597427]
 position = Vector2(0, -3)
 shape = SubResource("RectangleShape2D_u7ipo")
 debug_color = Color(1, 0.3, 0.2, 0.45)
 
-[node name="Govde" type="Area2D" parent="." unique_id=843102099]
+[node name="Govde" type="Area2D" parent="." unique_id=2113473022]
 collision_layer = 4
 collision_mask = 0
 monitoring = false
 monitorable = false
 
-[node name="Oval" type="CollisionShape2D" parent="Govde" unique_id=490665945]
+[node name="Oval" type="CollisionShape2D" parent="Govde" unique_id=1424216022]
 rotation = 1.5707964
 shape = SubResource("CapsuleShape2D_govde")
 debug_color = Color(1, 0.75, 0.2, 0.35)

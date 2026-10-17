@@ -2,6 +2,7 @@ import {
   collides,
   directionToward,
   distance,
+  hasLineOfSight,
   MOB_ATTACK_RANGE,
   MOB_FEAR_LEVEL_GAP,
   MOB_LEASH_RANGE,
@@ -16,9 +17,12 @@ import {
   zoneLayout,
   type SpawnZone,
 } from "../../../shared/src";
+import { groupHp } from "./partyScale";
 import { Mob } from "../rooms/schema/WorldState";
 import { bossSwingMultiplier, bossTick, newBossState, resetBoss } from "./boss";
-import { mobAttackPlayer } from "./combat";
+import { landArrows, mobAttackPlayer } from "./combat";
+import { enrageOf, mobCastTick, resetMobCasts } from "./mobCasts";
+import { findPath, walkableLine } from "./pathing";
 import type { Game, MobRuntime } from "./Game";
 
 // Mob AI is a tiny state machine:
@@ -35,6 +39,14 @@ const SAFE_RADIUS_AROUND_SPAWN = TILE_SIZE * 6;
 const SEPARATION_SHARE = 0.5;
 const SEPARATION_MAX = 2;
 const SEPARATION_CELL = 48;
+/** A chasing mob looks for a new way round obstacles this often, or once its target has moved this far. */
+const REPATH_MS = 600;
+const REPATH_MOVE = TILE_SIZE * 1.5;
+/** Path searches a tick may run (the rest keep their old path a tick longer). */
+const PATHS_PER_TICK = 4;
+let pathBudget = 0;
+/** A pack that has all died comes back no sooner than this (or its mobs' own respawn time). */
+const PACK_RESPAWN_MIN_MS = 5000;
 /** A dungeon pack: the mobs placed one after another round its first one (the pack's middle). */
 const PACK_LINK = TILE_SIZE * 6;
 
@@ -57,6 +69,26 @@ export function spawnMob(game: Game, zone: SpawnZone) {
   }
   const point = findSpawnPoint(game, zone);
   if (point) spawnMobAt(game, zone.mob, point, zone, `z${zone.tx},${zone.ty}`);
+}
+
+/**
+ * An open-world mob died (its runtime already gone). While others of its pack still live it
+ * waits; when the last one dies the whole pack comes back together, PACK_RESPAWN_MIN_MS later at
+ * the soonest (or its slowest mob's respawn time).
+ */
+export function packMemberDied(game: Game, runtime: MobRuntime) {
+  const zone = runtime.zone;
+  if (!zone) return;
+  const key = runtime.pack ?? `z${zone.tx},${zone.ty}`;
+  const waiting = game.deadPacks.get(key) ?? [];
+  waiting.push(zone);
+  game.deadPacks.set(key, waiting);
+  for (const other of game.mobRuntime.values()) if (other.pack === key) return;
+  game.deadPacks.delete(key);
+  const delay = Math.max(PACK_RESPAWN_MIN_MS, ...waiting.map((z) => MOBS[z.mob]?.respawnMs ?? 0));
+  game.after(delay, () => {
+    for (const z of waiting) spawnMob(game, z);
+  });
 }
 
 /**
@@ -127,7 +159,7 @@ export function spawnMobAt(game: Game, mobId: string, point: { x: number; y: num
   const power = mobPower(game, def);
   mob.kind = def.id;
   mob.level = def.level;
-  mob.maxHp = mob.hp = Math.round(def.maxHp * power);
+  mob.maxHp = mob.hp = Math.round(def.maxHp * power * groupHp(game));
   mob.empowered = power > 1;
   mob.x = point.x;
   mob.y = point.y;
@@ -136,6 +168,9 @@ export function spawnMobAt(game: Game, mobId: string, point: { x: number; y: num
     def,
     zone,
     pack,
+    path: null,
+    pathGoal: null,
+    pathAt: 0,
     home: { x: point.x, y: point.y },
     mode: "idle",
     threat: new Map(),
@@ -146,6 +181,9 @@ export function spawnMobAt(game: Game, mobId: string, point: { x: number; y: num
     rootedUntil: 0,
     stunnedUntil: 0,
     boss: def.boss ? newBossState() : undefined,
+    cast: null,
+    castReady: null,
+    enrage: null,
     power,
   });
   return id;
@@ -201,6 +239,8 @@ function findSpawnPoint(game: Game, zone: SpawnZone) {
 }
 
 export function updateMobs(game: Game) {
+  landArrows(game);
+  pathBudget = PATHS_PER_TICK;
   for (const [id, runtime] of game.mobRuntime) {
     const mob = game.state.mobs.get(id);
     if (!mob) continue;
@@ -313,7 +353,9 @@ export function addThreat(game: Game, runtime: MobRuntime, sessionId: string, am
 function updateIdle(game: Game, mob: Mob, runtime: MobRuntime) {
   if (runtime.def.aggroRange > 0) {
     // Players far above the mob's level are left alone.
-    const victim = nearestLivingPlayer(game, mob, runtime.def.aggroRange, (level) => level < mob.level + MOB_FEAR_LEVEL_GAP);
+    // In a dungeon whoever comes near is attacked, whatever their level.
+    const dungeon = game.zone.instanced;
+    const victim = nearestLivingPlayer(game, mob, runtime.def.aggroRange, (level) => dungeon || level < mob.level + MOB_FEAR_LEVEL_GAP);
     if (victim) {
       addThreat(game, runtime, victim, 1);
       return;
@@ -321,7 +363,7 @@ function updateIdle(game: Game, mob: Mob, runtime: MobRuntime) {
   }
 
   // ...and when one walks close, the mob edges away a little (bosses stand their ground).
-  if (!runtime.boss && !mob.rooted && shyAway(game, mob, runtime)) return;
+  if (!runtime.boss && !mob.rooted && !game.zone.instanced && shyAway(game, mob, runtime)) return;
 
   if (!runtime.wanderTo && game.now() >= runtime.nextWanderAt) {
     const angle = game.random() * Math.PI * 2;
@@ -343,29 +385,37 @@ function updateIdle(game: Game, mob: Mob, runtime: MobRuntime) {
 function updateChase(game: Game, mobId: string, mob: Mob, runtime: MobRuntime) {
   const targetId = highestThreat(game, runtime);
   const target = targetId ? game.state.players.get(targetId) : undefined;
-  if (!targetId || !target || distance(mob, runtime.home) > MOB_LEASH_RANGE) {
-    startReturn(mob, runtime);
+  // Dungeon mobs chase to the end; open-world ones give up this far from home.
+  if (!targetId || !target || (!game.zone.instanced && distance(mob, runtime.home) > MOB_LEASH_RANGE)) {
+    startReturn(game, mobId, mob, runtime);
     return;
   }
   mob.aggroId = targetId;
   if (runtime.boss && bossTick(game, mobId, mob, runtime, target)) return;
+  // An ability with a cast bar: it stands and casts (and doesn't swing) until the bar is full.
+  if (mobCastTick(game, mobId, mob, runtime, targetId, target)) return;
 
-  if (distance(mob, target) > MOB_ATTACK_RANGE) {
+  // An archer stops once in range and in clear sight; everyone else closes to melee.
+  const ranged = runtime.def.ranged;
+  const inReach = ranged ? distance(mob, target) <= ranged.range && hasLineOfSight(game.map, mob, target) : distance(mob, target) <= MOB_ATTACK_RANGE;
+  if (!inReach) {
     if (mob.rooted) mob.moving = false;
-    else stepToward(game, mob, target, runtime.def.speed);
+    else chaseStep(game, mob, runtime, target);
     return;
   }
+  runtime.path = null;
 
   mob.moving = false;
   mob.dir = directionToward(target.x - mob.x, target.y - mob.y, mob.dir);
   if (game.now() >= runtime.nextSwingAt) {
-    runtime.nextSwingAt = game.now() + runtime.def.attackSpeedMs * bossSwingMultiplier(runtime);
+    runtime.nextSwingAt = game.now() + (runtime.def.attackSpeedMs * bossSwingMultiplier(runtime)) / enrageOf(game, runtime).speed;
     mobAttackPlayer(game, mobId, runtime, targetId, target);
   }
 }
 
-function startReturn(mob: Mob, runtime: MobRuntime) {
+function startReturn(game: Game, mobId: string, mob: Mob, runtime: MobRuntime) {
   runtime.mode = "return";
+  resetMobCasts(game, mobId, runtime);
   runtime.rootedUntil = 0;
   runtime.stunnedUntil = 0;
   mob.rooted = false;
@@ -394,6 +444,40 @@ function updateReturn(mob: Mob, runtime: MobRuntime) {
   mob.x += (dx / dist) * step;
   mob.y += (dy / dist) * step;
   mob.moving = true;
+}
+
+/**
+ * One step after the target: straight at it when the way is clear, else along a path round the
+ * walls and props in between (found again every REPATH_MS, when the target has moved off, or when
+ * the mob got stuck). A target it can't reach at all: it goes as near as it can and waits there.
+ */
+function chaseStep(game: Game, mob: Mob, runtime: MobRuntime, target: { x: number; y: number }) {
+  const speed = runtime.def.speed;
+  if (walkableLine(game.map, mob, target)) {
+    runtime.path = null;
+    stepToward(game, mob, target, speed);
+    return;
+  }
+  const now = game.now();
+  const stale = !runtime.path || runtime.path.length === 0 || now >= runtime.pathAt + REPATH_MS || !runtime.pathGoal || distance(runtime.pathGoal, target) > REPATH_MOVE;
+  if (stale && (pathBudget > 0 || !runtime.path)) {
+    pathBudget--;
+    runtime.path = findPath(game.map, mob, target);
+    runtime.pathGoal = { x: target.x, y: target.y };
+    runtime.pathAt = now;
+  }
+  const path = runtime.path;
+  while (path && path.length > 0 && distance(mob, path[0]) < 2) path.shift();
+  if (!path || path.length === 0) {
+    // Nowhere nearer to go: stand (no walking on the spot).
+    mob.moving = false;
+    mob.dir = directionToward(target.x - mob.x, target.y - mob.y, mob.dir);
+    return;
+  }
+  if (stepToward(game, mob, path[0], speed) && distance(mob, path[0]) >= 1) {
+    // Stuck on something the path didn't know (another mob's push, a corner): look again.
+    runtime.pathAt = 0;
+  }
 }
 
 /** Moves the mob toward `to`. Returns true once it is (nearly) there or blocked. */

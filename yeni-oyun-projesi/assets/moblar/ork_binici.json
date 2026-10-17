@@ -1,0 +1,195 @@
+{
+ "frameWidth": 128,
+ "frameHeight": 128,
+ "originX": 0.5,
+ "originY": 1.0,
+ "anims": {
+  "idle": [
+   0,
+   1,
+   2,
+   3
+  ],
+  "walk": [
+   4,
+   5,
+   6,
+   7,
+   8,
+   9
+  ],
+  "dead": [
+   10,
+   11,
+   12,
+   13,
+   14,
+   15
+  ]
+ },
+ "fps": {
+  "idle": 7.0,
+  "walk": 10.0,
+  "dead": 10.0
+ },
+ "rig": {
+  "back": {
+   "sheet": "res://assets/moblar/ork_binici_arka.png",
+   "pivots": [
+    [
+     36,
+     108
+    ],
+    [
+     36,
+     112
+    ],
+    [
+     36,
+     112
+    ],
+    [
+     36,
+     110
+    ],
+    [
+     36,
+     108
+    ],
+    [
+     38,
+     106
+    ],
+    [
+     40,
+     108
+    ],
+    [
+     44,
+     108
+    ],
+    [
+     42,
+     106
+    ],
+    [
+     40,
+     108
+    ],
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+   ]
+  },
+  "front": {
+   "sheet": "res://assets/moblar/ork_binici_on.png",
+   "pivots": [
+    [
+     106,
+     102
+    ],
+    [
+     106,
+     106
+    ],
+    [
+     106,
+     106
+    ],
+    [
+     106,
+     104
+    ],
+    [
+     106,
+     102
+    ],
+    [
+     104,
+     100
+    ],
+    [
+     102,
+     102
+    ],
+    [
+     98,
+     102
+    ],
+    [
+     100,
+     100
+    ],
+    [
+     102,
+     102
+    ],
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+   ]
+  },
+  "swing": "back",
+  "swing_to": 75,
+  "draw": {
+   "front": [
+    "res://assets/moblar/ork_binici_on_1.png",
+    "res://assets/moblar/ork_binici_on_2.png"
+   ],
+   "nock": [
+    [
+     94,
+     96
+    ],
+    [
+     94,
+     100
+    ],
+    [
+     94,
+     100
+    ],
+    [
+     94,
+     98
+    ],
+    [
+     94,
+     96
+    ],
+    [
+     92,
+     94
+    ],
+    [
+     90,
+     96
+    ],
+    [
+     86,
+     96
+    ],
+    [
+     88,
+     94
+    ],
+    [
+     90,
+     96
+    ],
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+   ]
+  }
+ }
+}

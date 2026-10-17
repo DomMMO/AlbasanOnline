@@ -20,6 +20,7 @@ export interface CharacterRecord {
   accountId: number;
   name: string;
   class: string;
+  spec: string;
   color: number;
   level: number;
   xp: number;
@@ -53,6 +54,8 @@ export interface CharacterRecord {
 export interface CharacterProgress {
   /** Chosen at a master in the keep, undone at Ayşe Teyze. */
   cls: string;
+  /** "damage", "tank" or "" (chosen at the master too). */
+  spec: string;
   level: number;
   xp: number;
   hp: number;
@@ -179,7 +182,7 @@ export async function createCharacter(accountId: number, name: string, color: nu
 /** Loads a character only if it belongs to the account. */
 export async function loadCharacter(characterId: number, accountId: number): Promise<CharacterRecord | null> {
   const { rows } = await pool.query<Omit<CharacterRecord, "items" | "quests">>(
-    `SELECT id, account_id AS "accountId", name, class, color, level, xp, gold, storage_gold AS "storageGold", look,
+    `SELECT id, account_id AS "accountId", name, class, spec, color, level, xp, gold, storage_gold AS "storageGold", look,
             play_seconds AS "playSeconds", hp, zone, x, y,
             pvp_rating AS "pvpRating", pvp_kills AS "pvpKills", pvp_deaths AS "pvpDeaths",
             skill_ranks AS "skillRanks", fortune, life_skills AS "lifeSkills", horse, pets
@@ -245,7 +248,7 @@ export async function saveCharacters(saves: CharacterSave[]) {
       await client.query(
         `UPDATE characters SET level = $2, xp = $3, hp = $4, zone = COALESCE($5, zone), x = CASE WHEN $5::text IS NULL THEN x ELSE $6 END,
            y = CASE WHEN $5::text IS NULL THEN y ELSE $7 END, gold = $8, pvp_rating = $9, pvp_kills = $10, pvp_deaths = $11,
-           skill_ranks = $12, fortune = $13, storage_gold = $14, play_seconds = $15, life_skills = $16, class = $17, horse = $18, pets = $19, look = $20, updated_at = now()
+           skill_ranks = $12, fortune = $13, storage_gold = $14, play_seconds = $15, life_skills = $16, class = $17, horse = $18, pets = $19, look = $20, spec = $21, updated_at = now()
          WHERE id = $1`,
         [
           characterId,
@@ -268,6 +271,7 @@ export async function saveCharacters(saves: CharacterSave[]) {
           JSON.stringify(progress.horse),
           JSON.stringify(progress.pets),
           JSON.stringify(progress.look),
+          progress.spec,
         ],
       );
     }

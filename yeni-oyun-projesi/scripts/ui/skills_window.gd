@@ -45,6 +45,10 @@ func set_life(event: Dictionary) -> void:
 
 
 func rank(id: String) -> int:
+	# The class's interrupt is innate: known from its level, no points.
+	var cls := ui.player_class()
+	if not cls.is_empty() and String(GameData.class_of(cls).get("interrupt", "")) == id:
+		return 1 if ui.player_level() >= int(GameData.skill(id).get("level", 1)) else 0
 	return int(ranks.get(id, 0))
 
 
@@ -115,6 +119,10 @@ func _row(opts: Dictionary) -> Control:
 	detail.custom_minimum_size = Vector2(250, 0)
 	text.add_child(detail)
 	h.add_child(text)
+	if opts.get("innate", false):
+		# Known without points: no ranks to buy.
+		h.add_child(UiTheme.label("Doğuştan", 12, UiTheme.GOLD_LIGHT, true))
+		return panel
 	var controls := HBoxContainer.new()
 	controls.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	var minus := UiTheme.button("−", "DarkButton", func(): ui.send("skillRank", {"id": opts.id, "delta": -1}))
@@ -192,6 +200,11 @@ func render() -> void:
 		var cost := ("%d %s" % [cost_now, res_name]) if cost_now > 0 else "bedelsiz"
 		var cooldown := (" · %s sn bekleme" % Tooltip._num(float(skill.cooldownMs) / 1000.0)) if int(skill.get("cooldownMs", 0)) > 0 else ""
 		active.append(_row({"id": id, "skill": skill, "name": skill.name, "tag": cats.get(String(skill.get("category", "")), ""), "description": skill.get("description", ""), "detail": "%s · %s%s · her derece +%%%d" % ["Öğrenilmedi" if r == 0 else "Derece %d%s" % [r, bonus], cost, cooldown, bonus_step], "rank": r, "max": max_rank, "level": int(skill.get("level", 1))}))
+	var interrupt := String(cdef.get("interrupt", ""))
+	if not interrupt.is_empty():
+		var skill := GameData.skill(interrupt)
+		var cooldown := Tooltip._num(float(skill.cooldownMs) / 1000.0)
+		active.append(_row({"id": interrupt, "skill": skill, "name": skill.name, "tag": "Kesme", "description": skill.get("description", ""), "detail": "Doğuştan · bedelsiz · %s sn bekleme · global beklemeye girmez" % cooldown, "rank": rank(interrupt), "max": 1, "level": int(skill.get("level", 1)), "innate": true}))
 	var passives: Array = []
 	for p in GameData.get_value("CLASS_PASSIVES", {}).get(cls, []):
 		var r := rank(String(p.id))

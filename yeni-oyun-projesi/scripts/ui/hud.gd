@@ -25,8 +25,26 @@ var _player_name: Label
 var _player_level: Label
 var _player_hp: Bar
 var _player_res: Bar
+## Where the globes sit, from the user's sketch (1920 x 1080): the big ones (health) 370 px either
+## side of the middle at 70% of the height, 202 px across; the small ones (resource, target's cast)
+## 96 px across, 72 px out and 71 px down from the big ones' centres. Sizes go with the height,
+## the sideways spread with the width.
+const GLOBE_REF := Vector2(1920.0, 1080.0)
+const BIG_CENTER := Vector2(370.0, 752.0)
+const BIG_ACROSS := 202.0
+const SMALL_SHIFT := Vector2(72.0, 71.0)
+const SMALL_ACROSS := 96.0
+## A globe's frame spans this much of its control (its glass and ring fill the drawn circle).
+const GLOBE_FILL := 0.93
+const SMALL_GLOBE := 96.0
 var _hp_globe: Globe
 var _res_globe: Globe
+## The target's globes at the bottom right: its health, and its cast filling up.
+var _target_globe: Globe
+var _target_cast_globe: Globe
+## Returns the target's cast: {name, interruptible, progress (0..1), cut} or {} (world.gd sets it).
+var target_cast_source := Callable()
+var _target_cast_shown := ""
 var _target: PanelContainer
 var _target_name: Label
 var _target_level: Label
@@ -158,7 +176,9 @@ func _build_target_frame() -> void:
 	_target_name = UiTheme.title_label("", 19)
 	_target_level = UiTheme.label("", 12, UiTheme.GOLD, true)
 	box.add_child(_frame_title(_target_name, _target_level))
+	# Its health is in the globe at the bottom right.
 	_target_hp = Bar.new("hp", 15)
+	_target_hp.visible = false
 	box.add_child(_target_hp)
 	var actions := HFlowContainer.new()
 	actions.add_theme_constant_override("h_separation", 4)
@@ -212,19 +232,17 @@ func _build_top_right() -> void:
 
 func _build_globes() -> void:
 	_hp_globe = Globe.new("hp", "hp")
-	root.add_child(_hp_globe)
-	_hp_globe.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
-	_hp_globe.offset_left = 6
-	_hp_globe.offset_top = -154
-	_hp_globe.offset_right = 156
-	_hp_globe.offset_bottom = -4
-	_res_globe = Globe.new("resource", "rage")
-	root.add_child(_res_globe)
-	_res_globe.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-	_res_globe.offset_left = -156
-	_res_globe.offset_top = -154
-	_res_globe.offset_right = -6
-	_res_globe.offset_bottom = -4
+	_res_globe = Globe.new("resource", "rage", SMALL_GLOBE)
+	_target_globe = Globe.new("hp", "hp")
+	_target_cast_globe = Globe.new("resource", "cast", SMALL_GLOBE)
+	_target_cast_globe.set_level_now(0.0)
+	# Big globes first: the small ones lean over them.
+	for g in [_hp_globe, _target_globe, _res_globe, _target_cast_globe]:
+		root.add_child(g)
+	_target_globe.visible = false
+	_target_cast_globe.visible = false
+	root.resized.connect(_layout_globes)
+	_layout_globes.call_deferred()
 	var potions := PanelContainer.new()
 	_potions_panel = potions
 	potions.theme_type_variation = "FramePanel"
@@ -242,7 +260,7 @@ func _build_globes() -> void:
 		_potion_slots.append(s)
 	root.add_child(potions)
 	potions.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
-	potions.offset_left = 160
+	potions.offset_left = 8
 	potions.offset_top = -14 - 54
 	potions.offset_bottom = -14
 	_mount = SlotButton.new(40)
@@ -252,8 +270,8 @@ func _build_globes() -> void:
 	_mount.visible = false
 	root.add_child(_mount)
 	_mount.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-	_mount.offset_left = -160 - 46
-	_mount.offset_right = -160
+	_mount.offset_left = -8 - 46
+	_mount.offset_right = -8
 	_mount.offset_top = -14 - 46
 	_mount.offset_bottom = -14
 
@@ -306,7 +324,7 @@ func _build_bottom() -> void:
 	_help.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
 	_help.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	_help.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	_help.offset_right = -8 - 160
+	_help.offset_right = -8
 	_help.offset_bottom = -16
 	_help.custom_minimum_size = Vector2(360, 0)
 	_help.visible = bool(Settings.get_value("helpText"))
@@ -472,6 +490,8 @@ func stop_cast_bar(interrupted: bool) -> void:
 ## data: {name, level, hp, maxHp, color: Color, subtitle?, aggro?, invite: bool, duel, trade, friend} or null.
 func set_target_frame(d: Variant) -> void:
 	_target.visible = d != null
+	_target_globe.visible = d != null and not Settings.touch
+	_target_cast_globe.visible = _target_globe.visible
 	if d == null:
 		return
 	_target_name.text = String(d.name)
@@ -481,8 +501,60 @@ func set_target_frame(d: Variant) -> void:
 	if d.get("aggro"):
 		text += "  → %s" % d.aggro
 	_target_hp.set_value(d.hp, d.maxHp, text)
+	_target_globe.set_value(d.hp, d.maxHp, "%d / %d" % [d.hp, d.maxHp])
 	for key in _target_buttons:
 		_target_buttons[key].visible = bool(d.get(key, false))
+
+
+## The globes placed as in the sketch, scaled to the screen.
+func _layout_globes() -> void:
+	var vp := root.size
+	if vp.x <= 0 or vp.y <= 0:
+		return
+	var k := vp.y / GLOBE_REF.y
+	var mid := vp.x / 2.0
+	var cy := BIG_CENTER.y * k
+	var dx := BIG_CENTER.x * vp.x / GLOBE_REF.x
+	var big := BIG_ACROSS * k / GLOBE_FILL
+	var small := SMALL_ACROSS * k / GLOBE_FILL
+	var shift := SMALL_SHIFT * k
+	# One pixel size for every globe: 3 screen pixels per texel at 1080p.
+	var px := maxi(1, roundi(3.0 * k))
+	for g in [_hp_globe, _target_globe, _res_globe, _target_cast_globe]:
+		g.pixel = px
+	_place_globe(_hp_globe, Vector2(mid - dx, cy), big)
+	_place_globe(_target_globe, Vector2(mid + dx, cy), big)
+	_place_globe(_res_globe, Vector2(mid - dx + shift.x, cy + shift.y), small)
+	_place_globe(_target_cast_globe, Vector2(mid + dx - shift.x, cy + shift.y), small)
+
+
+func _place_globe(g: Globe, center: Vector2, across: float) -> void:
+	g.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	g.custom_minimum_size = Vector2(across, across)
+	g.size = Vector2(across, across)
+	g.position = (center - Vector2(across, across) / 2.0).round()
+
+
+## The target's cast globe follows its cast: filling yellow (or grey), red when cut off, dim when idle.
+func _update_target_cast() -> void:
+	if not _target_cast_globe.visible:
+		return
+	var c: Dictionary = target_cast_source.call() if target_cast_source.is_valid() else {}
+	if c.is_empty():
+		if _target_cast_shown != "":
+			_target_cast_shown = ""
+			_target_cast_globe.idle = true
+			_target_cast_globe.text = ""
+			_target_cast_globe.set_level_now(0.0)
+		return
+	var key := "%s|%s" % [c.name, c.cut]
+	if key != _target_cast_shown:
+		_target_cast_shown = key
+		_target_cast_globe.idle = false
+		_target_cast_globe.set_kind("cast_cut" if c.cut else ("cast" if c.interruptible else "cast_grey"))
+		if not c.cut:
+			_target_cast_globe.set_level_now(0.0)
+	_target_cast_globe.set_value(float(c.progress), 1.0, String(c.name))
 
 
 ## entries: [{kind: "skill"|"empty", skill: Dictionary, locked: bool}]
@@ -548,6 +620,7 @@ func flash_slot(index: int) -> void:
 
 func _process(_delta: float) -> void:
 	var now := Time.get_ticks_msec()
+	_update_target_cast()
 	for i in _slots.size():
 		var entry: Dictionary = _slot_entries[i]
 		var s := _slots[i]
@@ -781,6 +854,8 @@ func apply_layout() -> void:
 	var vp := root.size
 	_hp_globe.visible = false
 	_res_globe.visible = false
+	_target_globe.visible = false
+	_target_cast_globe.visible = false
 	_net_panel.visible = false
 	_help.visible = false
 	if _legend:

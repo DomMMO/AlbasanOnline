@@ -45,7 +45,12 @@ export type SkillEffect =
    * Timed buff on the caster (and party members within `partyRadius`): more attack,
    * faster swings and/or less damage taken. `hpCostPercent` of max health is paid up front.
    */
-  | { type: "buff"; durationMs: number; attackPct?: number; speedPct?: number; reductionPct?: number; partyRadius?: number; hpCostPercent?: number };
+  | { type: "buff"; durationMs: number; attackPct?: number; speedPct?: number; reductionPct?: number; partyRadius?: number; hpCostPercent?: number }
+  /**
+   * Kesme: a light hit that stops the enemy's magic cast (yellow bar; the mob can't start it
+   * again for INTERRUPT_LOCK_MS) or a player's spell. Grey bars (physical) need a stun instead.
+   */
+  | { type: "interrupt"; multiplier: number; bonus: number };
 
 /** How the client draws the skill; the server never looks at this. */
 export type SkillVisual =
@@ -130,6 +135,21 @@ export function skillCostAt(skill: SkillDef, resource: string, level: number): n
   return resource === "mana" ? Math.round(skill.cost * (1 + (level - 1) * MANA_COST_GROWTH)) : skill.cost;
 }
 
+/** Every class's interrupt: same rules, its own look. ClassDef.interrupt names it. */
+function interrupts(): SkillDef[] {
+  const base = { short: "", category: "utility" as const, level: 1, cost: 0, cooldownMs: 12_000, triggersGcd: false, castMs: 0, target: "enemy" as const, effect: { type: "interrupt" as const, multiplier: 0.3, bonus: 2 } };
+  const tail = " Sarı (büyü) barı keser: o büyü 10 sn yeniden başlayamaz. Gri barı kesemez; onu sersemletme durdurur.";
+  return [
+    { ...base, id: "pummel", name: "Susturan Yumruk", short: "SY", description: "Kılıcının kabzasıyla hedefin boğazına vurur." + tail, range: MELEE_RANGE, visual: "stun", color: "#f59f00" },
+    { ...base, id: "windShear", name: "Rüzgâr Kesiği", short: "RK", description: "Keskin bir rüzgâr hedefin sesini boğazında keser." + tail, range: SPELL_RANGE, visual: "spirit", color: "#f59f00" },
+    { ...base, id: "throatKick", name: "Boğaz Tekmesi", short: "BT", description: "Hızlı bir tekmeyle hedefin nefesini keser." + tail, range: MELEE_RANGE, visual: "stun", color: "#f59f00" },
+    { ...base, id: "silencingShot", name: "Susturan Ok", short: "SO", description: "Hedefin ağzına doğru küt uçlu bir ok gönderir." + tail, range: SPELL_RANGE, visual: "arrow", color: "#f59f00" },
+    { ...base, id: "thornGag", name: "Diken Gemi", short: "DG", description: "Dikenli bir sarmaşık hedefin ağzını bağlar." + tail, range: SPELL_RANGE, visual: "nature", color: "#f59f00" },
+    { ...base, id: "holySilence", name: "Kutsal Sessizlik", short: "KS", description: "Işık hedefin sesini bir anlığına söndürür." + tail, range: SPELL_RANGE, visual: "holy", color: "#f59f00" },
+    { ...base, id: "soulLock", name: "Ruh Kilidi", short: "RK", description: "Hedefin ruhunu bir an kilitler, büyüsü dağılır." + tail, range: SPELL_RANGE, visual: "shadow", color: "#f59f00" },
+  ];
+}
+
 export const SKILLS: Record<string, SkillDef> = Object.fromEntries(
   [
     // ---- Warrior (rage)
@@ -187,6 +207,9 @@ export const SKILLS: Record<string, SkillDef> = Object.fromEntries(
     skill({ id: "eviscerate", name: "İç Parçalama", short: "İP", category: "single", level: 3, description: "Ölümcül bir son vuruş: çok yüksek hasar.", cost: 45, cooldownMs: 10_000, triggersGcd: true, castMs: 0, target: "enemy", range: MELEE_RANGE, effect: { type: "strike", multiplier: 2.4, bonus: 10 }, visual: "melee", color: "#e03131" }),
     skill({ id: "blind", name: "Kör Edici Toz", short: "KT", category: "cc", level: 4, description: "Hedefin gözüne toz atar, 3 sn sersemletir.", cost: 30, cooldownMs: 16_000, triggersGcd: true, castMs: 0, target: "enemy", range: MELEE_RANGE * 2, effect: { type: "stun", multiplier: 0.2, bonus: 2, stunMs: 3000 }, visual: "stun", color: "#ced4da" }),
     skill({ id: "shadowStep", name: "Gölge Adımı", short: "GA", category: "dash", level: 6, description: "Gölgelere karışıp hedefin arkasında belirirsin ve sırtına vurursun.", cost: 25, cooldownMs: 12_000, triggersGcd: false, castMs: 0, target: "enemy", range: DASH_RANGE, effect: { type: "dash", mode: "behindTarget", distance: DASH_RANGE, multiplier: 0.9 }, visual: "shadow", color: "#495057" }),
+    // ---- Kesme: every class's own interrupt (innate: no points, from level 1, off the GCD) ----
+    ...interrupts(),
+
     skill({ id: "adrenaline", name: "Adrenalin", short: "AR", category: "buff", level: 8, description: "12 sn boyunca %40 daha hızlı saldırırsın.", cost: 0, cooldownMs: 40_000, triggersGcd: false, castMs: 0, target: "none", range: 0, effect: { type: "buff", durationMs: 12_000, speedPct: 0.4 }, visual: "buff", color: "#fab005" }),
   ].map((def) => [def.id, def]),
 );

@@ -4,6 +4,7 @@ import {
   classResetPrice,
   defaultRanks,
   distance,
+  isSpecId,
   ITEMS,
   Msg,
   NPC_RANGE,
@@ -21,7 +22,9 @@ import { sendSkillRanks } from "./talents";
 
 // Choosing a class: every character starts as a novice and picks one of the masters in the
 // keep's great hall. Ayşe Teyze undoes the choice for gold, making them a novice again
-// (gear only the old class may wear comes off into the bags).
+// (gear only the old class may wear comes off into the bags). Classes with specs (Savaşçı,
+// Druid) also choose damage or tank there; a character of that class without one yet picks it
+// once for free, after that only a reset changes it.
 
 const PATH_COLOR = "#ffd34d";
 
@@ -37,10 +40,11 @@ function npcNearby(game: Game, sessionId: string, npcId: unknown, check: (npc: N
   return npc;
 }
 
-function setClass(game: Game, sessionId: string, cls: ClassId, ranks: SkillRanks) {
+function setClass(game: Game, sessionId: string, cls: ClassId, ranks: SkillRanks, spec = "") {
   const player = game.state.players.get(sessionId)!;
   const runtime = game.playerRuntime.get(sessionId)!;
   player.cls = cls;
+  player.spec = spec;
   runtime.skillRanks = ranks;
   refreshStats(game, sessionId);
   player.resource = CLASSES[cls].resource === "rage" ? 0 : player.maxResource;
@@ -55,15 +59,24 @@ function say(game: Game, sessionId: string, text: string) {
   game.io.send(sessionId, Msg.ChatMessage, { channel: "system", text } satisfies ChatEvent);
 }
 
-export function chooseClass(game: Game, sessionId: string, npcId: unknown) {
+export function chooseClass(game: Game, sessionId: string, npcId: unknown, spec: unknown) {
   const player = game.state.players.get(sessionId);
-  if (!player || player.dead) return;
+  const runtime = game.playerRuntime.get(sessionId);
+  if (!player || !runtime || player.dead) return;
   const master = npcNearby(game, sessionId, npcId, (npc) => npc.role === "master" && !!npc.teaches);
   if (!master) return;
-  if (player.cls !== "novice") return notice(game, sessionId, "Zaten bir yolun var. Değiştirmek istersen Ayşe Teyze'ye git.");
   const cls = master.teaches!;
-  setClass(game, sessionId, cls, defaultRanks(cls, player.level));
-  notice(game, sessionId, `Yolun belli oldu: ${CLASSES[cls].name}`, PATH_COLOR);
+  const specs = CLASSES[cls].specs;
+  if (specs && !isSpecId(spec)) return;
+  const chosen = specs && isSpecId(spec) ? spec : "";
+  if (player.cls === cls && specs && !player.spec) {
+    setClass(game, sessionId, cls, runtime.skillRanks, chosen);
+    notice(game, sessionId, `Yolun belli oldu: ${specs[chosen as "damage" | "tank"].name}`, PATH_COLOR);
+    return;
+  }
+  if (player.cls !== "novice") return notice(game, sessionId, "Zaten bir yolun var. Değiştirmek istersen Ayşe Teyze'ye git.");
+  setClass(game, sessionId, cls, defaultRanks(cls, player.level), chosen);
+  notice(game, sessionId, `Yolun belli oldu: ${CLASSES[cls].name}${specs ? ` (${specs[chosen as "damage" | "tank"].name})` : ""}`, PATH_COLOR);
   say(game, sessionId, `${master.name} seni öğrencisi olarak kabul etti. Yeteneklerin K'da, Komutan Baran seni bekliyor.`);
 }
 
