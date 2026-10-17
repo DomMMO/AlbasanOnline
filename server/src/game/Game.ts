@@ -4,11 +4,11 @@ import {
   MAX_INPUT_BURST,
   classOf,
   MAX_LEVEL,
-  PARTY_BOSS_HP_PER_PLAYER,
   SPAWN_PROTECTION_MS,
   stepMovement,
   TICK_MS,
   statsWithEquipment,
+  isSpecId,
   sanitizeRanks,
   sanitizeLook,
   sanitizeHorse,
@@ -212,8 +212,8 @@ export class Game {
   readonly deadPacks = new Map<string, SpawnZone[]>();
 
   private time = 0;
-  /** Most players this (instanced) zone has had at once; bosses are scaled to it. */
-  private groupSize = 1;
+  /** Most players this (instanced) zone has had at once; its mobs are scaled to it (partyScale.ts). */
+  groupSize = 1;
   private timers: { at: number; fn: () => void }[] = [];
   private nextEntityId = 1;
 
@@ -268,6 +268,7 @@ export class Game {
     player.name = character.name;
     player.color = character.color;
     player.cls = classOf(character.class).id;
+    player.spec = classOf(player.cls).specs && isSpecId(character.spec) ? character.spec : "";
     player.level = Math.min(Math.max(1, character.level), MAX_LEVEL);
     player.xp = character.xp;
     player.pvpRating = character.pvpRating;
@@ -347,7 +348,7 @@ export class Game {
     // Rage starts empty, mana full.
     player.resource = classOf(player.cls).resource === "rage" ? 0 : player.maxResource;
     this.protectSpawn(sessionId);
-    if (this.zone.instanced) this.scaleBossesForGroup(this.state.players.size);
+    if (this.zone.instanced) this.scaleMobsForGroup(this.state.players.size);
     sendInventory(this, sessionId);
     sendQuestLog(this, sessionId);
     sendSkillRanks(this, sessionId);
@@ -369,6 +370,7 @@ export class Game {
       characterId: runtime.characterId,
       progress: {
         cls: player.cls,
+        spec: player.spec,
         level: player.level,
         xp: player.xp,
         hp: player.dead ? 0 : player.hp,
@@ -415,15 +417,15 @@ export class Game {
     runtime.inputQueue.push(input);
   }
 
-  /** Dungeon bosses get tougher as more party members come in (never weaker when someone leaves). */
-  private scaleBossesForGroup(players: number) {
+  /** Dungeon mobs get N times the health as more party members come in (never weaker when someone leaves). */
+  private scaleMobsForGroup(players: number) {
     if (players <= this.groupSize) return;
-    const before = 1 + PARTY_BOSS_HP_PER_PLAYER * (this.groupSize - 1);
-    const after = 1 + PARTY_BOSS_HP_PER_PLAYER * (players - 1);
+    const before = this.groupSize;
+    const after = players;
     this.groupSize = players;
-    for (const [id, runtime] of this.mobRuntime) {
+    for (const id of this.mobRuntime.keys()) {
       const mob = this.state.mobs.get(id);
-      if (!runtime.boss || !mob) continue;
+      if (!mob) continue;
       const fraction = mob.hp / mob.maxHp;
       mob.maxHp = Math.round((mob.maxHp / before) * after);
       mob.hp = Math.max(1, Math.round(mob.maxHp * fraction));

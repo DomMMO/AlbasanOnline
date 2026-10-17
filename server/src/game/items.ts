@@ -29,6 +29,8 @@ import {
   type NoticeEvent,
   type SkillUsedEvent,
   type SlotRef,
+  isTank,
+  TANK_SPEC,
 } from "../../../shared/src";
 import { Loot } from "../rooms/schema/WorldState";
 import { broadcastCombat } from "./combat";
@@ -76,6 +78,10 @@ export function refreshStats(game: Game, sessionId: string) {
     [...equippedItems(runtime.inventory), ...socketedJewels(runtime.inventory)],
     ranksToAffixes(player.cls, runtime.skillRanks),
   );
+  if (isTank(player.cls, player.spec)) {
+    const { maxHp, attack } = runtime.stats;
+    runtime.stats = { ...runtime.stats, maxHp: Math.round(maxHp * (1 + TANK_SPEC.hpPct)), attack: Math.round(attack * (1 + TANK_SPEC.attackPct)) };
+  }
   player.maxHp = runtime.stats.maxHp;
   player.xpToNext = xpToNextLevel(player.level);
   const cls = classOf(player.cls);
@@ -300,24 +306,27 @@ function recall(game: Game, sessionId: string, index: number) {
 
 // ---- Loot ----------------------------------------------------------------------
 
-/** `power` > 1 (night): more gold, likelier drops and better item modifiers. */
-export function dropLoot(game: Game, x: number, y: number, mobDef: MobDef, ownerId: string | null, power = 1) {
+/**
+ * `power` > 1 (night): more gold, likelier drops and better item modifiers.
+ * `chance`: drop chances only (dungeon parties). `personal`: the pile is the owner's alone, not their party's.
+ */
+export function dropLoot(game: Game, x: number, y: number, mobDef: MobDef, ownerId: string | null, power = 1, { chance = 1, personal = false } = {}) {
   const { gold: [min, max], drops } = mobDef.loot;
   const contents: LootContents = { gold: Math.round((min + Math.floor(game.random() * (max - min + 1))) * power), items: [] };
   for (const drop of drops) {
-    if (game.random() >= drop.chance * power) continue;
+    if (game.random() >= drop.chance * power * chance) continue;
     const lo = drop.min ?? 1;
     const hi = drop.max ?? lo;
     contents.items.push(newStack(drop.item, lo + Math.floor(game.random() * (hi - lo + 1)), drop.enhance ?? 0, { luck: power }));
   }
   // Passive tree jewels can drop from anything; their effects scale with the mob's level.
   const jewelOdds = mobDef.boss ? JEWEL_DROPS.boss : (mobDef.scale ?? 1) > 1 ? JEWEL_DROPS.elite : JEWEL_DROPS.normal;
-  if (game.random() < jewelOdds.minor * power * MOB_TUNING.dropChance) contents.items.push(newStack("minor_jewel", 1, 0, { level: mobDef.level, luck: power }));
-  if (game.random() < jewelOdds.major * power * MOB_TUNING.dropChance) contents.items.push(newStack("major_jewel", 1, 0, { level: mobDef.level, luck: power }));
-  if (game.random() < jewelOdds.greater * power * MOB_TUNING.dropChance) contents.items.push(newStack("greater_jewel", 1, 0, { level: mobDef.level, luck: power }));
+  if (game.random() < jewelOdds.minor * power * chance * MOB_TUNING.dropChance) contents.items.push(newStack("minor_jewel", 1, 0, { level: mobDef.level, luck: power }));
+  if (game.random() < jewelOdds.major * power * chance * MOB_TUNING.dropChance) contents.items.push(newStack("major_jewel", 1, 0, { level: mobDef.level, luck: power }));
+  if (game.random() < jewelOdds.greater * power * chance * MOB_TUNING.dropChance) contents.items.push(newStack("greater_jewel", 1, 0, { level: mobDef.level, luck: power }));
 
   // A party's kill belongs to the whole party ("party:<id>"), otherwise to the killer.
-  const ownerParty = ownerId ? partyIdOf(game.playerRuntime.get(ownerId)?.characterId ?? -1) : null;
+  const ownerParty = ownerId && !personal ? partyIdOf(game.playerRuntime.get(ownerId)?.characterId ?? -1) : null;
   spawnLoot(game, x, y, contents, ownerParty ? `party:${ownerParty}` : (ownerId ?? ""));
 }
 

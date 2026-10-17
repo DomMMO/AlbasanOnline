@@ -17,6 +17,7 @@ import {
   zoneLayout,
   type SpawnZone,
 } from "../../../shared/src";
+import { groupHp } from "./partyScale";
 import { Mob } from "../rooms/schema/WorldState";
 import { bossSwingMultiplier, bossTick, newBossState, resetBoss } from "./boss";
 import { landArrows, mobAttackPlayer } from "./combat";
@@ -158,7 +159,7 @@ export function spawnMobAt(game: Game, mobId: string, point: { x: number; y: num
   const power = mobPower(game, def);
   mob.kind = def.id;
   mob.level = def.level;
-  mob.maxHp = mob.hp = Math.round(def.maxHp * power);
+  mob.maxHp = mob.hp = Math.round(def.maxHp * power * groupHp(game));
   mob.empowered = power > 1;
   mob.x = point.x;
   mob.y = point.y;

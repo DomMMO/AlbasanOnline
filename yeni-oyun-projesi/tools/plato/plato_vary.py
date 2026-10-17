@@ -3,13 +3,14 @@
 import sys, json, random
 sys.path.insert(0, sys.argv[1]); sys.path.insert(0, __import__('os').path.dirname(__import__('os').path.abspath(__file__)))
 from plato_rules import user_grid
+import profil
 S = sys.argv[1]
-W, Hh = 128, 96
+W, Hh = profil.size()
 rng = random.Random(int(sys.argv[2]) if len(sys.argv) > 2 else 3)
-g = user_grid("maps/world.tscn", (0, 0, W - 1, Hh - 1))
+g = user_grid(profil.MAP, (0, 0, W - 1, Hh - 1))
 rock = {c for c, t in g.items() if t != "G"}
-# The feet (row 9) stand on grass: the body is the rest.
-body = {c for c in rock if not g[c].endswith(",9")}
+# The feet stand on the ground: the body is the rest.
+body = {c for c in rock if not g[c].endswith(f",{profil.FEET_ROW}")}
 keep = {tuple(c) for c in json.load(open(S + "/plato_keep.json"))}
 forbid = {tuple(c) for c in json.load(open(S + "/plato_forbid.json"))}
 inside = lambda c: 0 <= c[0] < W and 0 <= c[1] < Hh

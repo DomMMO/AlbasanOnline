@@ -1,9 +1,11 @@
-# Writes a solved plateau (plato_solution.json) into the world map.
-import re, base64, struct, random, sys, json
-P = "maps/world.tscn"
+# Writes a solved plateau (plato_solution.json) into the map (PLATO_MAP, profil.py): the rock on the
+# Plato layer, the ground under it on Zemin.
+import re, base64, struct, random, sys, json, os
+from collections import Counter
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import profil
+P = profil.MAP
 s = open(P, encoding="utf-8").read()
-WALL, FLOOR = 27, 28
-FLOORS = [(2,10),(1,10),(3,10)]
 rng = random.Random(7)
 sol = {tuple(map(int, k.split(","))): t for k, t in json.load(open(sys.argv[1] + "/plato_solution.json")).items()}
 
@@ -26,14 +28,20 @@ def put(name, cells, order):
     s = s[:m.start(1)] + base64.b64encode(bytes(out)).decode() + s[m.end(1):]
 
 _, _, Z, zo = get("Zemin"); _, _, PL, po = get("Plato")
-# Zemin stays grass; the rock and its feet go on the Plato layer.
+if profil.NAME == "world":
+    FLOOR = 28; FLOORS = [(FLOOR, 2, 10, 100), (FLOOR, 1, 10, 100), (FLOOR, 3, 10, 100)]
+    plain = lambda v: v[0] in (FLOOR, 3)
+else:
+    # The map's commonest ground; lava and the like stay where they are.
+    FLOORS = [v for v, _ in Counter(Z.values()).most_common(3)]
+    plain = lambda v: True
 for c, t in sol.items():
     if t == "G":
         PL.pop(c, None)
     else:
         x, y = map(int, t.split(","))
-        PL[c] = (WALL, x, y, 0 if y == 9 else 107)    # feet have only alternative 0; 107: the valley's rock
-    if Z.get(c, (0,))[0] not in (FLOOR, 3): Z[c] = (FLOOR,) + rng.choice(FLOORS) + (100,)
+        PL[c] = (profil.SRC, x, y, profil.alt_of(t))
+    if c not in Z or not plain(Z[c]): Z[c] = rng.choice(FLOORS)
 put("Zemin", Z, zo); put("Plato", PL, po)
 
 moves = json.loads(sys.argv[2]) if len(sys.argv) > 2 else {}

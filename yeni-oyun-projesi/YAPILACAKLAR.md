@@ -117,6 +117,40 @@ Açık haritalar `dungeon_theme.gd -- field <tema> <zone>` ile üretiliyor. Yerl
 - 12 malzeme seti tier sırasına dizilecek: Tahta → Kemik → Rustik → Kale → Bahçe → Elf → Zehir → Mantar → Kütüphane → Lanetli → Altın → Ateş.
 - 5 silah hattının 17 tier'ının hepsi ayrı görünecek; hem eldeki silah hem envanter ikonu değişecek.
 
+## 5. Güç dengesi: 🔨 (hesaplar `DENGE.md`'de)
+- [x] Parti ölçeklemesi, sadece zindanlarda (N = zindanın gördüğü en kalabalık sayı, hiç düşmez):
+  - Mob canı ve XP ×N.
+  - Düz vuruş hasarı +%25/kişi.
+  - Yetenekler +%15/kişi daha sık; yetenek hasarı sabit.
+  - Düşme şansı +%31,25/kişi.
+- [x] Zindanda ganimet kişisel: her üyeye ayrı zar, ayrı yığın.
+- [x] Tank speci, ustadan seçiliyor:
+  - Savaşçı: Akıncı (hasar) ya da Kalkan Eri (tank).
+  - Druid: Orman Gazabı (hasar) ya da Ayı Ruhu (tank).
+  - Tank: alınan hasar ×0,6, can +%30, hasar −%25. Vurduğu mobu üstüne çeker.
+  - Spec'i olmayan eski karakterler bir kereye mahsus bedava seçer. Değiştirmek için Ayşe Teyze'de yol sıfırlanır.
+- [x] Mob can eğrisine şimdilik dokunulmuyor. Aradaki açığı eşyalar kapatacak; ölçüm kayıtları gelince yeniden bakılacak.
+- [ ] Sunucuya ölçüm kayıtları eklenecek:
+  - Ortalama öldürme süresi.
+  - Ölüm sayısı.
+  - Seviye başına geçen süre.
+  - Saatlik ganimet.
+
+## Sıra
+1. Güç dengesi (5).
+2. Zindan aileleri (3'teki tablo). İlk sırada Haydut Sığınağı ve orkların world'e taşınması var.
+3. **Büyük güncelleme: world'deki bütün gelişmeler bütün açık haritalara** (forest, kurgan, canyon, volcano, frost). Yöntem `tools/plato/OKU.md`'de.
+   - Zemin ve plato ayrı katmanlar.
+   - Platolar kullanıcının kurallarıyla, girintili çıkıntılı.
+   - Kaya görüşü kesiyor.
+   - Platoların üstünde ağaç, kütük ya da toprak lekesi yok.
+   - Ağaçlar platolardan uzak ve dağınık.
+   - Her harita ayrı onaya gelir.
+   - ✅ volcano, frost, forest geçti (onay bekliyor).
+   - ⏳ kurgan, canyon: çapraz uzanan platolar bu sheet'lerde bölünüyor; yol seçimi bekleniyor.
+4. Silahlar (4).
+5. Araya girenler.
+
 ## Araya girenler
 - [ ] Son bossun ardından her oyuncuya ayrı hazine sandığı
 - [x] Ata binme (H tuşu)

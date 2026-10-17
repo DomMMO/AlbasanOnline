@@ -7,9 +7,10 @@ from collections import deque
 from ortools.sat.python import cp_model
 sys.path.insert(0, sys.argv[1]); sys.path.insert(0, __import__('os').path.dirname(__import__('os').path.abspath(__file__)))
 from plato_rules import user_grid
+import profil
 S = sys.argv[1]
 W, Hh = int(sys.argv[2]), int(sys.argv[3])
-MAP = sys.argv[4] if len(sys.argv) > 4 else "maps/world.tscn"
+MAP = sys.argv[4] if len(sys.argv) > 4 else profil.MAP
 R = json.load(open(S + "/plato_rules.json"))
 H = {tuple(p) for p in R["H"]}; V = {tuple(p) for p in R["V"]}
 TILES = sorted({t for p in H | V for t in p})
@@ -20,12 +21,14 @@ for t in TILES:
 for a, b in H: ALLOW[0][a].add(b); ALLOW[1][b].add(a)
 for a, b in V: ALLOW[2][a].add(b); ALLOW[3][b].add(a)
 LOSE, GAIN = 100, 100          # rock wanted but grass laid / grass wanted but rock laid
-def piece_cost(t):
+def canonical_cost(t):
     if t == "G": return 0
     a, b = map(int, t.split(","))
     if t in ("2,4", "2,3"): return 0      # the clean top (the user's): plain, no marks
     if 1 <= a <= 4 and 1 <= b <= 4: return 2   # other top pieces carry marks: only where needed
     return 1 if a in (0, 5) else 0     # only to break ties: ends where the shape has them
+# Another map's sheet token costs what the cheapest canonical piece it stands for costs.
+piece_cost = canonical_cost if profil.NAME == "world" else (lambda t: 0 if t == "G" else min(canonical_cost(c) for c in profil.preimages(t)))
 
 grid = user_grid(MAP, (0, 0, W - 1, Hh - 1))
 forbid = {tuple(c) for c in json.load(open(S + "/plato_forbid.json"))}
@@ -131,6 +134,8 @@ if os.environ.get("RESUME") and os.path.exists(CK):
     print("resumed at", start)
 for ci, comp in enumerate(comps):
     if ci < start: continue
+    # ONLY=i: a trial on one plateau; the others stay unsolved (no constraint on it).
+    if os.environ.get("ONLY") and ci != int(os.environ["ONLY"]): continue
     pending.difference_update(comp)
     area = set(map(tuple, areas[ci])) if ci < len(areas) and areas[ci] else None
     if area: pending.difference_update(area)

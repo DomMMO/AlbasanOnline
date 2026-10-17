@@ -17,6 +17,8 @@ var showing_completion := false
 var fortune: Variant = null
 var answer := ""
 var confirming := ""
+## The spec being confirmed with "choose" (Savaşçı, Druid), else "".
+var confirming_spec := ""
 var quiz_options: Variant = null
 
 
@@ -322,8 +324,16 @@ func render_dialog() -> void:
 	var advice: Array = target.get("advice", [])
 	if not advice.is_empty():
 		buttons.add_child(_button("Bir öğüt daha" if not answer.is_empty() else "Öğüt iste", func(): _give_advice(target)))
-	if target.has("teaches") and ui.player_class() == "novice":
-		buttons.add_child(_button("Yolunu seç: %s" % GameData.class_of(String(target.teaches)).get("name", ""), func(): _ask("choose")))
+	if target.has("teaches"):
+		var teaches := String(target.teaches)
+		var def := GameData.class_of(teaches)
+		var specs: Dictionary = def.get("specs", {})
+		var mine := ui.player_class()
+		if mine == "novice" and specs.is_empty():
+			buttons.add_child(_button("Yolunu seç: %s" % def.get("name", ""), func(): _ask("choose")))
+		elif mine == "novice" or (mine == teaches and not specs.is_empty() and ui.player_spec().is_empty()):
+			for spec in ["damage", "tank"]:
+				buttons.add_child(_button("Yolunu seç: %s" % specs[spec].name, func(): _ask("choose", spec)))
 	if target.get("fortuneTeller", false) and ui.player_class() != "novice":
 		buttons.add_child(_button("Yolumu sıfırla (%d altın)" % class_reset_price(ui.player_level()), func(): _ask("reset"), "DarkButton"))
 	buttons.add_child(_button("Hoşça kal", close_dialog, "DarkButton"))
@@ -354,16 +364,25 @@ func _path_block(master: Dictionary) -> VBoxContainer:
 	var block := VBoxContainer.new()
 	block.add_child(UiTheme.title_label(String(def.name), 20, Color(String(def.get("color", "#ffffff")))))
 	block.add_child(_text(String(def.get("description", "")), UiTheme.MUTED, 13))
+	var specs: Dictionary = def.get("specs", {})
+	for spec in ["damage", "tank"]:
+		if specs.has(spec):
+			block.add_child(_text("%s%s: %s" % [specs[spec].name, " (tank)" if spec == "tank" else "", specs[spec].description], UiTheme.MUTED, 13))
 	var mine := ui.player_class()
+	var my_spec := ui.player_spec()
 	if mine == String(master.teaches):
-		block.add_child(_text("Senin ustan.", UiTheme.GOLD_LIGHT, 13))
+		if not specs.is_empty() and my_spec.is_empty():
+			block.add_child(_text("Senin ustan. Yolunu henüz seçmedin: bir kereye mahsus bedava seçebilirsin.", UiTheme.GOLD_LIGHT, 13))
+		else:
+			block.add_child(_text("Senin ustan.%s" % (" Yolun: %s." % specs[my_spec].name if specs.has(my_spec) else ""), UiTheme.GOLD_LIGHT, 13))
 	elif mine != "novice":
 		block.add_child(_text("Sen %s yolundasın. Değiştirmek istersen Ayşe Teyze'ye git." % GameData.class_of(mine).get("name", ""), UiTheme.GOLD_LIGHT, 13))
 	return block
 
 
-func _ask(kind: String) -> void:
+func _ask(kind: String, spec := "") -> void:
 	confirming = kind
+	confirming_spec = spec
 	answer = ""
 	render_dialog()
 
@@ -373,7 +392,11 @@ func _render_confirm(target: Dictionary, kind: String) -> void:
 	var price := class_reset_price(ui.player_level())
 	if kind == "choose":
 		var def := GameData.class_of(String(target.teaches))
-		body.add_child(UiTheme.title_label("%s olmak istiyorsun." % def.name, 20, Color(String(def.get("color", "#ffffff")))))
+		var specs: Dictionary = def.get("specs", {})
+		var title := String(def.name) if not specs.has(confirming_spec) else "%s (%s)" % [def.name, specs[confirming_spec].name]
+		body.add_child(UiTheme.title_label("%s olmak istiyorsun." % title, 20, Color(String(def.get("color", "#ffffff")))))
+		if specs.has(confirming_spec):
+			body.add_child(_text(String(specs[confirming_spec].description), UiTheme.MUTED, 13))
 		body.add_child(_text("\"Benim yolumu seçersen geri dönüşü kolay değil. Bir kez öğrencim olursan başka bir ustaya ancak Ayşe Teyze fincanını ters çevirirse gidebilirsin; o da bedava değil.\"", Color("#d8cba8"), 14, true))
 		body.add_child(_text("Emin misin? Değiştirmek istersen bedeli şu an %d altın (seviyenle artar)." % price, UiTheme.MUTED, 13))
 	else:
@@ -383,7 +406,10 @@ func _render_confirm(target: Dictionary, kind: String) -> void:
 	var buttons := _buttons_row()
 	buttons.add_child(_button("Eminim, seç" if kind == "choose" else "Eminim, sıfırla", func():
 		confirming = ""
-		ui.send("chooseClass" if kind == "choose" else "resetClass", {"npcId": target.id})
+		if kind == "choose":
+			ui.send("chooseClass", {"npcId": target.id, "spec": confirming_spec})
+		else:
+			ui.send("resetClass", {"npcId": target.id})
 		render_dialog()))
 	buttons.add_child(_button("Vazgeç", func():
 		confirming = ""

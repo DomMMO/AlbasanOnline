@@ -42,6 +42,8 @@ import {
   type SkillErrorEvent,
   type SkillUsedEvent,
   type XpGainedEvent,
+  isTank,
+  TANK_SPEC,
 } from "../../../shared/src";
 import type { Mob, Player } from "../rooms/schema/WorldState";
 import type { ActiveBuff, Game, MobRuntime, PlayerRuntime } from "./Game";
@@ -57,6 +59,7 @@ import { recordPvpKill } from "./pvp";
 import { isDueling, loseDuel } from "./duel";
 import { dismissMinions, summonMinion } from "./minions";
 import { enrageOf, interruptMob, stopMobCast } from "./mobCasts";
+import { groupDamage, groupDrops, groupHp } from "./partyScale";
 
 // All damage, healing, XP and death go through this file. The client never
 // decides any of it; it only asks ("use skill X") and displays the results.
@@ -669,7 +672,7 @@ function rootMob(game: Game, mobId: string, mob: Mob, durationMs: number) {
 export function mobAttackPlayer(game: Game, mobId: string, mobRuntime: MobRuntime, sessionId: string, player: Player) {
   const runtime = game.playerRuntime.get(sessionId);
   if (!runtime || player.dead) return;
-  const hit = rollDamage(mobRuntime.def.attack * mobRuntime.power * enrageOf(game, mobRuntime).attack, runtime.stats.defense, game.random);
+  const hit = rollDamage(mobRuntime.def.attack * mobRuntime.power * groupDamage(game) * enrageOf(game, mobRuntime).attack, runtime.stats.defense, game.random);
   const kind = mobRuntime.def.ranged ? (mobRuntime.def.ranged.kind ?? "arrow") : null;
   const ranged = kind ? { ranged: kind } : {};
   game.io.broadcast(Msg.Attack, { sourceId: mobId, sourceKind: "mob", targetId: sessionId, targetKind: "player", ...ranged } satisfies AttackEvent);
@@ -706,7 +709,7 @@ export function hitPlayer(game: Game, sourceId: string, sessionId: string, playe
   // Tanks shrug off part of every hit; Kalkan Duvarı, the passive tree and buffs on top of that.
   const guard = game.now() < runtime.guardUntil ? 1 - runtime.guardReduction : 1;
   const buffed = 1 - Math.min(0.6, buffTotals(runtime, game.now()).reductionPct);
-  amount = Math.max(1, Math.round(amount * (classOf(player.cls).damageTaken ?? 1) * guard * buffed * (1 - runtime.stats.damageReduction)));
+  amount = Math.max(1, Math.round(amount * (isTank(player.cls, player.spec) ? TANK_SPEC.damageTaken : 1) * guard * buffed * (1 - runtime.stats.damageReduction)));
   // Getting hit breaks a gather in progress.
   if (runtime.gathering) cancelGather(game, sessionId, "Toplama yarıda kaldı");
   const absorbed = Math.min(player.shield, amount);
@@ -743,8 +746,8 @@ function damageMob(game: Game, sessionId: string, mobId: string, mob: Mob, amoun
   runtime.taggedBy ??= sessionId;
   // Warriors are the tanks: their damage holds aggro better.
   const attacker = game.state.players.get(sessionId);
-  // Guardians taunt: any hit puts them on top of the threat table at once.
-  if (attacker && classOf(attacker.cls).tauntOnHit) {
+  // Tanks taunt: any hit puts them on top of the threat table at once.
+  if (attacker && isTank(attacker.cls, attacker.spec)) {
     const top = Math.max(0, ...[...runtime.threat].filter(([id]) => id !== sessionId).map(([, threat]) => threat));
     if ((runtime.threat.get(sessionId) ?? 0) <= top) runtime.threat.set(sessionId, top + 1);
   }
@@ -793,7 +796,7 @@ function killMob(game: Game, mobId: string, mob: Mob, runtime: MobRuntime, kille
     for (const sessionId of recipients) {
       const player = game.state.players.get(sessionId)!;
       const xpBonus = 1 + (game.playerRuntime.get(sessionId)?.stats.xpBonus ?? 0);
-      grantXp(game, sessionId, player, Math.floor(xpForKill(runtime.def.xp * runtime.power, mob.level, player.level) * share * xpBonus));
+      grantXp(game, sessionId, player, Math.floor(xpForKill(runtime.def.xp * runtime.power * groupHp(game), mob.level, player.level) * share * xpBonus));
       questKill(game, sessionId, runtime.def.id);
     }
   }
@@ -804,7 +807,15 @@ function killMob(game: Game, mobId: string, mob: Mob, runtime: MobRuntime, kille
       playerRuntime.attacking = false;
     }
   }
-  dropLoot(game, mob.x, mob.y, runtime.def, runtime.taggedBy, runtime.power);
+  if (game.zone.instanced && runtime.taggedBy) {
+    // Dungeons: personal loot. Every member near the kill gets their own roll, at the party's drop chance.
+    const recipients = xpRecipients(game, runtime.taggedBy, mob);
+    recipients.forEach((sessionId, i) => {
+      const angle = (i / recipients.length) * Math.PI * 2;
+      const spread = recipients.length > 1 ? 10 : 0;
+      dropLoot(game, mob.x + Math.cos(angle) * spread, mob.y + Math.sin(angle) * spread, runtime.def, sessionId, runtime.power, { chance: groupDrops(game), personal: true });
+    });
+  } else dropLoot(game, mob.x, mob.y, runtime.def, runtime.taggedBy, runtime.power);
   game.state.mobs.delete(mobId);
   game.mobRuntime.delete(mobId);
   if (runtime.boss) bossDefeated(game, runtime);

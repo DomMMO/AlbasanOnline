@@ -269,6 +269,14 @@ const MIGRATIONS: { version: number; name: string; sql: string }[] = [
         CHECK (container IN ('inventory', 'equipment', 'passive', 'storage', 'tool', 'profession'));
     `,
   },
+  {
+    version: 21,
+    name: "class spec",
+    sql: `
+      -- damage or tank (Savaşçı, Druid); '' = no spec or not chosen yet
+      ALTER TABLE characters ADD COLUMN spec TEXT NOT NULL DEFAULT '';
+    `,
+  },
 ];
 
 export async function runMigrations() {

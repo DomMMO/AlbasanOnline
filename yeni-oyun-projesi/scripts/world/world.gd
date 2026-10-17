@@ -305,6 +305,8 @@ func _bind_ui() -> void:
 	_offs.append(_connect(hud.potion_used, use_potion))
 	_offs.append(_connect(hud.mount_clicked, toggle_mount))
 	_offs.append(_connect(hud.target_action, _on_target_action))
+	hud.target_cast_source = func() -> Dictionary:
+		return mobs[target_id].view.cast_state() if mobs.has(target_id) else {}
 	_offs.append(_connect(hud.touch_action, do_action))
 	ui.bind_world(self)
 
@@ -794,6 +796,10 @@ func select_target(id: String, attack: bool, notify := true) -> void:
 		room.send("setTarget", {"targetId": id if not id.is_empty() else null, "attack": attack})
 	if not previous.is_empty() and previous != id:
 		refresh_mob_health(previous)
+		if mobs.has(previous):
+			mobs[previous].view.set_front(false)
+	if mobs.has(id):
+		mobs[id].view.set_front(true)
 	if not id.is_empty():
 		refresh_mob_health(id)
 	draw_target_ring()

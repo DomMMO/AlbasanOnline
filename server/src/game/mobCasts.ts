@@ -14,6 +14,7 @@ import {
   type MobCastEndEvent,
   type MobCastStartEvent,
 } from "../../../shared/src";
+import { groupCastRate } from "./partyScale";
 import type { Mob, Player } from "../rooms/schema/WorldState";
 import { broadcastCombat, cancelCast, hitPlayer } from "./combat";
 import type { Game, MobRuntime } from "./Game";
@@ -60,7 +61,7 @@ export function mobCastTick(game: Game, mobId: string, mob: Mob, runtime: MobRun
     const done = runtime.cast;
     runtime.cast = null;
     const def = MOB_CASTS[done.castId];
-    runtime.castReady?.set(done.castId, now + def.cooldownMs);
+    runtime.castReady?.set(done.castId, now + def.cooldownMs / groupCastRate(game));
     runtime.nextSwingAt = Math.max(runtime.nextSwingAt, now + AFTER_CAST_SWING_MS);
     game.io.broadcast(Msg.MobCastEnd, { mobId, interrupted: false } satisfies MobCastEndEvent);
     landCast(game, mobId, mob, runtime, def, done);
@@ -179,7 +180,7 @@ export function stopMobCast(game: Game, mobId: string, runtime: MobRuntime, lock
   if (!cast) return;
   runtime.cast = null;
   const now = game.now();
-  runtime.castReady?.set(cast.castId, now + (lockMs ?? MOB_CASTS[cast.castId].cooldownMs));
+  runtime.castReady?.set(cast.castId, now + (lockMs ?? MOB_CASTS[cast.castId].cooldownMs / groupCastRate(game)));
   game.io.broadcast(Msg.MobCastEnd, { mobId, interrupted: true } satisfies MobCastEndEvent);
 }
 

@@ -59,8 +59,14 @@ export const MAX_FRIENDS = 50;
 export const PARTY_XP_RANGE = TILE_SIZE * 40;
 /** XP bonus per extra member who shares a kill (grouping is rewarded). */
 export const PARTY_XP_BONUS = 0.2;
-/** Bosses in a dungeon instance get this much more health per extra player. */
-export const PARTY_BOSS_HP_PER_PLAYER = 0.6;
+// Dungeon party scaling (DENGE.md, bölüm 6). N = most players the instance has had (never drops).
+// Mobs get N times the health and XP; these are the per-extra-player steps of the rest.
+/** Mob plain hits: +25% per extra player (×2 at 5). Ability (cast) damage stays the same. */
+export const PARTY_MOB_DAMAGE_PER_PLAYER = 0.25;
+/** Mob abilities come this much more often per extra player (×1.6 at 5). */
+export const PARTY_CAST_RATE_PER_PLAYER = 0.15;
+/** Drop chances: +31.25% per extra player (+125% at 5), rolled for every member on their own. */
+export const PARTY_DROP_PER_PLAYER = 0.3125;
 /** Warriors generate this much more threat (they are the tanks). */
 export const WARRIOR_THREAT_MULTIPLIER = 2;
 /** Threat per point healed, spread to the mobs fighting the healed player. */

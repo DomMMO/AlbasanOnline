@@ -1,8 +1,10 @@
 # Allowed neighbours for the plateau tiles, learnt from Wall_Tiles.png's own plateau block and from
 # the plateau the user built by hand on the world map. "G" = grass (nothing of the plateau there).
-import sys, json
+import sys, json, os
 sys.path.insert(0, sys.argv[1] if len(sys.argv) > 1 else ".")
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from tmdec import layers
+import profil
 
 def sheet_grid():
     empty = {(0,0),(5,0),(0,9),(5,9)}
@@ -23,8 +25,8 @@ def user_grid(path, box):
     for y in range(y0, y1+1):
         for x in range(x0, x1+1):
             z = Z.get((x,y)); s = SU.get((x,y))
-            if z and z[0] in (6,27) : g[(x,y)] = f"{z[1]},{z[2]}"
-            elif s and s[0] in (6,27): g[(x,y)] = f"{s[1]},{s[2]}"
+            if profil.is_rock(z): g[(x,y)] = f"{z[1]},{z[2]}"
+            elif profil.is_rock(s): g[(x,y)] = f"{s[1]},{s[2]}"
             else: g[(x,y)] = "G"
     return g
 
@@ -35,7 +37,38 @@ def pairs(g):
         if (x,y+1) in g: v.add((t, g[(x,y+1)]))
     return h, v
 
-if __name__ == "__main__":
+def carried_over(out_dir):
+    """Another map: the world's rules (canonical, tools/plato/plato_rules.json) through its profile.
+    Where the sheet folds two canonical rows into one, a vertical pair between them would stack that
+    row on itself: dropped, unless the canonical rules stack it themselves (a straight edge, plain top)."""
+    R = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "plato_rules.json")))
+    row = lambda t: None if t == "G" else int(t.split(",")[1])
+    H = {(profil.to_sheet(a), profil.to_sheet(b)) for a, b in R["H"]}
+    V = set()
+    for a, b in R["V"]:
+        sa, sb = profil.to_sheet(a), profil.to_sheet(b)
+        folded = a != "G" and b != "G" and row(a) != row(b) and row(sa) == row(sb)
+        if not folded: V.add((sa, sb))
+    if profil.P.get("front_apart"):
+        # This sheet's front row starts straight with the roots / rock heads, with no top surface on it
+        # (the world's front row carries the top's edge): beside a plain top piece it is cut off.
+        front = profil.ROWS[5]
+        def part(t):
+            if t == "G": return None
+            a, b = map(int, t.split(","))
+            return None if not 1 <= a - profil.COL <= 4 else ("front" if b == front else "top" if b < front else None)
+        H = {(a, b) for a, b in H if {part(a), part(b)} != {"front", "top"}}
+        # Nor does a step piece (rows 0-1) stand straight on the face: there the world's face side still
+        # carries the edge's line, this sheet's does not.
+        row = lambda t: None if t == "G" else int(t.split(",")[1])
+        V = {(a, b) for a, b in V if not (row(a) is not None and row(b) is not None and row(a) <= profil.ROWS[1] and row(b) >= front)}
+    tiles = sorted({t for p in H | V for t in p})
+    print(profil.NAME, "tiles", len(tiles), "horizontal", len(H), "vertical", len(V))
+    json.dump({"H": sorted(H), "V": sorted(V)}, open(out_dir + "/plato_rules.json", "w"))
+
+if __name__ == "__main__" and profil.NAME != "world":
+    carried_over(sys.argv[1])
+elif __name__ == "__main__":
     h1, v1 = pairs(sheet_grid())
     # The user's lessons: tools/plato/ornekler.json (kept apart from any map), else world.tscn.
     import os

@@ -40,6 +40,11 @@ var _hp_ratio := 1.0
 var _hp_visible := false
 ## A mob's nameplate: its name inside a bar that empties with its health (empty = no plate).
 var _plate_name := ""
+## Clicks on the nameplate select the mob as clicks on its body do.
+var _plate_box: Area2D
+var _plate_shape: CollisionShape2D
+## The selected mob's plate is drawn over every other plate.
+var _front := false
 var _plate_color := Color.WHITE
 ## The cast bar under the plate: what it casts, its colour (yellow: an interrupt stops it; grey:
 ## only a stun), when it began and how long it takes (ms; 0 = not casting). After a stop the bar
@@ -56,6 +61,9 @@ const PLATE_FONT_SIZE := 7
 ## The whole plate drawn at this scale (text and width); its height 90% of the 9 px it was.
 const PLATE_SCALE := 0.95
 const PLATE_HEIGHT := 9.0 * 0.9 / PLATE_SCALE
+## The selected mob's plate: this much bigger, with > < marks either side.
+const PLATE_SELECTED_SCALE := 1.25
+const SELECT_MARK := Color("#f2d58c")
 const CAST_BAR_HEIGHT := 7.0
 const CAST_FONT_SIZE := 6
 var _raw := Vector2.ZERO
@@ -274,6 +282,17 @@ func _on_input(_viewport: Node, event: InputEvent, _shape: int) -> void:
 
 func set_interactive(on: bool) -> void:
 	hurtbox.input_pickable = on
+	if _plate_box:
+		_plate_box.input_pickable = on
+
+
+## The selected mob: its plate in front of every other plate.
+func set_front(on: bool) -> void:
+	if _front == on:
+		return
+	_front = on
+	set_position(_raw.x, _raw.y)
+	_hp_bar.queue_redraw()
 
 
 func set_name_color(color: Color) -> void:
@@ -508,7 +527,7 @@ func set_position(px_raw: float, py_raw: float) -> void:
 	else:
 		# Over the head itself (the pack's frames are much taller than what is drawn in them).
 		var head := py - lift + (_opaque_rect().position.y - set.origin.y * set.height) * _scale
-		Depth.place(_hp_w, px, head - 3.0, 100000.0 + py)
+		Depth.place(_hp_w, px, head - 3.0, (200000.0 if _front else 100000.0) + py)
 	if _label_w:
 		Depth.place(_label_w, px, (top - 5.0) if _hp_visible else (top - 1.0), 100000.0 + py)
 	_layout_overhead(px, py, top)
@@ -798,6 +817,20 @@ func _idle_name(dir: int) -> String:
 func set_plate(plate_name: String, frame_color: Color) -> void:
 	_plate_name = plate_name
 	_plate_color = frame_color
+	if _plate_box == null:
+		_plate_box = Area2D.new()
+		_plate_box.collision_layer = 1
+		_plate_box.collision_mask = 0
+		_plate_box.monitoring = false
+		_plate_box.monitorable = false
+		_plate_box.input_pickable = hurtbox.input_pickable
+		_plate_shape = CollisionShape2D.new()
+		_plate_shape.shape = RectangleShape2D.new()
+		_plate_box.add_child(_plate_shape)
+		_hp_bar.add_child(_plate_box)
+		_plate_box.input_event.connect(_on_input)
+		_plate_box.mouse_entered.connect(func(): hovered.emit(self, true))
+		_plate_box.mouse_exited.connect(func(): hovered.emit(self, false))
 	_hp_visible = true
 	_hp_bar.visible = _visible
 	_hp_bar.queue_redraw()
@@ -847,6 +880,18 @@ func end_cast(interrupted: bool) -> void:
 	_hp_bar.queue_redraw()
 
 
+## Its cast for the target globe: {name, interruptible, progress, cut} or {} when not casting.
+func cast_state() -> Dictionary:
+	if _destroyed:
+		return {}
+	if _cast_ms > 0.0:
+		var progress := clampf((Time.get_ticks_msec() - _cast_start) / _cast_ms, 0.0, 1.0)
+		return {"name": _cast_name, "interruptible": _cast_color == CAST_YELLOW, "progress": progress, "cut": false}
+	if Time.get_ticks_msec() < _cast_flash_until:
+		return {"name": "Kesildi", "interruptible": true, "progress": 1.0, "cut": true}
+	return {}
+
+
 ## The plate: a dark frame, the health in red, the name in the middle (white, outlined).
 func _paint_plate(ci: CanvasItem) -> void:
 	var font := Fonts.names()
@@ -861,7 +906,8 @@ func _paint_plate(ci: CanvasItem) -> void:
 	var x0 := -roundf(w / 2.0)
 	# Casting: the plate moves up and the cast bar takes its place over the head.
 	var y0 := -h - ((CAST_BAR_HEIGHT + 2.0) if casting else 0.0)
-	ci.draw_set_transform(Vector2.ZERO, 0.0, Vector2(PLATE_SCALE, PLATE_SCALE))
+	var scale := PLATE_SCALE * (PLATE_SELECTED_SCALE if _front else 1.0)
+	ci.draw_set_transform(Vector2.ZERO, 0.0, Vector2(scale, scale))
 	ci.draw_rect(Rect2(x0 - 1, y0 - 1, w + 2, h + 2), Color(_plate_color, 0.9) if _plate_color != Color.WHITE else Color(0, 0, 0, 0.85))
 	ci.draw_rect(Rect2(x0, y0, w, h), Color(0.08, 0.06, 0.07, 0.82))
 	ci.draw_rect(Rect2(x0, y0, roundf(w * _hp_ratio), h), Color(0.62, 0.12, 0.12, 0.92))
@@ -871,6 +917,33 @@ func _paint_plate(ci: CanvasItem) -> void:
 	ci.draw_string(font, base, _plate_name, HORIZONTAL_ALIGNMENT_LEFT, -1, PLATE_FONT_SIZE, Color(1, 1, 1))
 	if casting:
 		_paint_cast(ci, font, x0, y0 + h + 2.0, w, cast_label)
+	if _front:
+		_paint_select_marks(ci, x0, y0, w, h)
+	if _plate_shape:
+		# The clickable part: the plate and, while casting, its cast bar (drawn scaled).
+		var bottom := y0 + h + ((CAST_BAR_HEIGHT + 2.0) if casting else 0.0)
+		var size := Vector2(w + 2.0, bottom - y0 + 2.0) * scale
+		var rect := _plate_shape.shape as RectangleShape2D
+		if rect.size != size:
+			rect.size = size
+		_plate_shape.position = Vector2(x0 + w / 2.0, (y0 + bottom) / 2.0) * scale
+
+
+## The selected mob's marks: > on the left and < on the right of the plate, pointing at it, in
+## pixel steps (light gold, outlined dark).
+func _paint_select_marks(ci: CanvasItem, x0: float, y0: float, w: float, h: float) -> void:
+	var mid := roundf(y0 + h / 2.0) - 1.0
+	var arm := 3
+	for pass_ in 2:
+		var color := Color(0, 0, 0, 0.9) if pass_ == 0 else SELECT_MARK
+		var grow := 1.0 if pass_ == 0 else 0.0
+		for k in arm + 1:
+			for side in [-1.0, 1.0]:
+				# Left mark's tip just left of the plate, right mark's just right of it.
+				var tip: float = (x0 - 4.0) if side < 0 else (x0 + w + 3.0)
+				var x: float = tip + k * side
+				for dy in [-k, k]:
+					ci.draw_rect(Rect2(x - grow - (1.0 if side < 0 else 0.0), mid + dy - grow, 2.0 + grow * 2.0, 2.0 + grow * 2.0), color)
 
 
 ## The cast bar, as wide as the plate, just under it: the spell's name on it, filling as it goes.

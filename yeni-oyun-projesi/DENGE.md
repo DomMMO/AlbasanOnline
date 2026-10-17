@@ -159,24 +159,29 @@ Bugün XP partiye bölünüyor. Kişi başı pay `(1 + 0,2 × (N − 1)) ÷ N`, 
 
 ```
 can çarpanı    = N                         → 1, 2, 3, 4, 5
-hasar çarpanı  = 1 + 0,15 × (N − 1)        → 1, 1,15, 1,3, 1,45, 1,6
+hasar çarpanı  = 1 + 0,25 × (N − 1)        → 1, 1,25, 1,5, 1,75, 2   (sadece düz vuruşlar)
+yetenek sıklığı = 1 + 0,15 × (N − 1)       → bekleme süreleri 5 kişide ÷1,6
 XP çarpanı     = N                         (bölüşüm kuralıyla kişi başı ×1,8)
 düşme çarpanı  = 1 + 0,3125 × (N − 1)      (kişisel ganimetle kişi başı ×2,25)
 ```
 
-- **Zorluğu mekanikle artır.** Kalabalık partide cast barlı yetenekler daha sık gelsin ve aynı anda birden fazla mob cast etsin. Kesme ve sersemletme sorumluluğu partiye dağılır. "Daha zor" hissi düz hasardan değil koordinasyondan gelir.
+- **Zorluğu mekanikle artır.** Kalabalık partide cast barlı yetenekler daha sık gelir. Kesme ve sersemletme sorumluluğu partiye dağılır. "Daha zor" hissi düz hasardan değil koordinasyondan gelir. Yetenek (cast) hasarı parti sayısıyla artmaz.
 
-### Bugün oyunda olanlar
-- Parti XP bonusu: ek üye başına +%20, menzil 40 karo (`PARTY_XP_BONUS`, `PARTY_XP_RANGE`).
-- Zindan boss'unun canı ek oyuncu başına +%60 (`PARTY_BOSS_HP_PER_PLAYER`). Kimse çıkınca boss zayıflamıyor.
-- Boss 2 kişiden az oyuncuyla dövülürse hasarın %30'unu alıyor ve kendini iyileştiriyor (tek başına kesilemiyor).
-- Normal zindan mobları parti sayısıyla **ölçeklenmiyor**. Önerilen çarpanlar onlara da uygulanacak.
+### ✅ Verilen kararlar (oyunda)
+1. **Hasar +%25/kişi.** 5 kişide ×2. Tank speciyle tank zorlanır ama ölmez.
+2. **Ganimet kişisel.** Zindanda öldürülen her mob için yakındaki her üyeye ayrı zar atılır, ayrı yığın düşer. Yığını yalnızca sahibi görür ve alır.
+3. **Çarpanlar sadece zindanlarda.** N, zindanın gördüğü en kalabalık oyuncu sayısıdır. Biri çıkınca moblar zayıflamaz. Açık haritalarda ganimet bugünkü gibi partinin ortak yığını.
+4. **Tank speci Savaşçı ve Druid'te, ustadan seçiliyor** (Kalkan Eri, Ayı Ruhu):
+   - Alınan hasar ×0,6.
+   - Can +%30.
+   - Hasar −%25 (`TANK_SPEC`).
+   - Vurduğu mobu üstüne çeker.
+   - Hasar yolları: Akıncı, Orman Gazabı.
 
-### Karar verilmesi gerekenler
-1. Ganimet kişisel mi olsun (önerilen), ortak yığın mı kalsın?
-2. Çarpanlar sadece zindanlarda mı, açık haritalarda da mı geçerli olsun?
-3. Hasar çarpanı +%15/kişi uygun mu?
-4. Zindana girerken oyuncu sayısı kilitlensin mi, yoksa biri girip çıktıkça değişsin mi? Bugün boss'larda "artar ama azalmaz" kuralı var.
+Kodda: `server/src/game/partyScale.ts`; sabitler `PARTY_MOB_DAMAGE_PER_PLAYER`, `PARTY_CAST_RATE_PER_PLAYER` ve `PARTY_DROP_PER_PLAYER`. Eski "boss canı +%60/kişi" kuralı kalktı; bosslar da dahil bütün moblar ×N can alıyor. Boss 2 kişiden az oyuncuyla dövülürse hasarın %30'unu alma kuralı duruyor.
+
+### Mob can eğrisi
+Mob canı seviyenin karesiyle büyüyor, oyuncu saldırısı doğrusal. Karar: şimdilik dokunulmuyor. Açığı eşya, yükseltme ve pasifler kapatacak; ölçüm kayıtları gelince yeniden bakılacak.
 
 ---
 

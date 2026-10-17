@@ -318,7 +318,7 @@ export class ZoneRoom extends Room<WorldState> {
     this.onMessage(Msg.HorseStyle, (client, message: { npcId?: unknown; look?: unknown }) => {
       if (!this.itemsLocked(client.sessionId)) styleHorse(this.game, client.sessionId, message?.npcId, message?.look);
     });
-    this.onMessage(Msg.ChooseClass, (client, message: { npcId?: unknown }) => chooseClass(this.game, client.sessionId, message?.npcId));
+    this.onMessage(Msg.ChooseClass, (client, message: { npcId?: unknown; spec?: unknown }) => chooseClass(this.game, client.sessionId, message?.npcId, message?.spec));
     this.onMessage(Msg.ResetClass, (client, message: { npcId?: unknown }) => {
       if (!this.itemsLocked(client.sessionId)) resetClass(this.game, client.sessionId, message?.npcId);
     });
