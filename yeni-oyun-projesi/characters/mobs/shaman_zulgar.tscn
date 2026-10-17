@@ -3,38 +3,38 @@
 [ext_resource type="SpriteFrames" path="res://characters/mobs/shaman_zulgar.tres" id="1_drjcw"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_06qpn"]
-size = Vector2(46, 50)
+size = Vector2(32, 60)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_qwkwn"]
 size = Vector2(10, 6)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_govde"]
-radius = 9.2
-height = 36.8
+radius = 6.4
+height = 25.6
 
-[node name="ShamanZulgar" type="Node2D" unique_id=2125000519]
+[node name="ShamanZulgar" type="Node2D" unique_id=743697809]
 
-[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1949303817]
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1827595894]
 sprite_frames = ExtResource("1_drjcw")
 animation = &"idle"
 autoplay = "idle"
 centered = false
 offset = Vector2(-64, -128)
 
-[node name="Hurtbox" type="Area2D" parent="." unique_id=80201716]
+[node name="Hurtbox" type="Area2D" parent="." unique_id=520643854]
 collision_mask = 0
 
-[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1097244760]
-position = Vector2(5, -25)
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=990617180]
+position = Vector2(0, -30)
 shape = SubResource("RectangleShape2D_06qpn")
 debug_color = Color(0.2, 0.6, 1, 0.35)
 
-[node name="Feet" type="Area2D" parent="." unique_id=1784554983]
+[node name="Feet" type="Area2D" parent="." unique_id=1898999561]
 collision_layer = 2
 collision_mask = 0
 input_pickable = false
 
-[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=2099615690]
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=2053433126]
 position = Vector2(0, -3)
 shape = SubResource("RectangleShape2D_qwkwn")
 debug_color = Color(1, 0.3, 0.2, 0.45)

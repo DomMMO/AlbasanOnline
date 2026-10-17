@@ -117,7 +117,7 @@ export const NPCS: Record<string, NpcDef> = {
     appearance: { type: "humanoid", tunic: 0x2f7a4f, hair: 0x1a1a1a },
     role: "merchant",
     shop: ["minor_hp_potion", "hp_potion", "large_hp_potion", "super_hp_potion", "minor_mana_potion", "mana_potion", "large_mana_potion", "super_mana_potion"],
-    greeting: "Kazanım hiç soğumaz. Balçık jölesi getirirsen sana daha iyilerini de yaparım.",
+    greeting: "Kazanım hiç soğumaz. Goblin merhemi getirirsen sana daha iyilerini de yaparım.",
   },
   blacksmith: {
     id: "blacksmith",

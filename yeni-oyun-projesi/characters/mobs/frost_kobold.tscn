@@ -3,38 +3,38 @@
 [ext_resource type="SpriteFrames" path="res://characters/mobs/frost_kobold.tres" id="1_hi5d1"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_0trdq"]
-size = Vector2(20, 30)
+size = Vector2(36, 50)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ao86s"]
 size = Vector2(10, 6)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_govde"]
-radius = 4.0
-height = 16.0
+radius = 7.2
+height = 28.8
 
-[node name="FrostKobold" type="Node2D" unique_id=1895629157]
+[node name="FrostKobold" type="Node2D" unique_id=894464758]
 
-[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1290519370]
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1107424626]
 sprite_frames = ExtResource("1_hi5d1")
 animation = &"idle"
 autoplay = "idle"
 centered = false
 offset = Vector2(-32, -64)
 
-[node name="Hurtbox" type="Area2D" parent="." unique_id=861927777]
+[node name="Hurtbox" type="Area2D" parent="." unique_id=342267668]
 collision_mask = 0
 
-[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1016145133]
-position = Vector2(-1, -15)
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=199143369]
+position = Vector2(4, -25)
 shape = SubResource("RectangleShape2D_0trdq")
 debug_color = Color(0.2, 0.6, 1, 0.35)
 
-[node name="Feet" type="Area2D" parent="." unique_id=1585308426]
+[node name="Feet" type="Area2D" parent="." unique_id=85683544]
 collision_layer = 2
 collision_mask = 0
 input_pickable = false
 
-[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1521331147]
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=118259724]
 position = Vector2(0, -3)
 shape = SubResource("RectangleShape2D_ao86s")
 debug_color = Color(1, 0.3, 0.2, 0.45)

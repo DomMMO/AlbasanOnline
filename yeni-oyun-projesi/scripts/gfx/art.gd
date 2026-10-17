@@ -18,6 +18,10 @@ static func tex(path: String) -> Texture2D:
 
 
 static func item_icon(def_id: String, rarity := "") -> Texture2D:
+	# Weapons: the Pixel Crawler pack's own (tools/weapon_art.py) before the baked drawing.
+	var pack := tex("res://art/items_paket/%s.png" % def_id)
+	if pack:
+		return pack
 	if not rarity.is_empty():
 		var jewel := tex("res://art/items/%s@%s.png" % [def_id, rarity])
 		if jewel:
@@ -37,9 +41,27 @@ static func decor(hash: String) -> Texture2D:
 	return tex("res://art/decor/%s.png" % hash)
 
 
-## Held item sprite (weapons.ts ensureItemTexture): frame 0 as drawn, frame 1 mirrored.
+## Held item sprite: frame 0 as drawn, frame 1 mirrored. Weapons from the pack (tools/weapon_art.py)
+## first, else the baked drawing (weapons.ts ensureItemTexture).
 static func held(def_id: String) -> Texture2D:
-	return tex("res://art/held/%s.png" % def_id)
+	var pack := tex("res://art/held_paket/%s.png" % def_id)
+	return pack if pack else tex("res://art/held/%s.png" % def_id)
+
+
+static var _pack_grips = null
+
+
+## Where the hand holds a weapon (share of its frame): the pack weapon's grip when it has one.
+static func weapon_grip(def_id: String) -> Variant:
+	if _pack_grips == null:
+		_pack_grips = {}
+		var text := FileAccess.get_file_as_string("res://art/held_paket/grips.json")
+		var parsed = JSON.parse_string(text) if not text.is_empty() else null
+		if parsed is Dictionary:
+			_pack_grips = parsed
+	if _pack_grips.has(def_id):
+		return _pack_grips[def_id]
+	return GameData.get_value("WEAPON_GRIPS", {}).get(def_id)
 
 
 ## A horse sheet (horse.ts): 11 frames of 39x30, side 0 + walk 1-4, front 5-7, back 8-10.

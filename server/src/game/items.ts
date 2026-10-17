@@ -31,6 +31,9 @@ import {
   type SlotRef,
   isTank,
   TANK_SPEC,
+  TREASURE_DESPAWN_MS,
+  TREASURE_DROP_POWER,
+  TREASURE_GOLD,
 } from "../../../shared/src";
 import { Loot } from "../rooms/schema/WorldState";
 import { broadcastCombat } from "./combat";
@@ -311,6 +314,14 @@ function recall(game: Game, sessionId: string, index: number) {
  * `chance`: drop chances only (dungeon parties). `personal`: the pile is the owner's alone, not their party's.
  */
 export function dropLoot(game: Game, x: number, y: number, mobDef: MobDef, ownerId: string | null, power = 1, { chance = 1, personal = false } = {}) {
+  const contents = rollLoot(game, mobDef, power, chance);
+  // A party's kill belongs to the whole party ("party:<id>"), otherwise to the killer.
+  const ownerParty = ownerId && !personal ? partyIdOf(game.playerRuntime.get(ownerId)?.characterId ?? -1) : null;
+  spawnLoot(game, x, y, contents, ownerParty ? `party:${ownerParty}` : (ownerId ?? ""));
+}
+
+/** One roll of a mob's loot table (gold, drops, jewels). */
+function rollLoot(game: Game, mobDef: MobDef, power: number, chance: number): LootContents {
   const { gold: [min, max], drops } = mobDef.loot;
   const contents: LootContents = { gold: Math.round((min + Math.floor(game.random() * (max - min + 1))) * power), items: [] };
   for (const drop of drops) {
@@ -324,26 +335,40 @@ export function dropLoot(game: Game, x: number, y: number, mobDef: MobDef, owner
   if (game.random() < jewelOdds.minor * power * chance * MOB_TUNING.dropChance) contents.items.push(newStack("minor_jewel", 1, 0, { level: mobDef.level, luck: power }));
   if (game.random() < jewelOdds.major * power * chance * MOB_TUNING.dropChance) contents.items.push(newStack("major_jewel", 1, 0, { level: mobDef.level, luck: power }));
   if (game.random() < jewelOdds.greater * power * chance * MOB_TUNING.dropChance) contents.items.push(newStack("greater_jewel", 1, 0, { level: mobDef.level, luck: power }));
-
-  // A party's kill belongs to the whole party ("party:<id>"), otherwise to the killer.
-  const ownerParty = ownerId && !personal ? partyIdOf(game.playerRuntime.get(ownerId)?.characterId ?? -1) : null;
-  spawnLoot(game, x, y, contents, ownerParty ? `party:${ownerParty}` : (ownerId ?? ""));
+  return contents;
 }
 
-/** A loot pile only `owner` may pick up for a while, then anyone, until it despawns. */
-function spawnLoot(game: Game, x: number, y: number, contents: LootContents, owner: string) {
+/** A loot pile only `owner` may pick up for a while, then anyone, until it despawns. A treasure
+ * chest stays its owner's (and lasts longer). */
+function spawnLoot(game: Game, x: number, y: number, contents: LootContents, owner: string, kind = "") {
   const lootId = game.newId("l");
   const loot = new Loot();
   loot.x = x;
   loot.y = y;
   loot.owner = owner;
+  loot.kind = kind;
   game.state.loot.set(lootId, loot);
   game.lootContents.set(lootId, contents);
-  game.after(LOOT_OWNER_MS, () => {
-    const current = game.state.loot.get(lootId);
-    if (current) current.owner = "";
+  if (kind !== "treasure") {
+    game.after(LOOT_OWNER_MS, () => {
+      const current = game.state.loot.get(lootId);
+      if (current) current.owner = "";
+    });
+  }
+  game.after(kind === "treasure" ? TREASURE_DESPAWN_MS : LOOT_DESPAWN_MS, () => removeLoot(game, lootId));
+}
+
+/** A dungeon's last boss has fallen: every player in it gets a treasure chest of their own round the
+ * spot, the boss's loot rolled again for them (likelier drops, more gold, the party's drop bonus). */
+export function treasureChests(game: Game, at: { x: number; y: number }, def: MobDef, dropChance = 1) {
+  const players = [...game.state.players.keys()];
+  players.forEach((sessionId, i) => {
+    const contents = rollLoot(game, def, TREASURE_DROP_POWER, dropChance * TREASURE_DROP_POWER);
+    contents.gold *= TREASURE_GOLD;
+    const angle = (i / Math.max(1, players.length)) * Math.PI * 2 - Math.PI / 2;
+    const r = players.length > 1 ? 26 : 0;
+    spawnLoot(game, at.x + Math.cos(angle) * r, at.y + 24 + Math.sin(angle) * r, contents, sessionId, "treasure");
   });
-  game.after(LOOT_DESPAWN_MS, () => removeLoot(game, lootId));
 }
 
 function removeLoot(game: Game, lootId: string) {

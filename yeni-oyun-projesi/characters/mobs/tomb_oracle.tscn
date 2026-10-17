@@ -3,38 +3,38 @@
 [ext_resource type="SpriteFrames" path="res://characters/mobs/tomb_oracle.tres" id="1_p7ysj"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_fdki7"]
-size = Vector2(21, 26)
+size = Vector2(18, 32)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_sxk7t"]
 size = Vector2(10, 6)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_govde"]
-radius = 4.2
-height = 16.8
+radius = 3.6
+height = 14.4
 
-[node name="TombOracle" type="Node2D" unique_id=1017579888]
+[node name="TombOracle" type="Node2D" unique_id=2103667993]
 
-[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=588426372]
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1740450902]
 sprite_frames = ExtResource("1_p7ysj")
 animation = &"idle"
 autoplay = "idle"
 centered = false
-offset = Vector2(-17.985401, -28.8864)
+offset = Vector2(-32, -64)
 
-[node name="Hurtbox" type="Area2D" parent="." unique_id=1024036732]
+[node name="Hurtbox" type="Area2D" parent="." unique_id=497883400]
 collision_mask = 0
 
-[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1436977550]
-position = Vector2(-0.48540038, -11.8864)
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=2034936672]
+position = Vector2(0, -16)
 shape = SubResource("RectangleShape2D_fdki7")
 debug_color = Color(0.2, 0.6, 1, 0.35)
 
-[node name="Feet" type="Area2D" parent="." unique_id=1538370655]
+[node name="Feet" type="Area2D" parent="." unique_id=1078065769]
 collision_layer = 2
 collision_mask = 0
 input_pickable = false
 
-[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=536394926]
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1404992410]
 position = Vector2(0, -3)
 shape = SubResource("RectangleShape2D_sxk7t")
 debug_color = Color(1, 0.3, 0.2, 0.45)

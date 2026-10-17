@@ -3,38 +3,38 @@
 [ext_resource type="SpriteFrames" path="res://characters/mobs/ash_priestess_nevra.tres" id="1_utxcc"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_0ud4e"]
-size = Vector2(38, 49)
+size = Vector2(44, 54)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_2shjd"]
 size = Vector2(10, 6)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_govde"]
-radius = 7.6
-height = 30.4
+radius = 8.8
+height = 35.2
 
-[node name="AshPriestessNevra" type="Node2D" unique_id=186708499]
+[node name="AshPriestessNevra" type="Node2D" unique_id=1031587854]
 
-[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=616983682]
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1143682559]
 sprite_frames = ExtResource("1_utxcc")
 animation = &"idle"
 autoplay = "idle"
 centered = false
-offset = Vector2(-32.6991, -54.5013)
+offset = Vector2(-64, -128)
 
-[node name="Hurtbox" type="Area2D" parent="." unique_id=1140151603]
+[node name="Hurtbox" type="Area2D" parent="." unique_id=974890041]
 collision_mask = 0
 
-[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1100997119]
-position = Vector2(0.30090067, -23.0013)
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1000230465]
+position = Vector2(2, -27)
 shape = SubResource("RectangleShape2D_0ud4e")
 debug_color = Color(0.2, 0.6, 1, 0.35)
 
-[node name="Feet" type="Area2D" parent="." unique_id=1024739665]
+[node name="Feet" type="Area2D" parent="." unique_id=850938237]
 collision_layer = 2
 collision_mask = 0
 input_pickable = false
 
-[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1832585332]
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=478225592]
 position = Vector2(0, -3)
 shape = SubResource("RectangleShape2D_2shjd")
 debug_color = Color(1, 0.3, 0.2, 0.45)

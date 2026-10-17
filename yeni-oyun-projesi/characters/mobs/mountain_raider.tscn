@@ -3,38 +3,38 @@
 [ext_resource type="SpriteFrames" path="res://characters/mobs/mountain_raider.tres" id="1_hw51y"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_jaseh"]
-size = Vector2(19, 28)
+size = Vector2(17, 30)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_svm38"]
 size = Vector2(10, 6)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_govde"]
-radius = 3.8
-height = 15.2
+radius = 3.4
+height = 13.6
 
-[node name="MountainRaider" type="Node2D" unique_id=544061102]
+[node name="MountainRaider" type="Node2D" unique_id=1508085451]
 
-[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=962195546]
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1017420017]
 sprite_frames = ExtResource("1_hw51y")
 animation = &"idle"
 autoplay = "idle"
 centered = false
-offset = Vector2(-12.1856, -28.1821)
+offset = Vector2(-32, -64)
 
-[node name="Hurtbox" type="Area2D" parent="." unique_id=49616647]
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1370214921]
 collision_mask = 0
 
-[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=640767119]
-position = Vector2(-1.6856002, -13.1821)
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=730531698]
+position = Vector2(-0.5, -15)
 shape = SubResource("RectangleShape2D_jaseh")
 debug_color = Color(0.2, 0.6, 1, 0.35)
 
-[node name="Feet" type="Area2D" parent="." unique_id=300381487]
+[node name="Feet" type="Area2D" parent="." unique_id=1697957522]
 collision_layer = 2
 collision_mask = 0
 input_pickable = false
 
-[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=207126007]
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1037269322]
 position = Vector2(0, -3)
 shape = SubResource("RectangleShape2D_svm38")
 debug_color = Color(1, 0.3, 0.2, 0.45)

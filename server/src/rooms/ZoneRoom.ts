@@ -318,6 +318,14 @@ export class ZoneRoom extends Room<WorldState> {
     this.onMessage(Msg.HorseStyle, (client, message: { npcId?: unknown; look?: unknown }) => {
       if (!this.itemsLocked(client.sessionId)) styleHorse(this.game, client.sessionId, message?.npcId, message?.look);
     });
+    this.onMessage(Msg.GmTeleport, (client, message: { zone?: unknown }) => {
+      const runtime = this.game.playerRuntime.get(client.sessionId);
+      if (!runtime) return;
+      if (!runtime.isAdmin) return notice(this.game, client.sessionId, "Bunun için GM olmak gerekir");
+      if (!isZoneId(message?.zone)) return;
+      // An instanced zone opens a fresh instance for the GM (the client joins with no room id).
+      this.game.io.transfer(client.sessionId, message.zone);
+    });
     this.onMessage(Msg.ChooseClass, (client, message: { npcId?: unknown; spec?: unknown }) => chooseClass(this.game, client.sessionId, message?.npcId, message?.spec));
     this.onMessage(Msg.ResetClass, (client, message: { npcId?: unknown }) => {
       if (!this.itemsLocked(client.sessionId)) resetClass(this.game, client.sessionId, message?.npcId);

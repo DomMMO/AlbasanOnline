@@ -3,38 +3,38 @@
 [ext_resource type="SpriteFrames" path="res://characters/mobs/white_wolf.tres" id="1_jwfs7"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_j3e41"]
-size = Vector2(53, 27)
+size = Vector2(17, 30)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_66seu"]
 size = Vector2(10, 6)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_govde"]
-radius = 10.6
-height = 42.4
+radius = 3.4
+height = 13.6
 
-[node name="WhiteWolf" type="Node2D" unique_id=2008901931]
+[node name="WhiteWolf" type="Node2D" unique_id=1733486251]
 
-[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=394375167]
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1732952153]
 sprite_frames = ExtResource("1_jwfs7")
 animation = &"idle"
 autoplay = "idle"
 centered = false
-offset = Vector2(-28.656, -24.8859)
+offset = Vector2(-32, -64)
 
-[node name="Hurtbox" type="Area2D" parent="." unique_id=79060686]
+[node name="Hurtbox" type="Area2D" parent="." unique_id=237817506]
 collision_mask = 0
 
-[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=2007448955]
-position = Vector2(-1.1560001, -11.3859005)
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=232496279]
+position = Vector2(0.5, -15)
 shape = SubResource("RectangleShape2D_j3e41")
 debug_color = Color(0.2, 0.6, 1, 0.35)
 
-[node name="Feet" type="Area2D" parent="." unique_id=1696285090]
+[node name="Feet" type="Area2D" parent="." unique_id=1645469467]
 collision_layer = 2
 collision_mask = 0
 input_pickable = false
 
-[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=362917695]
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1237393624]
 position = Vector2(0, -3)
 shape = SubResource("RectangleShape2D_66seu")
 debug_color = Color(1, 0.3, 0.2, 0.45)

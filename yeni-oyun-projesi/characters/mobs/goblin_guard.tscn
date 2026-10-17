@@ -12,29 +12,29 @@ size = Vector2(10, 6)
 radius = 4.0
 height = 16.0
 
-[node name="GoblinGuard" type="Node2D" unique_id=30711335]
+[node name="GoblinGuard" type="Node2D" unique_id=1502942336]
 
-[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1047593409]
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1123612109]
 sprite_frames = ExtResource("1_3mihp")
 animation = &"idle"
 autoplay = "idle"
 centered = false
 offset = Vector2(-32, -64)
 
-[node name="Hurtbox" type="Area2D" parent="." unique_id=426482356]
+[node name="Hurtbox" type="Area2D" parent="." unique_id=6023986]
 collision_mask = 0
 
-[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=696495817]
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=2103593421]
 position = Vector2(-1, -15)
 shape = SubResource("RectangleShape2D_duwm7")
 debug_color = Color(0.2, 0.6, 1, 0.35)
 
-[node name="Feet" type="Area2D" parent="." unique_id=1105860959]
+[node name="Feet" type="Area2D" parent="." unique_id=1529861163]
 collision_layer = 2
 collision_mask = 0
 input_pickable = false
 
-[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=444951923]
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1359812869]
 position = Vector2(0, -3)
 shape = SubResource("RectangleShape2D_7djvj")
 debug_color = Color(1, 0.3, 0.2, 0.45)

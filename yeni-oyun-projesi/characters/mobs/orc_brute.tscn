@@ -12,29 +12,29 @@ size = Vector2(10, 6)
 radius = 4.2
 height = 16.8
 
-[node name="OrcBrute" type="Node2D" unique_id=413750557]
+[node name="OrcBrute" type="Node2D" unique_id=1062431748]
 
-[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1115796145]
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=528299447]
 sprite_frames = ExtResource("1_owmj0")
 animation = &"idle"
 autoplay = "idle"
 centered = false
 offset = Vector2(-32, -64)
 
-[node name="Hurtbox" type="Area2D" parent="." unique_id=757102864]
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1428267675]
 collision_mask = 0
 
-[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=585753067]
-position = Vector2(-1.5, -16)
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=2141804294]
+position = Vector2(0.5, -16)
 shape = SubResource("RectangleShape2D_xm0uo")
 debug_color = Color(0.2, 0.6, 1, 0.35)
 
-[node name="Feet" type="Area2D" parent="." unique_id=408913942]
+[node name="Feet" type="Area2D" parent="." unique_id=1960106613]
 collision_layer = 2
 collision_mask = 0
 input_pickable = false
 
-[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1978705755]
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=219442487]
 position = Vector2(0, -3)
 shape = SubResource("RectangleShape2D_yrvoo")
 debug_color = Color(1, 0.3, 0.2, 0.45)

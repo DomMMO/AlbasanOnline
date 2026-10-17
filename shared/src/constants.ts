@@ -110,6 +110,11 @@ export const NPC_RANGE = TILE_SIZE * 3;
 /** Only the killer may loot for this long; afterwards anyone can. */
 export const LOOT_OWNER_MS = 30_000;
 export const LOOT_DESPAWN_MS = 90_000;
+/** The treasure chest each player gets when a dungeon's last boss falls: theirs alone, this long. */
+export const TREASURE_DESPAWN_MS = 5 * 60_000;
+/** A treasure chest rolls the last boss's loot again with this much likelier drops and more gold. */
+export const TREASURE_DROP_POWER = 1.5;
+export const TREASURE_GOLD = 3;
 
 // ---- Player market (stalls) -----------------------------------------------------
 

@@ -818,7 +818,7 @@ function killMob(game: Game, mobId: string, mob: Mob, runtime: MobRuntime, kille
   } else dropLoot(game, mob.x, mob.y, runtime.def, runtime.taggedBy, runtime.power);
   game.state.mobs.delete(mobId);
   game.mobRuntime.delete(mobId);
-  if (runtime.boss) bossDefeated(game, runtime);
+  if (runtime.boss) bossDefeated(game, runtime, mob);
   if (runtime.zone) packMemberDied(game, runtime);
 }
 

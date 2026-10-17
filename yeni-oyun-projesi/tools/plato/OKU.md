@@ -22,6 +22,8 @@ Başlangıç Vadisi'nde (world.tscn) kurulan, kullanıcının onayladığı plat
 - volcano ve frost: Town Wall_Tiles'ın gri bloğu, birebir aynı düzen. Frost'ta ayaklar karlı (10-11. satır), volcano'da çıplak (12-13. satır).
 - forest, kurgan, canyon: ön yüzün ilk satırı üst yüzeyi taşımıyor (`front_apart`). Ortadaki sütunlarda ön yüz parçası düz üst parçanın yanına gelmez, basamak parçası doğrudan ön yüze inmez. Yoksa kesik görünür.
 - Canyon'un kum zemini blok içindeki kum karosunun 118 alternatifidir, kaya 107'dir (`rock_alts`).
+- forest, kurgan, canyon `LOSE=1000` ile çözülür: kaya silmek pahalı olunca çapraz platolar bölünmek yerine iç köşe kuralıyla basamak basamak kurulur (kullanıcı onayladı).
+- `tileset_ekle.py` eksik karoları ve var olan bir karonun eksik alternatifini (canyon'da kum karosu kaya olarak, 107) ekler.
 
 ## Akış
 Her araç bir çalışma klasörünü ilk argüman olarak alır. Ara dosyalar oraya yazılır.

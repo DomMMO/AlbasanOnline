@@ -20,7 +20,7 @@ for t in TILES:
     for d in range(4): ALLOW[d][t] = set()
 for a, b in H: ALLOW[0][a].add(b); ALLOW[1][b].add(a)
 for a, b in V: ALLOW[2][a].add(b); ALLOW[3][b].add(a)
-LOSE, GAIN = 100, 100          # rock wanted but grass laid / grass wanted but rock laid
+LOSE, GAIN = int(os.environ.get("LOSE", "100")), int(os.environ.get("GAIN", "100"))   # rock wanted but grass laid / grass wanted but rock laid
 def canonical_cost(t):
     if t == "G": return 0
     a, b = map(int, t.split(","))

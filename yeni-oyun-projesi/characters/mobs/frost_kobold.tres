@@ -1,68 +1,84 @@
 [gd_resource type="SpriteFrames" format=3]
 
-[ext_resource type="Texture2D" path="res://assets/moblar/ork_goblin.png" id="1_y58c1"]
+[ext_resource type="Texture2D" path="res://assets/moblar/mantar_uzun.png" id="1_y58c1"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_goqan"]
 atlas = ExtResource("1_y58c1")
-region = Rect2(640, 0, 64, 64)
+region = Rect2(896, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_xkmbf"]
 atlas = ExtResource("1_y58c1")
-region = Rect2(704, 0, 64, 64)
+region = Rect2(960, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_cp5j6"]
 atlas = ExtResource("1_y58c1")
-region = Rect2(768, 0, 64, 64)
+region = Rect2(1024, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_xe35m"]
 atlas = ExtResource("1_y58c1")
-region = Rect2(832, 0, 64, 64)
+region = Rect2(1088, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_nm5qj"]
 atlas = ExtResource("1_y58c1")
-region = Rect2(896, 0, 64, 64)
+region = Rect2(1152, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_5y7ka"]
 atlas = ExtResource("1_y58c1")
-region = Rect2(960, 0, 64, 64)
+region = Rect2(1216, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_klsi6"]
 atlas = ExtResource("1_y58c1")
-region = Rect2(0, 0, 64, 64)
+region = Rect2(640, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_6n6sm"]
 atlas = ExtResource("1_y58c1")
-region = Rect2(64, 0, 64, 64)
+region = Rect2(704, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_80jxt"]
 atlas = ExtResource("1_y58c1")
-region = Rect2(128, 0, 64, 64)
+region = Rect2(768, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_gsdms"]
 atlas = ExtResource("1_y58c1")
-region = Rect2(192, 0, 64, 64)
+region = Rect2(832, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ubvac"]
 atlas = ExtResource("1_y58c1")
-region = Rect2(256, 0, 64, 64)
+region = Rect2(0, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_misos"]
 atlas = ExtResource("1_y58c1")
-region = Rect2(320, 0, 64, 64)
+region = Rect2(64, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_25r5f"]
 atlas = ExtResource("1_y58c1")
-region = Rect2(384, 0, 64, 64)
+region = Rect2(128, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_hd8fa"]
 atlas = ExtResource("1_y58c1")
-region = Rect2(448, 0, 64, 64)
+region = Rect2(192, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_66gtj"]
 atlas = ExtResource("1_y58c1")
-region = Rect2(512, 0, 64, 64)
+region = Rect2(256, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_t4fy8"]
+atlas = ExtResource("1_y58c1")
+region = Rect2(320, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7qirx"]
+atlas = ExtResource("1_y58c1")
+region = Rect2(384, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jvyww"]
+atlas = ExtResource("1_y58c1")
+region = Rect2(448, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0t7th"]
+atlas = ExtResource("1_y58c1")
+region = Rect2(512, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sjtsw"]
 atlas = ExtResource("1_y58c1")
 region = Rect2(576, 0, 64, 64)
 
@@ -104,9 +120,9 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_gsdms")
 }],
-"loop": 1,
-"name": &"idle",
-"speed": 7.0
+"loop": 0,
+"name": &"hurt",
+"speed": 10.0
 }, {
 "frames": [{
 "duration": 1.0,
@@ -120,12 +136,29 @@ animations = [{
 }, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_hd8fa")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 7.0
 }, {
+"frames": [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_66gtj")
 }, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_t4fy8")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7qirx")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jvyww")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0t7th")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sjtsw")
 }],
 "loop": 1,
 "name": &"walk",

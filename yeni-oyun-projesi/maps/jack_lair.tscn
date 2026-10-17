@@ -956,1339 +956,1339 @@ ref = "lair_exit"
 position = Vector2(776, 224)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf2" type="Marker2D" parent="Noktalar" unique_id=1199828778]
 position = Vector2(760, 208)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf3" type="Marker2D" parent="Noktalar" unique_id=2110821940]
 position = Vector2(760, 240)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf4" type="Marker2D" parent="Noktalar" unique_id=1955168565]
 position = Vector2(792, 240)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf5" type="Marker2D" parent="Noktalar" unique_id=1582627812]
 position = Vector2(792, 208)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf6" type="Marker2D" parent="Noktalar" unique_id=907211450]
 position = Vector2(744, 224)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="ShadowSlime" type="Marker2D" parent="Noktalar" unique_id=1126175547]
 position = Vector2(808, 224)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="ShadowSlime2" type="Marker2D" parent="Noktalar" unique_id=601568015]
 position = Vector2(776, 256)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="ShadowSlime3" type="Marker2D" parent="Noktalar" unique_id=818202923]
 position = Vector2(776, 192)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="ShadowSlime4" type="Marker2D" parent="Noktalar" unique_id=136064871]
 position = Vector2(744, 192)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="GhostWolf7" type="Marker2D" parent="Noktalar" unique_id=135549063]
 position = Vector2(616, 224)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf8" type="Marker2D" parent="Noktalar" unique_id=296602203]
 position = Vector2(632, 240)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf9" type="Marker2D" parent="Noktalar" unique_id=1199307329]
 position = Vector2(600, 208)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf10" type="Marker2D" parent="Noktalar" unique_id=1256347183]
 position = Vector2(632, 208)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf11" type="Marker2D" parent="Noktalar" unique_id=138257251]
 position = Vector2(600, 240)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf12" type="Marker2D" parent="Noktalar" unique_id=1089216936]
 position = Vector2(616, 256)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf13" type="Marker2D" parent="Noktalar" unique_id=1314830895]
 position = Vector2(584, 224)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf14" type="Marker2D" parent="Noktalar" unique_id=247184322]
 position = Vector2(648, 224)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="DarkWolf" type="Marker2D" parent="Noktalar" unique_id=494680393]
 position = Vector2(616, 192)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "dark_wolf"
+ref = "jack_dark_wolf"
 
 [node name="DarkWolf2" type="Marker2D" parent="Noktalar" unique_id=1423606264]
 position = Vector2(584, 192)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "dark_wolf"
+ref = "jack_dark_wolf"
 
 [node name="DarkWolf3" type="Marker2D" parent="Noktalar" unique_id=506147190]
 position = Vector2(1048, 224)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "dark_wolf"
+ref = "jack_dark_wolf"
 
 [node name="DarkWolf4" type="Marker2D" parent="Noktalar" unique_id=1699621553]
 position = Vector2(1032, 240)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "dark_wolf"
+ref = "jack_dark_wolf"
 
 [node name="DarkWolf5" type="Marker2D" parent="Noktalar" unique_id=1170482697]
 position = Vector2(1032, 208)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "dark_wolf"
+ref = "jack_dark_wolf"
 
 [node name="DarkWolf6" type="Marker2D" parent="Noktalar" unique_id=1747119214]
 position = Vector2(1064, 208)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "dark_wolf"
+ref = "jack_dark_wolf"
 
 [node name="GhostWolf15" type="Marker2D" parent="Noktalar" unique_id=590474750]
 position = Vector2(1064, 240)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf16" type="Marker2D" parent="Noktalar" unique_id=8833877]
 position = Vector2(1048, 256)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf17" type="Marker2D" parent="Noktalar" unique_id=1858899691]
 position = Vector2(1016, 224)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf18" type="Marker2D" parent="Noktalar" unique_id=1523101816]
 position = Vector2(1048, 192)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf19" type="Marker2D" parent="Noktalar" unique_id=907308752]
 position = Vector2(1080, 224)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="ShadowSlime5" type="Marker2D" parent="Noktalar" unique_id=2026297199]
 position = Vector2(1208, 224)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="ShadowSlime6" type="Marker2D" parent="Noktalar" unique_id=592341798]
 position = Vector2(1192, 208)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="ShadowSlime7" type="Marker2D" parent="Noktalar" unique_id=380807792]
 position = Vector2(1224, 208)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="PoisonSlime" type="Marker2D" parent="Noktalar" unique_id=620027007]
 position = Vector2(1192, 240)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "poison_slime"
+ref = "jack_poison_slime"
 
 [node name="PoisonSlime2" type="Marker2D" parent="Noktalar" unique_id=2083526720]
 position = Vector2(1224, 240)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "poison_slime"
+ref = "jack_poison_slime"
 
 [node name="PoisonSlime3" type="Marker2D" parent="Noktalar" unique_id=58888680]
 position = Vector2(1640, 224)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "poison_slime"
+ref = "jack_poison_slime"
 
 [node name="PoisonSlime4" type="Marker2D" parent="Noktalar" unique_id=721152545]
 position = Vector2(1624, 208)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "poison_slime"
+ref = "jack_poison_slime"
 
 [node name="PoisonSlime5" type="Marker2D" parent="Noktalar" unique_id=1875059333]
 position = Vector2(1656, 208)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "poison_slime"
+ref = "jack_poison_slime"
 
 [node name="PoisonSlime6" type="Marker2D" parent="Noktalar" unique_id=68677337]
 position = Vector2(1624, 240)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "poison_slime"
+ref = "jack_poison_slime"
 
 [node name="PoisonSlime7" type="Marker2D" parent="Noktalar" unique_id=431919608]
 position = Vector2(1656, 240)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "poison_slime"
+ref = "jack_poison_slime"
 
 [node name="ShadowSlime8" type="Marker2D" parent="Noktalar" unique_id=1085713890]
 position = Vector2(1672, 224)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="ShadowSlime9" type="Marker2D" parent="Noktalar" unique_id=1268008879]
 position = Vector2(1640, 256)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="ShadowSlime10" type="Marker2D" parent="Noktalar" unique_id=1236320472]
 position = Vector2(1640, 192)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="GhostWolf20" type="Marker2D" parent="Noktalar" unique_id=529845382]
 position = Vector2(1480, 224)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf21" type="Marker2D" parent="Noktalar" unique_id=1322826074]
 position = Vector2(1496, 240)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf22" type="Marker2D" parent="Noktalar" unique_id=641402609]
 position = Vector2(1464, 240)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf23" type="Marker2D" parent="Noktalar" unique_id=1470993413]
 position = Vector2(1496, 208)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="ShadowSlime11" type="Marker2D" parent="Noktalar" unique_id=814958443]
 position = Vector2(1464, 208)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="ShadowSlime12" type="Marker2D" parent="Noktalar" unique_id=1023157453]
 position = Vector2(1512, 224)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="ShadowSlime13" type="Marker2D" parent="Noktalar" unique_id=1726795456]
 position = Vector2(1480, 256)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="GoblinChief" type="Marker2D" parent="Noktalar" unique_id=1755110391]
 position = Vector2(1992, 224)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "goblin_chief"
+ref = "jack_goblin_chief"
 
 [node name="GhostWolf24" type="Marker2D" parent="Noktalar" unique_id=2059316398]
 position = Vector2(1944, 224)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf25" type="Marker2D" parent="Noktalar" unique_id=622848634]
 position = Vector2(2040, 224)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf26" type="Marker2D" parent="Noktalar" unique_id=709449052]
 position = Vector2(2072, 560)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf27" type="Marker2D" parent="Noktalar" unique_id=166752388]
 position = Vector2(2056, 576)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf28" type="Marker2D" parent="Noktalar" unique_id=1943202546]
 position = Vector2(2088, 576)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf29" type="Marker2D" parent="Noktalar" unique_id=957084821]
 position = Vector2(2088, 544)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="DarkWolf7" type="Marker2D" parent="Noktalar" unique_id=1162729338]
 position = Vector2(2056, 544)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "dark_wolf"
+ref = "jack_dark_wolf"
 
 [node name="DarkWolf8" type="Marker2D" parent="Noktalar" unique_id=1049884924]
 position = Vector2(1912, 560)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "dark_wolf"
+ref = "jack_dark_wolf"
 
 [node name="DarkWolf9" type="Marker2D" parent="Noktalar" unique_id=1673210365]
 position = Vector2(1928, 544)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "dark_wolf"
+ref = "jack_dark_wolf"
 
 [node name="DarkWolf10" type="Marker2D" parent="Noktalar" unique_id=361775106]
 position = Vector2(1928, 576)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "dark_wolf"
+ref = "jack_dark_wolf"
 
 [node name="GhostWolf30" type="Marker2D" parent="Noktalar" unique_id=564714751]
 position = Vector2(1896, 544)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf31" type="Marker2D" parent="Noktalar" unique_id=5366263]
 position = Vector2(1896, 576)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf32" type="Marker2D" parent="Noktalar" unique_id=18416744]
 position = Vector2(1880, 560)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf33" type="Marker2D" parent="Noktalar" unique_id=2018308721]
 position = Vector2(1912, 528)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf34" type="Marker2D" parent="Noktalar" unique_id=11355499]
 position = Vector2(1912, 592)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="ShadowSlime14" type="Marker2D" parent="Noktalar" unique_id=595735867]
 position = Vector2(1480, 560)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="ShadowSlime15" type="Marker2D" parent="Noktalar" unique_id=473248047]
 position = Vector2(1464, 544)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="ShadowSlime16" type="Marker2D" parent="Noktalar" unique_id=1090743666]
 position = Vector2(1496, 544)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="ShadowSlime17" type="Marker2D" parent="Noktalar" unique_id=2001601752]
 position = Vector2(1496, 576)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="PoisonSlime8" type="Marker2D" parent="Noktalar" unique_id=506317349]
 position = Vector2(1464, 576)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "poison_slime"
+ref = "jack_poison_slime"
 
 [node name="PoisonSlime9" type="Marker2D" parent="Noktalar" unique_id=609591104]
 position = Vector2(1480, 528)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "poison_slime"
+ref = "jack_poison_slime"
 
 [node name="PoisonSlime10" type="Marker2D" parent="Noktalar" unique_id=1702835034]
 position = Vector2(1480, 592)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "poison_slime"
+ref = "jack_poison_slime"
 
 [node name="PoisonSlime11" type="Marker2D" parent="Noktalar" unique_id=1316456522]
 position = Vector2(1640, 560)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "poison_slime"
+ref = "jack_poison_slime"
 
 [node name="PoisonSlime12" type="Marker2D" parent="Noktalar" unique_id=2041437468]
 position = Vector2(1656, 544)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "poison_slime"
+ref = "jack_poison_slime"
 
 [node name="PoisonSlime13" type="Marker2D" parent="Noktalar" unique_id=386957999]
 position = Vector2(1624, 576)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "poison_slime"
+ref = "jack_poison_slime"
 
 [node name="PoisonSlime14" type="Marker2D" parent="Noktalar" unique_id=104220094]
 position = Vector2(1656, 576)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "poison_slime"
+ref = "jack_poison_slime"
 
 [node name="ShadowSlime18" type="Marker2D" parent="Noktalar" unique_id=491949199]
 position = Vector2(1624, 544)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="ShadowSlime19" type="Marker2D" parent="Noktalar" unique_id=1851528864]
 position = Vector2(1640, 592)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="ShadowSlime20" type="Marker2D" parent="Noktalar" unique_id=230035738]
 position = Vector2(1608, 560)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="GhostWolf35" type="Marker2D" parent="Noktalar" unique_id=921304751]
 position = Vector2(1048, 560)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf36" type="Marker2D" parent="Noktalar" unique_id=49216978]
 position = Vector2(1064, 576)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf37" type="Marker2D" parent="Noktalar" unique_id=1015762908]
 position = Vector2(1064, 544)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="ShadowSlime21" type="Marker2D" parent="Noktalar" unique_id=1795492520]
 position = Vector2(1032, 576)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="ShadowSlime22" type="Marker2D" parent="Noktalar" unique_id=37435300]
 position = Vector2(1032, 544)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="GhostWolf38" type="Marker2D" parent="Noktalar" unique_id=1723101034]
 position = Vector2(1208, 560)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf39" type="Marker2D" parent="Noktalar" unique_id=466690205]
 position = Vector2(1224, 576)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf40" type="Marker2D" parent="Noktalar" unique_id=1977729625]
 position = Vector2(1224, 544)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf41" type="Marker2D" parent="Noktalar" unique_id=1162904428]
 position = Vector2(1192, 544)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf42" type="Marker2D" parent="Noktalar" unique_id=1354064207]
 position = Vector2(1192, 576)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf43" type="Marker2D" parent="Noktalar" unique_id=444558316]
 position = Vector2(1176, 560)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf44" type="Marker2D" parent="Noktalar" unique_id=1972637319]
 position = Vector2(1208, 528)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="DarkWolf11" type="Marker2D" parent="Noktalar" unique_id=1707547870]
 position = Vector2(1240, 560)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "dark_wolf"
+ref = "jack_dark_wolf"
 
 [node name="DarkWolf12" type="Marker2D" parent="Noktalar" unique_id=751247538]
 position = Vector2(1208, 592)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "dark_wolf"
+ref = "jack_dark_wolf"
 
 [node name="DarkWolf13" type="Marker2D" parent="Noktalar" unique_id=519066716]
 position = Vector2(776, 560)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "dark_wolf"
+ref = "jack_dark_wolf"
 
 [node name="DarkWolf14" type="Marker2D" parent="Noktalar" unique_id=1745660153]
 position = Vector2(760, 576)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "dark_wolf"
+ref = "jack_dark_wolf"
 
 [node name="DarkWolf15" type="Marker2D" parent="Noktalar" unique_id=395630384]
 position = Vector2(792, 576)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "dark_wolf"
+ref = "jack_dark_wolf"
 
 [node name="GhostWolf45" type="Marker2D" parent="Noktalar" unique_id=2037189060]
 position = Vector2(760, 544)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf46" type="Marker2D" parent="Noktalar" unique_id=1717261627]
 position = Vector2(792, 544)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf47" type="Marker2D" parent="Noktalar" unique_id=528854116]
 position = Vector2(776, 528)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf48" type="Marker2D" parent="Noktalar" unique_id=2113160456]
 position = Vector2(776, 592)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="ShadowSlime23" type="Marker2D" parent="Noktalar" unique_id=1847766384]
 position = Vector2(616, 560)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="ShadowSlime24" type="Marker2D" parent="Noktalar" unique_id=340745109]
 position = Vector2(632, 544)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="ShadowSlime25" type="Marker2D" parent="Noktalar" unique_id=1465375784]
 position = Vector2(600, 576)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="ShadowSlime26" type="Marker2D" parent="Noktalar" unique_id=1812335304]
 position = Vector2(600, 544)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="ShadowSlime27" type="Marker2D" parent="Noktalar" unique_id=655947110]
 position = Vector2(632, 576)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="PoisonSlime15" type="Marker2D" parent="Noktalar" unique_id=1422208333]
 position = Vector2(616, 592)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "poison_slime"
+ref = "jack_poison_slime"
 
 [node name="PoisonSlime16" type="Marker2D" parent="Noktalar" unique_id=1543514523]
 position = Vector2(616, 528)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "poison_slime"
+ref = "jack_poison_slime"
 
 [node name="PoisonSlime17" type="Marker2D" parent="Noktalar" unique_id=1946207869]
 position = Vector2(648, 560)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "poison_slime"
+ref = "jack_poison_slime"
 
 [node name="PoisonSlime18" type="Marker2D" parent="Noktalar" unique_id=488380583]
 position = Vector2(584, 560)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "poison_slime"
+ref = "jack_poison_slime"
 
 [node name="GoblinChief2" type="Marker2D" parent="Noktalar" unique_id=1373534563]
 position = Vector2(264, 560)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "goblin_chief"
+ref = "jack_goblin_chief"
 
 [node name="DarkWolf16" type="Marker2D" parent="Noktalar" unique_id=6803699]
 position = Vector2(216, 560)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "dark_wolf"
+ref = "jack_dark_wolf"
 
 [node name="DarkWolf17" type="Marker2D" parent="Noktalar" unique_id=1517272014]
 position = Vector2(312, 560)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "dark_wolf"
+ref = "jack_dark_wolf"
 
 [node name="PoisonSlime19" type="Marker2D" parent="Noktalar" unique_id=1226001164]
 position = Vector2(184, 896)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "poison_slime"
+ref = "jack_poison_slime"
 
 [node name="PoisonSlime20" type="Marker2D" parent="Noktalar" unique_id=1853748333]
 position = Vector2(168, 880)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "poison_slime"
+ref = "jack_poison_slime"
 
 [node name="PoisonSlime21" type="Marker2D" parent="Noktalar" unique_id=651387245]
 position = Vector2(200, 912)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "poison_slime"
+ref = "jack_poison_slime"
 
 [node name="PoisonSlime22" type="Marker2D" parent="Noktalar" unique_id=2101448701]
 position = Vector2(200, 880)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "poison_slime"
+ref = "jack_poison_slime"
 
 [node name="ShadowSlime28" type="Marker2D" parent="Noktalar" unique_id=38428796]
 position = Vector2(168, 912)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="ShadowSlime29" type="Marker2D" parent="Noktalar" unique_id=1468669789]
 position = Vector2(152, 896)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="GhostWolf49" type="Marker2D" parent="Noktalar" unique_id=1770343806]
 position = Vector2(344, 896)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf50" type="Marker2D" parent="Noktalar" unique_id=393368016]
 position = Vector2(328, 912)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf51" type="Marker2D" parent="Noktalar" unique_id=1785021138]
 position = Vector2(360, 880)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="ShadowSlime30" type="Marker2D" parent="Noktalar" unique_id=1457018652]
 position = Vector2(360, 912)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="ShadowSlime31" type="Marker2D" parent="Noktalar" unique_id=1271173406]
 position = Vector2(328, 880)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="GhostWolf52" type="Marker2D" parent="Noktalar" unique_id=1418352565]
 position = Vector2(776, 896)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf53" type="Marker2D" parent="Noktalar" unique_id=94163119]
 position = Vector2(760, 912)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf54" type="Marker2D" parent="Noktalar" unique_id=1153504683]
 position = Vector2(760, 880)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf55" type="Marker2D" parent="Noktalar" unique_id=1104926464]
 position = Vector2(792, 912)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf56" type="Marker2D" parent="Noktalar" unique_id=1120498715]
 position = Vector2(792, 880)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="DarkWolf18" type="Marker2D" parent="Noktalar" unique_id=942190878]
 position = Vector2(744, 896)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "dark_wolf"
+ref = "jack_dark_wolf"
 
 [node name="DarkWolf19" type="Marker2D" parent="Noktalar" unique_id=2092830287]
 position = Vector2(616, 896)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "dark_wolf"
+ref = "jack_dark_wolf"
 
 [node name="DarkWolf20" type="Marker2D" parent="Noktalar" unique_id=2026570759]
 position = Vector2(632, 880)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "dark_wolf"
+ref = "jack_dark_wolf"
 
 [node name="DarkWolf21" type="Marker2D" parent="Noktalar" unique_id=627340779]
 position = Vector2(632, 912)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "dark_wolf"
+ref = "jack_dark_wolf"
 
 [node name="GhostWolf57" type="Marker2D" parent="Noktalar" unique_id=1886951007]
 position = Vector2(600, 912)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf58" type="Marker2D" parent="Noktalar" unique_id=2101017967]
 position = Vector2(600, 880)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf59" type="Marker2D" parent="Noktalar" unique_id=408282085]
 position = Vector2(584, 896)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf60" type="Marker2D" parent="Noktalar" unique_id=362785019]
 position = Vector2(616, 928)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf61" type="Marker2D" parent="Noktalar" unique_id=590244235]
 position = Vector2(648, 896)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="ShadowSlime32" type="Marker2D" parent="Noktalar" unique_id=1178558481]
 position = Vector2(1048, 896)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="ShadowSlime33" type="Marker2D" parent="Noktalar" unique_id=2041982700]
 position = Vector2(1064, 880)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="ShadowSlime34" type="Marker2D" parent="Noktalar" unique_id=707960806]
 position = Vector2(1032, 880)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="ShadowSlime35" type="Marker2D" parent="Noktalar" unique_id=1090945781]
 position = Vector2(1064, 912)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="ShadowSlime36" type="Marker2D" parent="Noktalar" unique_id=748068845]
 position = Vector2(1032, 912)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="ShadowSlime37" type="Marker2D" parent="Noktalar" unique_id=1645846200]
 position = Vector2(1016, 896)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="PoisonSlime23" type="Marker2D" parent="Noktalar" unique_id=866140044]
 position = Vector2(1048, 928)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "poison_slime"
+ref = "jack_poison_slime"
 
 [node name="PoisonSlime24" type="Marker2D" parent="Noktalar" unique_id=2117427447]
 position = Vector2(1048, 864)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "poison_slime"
+ref = "jack_poison_slime"
 
 [node name="PoisonSlime25" type="Marker2D" parent="Noktalar" unique_id=723619098]
 position = Vector2(1080, 896)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "poison_slime"
+ref = "jack_poison_slime"
 
 [node name="PoisonSlime26" type="Marker2D" parent="Noktalar" unique_id=1392681148]
 position = Vector2(1016, 864)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "poison_slime"
+ref = "jack_poison_slime"
 
 [node name="PoisonSlime27" type="Marker2D" parent="Noktalar" unique_id=705244209]
 position = Vector2(1208, 896)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "poison_slime"
+ref = "jack_poison_slime"
 
 [node name="PoisonSlime28" type="Marker2D" parent="Noktalar" unique_id=538879817]
 position = Vector2(1192, 880)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "poison_slime"
+ref = "jack_poison_slime"
 
 [node name="PoisonSlime29" type="Marker2D" parent="Noktalar" unique_id=1864043467]
 position = Vector2(1224, 912)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "poison_slime"
+ref = "jack_poison_slime"
 
 [node name="ShadowSlime38" type="Marker2D" parent="Noktalar" unique_id=81203942]
 position = Vector2(1192, 912)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="ShadowSlime39" type="Marker2D" parent="Noktalar" unique_id=897230840]
 position = Vector2(1224, 880)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="GhostWolf62" type="Marker2D" parent="Noktalar" unique_id=168904998]
 position = Vector2(1640, 896)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf63" type="Marker2D" parent="Noktalar" unique_id=1436625750]
 position = Vector2(1656, 880)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf64" type="Marker2D" parent="Noktalar" unique_id=1200989569]
 position = Vector2(1656, 912)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="ShadowSlime40" type="Marker2D" parent="Noktalar" unique_id=222130412]
 position = Vector2(1624, 912)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="ShadowSlime41" type="Marker2D" parent="Noktalar" unique_id=554616255]
 position = Vector2(1624, 880)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="GhostWolf65" type="Marker2D" parent="Noktalar" unique_id=1365598272]
 position = Vector2(1480, 896)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf66" type="Marker2D" parent="Noktalar" unique_id=2012063724]
 position = Vector2(1496, 880)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf67" type="Marker2D" parent="Noktalar" unique_id=1148339625]
 position = Vector2(1464, 912)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf68" type="Marker2D" parent="Noktalar" unique_id=2098341881]
 position = Vector2(1464, 880)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="DarkWolf22" type="Marker2D" parent="Noktalar" unique_id=2016074840]
 position = Vector2(1496, 912)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "dark_wolf"
+ref = "jack_dark_wolf"
 
 [node name="GoblinChief3" type="Marker2D" parent="Noktalar" unique_id=1075701135]
 position = Vector2(1992, 896)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "goblin_chief"
+ref = "jack_goblin_chief"
 
 [node name="ShadowSlime42" type="Marker2D" parent="Noktalar" unique_id=1115227061]
 position = Vector2(1944, 896)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="ShadowSlime43" type="Marker2D" parent="Noktalar" unique_id=90619438]
 position = Vector2(2040, 896)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="DarkWolf23" type="Marker2D" parent="Noktalar" unique_id=74331139]
 position = Vector2(2072, 1232)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "dark_wolf"
+ref = "jack_dark_wolf"
 
 [node name="DarkWolf24" type="Marker2D" parent="Noktalar" unique_id=1191197236]
 position = Vector2(2088, 1248)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "dark_wolf"
+ref = "jack_dark_wolf"
 
 [node name="DarkWolf25" type="Marker2D" parent="Noktalar" unique_id=431182179]
 position = Vector2(2056, 1248)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "dark_wolf"
+ref = "jack_dark_wolf"
 
 [node name="DarkWolf26" type="Marker2D" parent="Noktalar" unique_id=630225608]
 position = Vector2(2088, 1216)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "dark_wolf"
+ref = "jack_dark_wolf"
 
 [node name="GhostWolf69" type="Marker2D" parent="Noktalar" unique_id=1827696733]
 position = Vector2(2056, 1216)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf70" type="Marker2D" parent="Noktalar" unique_id=185518340]
 position = Vector2(2040, 1232)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf71" type="Marker2D" parent="Noktalar" unique_id=1453203599]
 position = Vector2(2072, 1200)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf72" type="Marker2D" parent="Noktalar" unique_id=463223511]
 position = Vector2(2072, 1264)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf73" type="Marker2D" parent="Noktalar" unique_id=1771212861]
 position = Vector2(2104, 1232)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf74" type="Marker2D" parent="Noktalar" unique_id=1445229704]
 position = Vector2(2104, 1264)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="ShadowSlime44" type="Marker2D" parent="Noktalar" unique_id=1547978208]
 position = Vector2(1912, 1232)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="ShadowSlime45" type="Marker2D" parent="Noktalar" unique_id=455951158]
 position = Vector2(1928, 1216)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="ShadowSlime46" type="Marker2D" parent="Noktalar" unique_id=638123952]
 position = Vector2(1896, 1248)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="ShadowSlime47" type="Marker2D" parent="Noktalar" unique_id=1019113057]
 position = Vector2(1896, 1216)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="ShadowSlime48" type="Marker2D" parent="Noktalar" unique_id=1638847899]
 position = Vector2(1928, 1248)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="PoisonSlime30" type="Marker2D" parent="Noktalar" unique_id=817452865]
 position = Vector2(1944, 1232)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "poison_slime"
+ref = "jack_poison_slime"
 
 [node name="PoisonSlime31" type="Marker2D" parent="Noktalar" unique_id=1674222003]
 position = Vector2(1880, 1232)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "poison_slime"
+ref = "jack_poison_slime"
 
 [node name="PoisonSlime32" type="Marker2D" parent="Noktalar" unique_id=918901654]
 position = Vector2(1912, 1264)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "poison_slime"
+ref = "jack_poison_slime"
 
 [node name="PoisonSlime33" type="Marker2D" parent="Noktalar" unique_id=546953699]
 position = Vector2(1912, 1200)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "poison_slime"
+ref = "jack_poison_slime"
 
 [node name="PoisonSlime34" type="Marker2D" parent="Noktalar" unique_id=1416960990]
 position = Vector2(1480, 1232)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "poison_slime"
+ref = "jack_poison_slime"
 
 [node name="PoisonSlime35" type="Marker2D" parent="Noktalar" unique_id=108284765]
 position = Vector2(1496, 1248)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "poison_slime"
+ref = "jack_poison_slime"
 
 [node name="PoisonSlime36" type="Marker2D" parent="Noktalar" unique_id=134285395]
 position = Vector2(1496, 1216)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "poison_slime"
+ref = "jack_poison_slime"
 
 [node name="ShadowSlime49" type="Marker2D" parent="Noktalar" unique_id=784261869]
 position = Vector2(1464, 1216)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="ShadowSlime50" type="Marker2D" parent="Noktalar" unique_id=1641678620]
 position = Vector2(1464, 1248)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="GhostWolf75" type="Marker2D" parent="Noktalar" unique_id=1681904927]
 position = Vector2(1640, 1232)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf76" type="Marker2D" parent="Noktalar" unique_id=1780419122]
 position = Vector2(1624, 1248)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf77" type="Marker2D" parent="Noktalar" unique_id=2005628181]
 position = Vector2(1656, 1216)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf78" type="Marker2D" parent="Noktalar" unique_id=315785000]
 position = Vector2(1656, 1248)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="ShadowSlime51" type="Marker2D" parent="Noktalar" unique_id=291865227]
 position = Vector2(1624, 1216)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="ShadowSlime52" type="Marker2D" parent="Noktalar" unique_id=102397400]
 position = Vector2(1640, 1264)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="ShadowSlime53" type="Marker2D" parent="Noktalar" unique_id=1965506608]
 position = Vector2(1608, 1232)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="GhostWolf79" type="Marker2D" parent="Noktalar" unique_id=940715401]
 position = Vector2(1208, 1232)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf80" type="Marker2D" parent="Noktalar" unique_id=234979463]
 position = Vector2(1192, 1216)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf81" type="Marker2D" parent="Noktalar" unique_id=145509513]
 position = Vector2(1224, 1248)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf82" type="Marker2D" parent="Noktalar" unique_id=776385]
 position = Vector2(1224, 1216)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf83" type="Marker2D" parent="Noktalar" unique_id=1948407606]
 position = Vector2(1192, 1248)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf84" type="Marker2D" parent="Noktalar" unique_id=1290101374]
 position = Vector2(1208, 1264)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="DarkWolf27" type="Marker2D" parent="Noktalar" unique_id=1313967752]
 position = Vector2(1240, 1232)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "dark_wolf"
+ref = "jack_dark_wolf"
 
 [node name="DarkWolf28" type="Marker2D" parent="Noktalar" unique_id=153484058]
 position = Vector2(1176, 1232)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "dark_wolf"
+ref = "jack_dark_wolf"
 
 [node name="DarkWolf29" type="Marker2D" parent="Noktalar" unique_id=1211257830]
 position = Vector2(1048, 1232)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "dark_wolf"
+ref = "jack_dark_wolf"
 
 [node name="DarkWolf30" type="Marker2D" parent="Noktalar" unique_id=297909121]
 position = Vector2(1064, 1248)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "dark_wolf"
+ref = "jack_dark_wolf"
 
 [node name="GhostWolf85" type="Marker2D" parent="Noktalar" unique_id=1377573645]
 position = Vector2(1064, 1216)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf86" type="Marker2D" parent="Noktalar" unique_id=2046151549]
 position = Vector2(1032, 1248)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf87" type="Marker2D" parent="Noktalar" unique_id=92251408]
 position = Vector2(1032, 1216)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="ShadowSlime54" type="Marker2D" parent="Noktalar" unique_id=1182035300]
 position = Vector2(776, 1232)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="ShadowSlime55" type="Marker2D" parent="Noktalar" unique_id=1440557200]
 position = Vector2(792, 1216)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="ShadowSlime56" type="Marker2D" parent="Noktalar" unique_id=1864493694]
 position = Vector2(760, 1216)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="PoisonSlime37" type="Marker2D" parent="Noktalar" unique_id=992505241]
 position = Vector2(760, 1248)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "poison_slime"
+ref = "jack_poison_slime"
 
 [node name="PoisonSlime38" type="Marker2D" parent="Noktalar" unique_id=1568217095]
 position = Vector2(792, 1248)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "poison_slime"
+ref = "jack_poison_slime"
 
 [node name="PoisonSlime39" type="Marker2D" parent="Noktalar" unique_id=946247975]
 position = Vector2(616, 1232)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "poison_slime"
+ref = "jack_poison_slime"
 
 [node name="PoisonSlime40" type="Marker2D" parent="Noktalar" unique_id=1812078541]
 position = Vector2(600, 1248)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "poison_slime"
+ref = "jack_poison_slime"
 
 [node name="PoisonSlime41" type="Marker2D" parent="Noktalar" unique_id=361869611]
 position = Vector2(632, 1248)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "poison_slime"
+ref = "jack_poison_slime"
 
 [node name="PoisonSlime42" type="Marker2D" parent="Noktalar" unique_id=1867056098]
 position = Vector2(632, 1216)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "poison_slime"
+ref = "jack_poison_slime"
 
 [node name="PoisonSlime43" type="Marker2D" parent="Noktalar" unique_id=1452458721]
 position = Vector2(600, 1216)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "poison_slime"
+ref = "jack_poison_slime"
 
 [node name="ShadowSlime57" type="Marker2D" parent="Noktalar" unique_id=819585737]
 position = Vector2(616, 1200)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="ShadowSlime58" type="Marker2D" parent="Noktalar" unique_id=1564243452]
 position = Vector2(648, 1232)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="ShadowSlime59" type="Marker2D" parent="Noktalar" unique_id=712313531]
 position = Vector2(584, 1232)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="ShadowSlime60" type="Marker2D" parent="Noktalar" unique_id=1606004324]
 position = Vector2(616, 1264)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "shadow_slime"
+ref = "jack_shadow_slime"
 
 [node name="LairExitTop" type="Marker2D" parent="Noktalar" unique_id=492918412]
 position = Vector2(264, 1136)
@@ -2306,10 +2306,10 @@ ref = "pumpkin_jack"
 position = Vector2(216, 1232)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"
 
 [node name="GhostWolf89" type="Marker2D" parent="Noktalar" unique_id=1898486798]
 position = Vector2(312, 1232)
 script = ExtResource("3_tqtg7")
 kind = "mob"
-ref = "ghost_wolf"
+ref = "jack_ghost_wolf"

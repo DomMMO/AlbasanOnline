@@ -12,29 +12,29 @@ size = Vector2(10, 6)
 radius = 4.6
 height = 18.4
 
-[node name="MoonWolf" type="Node2D" unique_id=1506495508]
+[node name="MoonWolf" type="Node2D" unique_id=376622180]
 
-[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=999415355]
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=612719611]
 sprite_frames = ExtResource("1_20v6t")
 animation = &"idle"
 autoplay = "idle"
 centered = false
 offset = Vector2(-32, -64)
 
-[node name="Hurtbox" type="Area2D" parent="." unique_id=1657670758]
+[node name="Hurtbox" type="Area2D" parent="." unique_id=958979439]
 collision_mask = 0
 
-[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=716662428]
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1104908450]
 position = Vector2(2.5, -16)
 shape = SubResource("RectangleShape2D_rp3f2")
 debug_color = Color(0.2, 0.6, 1, 0.35)
 
-[node name="Feet" type="Area2D" parent="." unique_id=933434203]
+[node name="Feet" type="Area2D" parent="." unique_id=1104425529]
 collision_layer = 2
 collision_mask = 0
 input_pickable = false
 
-[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1963739560]
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=439109220]
 position = Vector2(0, -3)
 shape = SubResource("RectangleShape2D_8eh32")
 debug_color = Color(1, 0.3, 0.2, 0.45)

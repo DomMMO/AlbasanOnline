@@ -1,68 +1,84 @@
 [gd_resource type="SpriteFrames" format=3]
 
-[ext_resource type="Texture2D" path="res://assets/moblar/ork_goblin.png" id="1_gpk4h"]
+[ext_resource type="Texture2D" path="res://assets/moblar/haydut_suikastci.png" id="1_gpk4h"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_lje3b"]
 atlas = ExtResource("1_gpk4h")
-region = Rect2(640, 0, 64, 64)
+region = Rect2(896, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_8sj0n"]
 atlas = ExtResource("1_gpk4h")
-region = Rect2(704, 0, 64, 64)
+region = Rect2(960, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_n360g"]
 atlas = ExtResource("1_gpk4h")
-region = Rect2(768, 0, 64, 64)
+region = Rect2(1024, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_akcc5"]
 atlas = ExtResource("1_gpk4h")
-region = Rect2(832, 0, 64, 64)
+region = Rect2(1088, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_78815"]
 atlas = ExtResource("1_gpk4h")
-region = Rect2(896, 0, 64, 64)
+region = Rect2(1152, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_bcrno"]
 atlas = ExtResource("1_gpk4h")
-region = Rect2(960, 0, 64, 64)
+region = Rect2(1216, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_i3u3x"]
 atlas = ExtResource("1_gpk4h")
-region = Rect2(0, 0, 64, 64)
+region = Rect2(640, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_1o6po"]
 atlas = ExtResource("1_gpk4h")
-region = Rect2(64, 0, 64, 64)
+region = Rect2(704, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_hdqv4"]
 atlas = ExtResource("1_gpk4h")
-region = Rect2(128, 0, 64, 64)
+region = Rect2(768, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_yj2ru"]
 atlas = ExtResource("1_gpk4h")
-region = Rect2(192, 0, 64, 64)
+region = Rect2(832, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_erlts"]
 atlas = ExtResource("1_gpk4h")
-region = Rect2(256, 0, 64, 64)
+region = Rect2(0, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_6s6vw"]
 atlas = ExtResource("1_gpk4h")
-region = Rect2(320, 0, 64, 64)
+region = Rect2(64, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_m5hxi"]
 atlas = ExtResource("1_gpk4h")
-region = Rect2(384, 0, 64, 64)
+region = Rect2(128, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_3bn0r"]
 atlas = ExtResource("1_gpk4h")
-region = Rect2(448, 0, 64, 64)
+region = Rect2(192, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_4tjge"]
 atlas = ExtResource("1_gpk4h")
-region = Rect2(512, 0, 64, 64)
+region = Rect2(256, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_wiyj6"]
+atlas = ExtResource("1_gpk4h")
+region = Rect2(320, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_il173"]
+atlas = ExtResource("1_gpk4h")
+region = Rect2(384, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_a1yt2"]
+atlas = ExtResource("1_gpk4h")
+region = Rect2(448, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_df7gk"]
+atlas = ExtResource("1_gpk4h")
+region = Rect2(512, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dg4hi"]
 atlas = ExtResource("1_gpk4h")
 region = Rect2(576, 0, 64, 64)
 
@@ -104,9 +120,9 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_yj2ru")
 }],
-"loop": 1,
-"name": &"idle",
-"speed": 7.0
+"loop": 0,
+"name": &"hurt",
+"speed": 10.0
 }, {
 "frames": [{
 "duration": 1.0,
@@ -120,12 +136,29 @@ animations = [{
 }, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_3bn0r")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 7.0
 }, {
+"frames": [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_4tjge")
 }, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_wiyj6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_il173")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_a1yt2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_df7gk")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dg4hi")
 }],
 "loop": 1,
 "name": &"walk",

@@ -1116,17 +1116,17 @@ const BUILDS := {
 		# Jack's cellar: graves and coffins.
 		"looks": ["mezarlik", "tabutluk", "kript_depo", "lahitler", "mezarlik", "turbe"],
 		"packs": [
-			[["ghost_wolf", 3], ["shadow_slime", 2]],
-			[["dark_wolf", 2], ["ghost_wolf", 3]],
-			[["poison_slime", 3], ["shadow_slime", 2]],
-			[["ghost_wolf", 4], ["dark_wolf", 1]],
-			[["shadow_slime", 3], ["poison_slime", 2]],
+			[["jack_ghost_wolf", 3], ["jack_shadow_slime", 2]],
+			[["jack_dark_wolf", 2], ["jack_ghost_wolf", 3]],
+			[["jack_poison_slime", 3], ["jack_shadow_slime", 2]],
+			[["jack_ghost_wolf", 4], ["jack_dark_wolf", 1]],
+			[["jack_shadow_slime", 3], ["jack_poison_slime", 2]],
 		],
 		"bosses": [
-			["goblin_chief", [["ghost_wolf", 2]]],
-			["goblin_chief", [["dark_wolf", 2]]],
-			["goblin_chief", [["shadow_slime", 2]]],
-			["pumpkin_jack", [["ghost_wolf", 2]]],
+			["jack_goblin_chief", [["jack_ghost_wolf", 2]]],
+			["jack_goblin_chief", [["jack_dark_wolf", 2]]],
+			["jack_goblin_chief", [["jack_shadow_slime", 2]]],
+			["pumpkin_jack", [["jack_ghost_wolf", 2]]],
 		],
 	},
 	"buried_caravanserai": {

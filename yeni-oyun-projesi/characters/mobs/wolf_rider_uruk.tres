@@ -1,68 +1,84 @@
 [gd_resource type="SpriteFrames" format=3]
 
-[ext_resource type="Texture2D" path="res://assets/moblar/ork_binici.png" id="1_08qhg"]
+[ext_resource type="Texture2D" path="res://assets/moblar/haydut_binici.png" id="1_08qhg"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_h0u4y"]
 atlas = ExtResource("1_08qhg")
-region = Rect2(1280, 0, 128, 128)
+region = Rect2(1792, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_dvju1"]
 atlas = ExtResource("1_08qhg")
-region = Rect2(1408, 0, 128, 128)
+region = Rect2(1920, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_axm06"]
 atlas = ExtResource("1_08qhg")
-region = Rect2(1536, 0, 128, 128)
+region = Rect2(2048, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_gxuy0"]
 atlas = ExtResource("1_08qhg")
-region = Rect2(1664, 0, 128, 128)
+region = Rect2(2176, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_vb0fi"]
 atlas = ExtResource("1_08qhg")
-region = Rect2(1792, 0, 128, 128)
+region = Rect2(2304, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_gj3hw"]
 atlas = ExtResource("1_08qhg")
-region = Rect2(1920, 0, 128, 128)
+region = Rect2(2432, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_dygii"]
 atlas = ExtResource("1_08qhg")
-region = Rect2(0, 0, 128, 128)
+region = Rect2(1280, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_i34ys"]
 atlas = ExtResource("1_08qhg")
-region = Rect2(128, 0, 128, 128)
+region = Rect2(1408, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_fyhfw"]
 atlas = ExtResource("1_08qhg")
-region = Rect2(256, 0, 128, 128)
+region = Rect2(1536, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_cma3g"]
 atlas = ExtResource("1_08qhg")
-region = Rect2(384, 0, 128, 128)
+region = Rect2(1664, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_tt5ak"]
 atlas = ExtResource("1_08qhg")
-region = Rect2(512, 0, 128, 128)
+region = Rect2(0, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_puqy5"]
 atlas = ExtResource("1_08qhg")
-region = Rect2(640, 0, 128, 128)
+region = Rect2(128, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_w2hpp"]
 atlas = ExtResource("1_08qhg")
-region = Rect2(768, 0, 128, 128)
+region = Rect2(256, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_begf6"]
 atlas = ExtResource("1_08qhg")
-region = Rect2(896, 0, 128, 128)
+region = Rect2(384, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ptdaw"]
 atlas = ExtResource("1_08qhg")
-region = Rect2(1024, 0, 128, 128)
+region = Rect2(512, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_4h0sc"]
+atlas = ExtResource("1_08qhg")
+region = Rect2(640, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bhum6"]
+atlas = ExtResource("1_08qhg")
+region = Rect2(768, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5g4ef"]
+atlas = ExtResource("1_08qhg")
+region = Rect2(896, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_w75ed"]
+atlas = ExtResource("1_08qhg")
+region = Rect2(1024, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ncebb"]
 atlas = ExtResource("1_08qhg")
 region = Rect2(1152, 0, 128, 128)
 
@@ -104,9 +120,9 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_cma3g")
 }],
-"loop": 1,
-"name": &"idle",
-"speed": 7.0
+"loop": 0,
+"name": &"hurt",
+"speed": 10.0
 }, {
 "frames": [{
 "duration": 1.0,
@@ -120,12 +136,29 @@ animations = [{
 }, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_begf6")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 7.0
 }, {
+"frames": [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_ptdaw")
 }, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_4h0sc")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bhum6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5g4ef")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_w75ed")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ncebb")
 }],
 "loop": 1,
 "name": &"walk",

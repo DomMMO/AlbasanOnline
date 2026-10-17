@@ -1,0 +1,147 @@
+{
+ "frameWidth": 64,
+ "frameHeight": 64,
+ "originX": 0.5,
+ "originY": 1.0,
+ "anims": {
+  "idle": [
+   0,
+   1,
+   2,
+   3
+  ],
+  "walk": [
+   4,
+   5,
+   6,
+   7,
+   8,
+   9
+  ],
+  "dead": [
+   10,
+   11,
+   12,
+   13,
+   14,
+   15,
+   16,
+   17
+  ]
+ },
+ "fps": {
+  "idle": 7.0,
+  "walk": 10.0,
+  "dead": 10.0
+ },
+ "rig": {
+  "back": {
+   "sheet": "res://assets/moblar/iskelet_savasci_arka.png",
+   "pivots": [
+    [
+     16.0,
+     51.0
+    ],
+    [
+     16.0,
+     53.0
+    ],
+    [
+     16.0,
+     53.0
+    ],
+    [
+     16.0,
+     52.0
+    ],
+    [
+     16.0,
+     51.0
+    ],
+    [
+     17.0,
+     51.0
+    ],
+    [
+     18.0,
+     51.0
+    ],
+    [
+     20.0,
+     51.0
+    ],
+    [
+     19.0,
+     51.0
+    ],
+    [
+     18.0,
+     51.0
+    ],
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+   ]
+  },
+  "front": {
+   "sheet": "res://assets/moblar/iskelet_savasci_on.png",
+   "pivots": [
+    [
+     50.5,
+     59
+    ],
+    [
+     50.5,
+     61
+    ],
+    [
+     50.5,
+     61
+    ],
+    [
+     50.5,
+     60
+    ],
+    [
+     50.5,
+     59
+    ],
+    [
+     49.5,
+     59
+    ],
+    [
+     48.5,
+     59
+    ],
+    [
+     46.5,
+     59
+    ],
+    [
+     47.5,
+     59
+    ],
+    [
+     48.5,
+     59
+    ],
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+   ]
+  },
+  "swing": "back",
+  "swing_to": 75
+ }
+}

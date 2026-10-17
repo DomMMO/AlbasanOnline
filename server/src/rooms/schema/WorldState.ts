@@ -141,6 +141,8 @@ export class Loot extends Schema {
   @type("number") y = 0;
   /** sessionId allowed to loot; "" = anyone. Contents stay server-side until picked up. */
   @type("string") owner = "";
+  /** "" = a loot pile; "treasure" = a player's own treasure chest after a dungeon's last boss. */
+  @type("string") kind = "";
 }
 
 export class WorldState extends Schema {

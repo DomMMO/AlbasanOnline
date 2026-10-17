@@ -212,11 +212,11 @@ export const ITEMS: Record<string, ItemDef> = Object.fromEntries(
 
     // ---- Food (Ayşe Teyze's dinner quests)
     def({ id: "ayse_stew", name: "Ayşe Teyze'nin Güveci", rarity: "uncommon", level: 1, heal: 150, cooldownGroup: "food", maxStack: 20, sellPrice: 4, icon: { shape: "bowl", color: 0xb5651d }, description: "Dumanı üstünde. 150 can yeniler; iksirlerle ayrı bekleme süresi var." }),
-    def({ id: "wolf_meat", name: "Kurt Eti", rarity: "common", level: 1, maxStack: 50, sellPrice: 2, icon: { shape: "meat", color: 0xb5463a } }),
+    def({ id: "wolf_meat", name: "Kuru Et", rarity: "common", level: 1, maxStack: 50, sellPrice: 2, icon: { shape: "meat", color: 0xb5463a } }),
 
     // ---- Materials (sold for gold)
-    def({ id: "slime_gel", name: "Balçık Jölesi", rarity: "common", level: 1, maxStack: 50, sellPrice: 1, icon: { shape: "blob", color: 0x6fcf5a } }),
-    def({ id: "wolf_pelt", name: "Kurt Postu", rarity: "common", level: 1, maxStack: 50, sellPrice: 3, icon: { shape: "pelt", color: 0x8a8f99 } }),
+    def({ id: "slime_gel", name: "Goblin Merhemi", rarity: "common", level: 1, maxStack: 50, sellPrice: 1, icon: { shape: "blob", color: 0x6fcf5a } }),
+    def({ id: "wolf_pelt", name: "Ham Deri", rarity: "common", level: 1, maxStack: 50, sellPrice: 3, icon: { shape: "pelt", color: 0x8a8f99 } }),
     // ---- Passive tree jewels (see passives.ts); each rolls one effect when it drops
     def({ id: "major_jewel", jewel: "major", name: "Büyük Mücevher", rarity: "epic", level: 1, maxStack: 1, sellPrice: 40, icon: { shape: "jewel_major", color: 0xb65cff }, description: "Pasif ağaçta büyük bir slota takılır; altındaki 5 küçük slotu açar. Nadirliği arttıkça etkisi güçlenir." }),
     def({ id: "greater_jewel", jewel: "greater", name: "Kadim Mücevher", rarity: "legendary", level: 1, maxStack: 1, sellPrice: 150, icon: { shape: "jewel_greater", color: 0xff8000 }, description: "Sadece pasif ağacın Kadim Yuvalarına (1, 6, 11 ve 16. yuvalar) takılır. Güçlü ve özel bir etkisi vardır; nadirliği arttıkça güçlenir." }),

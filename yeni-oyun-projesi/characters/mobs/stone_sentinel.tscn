@@ -3,38 +3,38 @@
 [ext_resource type="SpriteFrames" path="res://characters/mobs/stone_sentinel.tres" id="1_1bswj"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_7dynx"]
-size = Vector2(72, 60)
+size = Vector2(44, 72)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rgje8"]
 size = Vector2(10, 6)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_govde"]
-radius = 14.4
-height = 57.6
+radius = 8.8
+height = 35.2
 
-[node name="StoneSentinel" type="Node2D" unique_id=1621412783]
+[node name="StoneSentinel" type="Node2D" unique_id=1063245218]
 
-[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=841233074]
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=442601924]
 sprite_frames = ExtResource("1_1bswj")
 animation = &"idle"
 autoplay = "idle"
 centered = false
-offset = Vector2(-40.6014, -69.4786)
+offset = Vector2(-64, -128)
 
-[node name="Hurtbox" type="Area2D" parent="." unique_id=1506275876]
+[node name="Hurtbox" type="Area2D" parent="." unique_id=765110872]
 collision_mask = 0
 
-[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=569571356]
-position = Vector2(10.398601, -28.4786)
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=2087451695]
+position = Vector2(2, -36)
 shape = SubResource("RectangleShape2D_7dynx")
 debug_color = Color(0.2, 0.6, 1, 0.35)
 
-[node name="Feet" type="Area2D" parent="." unique_id=378927469]
+[node name="Feet" type="Area2D" parent="." unique_id=262827853]
 collision_layer = 2
 collision_mask = 0
 input_pickable = false
 
-[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=169676159]
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1645708637]
 position = Vector2(0, -3)
 shape = SubResource("RectangleShape2D_rgje8")
 debug_color = Color(1, 0.3, 0.2, 0.45)

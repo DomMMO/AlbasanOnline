@@ -3,38 +3,38 @@
 [ext_resource type="SpriteFrames" path="res://characters/mobs/shadow_slime.tres" id="1_g23y2"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_qg1ca"]
-size = Vector2(15, 21)
+size = Vector2(20, 30)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_m18h4"]
 size = Vector2(10, 6)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_govde"]
-radius = 3.0
-height = 12.0
+radius = 4.0
+height = 16.0
 
-[node name="ShadowSlime" type="Node2D" unique_id=922869598]
+[node name="ShadowSlime" type="Node2D" unique_id=1367410363]
 
-[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1913063157]
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=848372704]
 sprite_frames = ExtResource("1_g23y2")
 animation = &"idle"
 autoplay = "idle"
 centered = false
-offset = Vector2(-13.4412, -19.883999)
+offset = Vector2(-32, -64)
 
-[node name="Hurtbox" type="Area2D" parent="." unique_id=401389359]
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1422800577]
 collision_mask = 0
 
-[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1705909339]
-position = Vector2(1.0588, -8.383999)
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=15440766]
+position = Vector2(-1, -15)
 shape = SubResource("RectangleShape2D_qg1ca")
 debug_color = Color(0.2, 0.6, 1, 0.35)
 
-[node name="Feet" type="Area2D" parent="." unique_id=597826378]
+[node name="Feet" type="Area2D" parent="." unique_id=1378022779]
 collision_layer = 2
 collision_mask = 0
 input_pickable = false
 
-[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=354663077]
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1662659373]
 position = Vector2(0, -3)
 shape = SubResource("RectangleShape2D_m18h4")
 debug_color = Color(1, 0.3, 0.2, 0.45)

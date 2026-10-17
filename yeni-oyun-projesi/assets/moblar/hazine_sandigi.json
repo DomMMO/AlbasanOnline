@@ -1,0 +1,18 @@
+{
+ "frameWidth": 32,
+ "frameHeight": 48,
+ "originX": 0.5,
+ "originY": 1.0,
+ "anims": {
+  "idle": [
+   0
+  ],
+  "open": [
+   1
+  ]
+ },
+ "fps": {
+  "idle": 1,
+  "open": 1
+ }
+}

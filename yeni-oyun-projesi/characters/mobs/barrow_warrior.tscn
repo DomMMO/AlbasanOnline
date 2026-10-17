@@ -3,38 +3,38 @@
 [ext_resource type="SpriteFrames" path="res://characters/mobs/barrow_warrior.tres" id="1_yds2a"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_lmkq7"]
-size = Vector2(21, 26)
+size = Vector2(20, 30)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ni7em"]
 size = Vector2(10, 6)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_govde"]
-radius = 4.2
-height = 16.8
+radius = 4.0
+height = 16.0
 
-[node name="BarrowWarrior" type="Node2D" unique_id=77000583]
+[node name="BarrowWarrior" type="Node2D" unique_id=517140340]
 
-[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1793192892]
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1235603912]
 sprite_frames = ExtResource("1_yds2a")
 animation = &"idle"
 autoplay = "idle"
 centered = false
-offset = Vector2(-17.070301, -29.379398)
+offset = Vector2(-32, -64)
 
-[node name="Hurtbox" type="Area2D" parent="." unique_id=1154350379]
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1424938117]
 collision_mask = 0
 
-[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=896544833]
-position = Vector2(-0.5703001, -12.379399)
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1240369454]
+position = Vector2(-2, -15)
 shape = SubResource("RectangleShape2D_lmkq7")
 debug_color = Color(0.2, 0.6, 1, 0.35)
 
-[node name="Feet" type="Area2D" parent="." unique_id=679932011]
+[node name="Feet" type="Area2D" parent="." unique_id=1041801615]
 collision_layer = 2
 collision_mask = 0
 input_pickable = false
 
-[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=894425860]
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=433434384]
 position = Vector2(0, -3)
 shape = SubResource("RectangleShape2D_ni7em")
 debug_color = Color(1, 0.3, 0.2, 0.45)

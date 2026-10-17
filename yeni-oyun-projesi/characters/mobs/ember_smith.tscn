@@ -3,38 +3,38 @@
 [ext_resource type="SpriteFrames" path="res://characters/mobs/ember_smith.tres" id="1_cxogl"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_o2oif"]
-size = Vector2(17, 30)
+size = Vector2(21, 29)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_4pu3o"]
 size = Vector2(10, 6)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_govde"]
-radius = 3.4
-height = 13.6
+radius = 4.2
+height = 16.8
 
-[node name="EmberSmith" type="Node2D" unique_id=1059882794]
+[node name="EmberSmith" type="Node2D" unique_id=1549563870]
 
-[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=865299777]
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=763560733]
 sprite_frames = ExtResource("1_cxogl")
 animation = &"idle"
 autoplay = "idle"
 centered = false
-offset = Vector2(-17.3004, -32.389)
+offset = Vector2(-32, -64)
 
-[node name="Hurtbox" type="Area2D" parent="." unique_id=365006851]
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1415592642]
 collision_mask = 0
 
-[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=845096775]
-position = Vector2(0.19960004, -13.389001)
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=307024003]
+position = Vector2(-0.5, -14.5)
 shape = SubResource("RectangleShape2D_o2oif")
 debug_color = Color(0.2, 0.6, 1, 0.35)
 
-[node name="Feet" type="Area2D" parent="." unique_id=2082024388]
+[node name="Feet" type="Area2D" parent="." unique_id=89067141]
 collision_layer = 2
 collision_mask = 0
 input_pickable = false
 
-[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1871870195]
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=2098872972]
 position = Vector2(0, -3)
 shape = SubResource("RectangleShape2D_4pu3o")
 debug_color = Color(1, 0.3, 0.2, 0.45)

@@ -3,38 +3,39 @@
 [ext_resource type="SpriteFrames" path="res://characters/mobs/white_drake_kiragi.tres" id="1_snjv0"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_g7tou"]
-size = Vector2(145, 76)
+size = Vector2(34, 62)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_lpcxh"]
 size = Vector2(10, 6)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_govde"]
-radius = 20.0
-height = 80.0
+radius = 6.8
+height = 27.2
 
-[node name="WhiteDrakeKiragi" type="Node2D" unique_id=61468419]
+[node name="WhiteDrakeKiragi" type="Node2D" unique_id=1157110546]
 
-[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=934312247]
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1624451009]
+scale = Vector2(2, 2)
 sprite_frames = ExtResource("1_snjv0")
 animation = &"idle"
 autoplay = "idle"
 centered = false
-offset = Vector2(-92.7442, -113.1696)
+offset = Vector2(-32, -64)
 
-[node name="Hurtbox" type="Area2D" parent="." unique_id=1622937320]
+[node name="Hurtbox" type="Area2D" parent="." unique_id=2776280]
 collision_mask = 0
 
-[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=285589550]
-position = Vector2(-20.2442, -36.1696)
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=829802201]
+position = Vector2(-1, -31)
 shape = SubResource("RectangleShape2D_g7tou")
 debug_color = Color(0.2, 0.6, 1, 0.35)
 
-[node name="Feet" type="Area2D" parent="." unique_id=823614029]
+[node name="Feet" type="Area2D" parent="." unique_id=1422974378]
 collision_layer = 2
 collision_mask = 0
 input_pickable = false
 
-[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=583180312]
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=163369511]
 position = Vector2(0, -3)
 shape = SubResource("RectangleShape2D_lpcxh")
 debug_color = Color(1, 0.3, 0.2, 0.45)

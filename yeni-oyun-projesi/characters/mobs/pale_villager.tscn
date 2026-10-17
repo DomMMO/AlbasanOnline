@@ -3,38 +3,38 @@
 [ext_resource type="SpriteFrames" path="res://characters/mobs/pale_villager.tres" id="1_optvg"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_05k8m"]
-size = Vector2(19, 24)
+size = Vector2(17, 32)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_nqls3"]
 size = Vector2(10, 6)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_govde"]
-radius = 3.8
-height = 15.2
+radius = 3.4
+height = 13.6
 
-[node name="PaleVillager" type="Node2D" unique_id=484142528]
+[node name="PaleVillager" type="Node2D" unique_id=1330200504]
 
-[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1819712728]
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=726515458]
 sprite_frames = ExtResource("1_optvg")
 animation = &"idle"
 autoplay = "idle"
 centered = false
-offset = Vector2(-15.813, -26.8336)
+offset = Vector2(-32, -64)
 
-[node name="Hurtbox" type="Area2D" parent="." unique_id=1936276654]
+[node name="Hurtbox" type="Area2D" parent="." unique_id=864451479]
 collision_mask = 0
 
-[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=2054358546]
-position = Vector2(-0.3129996, -10.8336)
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=2099177889]
+position = Vector2(0.5, -16)
 shape = SubResource("RectangleShape2D_05k8m")
 debug_color = Color(0.2, 0.6, 1, 0.35)
 
-[node name="Feet" type="Area2D" parent="." unique_id=662837475]
+[node name="Feet" type="Area2D" parent="." unique_id=1842765917]
 collision_layer = 2
 collision_mask = 0
 input_pickable = false
 
-[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1764947908]
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=110683976]
 position = Vector2(0, -3)
 shape = SubResource("RectangleShape2D_nqls3")
 debug_color = Color(1, 0.3, 0.2, 0.45)

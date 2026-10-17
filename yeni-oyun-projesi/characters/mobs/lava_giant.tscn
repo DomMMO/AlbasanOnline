@@ -3,38 +3,38 @@
 [ext_resource type="SpriteFrames" path="res://characters/mobs/lava_giant.tres" id="1_ka7fn"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_d6ovr"]
-size = Vector2(82, 67)
+size = Vector2(42, 62)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rxkrb"]
 size = Vector2(10, 6)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_govde"]
-radius = 16.4
-height = 65.6
+radius = 8.4
+height = 33.6
 
-[node name="LavaGiant" type="Node2D" unique_id=318223375]
+[node name="LavaGiant" type="Node2D" unique_id=1134332298]
 
-[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=523967009]
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1897155878]
 sprite_frames = ExtResource("1_ka7fn")
 animation = &"idle"
 autoplay = "idle"
 centered = false
-offset = Vector2(-46.4688, -79.942505)
+offset = Vector2(-64, -128)
 
-[node name="Hurtbox" type="Area2D" parent="." unique_id=1120488694]
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1692938754]
 collision_mask = 0
 
-[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=297463465]
-position = Vector2(11.531199, -32.4425)
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1320127581]
+position = Vector2(-1, -31)
 shape = SubResource("RectangleShape2D_d6ovr")
 debug_color = Color(0.2, 0.6, 1, 0.35)
 
-[node name="Feet" type="Area2D" parent="." unique_id=1736416861]
+[node name="Feet" type="Area2D" parent="." unique_id=1091339006]
 collision_layer = 2
 collision_mask = 0
 input_pickable = false
 
-[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1329395087]
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=224045476]
 position = Vector2(0, -3)
 shape = SubResource("RectangleShape2D_rxkrb")
 debug_color = Color(1, 0.3, 0.2, 0.45)

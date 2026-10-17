@@ -3,38 +3,38 @@
 [ext_resource type="SpriteFrames" path="res://characters/mobs/fire_djinn.tres" id="1_2e2tv"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_4y02g"]
-size = Vector2(21, 29)
+size = Vector2(22, 27)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_71lvm"]
 size = Vector2(10, 6)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_govde"]
-radius = 4.2
-height = 16.8
+radius = 4.4
+height = 17.6
 
-[node name="FireDjinn" type="Node2D" unique_id=552557056]
+[node name="FireDjinn" type="Node2D" unique_id=774906387]
 
-[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=998732023]
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1217527787]
 sprite_frames = ExtResource("1_2e2tv")
 animation = &"idle"
 autoplay = "idle"
 centered = false
-offset = Vector2(-17.469, -27.965)
+offset = Vector2(-32, -64)
 
-[node name="Hurtbox" type="Area2D" parent="." unique_id=1183744551]
+[node name="Hurtbox" type="Area2D" parent="." unique_id=93198037]
 collision_mask = 0
 
-[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1345377369]
-position = Vector2(1.0309998, -13.465)
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=705675527]
+position = Vector2(1, -13.5)
 shape = SubResource("RectangleShape2D_4y02g")
 debug_color = Color(0.2, 0.6, 1, 0.35)
 
-[node name="Feet" type="Area2D" parent="." unique_id=951126024]
+[node name="Feet" type="Area2D" parent="." unique_id=1296702046]
 collision_layer = 2
 collision_mask = 0
 input_pickable = false
 
-[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1048235100]
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=488521356]
 position = Vector2(0, -3)
 shape = SubResource("RectangleShape2D_71lvm")
 debug_color = Color(1, 0.3, 0.2, 0.45)

@@ -1,0 +1,51 @@
+[gd_scene format=3]
+
+[ext_resource type="SpriteFrames" path="res://characters/mobs/jack_ghost_wolf.tres" id="1_u2ief"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_nhtby"]
+size = Vector2(16, 30)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_meygy"]
+size = Vector2(10, 6)
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_govde"]
+radius = 3.2
+height = 12.8
+
+[node name="JackGhostWolf" type="Node2D" unique_id=1487041579]
+
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=229185652]
+sprite_frames = ExtResource("1_u2ief")
+animation = &"idle"
+autoplay = "idle"
+centered = false
+offset = Vector2(-32, -64)
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1913742909]
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1365815277]
+position = Vector2(0, -15)
+shape = SubResource("RectangleShape2D_nhtby")
+debug_color = Color(0.2, 0.6, 1, 0.35)
+
+[node name="Feet" type="Area2D" parent="." unique_id=1992986812]
+collision_layer = 2
+collision_mask = 0
+input_pickable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=740927480]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_meygy")
+debug_color = Color(1, 0.3, 0.2, 0.45)
+
+[node name="Govde" type="Area2D" parent="." unique_id=440807212]
+collision_layer = 4
+collision_mask = 0
+monitoring = false
+monitorable = false
+
+[node name="Oval" type="CollisionShape2D" parent="Govde" unique_id=624612628]
+rotation = 1.5707964
+shape = SubResource("CapsuleShape2D_govde")
+debug_color = Color(1, 0.75, 0.2, 0.35)

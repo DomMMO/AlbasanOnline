@@ -12,9 +12,9 @@ size = Vector2(10, 6)
 radius = 8.0
 height = 32.0
 
-[node name="BanditChief" type="Node2D" unique_id=313780009]
+[node name="BanditChief" type="Node2D" unique_id=1807538065]
 
-[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1838657028]
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=147796837]
 scale = Vector2(2, 2)
 sprite_frames = ExtResource("1_a6apc")
 animation = &"idle"
@@ -22,20 +22,20 @@ autoplay = "idle"
 centered = false
 offset = Vector2(-32, -64)
 
-[node name="Hurtbox" type="Area2D" parent="." unique_id=779978285]
+[node name="Hurtbox" type="Area2D" parent="." unique_id=996175953]
 collision_mask = 0
 
-[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=815818504]
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1607584649]
 position = Vector2(0, -31)
 shape = SubResource("RectangleShape2D_c7j3o")
 debug_color = Color(0.2, 0.6, 1, 0.35)
 
-[node name="Feet" type="Area2D" parent="." unique_id=1195424056]
+[node name="Feet" type="Area2D" parent="." unique_id=751739408]
 collision_layer = 2
 collision_mask = 0
 input_pickable = false
 
-[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=559597427]
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1255208508]
 position = Vector2(0, -3)
 shape = SubResource("RectangleShape2D_u7ipo")
 debug_color = Color(1, 0.3, 0.2, 0.45)

@@ -95,7 +95,7 @@ function tuned(mob: MobDef): MobDef {
 const BASE_MOBS: Record<string, MobDef> = {
   slime: {
     id: "slime",
-    name: "Balçık",
+    name: "Goblin Serseri",
     level: 1,
     maxHp: 30,
     attack: 5,
@@ -105,7 +105,7 @@ const BASE_MOBS: Record<string, MobDef> = {
     xp: 12,
     aggroRange: 0,
     respawnMs: 10_000,
-    appearance: { type: "slime", color: 0x6fcf5a },
+    appearance: { type: "image", key: "ork_goblin", tint: 0xb8e0a0 },
     loot: {
       gold: [1, 3],
       drops: [
@@ -121,7 +121,7 @@ const BASE_MOBS: Record<string, MobDef> = {
   },
   wolf: {
     id: "wolf",
-    name: "Gri Kurt",
+    name: "Ork Akıncı",
     level: 3,
     maxHp: 75,
     attack: 11,
@@ -131,10 +131,10 @@ const BASE_MOBS: Record<string, MobDef> = {
     xp: 30,
     aggroRange: 56,
     respawnMs: 15_000,
-    appearance: { type: "wolf", fur: 0x8a8f99 },
+    appearance: { type: "image", key: "ork_savasci" },
     loot: {
       gold: [3, 7],
-      drops: [
+      drops: [{ item: "orc_tusk", chance: 0.1 }, 
         { item: "wolf_pelt", chance: 0.55 },
         { item: "wolf_meat", chance: 0.45 },
         { item: "minor_hp_potion", chance: 0.1 },
@@ -185,7 +185,7 @@ const BASE_MOBS: Record<string, MobDef> = {
   // ---- Night only, valley ----
   shadow_slime: {
     id: "shadow_slime",
-    name: "Gölge Balçığı",
+    name: "Gölge Goblin",
     level: 3,
     maxHp: 60,
     attack: 9,
@@ -196,7 +196,7 @@ const BASE_MOBS: Record<string, MobDef> = {
     aggroRange: 48,
     respawnMs: 15_000,
     nightOnly: true,
-    appearance: { type: "slime", color: 0x4b2d7a },
+    appearance: { type: "image", key: "ork_goblin", tint: 0x9890c0 },
     loot: {
       gold: [3, 7],
       drops: [
@@ -213,7 +213,7 @@ const BASE_MOBS: Record<string, MobDef> = {
   },
   ghost_wolf: {
     id: "ghost_wolf",
-    name: "Hayalet Kurt",
+    name: "Solgun Ork",
     level: 6,
     maxHp: 150,
     attack: 18,
@@ -224,10 +224,10 @@ const BASE_MOBS: Record<string, MobDef> = {
     aggroRange: 64,
     respawnMs: 20_000,
     nightOnly: true,
-    appearance: { type: "wolf", fur: 0xc8d4ff },
+    appearance: { type: "image", key: "ork_savasci", tint: 0xc8d4ff },
     loot: {
       gold: [8, 16],
-      drops: [
+      drops: [{ item: "orc_tusk", chance: 0.1 }, 
         { item: "night_essence", chance: 0.5 },
         { item: "wolf_pelt", chance: 0.4 },
         { item: "hp_potion", chance: 0.1 },
@@ -247,7 +247,7 @@ const BASE_MOBS: Record<string, MobDef> = {
   // ---- Goblin Cave ----
   cave_slime: {
     id: "cave_slime",
-    name: "Mağara Balçığı",
+    name: "Mağara Goblini",
     level: 5,
     maxHp: 110,
     attack: 15,
@@ -257,7 +257,7 @@ const BASE_MOBS: Record<string, MobDef> = {
     xp: 45,
     aggroRange: 48,
     respawnMs: 0,
-    appearance: { type: "slime", color: 0x9b5bd9 },
+    appearance: { type: "image", key: "ork_goblin", tint: 0x90c890 },
     loot: {
       gold: [4, 9],
       drops: [
@@ -343,7 +343,7 @@ const BASE_MOBS: Record<string, MobDef> = {
     xp: 800,
     aggroRange: 110,
     respawnMs: 0,
-    appearance: { type: "image", key: "jack" },
+    appearance: { type: "image", key: "zombi_kasli_buyuk", tint: 0xffa040 },
     loot: {
       gold: [150, 300],
       drops: [
@@ -415,7 +415,6 @@ const BASE_MOBS: Record<string, MobDef> = {
       gold: [10, 22],
       drops: [
         { item: "poison_sac", chance: 0.5 },
-        { item: "slime_gel", chance: 0.4, min: 1, max: 3 },
         { item: "large_mana_potion", chance: 0.08 },
         { item: "upgrade_scroll_low", chance: 0.1 },
         { item: "upgrade_scroll_mid", chance: 0.03 },
@@ -499,7 +498,7 @@ const BASE_MOBS: Record<string, MobDef> = {
     loot: {
       gold: [22, 42],
       drops: [
-        { item: "orc_tusk", chance: 0.5 },
+        { item: "satyr_horn", chance: 0.5 },
         { item: "super_hp_potion", chance: 0.05 },
         { item: "large_mana_potion", chance: 0.08 },
         { item: "upgrade_scroll_mid", chance: 0.06 },
@@ -643,7 +642,7 @@ const BASE_MOBS: Record<string, MobDef> = {
     loot: {
       gold: [45, 85],
       drops: [
-        { item: "golem_core", chance: 0.6 },
+        { item: "satyr_horn", chance: 0.6 },
         { item: "super_hp_potion", chance: 0.12 },
         { item: "upgrade_scroll_mid", chance: 0.14 },
         { item: "upgrade_scroll_high", chance: 0.025 },
@@ -676,7 +675,7 @@ const BASE_MOBS: Record<string, MobDef> = {
       gold: [16, 32],
       drops: [
         { item: "night_essence", chance: 0.6 },
-        { item: "bone_dust", chance: 0.3 },
+        { item: "satyr_horn", chance: 0.3 },
         { item: "large_hp_potion", chance: 0.1 },
         { item: "large_mana_potion", chance: 0.1 },
         { item: "upgrade_scroll_mid", chance: 0.06 },
@@ -765,5 +764,21 @@ const BASE_MOBS: Record<string, MobDef> = {
   ...DUNGEON_MOBS,
   ...FRONTIER_MOBS,
 };
+
+// jack_lair's own copies of the mobs it shares with world, forest and goblin_cave: the same stats,
+// the Cemetery family's looks (a mob has one look wherever it is).
+/** A copy's loot with some materials swapped for others. */
+function swapDrops(mob: MobDef, swaps: Record<string, string>): MobDef["loot"] {
+  return { ...mob.loot, drops: mob.loot.drops.map((d) => (swaps[d.item] ? { ...d, item: swaps[d.item] } : d)) };
+}
+const CEMETERY_DROPS = { slime_gel: "cursed_bone", wolf_pelt: "cursed_bone", dark_wolf_pelt: "cursed_bone", orc_tusk: "bone_dust" };
+const JACK_LAIR_MOBS: Record<string, MobDef> = {
+  jack_ghost_wolf: { ...BASE_MOBS.ghost_wolf, id: "jack_ghost_wolf", loot: swapDrops(BASE_MOBS.ghost_wolf, CEMETERY_DROPS), name: "Mahzen Zombisi", appearance: { type: "image", key: "zombi", tint: 0xc0d0e0 } },
+  jack_shadow_slime: { ...BASE_MOBS.shadow_slime, id: "jack_shadow_slime", loot: swapDrops(BASE_MOBS.shadow_slime, CEMETERY_DROPS), name: "Şişkin Ölü", appearance: { type: "image", key: "zombi_sisman", tint: 0x9890c0 } },
+  jack_dark_wolf: { ...BASE_MOBS.dark_wolf, id: "jack_dark_wolf", loot: swapDrops(BASE_MOBS.dark_wolf, CEMETERY_DROPS), name: "Mahzen İskeleti", appearance: { type: "image", key: "iskelet" } },
+  jack_poison_slime: { ...BASE_MOBS.poison_slime, id: "jack_poison_slime", loot: swapDrops(BASE_MOBS.poison_slime, CEMETERY_DROPS), name: "Zehirli Kemikçi", appearance: { type: "image", key: "iskelet_buyucu", tint: 0xb0e0a0 } },
+  jack_goblin_chief: { ...BASE_MOBS.goblin_chief, id: "jack_goblin_chief", name: "Kemik Bekçi Grukk", appearance: { type: "image", key: "iskelet_savasci_buyuk", tint: 0xe0c090 } },
+};
+Object.assign(BASE_MOBS, JACK_LAIR_MOBS);
 
 export const MOBS: Record<string, MobDef> = Object.fromEntries(Object.entries(BASE_MOBS).map(([id, mob]) => [id, tuned(mob)]));

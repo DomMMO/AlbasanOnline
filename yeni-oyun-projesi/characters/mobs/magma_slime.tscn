@@ -3,38 +3,38 @@
 [ext_resource type="SpriteFrames" path="res://characters/mobs/magma_slime.tres" id="1_fl4mm"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wuuqj"]
-size = Vector2(30, 25)
+size = Vector2(21, 29)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_o6l8m"]
 size = Vector2(10, 6)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_govde"]
-radius = 6.0
-height = 24.0
+radius = 4.2
+height = 16.8
 
-[node name="MagmaSlime" type="Node2D" unique_id=1852944646]
+[node name="MagmaSlime" type="Node2D" unique_id=1596742549]
 
-[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=742830743]
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1069277946]
 sprite_frames = ExtResource("1_fl4mm")
 animation = &"idle"
 autoplay = "idle"
 centered = false
-offset = Vector2(-16.628, -28.1356)
+offset = Vector2(-32, -64)
 
-[node name="Hurtbox" type="Area2D" parent="." unique_id=1606663796]
+[node name="Hurtbox" type="Area2D" parent="." unique_id=983571548]
 collision_mask = 0
 
-[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=301156152]
-position = Vector2(4.3720007, -10.635599)
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1623173879]
+position = Vector2(-0.5, -14.5)
 shape = SubResource("RectangleShape2D_wuuqj")
 debug_color = Color(0.2, 0.6, 1, 0.35)
 
-[node name="Feet" type="Area2D" parent="." unique_id=1372616029]
+[node name="Feet" type="Area2D" parent="." unique_id=1112325572]
 collision_layer = 2
 collision_mask = 0
 input_pickable = false
 
-[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1281708516]
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=277680751]
 position = Vector2(0, -3)
 shape = SubResource("RectangleShape2D_o6l8m")
 debug_color = Color(1, 0.3, 0.2, 0.45)

@@ -3,38 +3,38 @@
 [ext_resource type="SpriteFrames" path="res://characters/mobs/frost_giant_ayazhan.tres" id="1_uw03b"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ij0ko"]
-size = Vector2(62, 59)
+size = Vector2(42, 64)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_uwuvp"]
 size = Vector2(10, 6)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_govde"]
-radius = 12.4
-height = 49.6
+radius = 8.4
+height = 33.6
 
-[node name="FrostGiantAyazhan" type="Node2D" unique_id=1881615889]
+[node name="FrostGiantAyazhan" type="Node2D" unique_id=948218507]
 
-[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1308479542]
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=240790133]
 sprite_frames = ExtResource("1_uw03b")
 animation = &"idle"
 autoplay = "idle"
 centered = false
-offset = Vector2(-44.5265, -60.528603)
+offset = Vector2(-64, -128)
 
-[node name="Hurtbox" type="Area2D" parent="." unique_id=1239913630]
+[node name="Hurtbox" type="Area2D" parent="." unique_id=333772659]
 collision_mask = 0
 
-[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1754143243]
-position = Vector2(10.473501, -28.0286)
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=458658250]
+position = Vector2(1, -32)
 shape = SubResource("RectangleShape2D_ij0ko")
 debug_color = Color(0.2, 0.6, 1, 0.35)
 
-[node name="Feet" type="Area2D" parent="." unique_id=139086932]
+[node name="Feet" type="Area2D" parent="." unique_id=2095899087]
 collision_layer = 2
 collision_mask = 0
 input_pickable = false
 
-[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1501430678]
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1694293964]
 position = Vector2(0, -3)
 shape = SubResource("RectangleShape2D_uwuvp")
 debug_color = Color(1, 0.3, 0.2, 0.45)
