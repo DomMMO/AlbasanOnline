@@ -3,38 +3,39 @@
 [ext_resource type="SpriteFrames" path="res://characters/mobs/vizier_kamil.tres" id="1_bi72x"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_03qe6"]
-size = Vector2(30, 57)
+size = Vector2(34, 64)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_nleow"]
 size = Vector2(10, 6)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_govde"]
-radius = 6.0
-height = 24.0
+radius = 6.8
+height = 27.2
 
-[node name="VizierKamil" type="Node2D" unique_id=658969185]
+[node name="VizierKamil" type="Node2D" unique_id=1225694483]
 
-[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1826019871]
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1434966326]
+scale = Vector2(2, 2)
 sprite_frames = ExtResource("1_bi72x")
 animation = &"idle"
 autoplay = "idle"
 centered = false
-offset = Vector2(-18.2307, -63.1542)
+offset = Vector2(-32, -64)
 
-[node name="Hurtbox" type="Area2D" parent="." unique_id=1867697561]
+[node name="Hurtbox" type="Area2D" parent="." unique_id=944483983]
 collision_mask = 0
 
-[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1211696171]
-position = Vector2(3.7693, -26.654202)
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1230010766]
+position = Vector2(1, -32)
 shape = SubResource("RectangleShape2D_03qe6")
 debug_color = Color(0.2, 0.6, 1, 0.35)
 
-[node name="Feet" type="Area2D" parent="." unique_id=613685071]
+[node name="Feet" type="Area2D" parent="." unique_id=978785873]
 collision_layer = 2
 collision_mask = 0
 input_pickable = false
 
-[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=280920381]
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=345625443]
 position = Vector2(0, -3)
 shape = SubResource("RectangleShape2D_nleow")
 debug_color = Color(1, 0.3, 0.2, 0.45)

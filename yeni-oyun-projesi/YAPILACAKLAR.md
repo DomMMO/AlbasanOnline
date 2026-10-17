@@ -6,7 +6,7 @@ Oyun, Anokolisa "Pixel Crawler" paketine taşınıyor. Her adım bitince ekran g
 - Paket `assetpack/ANOKOLISA` altında, TileSet'ler kurulu, tema aracı `tools/dungeon_theme.gd` hazır.
 - ❓ Açık soru: `assetpack/` git'e girecek mi? Lisans paketin yeniden dağıtılmasını yasaklıyor.
 
-## 1. Zindanlar
+## 1. Zindanlar: ✅ temalar onaylandı
 Hepsine Forge'daki stil uygulanacak:
 - 20 eşit oda, eşit koridorlar;
 - bosslar 5., 10., 15. ve 20. odalarda;
@@ -22,12 +22,12 @@ goblin_cave ve jack_lair da 20 odalı yapıya geçti.
 | # | Tema | Haritalar | Durum |
 |---|---|---|---|
 | 1a | Forge | magma_forges, ash_temple, dragon_lair | ✅ bitti (moblar 2 paket/oda) |
-| 1b | Cave | goblin_cave, abandoned_mine, red_caves, frost_cavern | ✅ bitti (onay bekliyor) |
-| 1c | Cemetery + Castle | bone_crypt, khan_barrow, jack_lair | ✅ bitti (onay bekliyor) |
-| 1d | Desert | buried_caravanserai | ✅ bitti (onay bekliyor) |
+| 1b | Cave | goblin_cave, abandoned_mine, red_caves, frost_cavern | ✅ bitti (onaylandı) |
+| 1c | Cemetery + Castle | bone_crypt, khan_barrow, jack_lair | ✅ bitti (onaylandı) |
+| 1d | Desert | buried_caravanserai | ✅ bitti (onaylandı) |
 | 1e | Garden + Sewer | sunken_temple | ✅ bitti (Garden duvarlarıyla yenilendi, onay bekliyor) |
-| 1f | Hideout | orc_fortress | ✅ bitti (onay bekliyor) |
-| 1g | Castle | keep_hall ✅ (onay bekliyor) · frost_citadel ✅ açık karlı alan (onay bekliyor) · pvp_arena ⏸ (kaldırılabilir, dokunulmadı) | 🔨 |
+| 1f | Hideout | orc_fortress | ✅ bitti (onaylandı) |
+| 1g | Castle | keep_hall ✅ (onaylandı) · frost_citadel ✅ açık karlı alan (onaylandı) · pvp_arena ⏸ (kaldırılabilir, dokunulmadı) | 🔨 |
 
 ## 2. Açık haritalar
 | Harita | Tema | Durum |
@@ -75,14 +75,15 @@ Açık haritalar `dungeon_theme.gd -- field <tema> <zone>` ile üretiliyor. Yerl
   | Harita | Paket | Aile | Durum |
   |---|---|---|---|
   | Kara Orman (forest) | Fairy Forest | Elfler | ✅ |
-  | orc_fortress | Hideout | Haydutlar (adı ve bossları da haydut olacak: Haydut Sığınağı) | ⏳ |
-  | world (Başlangıç Vadisi) | Town | Orklar (Orc Fortress'teki orklar buraya taşınacak) | ⏳ |
-  | bone_crypt, khan_barrow, jack_lair, kurgan | Cemetery (+Castle) | Zombiler | ⏳ |
-  | sunken_temple | Garden (+Sewer) | Bahçe halkı ve Medusa | ⏳ |
-  | canyon, buried_caravanserai | Desert | Mumyalar | ⏳ |
-  | volcano, magma_forges, ash_temple, dragon_lair | Forge | Taş ailesi | ⏳ |
-  | mağara zindanları | Cave | Mantarlar | ⏳ |
-  | keep_hall, frost_citadel | Castle | Kraliyet muhafızları | ⏳ |
+  | orc_fortress | Hideout | Haydutlar: zindanın adı Haydut Sığınağı, bossları Deli Hasan, Kemankeş Rüstem, Kara Yusuf, Demirkol | ✅ |
+  | world (Başlangıç Vadisi) | Town | Orklar | ✅ |
+  | bone_crypt, khan_barrow, jack_lair, kurgan | Cemetery (+Castle) | Zombiler, iskeletler, Banshee (jack_lair kendi mob kopyalarıyla) | ✅ |
+  | sunken_temple | Garden (+Sewer) | Bahçe heykelleri, Medusa, sıçanlar | ✅ |
+  | canyon, buried_caravanserai | Desert | Mumyalar | ✅ |
+  | volcano, magma_forges, ash_temple, dragon_lair | Forge | Taş ailesi | ✅ |
+  | abandoned_mine, red_caves, frost_cavern (goblin_cave goblinlerle kalır) | Cave | Mantarlar (+tünel sıçanı) | ✅ |
+  | keep_hall, frost_citadel | Castle | Kraliyet muhafızları | ✅ |
+  | frost | Town kar | Haydutlar ve Banshee | ✅ |
 - ✅ Elf ailesi (Kara Orman). Eller ve silahlar sanatçının kendi `Social/Elfs.aseprite` dosyasından; koşu kareleriyle piksel piksel aynı:
   - Elf İzci (orak): dark_wolf, moon_wolf (gece tonu), skeleton (Mezar Soyguncusu).
   - Elf Avcı (yay ve ok, menzilli): satyr_spearman, orc (Elf Yağmacı), bandit_chief (Kara Murat, iki kat boy, kendi tonu).
@@ -92,7 +93,11 @@ Açık haritalar `dungeon_theme.gd -- field <tema> <zone>` ile üretiliyor. Yerl
   - Elf Druid (kitap ve asa, büyü mermisi): poison_slime, night_wraith, moss_golem.
   - Görev metinleri elflere göre yeniden yazıldı; hedefler aynı.
   - Not: jack_lair'deki dark_wolf ve poison_slime şimdilik elf görünüyor; zombi geçişinde düzelecek.
-- ⏳ Sıradakiler: yukarıdaki tablodaki aileler (her zindan kendi paketinin ailesiyle); ardından eşi olmayanlar.
+- ✅ Bütün moblar paket ailelerinde (160 mob, eski görsel kalmadı; onay bekliyor). `tools/mob_sheets.py`:
+  - İskelet, mumya, taş: sanatçının kendi el ve silah katmanı (orklar gibi).
+  - Elleri olmayan aileler (zombi, haydut, Royal Crew, bahçe heykelleri, sıçan, mantar): paketin kendi silah sayfasındaki elleri, iskeletin el yollarında; rolüne göre o sayfanın silahı (savaşçı kılıç/kalkan, iri balta/topuz, okçu yay, büyücü asa, haydut hançer). Mantarların arka elinde küçük taş.
+  - Bosslar: ölçeği 1 olanlar iki kat çizilmiş halleri, büyükler kendi ölçeğiyle; tonla ayrışıyorlar.
+  - İsimler (Haydut Sığınağı dışında) şimdilik eski: ör. "Gnol Avcı" mantar görünüyor. Yeniden adlandırma ayrıca yapılacak.
 - ✅ Duruş (idle) animasyonu sanatçının hızının 0,7'si (saniyede 7 kare).
 - ✅ Mob plakası %5 küçük, %10 ince.
 - ✅ Cast barları (WoW gibi; `shared/src/data/mobCasts.ts`, sunucu `server/src/game/mobCasts.ts`):
@@ -113,9 +118,11 @@ Açık haritalar `dungeon_theme.gd -- field <tema> <zone>` ile üretiliyor. Yerl
   - Şifacı: Kutsal Sessizlik
   - Nekromant: Ruh Kilidi
 
-## 4. Silahlar: ⏳
-- 12 malzeme seti tier sırasına dizilecek: Tahta → Kemik → Rustik → Kale → Bahçe → Elf → Zehir → Mantar → Kütüphane → Lanetli → Altın → Ateş.
-- 5 silah hattının 17 tier'ının hepsi ayrı görünecek; hem eldeki silah hem envanter ikonu değişecek.
+## 4. Silahlar: ✅ (onay bekliyor)
+- 110 silahın hepsi paketin malzeme sayfalarından (`tools/weapon_art.py`): Tahta → Kemik → Rustik → Kale → Bahçe → Elf → Zehir → Mantar → Kütüphane → Lanetli → Altın → Ateş, seviyeye göre.
+- Aynı malzemeye düşen iki tier o malzemenin iki farklı parçasını alıyor; 17 tier'ın hepsi ayrı görünüyor.
+- Elde paketin yarı boyunda dik duruyor (karakterimiz paket karakterlerinin yarı boyu); envanter ikonu paketin kendi boyunda.
+- Karakter mevcut haliyle kaldı (kullanıcı kararı). Paket eli eklenmedi: oyuncunun teni değişken.
 
 ## 5. Güç dengesi: 🔨 (hesaplar `DENGE.md`'de)
 - [x] Parti ölçeklemesi, sadece zindanlarda (N = zindanın gördüğü en kalabalık sayı, hiç düşmez):
@@ -136,23 +143,29 @@ Açık haritalar `dungeon_theme.gd -- field <tema> <zone>` ile üretiliyor. Yerl
   - Seviye başına geçen süre.
   - Saatlik ganimet.
 
+## 6. Büyük min/max güncellemesi: ⏳ (kullanıcıyla birlikte, başlanmadı)
+- Kaynak: `limit_testing/` dizini (`skill-sistemi.md`, `dps_sim.py`). Karakterlerin bütün sayıları ve oynanış buna göre baştan kurulacak.
+- Yeni ekipman düzeni, karakter başına 10 parça:
+  - Head, Amulet, Shoulder, Chest, Gloves, Pant, Shoes, Finger, Trinket, Weapon.
+- Ölçekleme yeni eşyalar ve dizindeki yeniliklere göre yapılacak. Yeni eşyalar da oyuna eklenecek.
+
 ## Sıra
-1. Güç dengesi (5).
-2. Zindan aileleri (3'teki tablo). İlk sırada Haydut Sığınağı ve orkların world'e taşınması var.
-3. **Büyük güncelleme: world'deki bütün gelişmeler bütün açık haritalara** (forest, kurgan, canyon, volcano, frost). Yöntem `tools/plato/OKU.md`'de.
+1. Büyük min/max güncellemesi (6) ve güç dengesi, sınıflar (5): `limit_testing/` üzerinden.
+2. ✅ Zindan aileleri (3'teki tablo).
+3. ✅ **Büyük güncelleme: world'deki bütün gelişmeler bütün açık haritalara** (forest, kurgan, canyon, volcano, frost). Yöntem `tools/plato/OKU.md`'de.
    - Zemin ve plato ayrı katmanlar.
    - Platolar kullanıcının kurallarıyla, girintili çıkıntılı.
    - Kaya görüşü kesiyor.
    - Platoların üstünde ağaç, kütük ya da toprak lekesi yok.
    - Ağaçlar platolardan uzak ve dağınık.
    - Her harita ayrı onaya gelir.
-   - ✅ volcano, frost, forest geçti (onay bekliyor).
-   - ⏳ kurgan, canyon: çapraz uzanan platolar bu sheet'lerde bölünüyor; yol seçimi bekleniyor.
+   - ✅ volcano, frost, forest, kurgan, canyon geçti (onay bekliyor). Bütün açık haritalar world yöntemiyle döşendi.
 4. Silahlar (4).
 5. Araya girenler.
 
 ## Araya girenler
-- [ ] Son bossun ardından her oyuncuya ayrı hazine sandığı
+- [x] Malzemeler yeni moblara göre: Kuru Et, Goblin Merhemi, Ham Deri, Elf Pelerini, Elf Tılsımı, Mumya Sargısı, Kar Kürkü; yeni Mantar Sporu ve Mermer Parçası. Her mob kendi ailesinin malzemesini düşürüyor, görev metinleri buna göre.
+- [x] Yerdeki ganimet yığını Hideout paketinin çuvalı (eski kod çizimi sandık kalktı).
+- [x] Son bossun ardından her oyuncuya ayrı hazine sandığı (Hideout paketinin sandığı; bossun ganimeti 1,5 kat şansla yeniden atılır, 3 kat altın; 5 dk sahibinin)
 - [x] Ata binme (H tuşu)
-- [ ] At renkleri (görseller senden gelecek)
-- [ ] Açık alan zindanları: frost_citadel tarzında (koridorsuz, bosslar uzağa dağılmış, paketler eşit aralıklı) yeni zindanlar. İlki çöl versiyonu (Desert + Floors_Tiles'ın kum karoları), sonra başka temalar.
+- [ ] (Ertelendi, zindan seçeneği şimdilik yeterli) Açık alan zindanları: frost_citadel tarzında (koridorsuz, bosslar uzağa dağılmış, paketler eşit aralıklı) yeni zindanlar. İlki çöl versiyonu (Desert + Floors_Tiles'ın kum karoları), sonra başka temalar.

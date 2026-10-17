@@ -538,7 +538,11 @@ func _on_mob_remove(_mob: Schema.Struct, mob_id: String) -> void:
 # ---- Loot, nodes, town portals, minions ----
 
 func _on_loot_add(item: Schema.Struct, loot_id: String) -> void:
-	var view := EntityView.new(sorted, float(f(item, "x")), float(f(item, "y")), {"type": "chest"})
+	# A loot pile is the Hideout pack's sack; a player's own treasure chest after a dungeon's last
+	# boss, the same pack's chest.
+	var treasure := String(f(item, "kind", "")) == "treasure"
+	var look: Dictionary = {"type": "image", "key": "hazine_sandigi" if treasure else "ganimet_kesesi"}
+	var view := EntityView.new(sorted, float(f(item, "x")), float(f(item, "y")), look, "Hazine Sandığı" if treasure else "", Color("#ffd43b"))
 	entities.add_child(view)
 	view.clicked.connect(func(_v, ev: InputEventMouseButton):
 		if not ev.alt_pressed:

@@ -127,7 +127,7 @@ const list: DungeonSource[] = [
   },
   {
     id: "orc_fortress",
-    name: "Ork Kalesi",
+    name: "Haydut Sığınağı",
     minLevel: 18,
     host: "forest",
     entranceTile: { tx: 8, ty: 37 },

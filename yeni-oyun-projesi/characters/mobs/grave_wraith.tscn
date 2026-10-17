@@ -3,38 +3,38 @@
 [ext_resource type="SpriteFrames" path="res://characters/mobs/grave_wraith.tres" id="1_l1adw"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_l63o7"]
-size = Vector2(21, 29)
+size = Vector2(18, 47)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_0jqo8"]
 size = Vector2(10, 6)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_govde"]
-radius = 4.2
-height = 16.8
+radius = 3.6
+height = 14.4
 
-[node name="GraveWraith" type="Node2D" unique_id=959728721]
+[node name="GraveWraith" type="Node2D" unique_id=1009428783]
 
-[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1917672483]
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1383134555]
 sprite_frames = ExtResource("1_l1adw")
 animation = &"idle"
 autoplay = "idle"
 centered = false
-offset = Vector2(-17.469, -27.965)
+offset = Vector2(-32, -64)
 
-[node name="Hurtbox" type="Area2D" parent="." unique_id=426559846]
+[node name="Hurtbox" type="Area2D" parent="." unique_id=521915034]
 collision_mask = 0
 
-[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1424342902]
-position = Vector2(1.0309998, -13.465)
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=413014489]
+position = Vector2(-1, -23.5)
 shape = SubResource("RectangleShape2D_l63o7")
 debug_color = Color(0.2, 0.6, 1, 0.35)
 
-[node name="Feet" type="Area2D" parent="." unique_id=264838641]
+[node name="Feet" type="Area2D" parent="." unique_id=1197213935]
 collision_layer = 2
 collision_mask = 0
 input_pickable = false
 
-[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=112678649]
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1292574682]
 position = Vector2(0, -3)
 shape = SubResource("RectangleShape2D_0jqo8")
 debug_color = Color(1, 0.3, 0.2, 0.45)

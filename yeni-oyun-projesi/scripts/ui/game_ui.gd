@@ -90,6 +90,11 @@ func player_class() -> String:
 	return String(World.f(world.local.state, "cls", "novice")) if world and world.local else "novice"
 
 
+## The account is a GM (the server says so; it checks again on every GM action).
+func is_gm() -> bool:
+	return bool(World.f(world.local.state, "gm", false)) if world and world.local else false
+
+
 ## "damage", "tank" or "" (no spec, or not chosen yet).
 func player_spec() -> String:
 	return String(World.f(world.local.state, "spec", "")) if world and world.local else ""

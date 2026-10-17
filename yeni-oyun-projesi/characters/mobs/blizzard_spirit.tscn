@@ -3,38 +3,38 @@
 [ext_resource type="SpriteFrames" path="res://characters/mobs/blizzard_spirit.tres" id="1_t0kcd"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_kognc"]
-size = Vector2(21, 29)
+size = Vector2(18, 47)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_141j8"]
 size = Vector2(10, 6)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_govde"]
-radius = 4.2
-height = 16.8
+radius = 3.6
+height = 14.4
 
-[node name="BlizzardSpirit" type="Node2D" unique_id=1214657987]
+[node name="BlizzardSpirit" type="Node2D" unique_id=182539706]
 
-[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=17081762]
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=75150862]
 sprite_frames = ExtResource("1_t0kcd")
 animation = &"idle"
 autoplay = "idle"
 centered = false
-offset = Vector2(-17.469, -27.965)
+offset = Vector2(-32, -64)
 
-[node name="Hurtbox" type="Area2D" parent="." unique_id=1753466768]
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1719619512]
 collision_mask = 0
 
-[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=507515374]
-position = Vector2(1.0309998, -13.465)
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1302645761]
+position = Vector2(-1, -23.5)
 shape = SubResource("RectangleShape2D_kognc")
 debug_color = Color(0.2, 0.6, 1, 0.35)
 
-[node name="Feet" type="Area2D" parent="." unique_id=1118291132]
+[node name="Feet" type="Area2D" parent="." unique_id=2086897470]
 collision_layer = 2
 collision_mask = 0
 input_pickable = false
 
-[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=644302190]
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=458977809]
 position = Vector2(0, -3)
 shape = SubResource("RectangleShape2D_141j8")
 debug_color = Color(1, 0.3, 0.2, 0.45)

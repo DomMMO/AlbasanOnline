@@ -72,6 +72,8 @@ export const Msg = {
   PetSummon: "petSummon",
   /** A novice asks a master in the keep to take them on (their class). */
   ChooseClass: "chooseClass",
+  /** GM only: go straight to a zone (Esc menu), skipping its level and clear requirements. */
+  GmTeleport: "gmTeleport",
   /** Ayşe Teyze: undo the class choice for gold (back to novice). */
   ResetClass: "resetClass",
   /** T: open a town portal where you stand. */

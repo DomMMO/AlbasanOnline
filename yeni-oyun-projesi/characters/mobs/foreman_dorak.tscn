@@ -3,38 +3,38 @@
 [ext_resource type="SpriteFrames" path="res://characters/mobs/foreman_dorak.tres" id="1_6ryp1"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_5o0i6"]
-size = Vector2(62, 59)
+size = Vector2(80, 70)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1i81e"]
 size = Vector2(10, 6)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_govde"]
-radius = 12.4
-height = 49.6
+radius = 16.0
+height = 64.0
 
-[node name="ForemanDorak" type="Node2D" unique_id=630540375]
+[node name="ForemanDorak" type="Node2D" unique_id=833383271]
 
-[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1573748621]
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1862762169]
 sprite_frames = ExtResource("1_6ryp1")
 animation = &"idle"
 autoplay = "idle"
 centered = false
-offset = Vector2(-44.5265, -60.528603)
+offset = Vector2(-64, -128)
 
-[node name="Hurtbox" type="Area2D" parent="." unique_id=1923281239]
+[node name="Hurtbox" type="Area2D" parent="." unique_id=89635439]
 collision_mask = 0
 
-[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1567795551]
-position = Vector2(10.473501, -28.0286)
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1876397557]
+position = Vector2(0, -35)
 shape = SubResource("RectangleShape2D_5o0i6")
 debug_color = Color(0.2, 0.6, 1, 0.35)
 
-[node name="Feet" type="Area2D" parent="." unique_id=1080573012]
+[node name="Feet" type="Area2D" parent="." unique_id=1826987789]
 collision_layer = 2
 collision_mask = 0
 input_pickable = false
 
-[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=218309235]
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1502711385]
 position = Vector2(0, -3)
 shape = SubResource("RectangleShape2D_1i81e")
 debug_color = Color(1, 0.3, 0.2, 0.45)

@@ -36,7 +36,7 @@ func _init(layer: Node2D, def_id: String, enhance: int) -> void:
 	sprite = Sprite2D.new()
 	sprite.centered = false
 	_w = Depth.wrap(layer, sprite)
-	var grip = GameData.get_value("WEAPON_GRIPS", {}).get(def_id)
+	var grip = Art.weapon_grip(def_id)
 	if grip is Dictionary:
 		_grip = Vector2(float(grip.x), float(grip.y))
 	var tex := Art.held(def_id)

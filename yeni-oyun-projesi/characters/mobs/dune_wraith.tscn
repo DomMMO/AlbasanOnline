@@ -3,38 +3,38 @@
 [ext_resource type="SpriteFrames" path="res://characters/mobs/dune_wraith.tres" id="1_3nq8v"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_llh7c"]
-size = Vector2(20, 29)
+size = Vector2(17, 32)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_6ynxy"]
 size = Vector2(10, 6)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_govde"]
-radius = 4.0
-height = 16.0
+radius = 3.4
+height = 13.6
 
-[node name="DuneWraith" type="Node2D" unique_id=342955145]
+[node name="DuneWraith" type="Node2D" unique_id=2006878328]
 
-[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1474467868]
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1406914685]
 sprite_frames = ExtResource("1_3nq8v")
 animation = &"idle"
 autoplay = "idle"
 centered = false
-offset = Vector2(-18.9728, -28.277699)
+offset = Vector2(-32, -64)
 
-[node name="Hurtbox" type="Area2D" parent="." unique_id=1924081377]
+[node name="Hurtbox" type="Area2D" parent="." unique_id=592429848]
 collision_mask = 0
 
-[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=35135626]
-position = Vector2(1.0272007, -12.777699)
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=626924613]
+position = Vector2(0.5, -16)
 shape = SubResource("RectangleShape2D_llh7c")
 debug_color = Color(0.2, 0.6, 1, 0.35)
 
-[node name="Feet" type="Area2D" parent="." unique_id=1536268055]
+[node name="Feet" type="Area2D" parent="." unique_id=21219744]
 collision_layer = 2
 collision_mask = 0
 input_pickable = false
 
-[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=205094960]
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1209159527]
 position = Vector2(0, -3)
 shape = SubResource("RectangleShape2D_6ynxy")
 debug_color = Color(1, 0.3, 0.2, 0.45)

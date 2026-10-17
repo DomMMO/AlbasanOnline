@@ -3,38 +3,38 @@
 [ext_resource type="SpriteFrames" path="res://characters/mobs/icebreaker_gorr.tres" id="1_p1lfq"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_xuw2s"]
-size = Vector2(72, 60)
+size = Vector2(80, 70)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_04rmm"]
 size = Vector2(10, 6)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_govde"]
-radius = 14.4
-height = 57.6
+radius = 16.0
+height = 64.0
 
-[node name="IcebreakerGorr" type="Node2D" unique_id=2062882707]
+[node name="IcebreakerGorr" type="Node2D" unique_id=583168846]
 
-[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1035368445]
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=79012618]
 sprite_frames = ExtResource("1_p1lfq")
 animation = &"idle"
 autoplay = "idle"
 centered = false
-offset = Vector2(-40.6014, -69.4786)
+offset = Vector2(-64, -128)
 
-[node name="Hurtbox" type="Area2D" parent="." unique_id=1801401577]
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1737158412]
 collision_mask = 0
 
-[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1916503231]
-position = Vector2(10.398601, -28.4786)
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=511295644]
+position = Vector2(0, -35)
 shape = SubResource("RectangleShape2D_xuw2s")
 debug_color = Color(0.2, 0.6, 1, 0.35)
 
-[node name="Feet" type="Area2D" parent="." unique_id=1341004448]
+[node name="Feet" type="Area2D" parent="." unique_id=1085986714]
 collision_layer = 2
 collision_mask = 0
 input_pickable = false
 
-[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1335705961]
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1856762228]
 position = Vector2(0, -3)
 shape = SubResource("RectangleShape2D_04rmm")
 debug_color = Color(1, 0.3, 0.2, 0.45)

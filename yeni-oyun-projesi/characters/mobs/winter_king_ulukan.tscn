@@ -3,38 +3,39 @@
 [ext_resource type="SpriteFrames" path="res://characters/mobs/winter_king_ulukan.tres" id="1_wk285"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_nqmne"]
-size = Vector2(27, 48)
+size = Vector2(34, 62)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_8iivg"]
 size = Vector2(10, 6)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_govde"]
-radius = 5.4
-height = 21.6
+radius = 6.8
+height = 27.2
 
-[node name="WinterKingUlukan" type="Node2D" unique_id=1477308521]
+[node name="WinterKingUlukan" type="Node2D" unique_id=1763784909]
 
-[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1326204994]
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1576596452]
+scale = Vector2(2, 2)
 sprite_frames = ExtResource("1_wk285")
 animation = &"idle"
 autoplay = "idle"
 centered = false
-offset = Vector2(-27.783, -52.5672)
+offset = Vector2(-32, -64)
 
-[node name="Hurtbox" type="Area2D" parent="." unique_id=479994475]
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1533716230]
 collision_mask = 0
 
-[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1211405980]
-position = Vector2(0.71699905, -22.567202)
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1449678631]
+position = Vector2(-1, -31)
 shape = SubResource("RectangleShape2D_nqmne")
 debug_color = Color(0.2, 0.6, 1, 0.35)
 
-[node name="Feet" type="Area2D" parent="." unique_id=1698576455]
+[node name="Feet" type="Area2D" parent="." unique_id=1576625902]
 collision_layer = 2
 collision_mask = 0
 input_pickable = false
 
-[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=926117892]
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1632572805]
 position = Vector2(0, -3)
 shape = SubResource("RectangleShape2D_8iivg")
 debug_color = Color(1, 0.3, 0.2, 0.45)

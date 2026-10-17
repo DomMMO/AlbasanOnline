@@ -3,38 +3,38 @@
 [ext_resource type="SpriteFrames" path="res://characters/mobs/cave_hyena.tres" id="1_l0iei"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_tfgbw"]
-size = Vector2(53, 27)
+size = Vector2(27, 30)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_agot5"]
 size = Vector2(10, 6)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_govde"]
-radius = 10.6
-height = 42.4
+radius = 5.4
+height = 21.6
 
-[node name="CaveHyena" type="Node2D" unique_id=123552979]
+[node name="CaveHyena" type="Node2D" unique_id=1909436285]
 
-[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1200707525]
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=827928239]
 sprite_frames = ExtResource("1_l0iei")
 animation = &"idle"
 autoplay = "idle"
 centered = false
-offset = Vector2(-28.656, -24.8859)
+offset = Vector2(-32, -64)
 
-[node name="Hurtbox" type="Area2D" parent="." unique_id=1101538980]
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1532959755]
 collision_mask = 0
 
-[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=182159420]
-position = Vector2(-1.1560001, -11.3859005)
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1306761249]
+position = Vector2(-0.5, -15)
 shape = SubResource("RectangleShape2D_tfgbw")
 debug_color = Color(0.2, 0.6, 1, 0.35)
 
-[node name="Feet" type="Area2D" parent="." unique_id=1863355306]
+[node name="Feet" type="Area2D" parent="." unique_id=864951660]
 collision_layer = 2
 collision_mask = 0
 input_pickable = false
 
-[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1225133539]
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=653037813]
 position = Vector2(0, -3)
 shape = SubResource("RectangleShape2D_agot5")
 debug_color = Color(1, 0.3, 0.2, 0.45)

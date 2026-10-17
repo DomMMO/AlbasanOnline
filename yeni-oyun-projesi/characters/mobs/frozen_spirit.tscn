@@ -3,38 +3,38 @@
 [ext_resource type="SpriteFrames" path="res://characters/mobs/frozen_spirit.tres" id="1_5jlju"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1j16r"]
-size = Vector2(20, 29)
+size = Vector2(30, 39)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_8lrna"]
 size = Vector2(10, 6)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_govde"]
-radius = 4.0
-height = 16.0
+radius = 6.0
+height = 24.0
 
-[node name="FrozenSpirit" type="Node2D" unique_id=317174617]
+[node name="FrozenSpirit" type="Node2D" unique_id=639477834]
 
-[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1221118190]
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1193450545]
 sprite_frames = ExtResource("1_5jlju")
 animation = &"idle"
 autoplay = "idle"
 centered = false
-offset = Vector2(-18.9728, -28.277699)
+offset = Vector2(-32, -64)
 
-[node name="Hurtbox" type="Area2D" parent="." unique_id=419480426]
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1156298691]
 collision_mask = 0
 
-[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=2084577802]
-position = Vector2(1.0272007, -12.777699)
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1464220024]
+position = Vector2(-2, -19.5)
 shape = SubResource("RectangleShape2D_1j16r")
 debug_color = Color(0.2, 0.6, 1, 0.35)
 
-[node name="Feet" type="Area2D" parent="." unique_id=421851396]
+[node name="Feet" type="Area2D" parent="." unique_id=379174200]
 collision_layer = 2
 collision_mask = 0
 input_pickable = false
 
-[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1597926261]
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=325969529]
 position = Vector2(0, -3)
 shape = SubResource("RectangleShape2D_8lrna")
 debug_color = Color(1, 0.3, 0.2, 0.45)

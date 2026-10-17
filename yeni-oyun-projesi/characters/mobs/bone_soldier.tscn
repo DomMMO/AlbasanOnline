@@ -3,7 +3,7 @@
 [ext_resource type="SpriteFrames" path="res://characters/mobs/bone_soldier.tres" id="1_agwe7"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_lk0vo"]
-size = Vector2(20, 26)
+size = Vector2(20, 30)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_q6g5w"]
 size = Vector2(10, 6)
@@ -12,29 +12,29 @@ size = Vector2(10, 6)
 radius = 4.0
 height = 16.0
 
-[node name="BoneSoldier" type="Node2D" unique_id=1245293825]
+[node name="BoneSoldier" type="Node2D" unique_id=726765090]
 
-[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=763119428]
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=739940599]
 sprite_frames = ExtResource("1_agwe7")
 animation = &"idle"
 autoplay = "idle"
 centered = false
-offset = Vector2(-17.2064, -29.1357)
+offset = Vector2(-32, -64)
 
-[node name="Hurtbox" type="Area2D" parent="." unique_id=1970393232]
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1405943516]
 collision_mask = 0
 
-[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1733236821]
-position = Vector2(-0.20640022, -12.1357)
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=23860788]
+position = Vector2(-2, -15)
 shape = SubResource("RectangleShape2D_lk0vo")
 debug_color = Color(0.2, 0.6, 1, 0.35)
 
-[node name="Feet" type="Area2D" parent="." unique_id=1269003085]
+[node name="Feet" type="Area2D" parent="." unique_id=260427003]
 collision_layer = 2
 collision_mask = 0
 input_pickable = false
 
-[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=2067899114]
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1553942984]
 position = Vector2(0, -3)
 shape = SubResource("RectangleShape2D_q6g5w")
 debug_color = Color(1, 0.3, 0.2, 0.45)

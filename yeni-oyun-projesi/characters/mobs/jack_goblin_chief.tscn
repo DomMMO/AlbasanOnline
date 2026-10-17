@@ -1,0 +1,51 @@
+[gd_scene format=3]
+
+[ext_resource type="SpriteFrames" path="res://characters/mobs/jack_goblin_chief.tres" id="1_3yo5b"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ae0lq"]
+size = Vector2(40, 60)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ji1xa"]
+size = Vector2(10, 6)
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_govde"]
+radius = 8.0
+height = 32.0
+
+[node name="JackGoblinChief" type="Node2D" unique_id=797098933]
+
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=2037127751]
+sprite_frames = ExtResource("1_3yo5b")
+animation = &"idle"
+autoplay = "idle"
+centered = false
+offset = Vector2(-64, -128)
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1202983146]
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1969505124]
+position = Vector2(-4, -30)
+shape = SubResource("RectangleShape2D_ae0lq")
+debug_color = Color(0.2, 0.6, 1, 0.35)
+
+[node name="Feet" type="Area2D" parent="." unique_id=989724004]
+collision_layer = 2
+collision_mask = 0
+input_pickable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=32530317]
+position = Vector2(0, -3)
+shape = SubResource("RectangleShape2D_ji1xa")
+debug_color = Color(1, 0.3, 0.2, 0.45)
+
+[node name="Govde" type="Area2D" parent="." unique_id=1978748154]
+collision_layer = 4
+collision_mask = 0
+monitoring = false
+monitorable = false
+
+[node name="Oval" type="CollisionShape2D" parent="Govde" unique_id=484050822]
+rotation = 1.5707964
+shape = SubResource("CapsuleShape2D_govde")
+debug_color = Color(1, 0.75, 0.2, 0.35)

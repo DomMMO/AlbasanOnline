@@ -380,25 +380,29 @@ export const GEAR: ItemDef[] = [
   def({ id: "return_scroll", name: "Geri Dönüş Parşömeni", rarity: "common", level: 1, recall: true, maxStack: 20, buyPrice: 25, sellPrice: 5, icon: { shape: "scroll", color: 0x2f9e44 }, description: "Okuyanı Ana Merkez'e ışınlar. Savaşta kullanılamaz." }),
 
   // ---- Dark Forest materials (sold for gold, wanted by quests)
-  def({ id: "dark_wolf_pelt", name: "Kara Kurt Postu", rarity: "common", level: 1, maxStack: 50, sellPrice: 9, icon: { shape: "pelt", color: 0x3a3a44 } }),
+  def({ id: "dark_wolf_pelt", name: "Elf Pelerini", rarity: "common", level: 1, maxStack: 50, sellPrice: 9, icon: { shape: "pelt", color: 0x5f3dc4 } }),
   def({ id: "poison_sac", name: "Zehir Kesesi", rarity: "common", level: 1, maxStack: 50, sellPrice: 10, icon: { shape: "blob", color: 0x9bd13a } }),
   def({ id: "bandit_badge", name: "Haydut Nişanı", rarity: "common", level: 1, maxStack: 50, sellPrice: 12, icon: { shape: "coin", color: 0x8b2a2a } }),
   def({ id: "bone_dust", name: "Kemik Tozu", rarity: "common", level: 1, maxStack: 50, sellPrice: 13, icon: { shape: "bone", color: 0xe8e4d8 } }),
   def({ id: "orc_tusk", name: "Ork Dişi", rarity: "common", level: 1, maxStack: 50, sellPrice: 16, icon: { shape: "fang", color: 0xe8e2c8 } }),
   def({ id: "bear_claw", name: "Ayı Pençesi", rarity: "uncommon", level: 1, maxStack: 50, sellPrice: 30, icon: { shape: "fang", color: 0x6b4a2b } }),
-  def({ id: "satyr_horn", name: "Satir Boynuzu", rarity: "common", level: 1, maxStack: 50, sellPrice: 13, icon: { shape: "fang", color: 0xd9c8a0 } }),
+  def({ id: "satyr_horn", name: "Elf Tılsımı", rarity: "common", level: 1, maxStack: 50, sellPrice: 13, icon: { shape: "gem", color: 0x9775fa } }),
   def({ id: "golem_core", name: "Golem Çekirdeği", rarity: "uncommon", level: 1, maxStack: 50, sellPrice: 28, icon: { shape: "gem", color: 0x8bd35a } }),
   // Kızıl Kanyon and Ayaz Dağları.
-  def({ id: "hyena_fang", name: "Sırtlan Dişi", rarity: "common", level: 1, maxStack: 50, sellPrice: 22, icon: { shape: "fang", color: 0xd9c8a0 } }),
+  def({ id: "hyena_fang", name: "Mumya Sargısı", rarity: "common", level: 1, maxStack: 50, sellPrice: 22, icon: { shape: "pelt", color: 0xd9c8a0 } }),
   def({ id: "sand_crystal", name: "Kum Kristali", rarity: "uncommon", level: 1, maxStack: 50, sellPrice: 40, icon: { shape: "gem", color: 0xe0b070 }, description: "Güneşte tutunca içinde kum taneleri döner." }),
   def({ id: "frost_shard", name: "Ayaz Kristali", rarity: "common", level: 1, maxStack: 50, sellPrice: 30, icon: { shape: "gem", color: 0xb8e0ff } }),
-  def({ id: "yeti_fur", name: "Yeti Postu", rarity: "uncommon", level: 1, maxStack: 50, sellPrice: 55, icon: { shape: "fang", color: 0xf1f3f5 }, description: "Kürkçüler bunun için altın öder." }),
+  def({ id: "yeti_fur", name: "Kar Kürkü", rarity: "uncommon", level: 1, maxStack: 50, sellPrice: 55, icon: { shape: "fang", color: 0xf1f3f5 }, description: "Kürkçüler bunun için altın öder." }),
   // Kor Toprakları.
   def({ id: "obsidian_shard", name: "Obsidyen Parçası", rarity: "common", level: 1, maxStack: 50, sellPrice: 38, icon: { shape: "gem", color: 0x343a40 } }),
   def({ id: "cursed_bone", name: "Lanetli Kemik", rarity: "common", level: 1, maxStack: 50, sellPrice: 48, icon: { shape: "bone", color: 0xc9c2a8 } }),
   def({ id: "barrow_gold", name: "Kurgan Altını", rarity: "uncommon", level: 1, maxStack: 50, sellPrice: 90, icon: { shape: "coin", color: 0xe8b84a }, description: "Kurganlardan çıkan eski bir sikke. Üstündeki han yüzü silinmiş." }),
   def({ id: "ember_core", name: "Kor Çekirdeği", rarity: "uncommon", level: 1, maxStack: 50, sellPrice: 70, icon: { shape: "gem", color: 0xff6b00 }, description: "Avucunda hâlâ sıcak. Demirciler bayılır." }),
   def({ id: "spirit_stone", name: "Ruh Taşı", rarity: "rare", level: 1, maxStack: 20, sellPrice: 150, icon: { shape: "gem", color: 0x845ef7 }, description: "İçinde sönük bir ruh ışığı yanıp sönüyor. Tüccarlar iyi para verir." }),
+
+  // The Cave's mushrooms and the Garden's statues.
+  def({ id: "spore_cap", name: "Mantar Sporu", rarity: "common", level: 1, maxStack: 50, sellPrice: 14, icon: { shape: "blob", color: 0xc8553d }, description: "Avuçta ezince ince bir toz bulutu kalkar." }),
+  def({ id: "marble_chip", name: "Mermer Parçası", rarity: "common", level: 1, maxStack: 50, sellPrice: 12, icon: { shape: "gem", color: 0xd8d0bc }, description: "Canlanan bir heykelden kopmuş; hâlâ soğuk." }),
 
   // ---- Quest items
   def({ id: "seal_fragment", name: "Mühür Parçası", rarity: "epic", level: 1, questItem: true, maxStack: 5, sellPrice: 0, icon: { shape: "gem", color: 0xffd43b }, description: "Kırık Mühür'ün altın bir parçası. Bilge Ozan'a götür." }),

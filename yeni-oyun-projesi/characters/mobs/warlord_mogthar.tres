@@ -1,68 +1,84 @@
 [gd_resource type="SpriteFrames" format=3]
 
-[ext_resource type="Texture2D" path="res://assets/moblar/ork_lord.png" id="1_yhmj1"]
+[ext_resource type="Texture2D" path="res://assets/moblar/haydut_reis.png" id="1_yhmj1"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_okfvb"]
 atlas = ExtResource("1_yhmj1")
-region = Rect2(1280, 0, 128, 128)
+region = Rect2(1792, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_lb12t"]
 atlas = ExtResource("1_yhmj1")
-region = Rect2(1408, 0, 128, 128)
+region = Rect2(1920, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_mwo44"]
 atlas = ExtResource("1_yhmj1")
-region = Rect2(1536, 0, 128, 128)
+region = Rect2(2048, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_cjn5c"]
 atlas = ExtResource("1_yhmj1")
-region = Rect2(1664, 0, 128, 128)
+region = Rect2(2176, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_rohj5"]
 atlas = ExtResource("1_yhmj1")
-region = Rect2(1792, 0, 128, 128)
+region = Rect2(2304, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_03ylu"]
 atlas = ExtResource("1_yhmj1")
-region = Rect2(1920, 0, 128, 128)
+region = Rect2(2432, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_s81sj"]
 atlas = ExtResource("1_yhmj1")
-region = Rect2(0, 0, 128, 128)
+region = Rect2(1280, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_s4p2c"]
 atlas = ExtResource("1_yhmj1")
-region = Rect2(128, 0, 128, 128)
+region = Rect2(1408, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_qnadw"]
 atlas = ExtResource("1_yhmj1")
-region = Rect2(256, 0, 128, 128)
+region = Rect2(1536, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_4lu6l"]
 atlas = ExtResource("1_yhmj1")
-region = Rect2(384, 0, 128, 128)
+region = Rect2(1664, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_38f84"]
 atlas = ExtResource("1_yhmj1")
-region = Rect2(512, 0, 128, 128)
+region = Rect2(0, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_qypog"]
 atlas = ExtResource("1_yhmj1")
-region = Rect2(640, 0, 128, 128)
+region = Rect2(128, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_rovpu"]
 atlas = ExtResource("1_yhmj1")
-region = Rect2(768, 0, 128, 128)
+region = Rect2(256, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_s2avs"]
 atlas = ExtResource("1_yhmj1")
-region = Rect2(896, 0, 128, 128)
+region = Rect2(384, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_07hgc"]
 atlas = ExtResource("1_yhmj1")
-region = Rect2(1024, 0, 128, 128)
+region = Rect2(512, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_1gr4r"]
+atlas = ExtResource("1_yhmj1")
+region = Rect2(640, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kqcqe"]
+atlas = ExtResource("1_yhmj1")
+region = Rect2(768, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ouc3p"]
+atlas = ExtResource("1_yhmj1")
+region = Rect2(896, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yhccc"]
+atlas = ExtResource("1_yhmj1")
+region = Rect2(1024, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8ab4a"]
 atlas = ExtResource("1_yhmj1")
 region = Rect2(1152, 0, 128, 128)
 
@@ -104,9 +120,9 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_4lu6l")
 }],
-"loop": 1,
-"name": &"idle",
-"speed": 7.0
+"loop": 0,
+"name": &"hurt",
+"speed": 10.0
 }, {
 "frames": [{
 "duration": 1.0,
@@ -120,12 +136,29 @@ animations = [{
 }, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_s2avs")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 7.0
 }, {
+"frames": [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_07hgc")
 }, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_1gr4r")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kqcqe")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ouc3p")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yhccc")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8ab4a")
 }],
 "loop": 1,
 "name": &"walk",

@@ -3,38 +3,38 @@
 [ext_resource type="SpriteFrames" path="res://characters/mobs/ash_priest.tres" id="1_427b6"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_g7i1i"]
-size = Vector2(21, 26)
+size = Vector2(22, 27)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_2mm3q"]
 size = Vector2(10, 6)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_govde"]
-radius = 4.2
-height = 16.8
+radius = 4.4
+height = 17.6
 
-[node name="AshPriest" type="Node2D" unique_id=717066514]
+[node name="AshPriest" type="Node2D" unique_id=120091006]
 
-[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=506481576]
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=120766121]
 sprite_frames = ExtResource("1_427b6")
 animation = &"idle"
 autoplay = "idle"
 centered = false
-offset = Vector2(-17.538, -28.913599)
+offset = Vector2(-32, -64)
 
-[node name="Hurtbox" type="Area2D" parent="." unique_id=684730860]
+[node name="Hurtbox" type="Area2D" parent="." unique_id=248159950]
 collision_mask = 0
 
-[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1678551066]
-position = Vector2(-0.038000256, -11.913599)
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1210037903]
+position = Vector2(1, -13.5)
 shape = SubResource("RectangleShape2D_g7i1i")
 debug_color = Color(0.2, 0.6, 1, 0.35)
 
-[node name="Feet" type="Area2D" parent="." unique_id=763505027]
+[node name="Feet" type="Area2D" parent="." unique_id=1148327697]
 collision_layer = 2
 collision_mask = 0
 input_pickable = false
 
-[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=312078205]
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1467097728]
 position = Vector2(0, -3)
 shape = SubResource("RectangleShape2D_2mm3q")
 debug_color = Color(1, 0.3, 0.2, 0.45)

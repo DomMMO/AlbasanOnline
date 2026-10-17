@@ -3,38 +3,39 @@
 [ext_resource type="SpriteFrames" path="res://characters/mobs/forge_king_tamgar.tres" id="1_eygb3"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_f6lxu"]
-size = Vector2(22, 48)
+size = Vector2(44, 54)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_5i88j"]
 size = Vector2(10, 6)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_govde"]
-radius = 4.4
-height = 17.6
+radius = 8.8
+height = 35.2
 
-[node name="ForgeKingTamgar" type="Node2D" unique_id=1167251451]
+[node name="ForgeKingTamgar" type="Node2D" unique_id=1595273242]
 
-[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=734684922]
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=133763403]
+scale = Vector2(2, 2)
 sprite_frames = ExtResource("1_eygb3")
 animation = &"idle"
 autoplay = "idle"
 centered = false
-offset = Vector2(-26.609001, -48.5061)
+offset = Vector2(-32, -64)
 
-[node name="Hurtbox" type="Area2D" parent="." unique_id=426866715]
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1584968145]
 collision_mask = 0
 
-[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1889513700]
-position = Vector2(1.3909997, -22.5061)
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1818973593]
+position = Vector2(2, -27)
 shape = SubResource("RectangleShape2D_f6lxu")
 debug_color = Color(0.2, 0.6, 1, 0.35)
 
-[node name="Feet" type="Area2D" parent="." unique_id=1510516605]
+[node name="Feet" type="Area2D" parent="." unique_id=1788089662]
 collision_layer = 2
 collision_mask = 0
 input_pickable = false
 
-[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=538021747]
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=943115487]
 position = Vector2(0, -3)
 shape = SubResource("RectangleShape2D_5i88j")
 debug_color = Color(1, 0.3, 0.2, 0.45)

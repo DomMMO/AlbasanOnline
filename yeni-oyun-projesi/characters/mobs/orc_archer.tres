@@ -1,68 +1,84 @@
 [gd_resource type="SpriteFrames" format=3]
 
-[ext_resource type="Texture2D" path="res://assets/moblar/ork_yagmaci.png" id="1_rsfgr"]
+[ext_resource type="Texture2D" path="res://assets/moblar/haydut_okcu.png" id="1_rsfgr"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_63aw4"]
 atlas = ExtResource("1_rsfgr")
-region = Rect2(640, 0, 64, 64)
+region = Rect2(896, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_wi61e"]
 atlas = ExtResource("1_rsfgr")
-region = Rect2(704, 0, 64, 64)
+region = Rect2(960, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_0igs5"]
 atlas = ExtResource("1_rsfgr")
-region = Rect2(768, 0, 64, 64)
+region = Rect2(1024, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_mqri4"]
 atlas = ExtResource("1_rsfgr")
-region = Rect2(832, 0, 64, 64)
+region = Rect2(1088, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_huekx"]
 atlas = ExtResource("1_rsfgr")
-region = Rect2(896, 0, 64, 64)
+region = Rect2(1152, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_wy2ck"]
 atlas = ExtResource("1_rsfgr")
-region = Rect2(960, 0, 64, 64)
+region = Rect2(1216, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_yolag"]
 atlas = ExtResource("1_rsfgr")
-region = Rect2(0, 0, 64, 64)
+region = Rect2(640, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_uq7dk"]
 atlas = ExtResource("1_rsfgr")
-region = Rect2(64, 0, 64, 64)
+region = Rect2(704, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_b4smd"]
 atlas = ExtResource("1_rsfgr")
-region = Rect2(128, 0, 64, 64)
+region = Rect2(768, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_jt4os"]
 atlas = ExtResource("1_rsfgr")
-region = Rect2(192, 0, 64, 64)
+region = Rect2(832, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_uhyqe"]
 atlas = ExtResource("1_rsfgr")
-region = Rect2(256, 0, 64, 64)
+region = Rect2(0, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_lniix"]
 atlas = ExtResource("1_rsfgr")
-region = Rect2(320, 0, 64, 64)
+region = Rect2(64, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_sn8cc"]
 atlas = ExtResource("1_rsfgr")
-region = Rect2(384, 0, 64, 64)
+region = Rect2(128, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_k8nro"]
 atlas = ExtResource("1_rsfgr")
-region = Rect2(448, 0, 64, 64)
+region = Rect2(192, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_oigft"]
 atlas = ExtResource("1_rsfgr")
-region = Rect2(512, 0, 64, 64)
+region = Rect2(256, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_1llhh"]
+atlas = ExtResource("1_rsfgr")
+region = Rect2(320, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ww8d2"]
+atlas = ExtResource("1_rsfgr")
+region = Rect2(384, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2yvqi"]
+atlas = ExtResource("1_rsfgr")
+region = Rect2(448, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bl04p"]
+atlas = ExtResource("1_rsfgr")
+region = Rect2(512, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6bhrs"]
 atlas = ExtResource("1_rsfgr")
 region = Rect2(576, 0, 64, 64)
 
@@ -104,9 +120,9 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_jt4os")
 }],
-"loop": 1,
-"name": &"idle",
-"speed": 7.0
+"loop": 0,
+"name": &"hurt",
+"speed": 10.0
 }, {
 "frames": [{
 "duration": 1.0,
@@ -120,12 +136,29 @@ animations = [{
 }, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_k8nro")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 7.0
 }, {
+"frames": [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_oigft")
 }, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_1llhh")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ww8d2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2yvqi")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bl04p")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6bhrs")
 }],
 "loop": 1,
 "name": &"walk",

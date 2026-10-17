@@ -3,38 +3,39 @@
 [ext_resource type="SpriteFrames" path="res://characters/mobs/ice_witch_ayaza.tres" id="1_xb1qe"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_jextb"]
-size = Vector2(27, 53)
+size = Vector2(34, 62)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_xg35t"]
 size = Vector2(10, 6)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_govde"]
-radius = 5.4
-height = 21.6
+radius = 6.8
+height = 27.2
 
-[node name="IceWitchAyaza" type="Node2D" unique_id=63758017]
+[node name="IceWitchAyaza" type="Node2D" unique_id=52703180]
 
-[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=2034759002]
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=2079603601]
+scale = Vector2(2, 2)
 sprite_frames = ExtResource("1_xb1qe")
 animation = &"idle"
 autoplay = "idle"
 centered = false
-offset = Vector2(-25.2072, -68.46)
+offset = Vector2(-32, -64)
 
-[node name="Hurtbox" type="Area2D" parent="." unique_id=1412241877]
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1823329651]
 collision_mask = 0
 
-[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1186727283]
-position = Vector2(-2.7071993, -24.96)
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=98339383]
+position = Vector2(-1, -31)
 shape = SubResource("RectangleShape2D_jextb")
 debug_color = Color(0.2, 0.6, 1, 0.35)
 
-[node name="Feet" type="Area2D" parent="." unique_id=519888542]
+[node name="Feet" type="Area2D" parent="." unique_id=1160233079]
 collision_layer = 2
 collision_mask = 0
 input_pickable = false
 
-[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=270214671]
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1717633859]
 position = Vector2(0, -3)
 shape = SubResource("RectangleShape2D_xg35t")
 debug_color = Color(1, 0.3, 0.2, 0.45)

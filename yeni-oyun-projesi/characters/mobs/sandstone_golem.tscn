@@ -3,38 +3,38 @@
 [ext_resource type="SpriteFrames" path="res://characters/mobs/sandstone_golem.tres" id="1_w72sc"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_lqyse"]
-size = Vector2(45, 37)
+size = Vector2(22, 36)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_8i1vb"]
 size = Vector2(10, 6)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_govde"]
-radius = 9.0
-height = 36.0
+radius = 4.4
+height = 17.6
 
-[node name="SandstoneGolem" type="Node2D" unique_id=1495110478]
+[node name="SandstoneGolem" type="Node2D" unique_id=1815084627]
 
-[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=741419351]
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=2025603147]
 sprite_frames = ExtResource("1_w72sc")
 animation = &"idle"
 autoplay = "idle"
 centered = false
-offset = Vector2(-25.1503, -42.936398)
+offset = Vector2(-32, -64)
 
-[node name="Hurtbox" type="Area2D" parent="." unique_id=992607917]
+[node name="Hurtbox" type="Area2D" parent="." unique_id=556299731]
 collision_mask = 0
 
-[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=2030652783]
-position = Vector2(6.3497005, -17.4364)
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=893236946]
+position = Vector2(1, -18)
 shape = SubResource("RectangleShape2D_lqyse")
 debug_color = Color(0.2, 0.6, 1, 0.35)
 
-[node name="Feet" type="Area2D" parent="." unique_id=1096992300]
+[node name="Feet" type="Area2D" parent="." unique_id=1840557608]
 collision_layer = 2
 collision_mask = 0
 input_pickable = false
 
-[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1299868471]
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1787818381]
 position = Vector2(0, -3)
 shape = SubResource("RectangleShape2D_8i1vb")
 debug_color = Color(1, 0.3, 0.2, 0.45)

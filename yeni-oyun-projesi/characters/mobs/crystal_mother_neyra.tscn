@@ -3,38 +3,39 @@
 [ext_resource type="SpriteFrames" path="res://characters/mobs/crystal_mother_neyra.tres" id="1_hc3t6"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_hrx6d"]
-size = Vector2(42, 52)
+size = Vector2(60, 78)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_xlmhk"]
 size = Vector2(10, 6)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_govde"]
-radius = 8.4
-height = 33.6
+radius = 12.0
+height = 48.0
 
-[node name="CrystalMotherNeyra" type="Node2D" unique_id=341354413]
+[node name="CrystalMotherNeyra" type="Node2D" unique_id=212259556]
 
-[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=157868882]
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=357040372]
+scale = Vector2(2, 2)
 sprite_frames = ExtResource("1_hc3t6")
 animation = &"idle"
 autoplay = "idle"
 centered = false
-offset = Vector2(-33.957, -75.999)
+offset = Vector2(-32, -64)
 
-[node name="Hurtbox" type="Area2D" parent="." unique_id=467184329]
+[node name="Hurtbox" type="Area2D" parent="." unique_id=2142445359]
 collision_mask = 0
 
-[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=38803291]
-position = Vector2(-6.957001, -24.998999)
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=165137395]
+position = Vector2(-4, -39)
 shape = SubResource("RectangleShape2D_hrx6d")
 debug_color = Color(0.2, 0.6, 1, 0.35)
 
-[node name="Feet" type="Area2D" parent="." unique_id=272538930]
+[node name="Feet" type="Area2D" parent="." unique_id=596666679]
 collision_layer = 2
 collision_mask = 0
 input_pickable = false
 
-[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=2146088639]
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1353626873]
 position = Vector2(0, -3)
 shape = SubResource("RectangleShape2D_xlmhk")
 debug_color = Color(1, 0.3, 0.2, 0.45)

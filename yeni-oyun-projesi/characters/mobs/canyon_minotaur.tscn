@@ -3,38 +3,38 @@
 [ext_resource type="SpriteFrames" path="res://characters/mobs/canyon_minotaur.tres" id="1_so0xu"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_hbe07"]
-size = Vector2(41, 37)
+size = Vector2(22, 36)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_kn7yq"]
 size = Vector2(10, 6)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_govde"]
-radius = 8.2
-height = 32.8
+radius = 4.4
+height = 17.6
 
-[node name="CanyonMinotaur" type="Node2D" unique_id=931455682]
+[node name="CanyonMinotaur" type="Node2D" unique_id=339962328]
 
-[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=923807506]
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=929761092]
 sprite_frames = ExtResource("1_so0xu")
 animation = &"idle"
 autoplay = "idle"
 centered = false
-offset = Vector2(-28.4016, -39.5428)
+offset = Vector2(-32, -64)
 
-[node name="Hurtbox" type="Area2D" parent="." unique_id=542088379]
+[node name="Hurtbox" type="Area2D" parent="." unique_id=102677417]
 collision_mask = 0
 
-[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1051792462]
-position = Vector2(6.098399, -17.0428)
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1735738690]
+position = Vector2(1, -18)
 shape = SubResource("RectangleShape2D_hbe07")
 debug_color = Color(0.2, 0.6, 1, 0.35)
 
-[node name="Feet" type="Area2D" parent="." unique_id=1669539475]
+[node name="Feet" type="Area2D" parent="." unique_id=1134036097]
 collision_layer = 2
 collision_mask = 0
 input_pickable = false
 
-[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=808260754]
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=293702960]
 position = Vector2(0, -3)
 shape = SubResource("RectangleShape2D_kn7yq")
 debug_color = Color(1, 0.3, 0.2, 0.45)

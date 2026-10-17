@@ -3,38 +3,38 @@
 [ext_resource type="SpriteFrames" path="res://characters/mobs/lich_azgor.tres" id="1_ut268"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ohvgy"]
-size = Vector2(41, 55)
+size = Vector2(36, 64)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_cum8w"]
 size = Vector2(10, 6)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_govde"]
-radius = 8.2
-height = 32.8
+radius = 7.2
+height = 28.8
 
-[node name="LichAzgor" type="Node2D" unique_id=1166000612]
+[node name="LichAzgor" type="Node2D" unique_id=1002803966]
 
-[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1205980415]
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1938755949]
 sprite_frames = ExtResource("1_ut268")
 animation = &"idle"
 autoplay = "idle"
 centered = false
-offset = Vector2(-33.9416, -54.9315)
+offset = Vector2(-64, -128)
 
-[node name="Hurtbox" type="Area2D" parent="." unique_id=114766686]
+[node name="Hurtbox" type="Area2D" parent="." unique_id=737958936]
 collision_mask = 0
 
-[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1246745872]
-position = Vector2(1.5583993, -26.4315)
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=196436832]
+position = Vector2(0, -32)
 shape = SubResource("RectangleShape2D_ohvgy")
 debug_color = Color(0.2, 0.6, 1, 0.35)
 
-[node name="Feet" type="Area2D" parent="." unique_id=308088492]
+[node name="Feet" type="Area2D" parent="." unique_id=1402403494]
 collision_layer = 2
 collision_mask = 0
 input_pickable = false
 
-[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=310274338]
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=557191084]
 position = Vector2(0, -3)
 shape = SubResource("RectangleShape2D_cum8w")
 debug_color = Color(1, 0.3, 0.2, 0.45)

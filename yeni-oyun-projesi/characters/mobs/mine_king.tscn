@@ -3,38 +3,38 @@
 [ext_resource type="SpriteFrames" path="res://characters/mobs/mine_king.tres" id="1_gl7j3"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_gxgbr"]
-size = Vector2(68, 63)
+size = Vector2(60, 78)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_sayve"]
 size = Vector2(10, 6)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_govde"]
-radius = 13.6
-height = 54.4
+radius = 12.0
+height = 48.0
 
-[node name="MineKing" type="Node2D" unique_id=1093727011]
+[node name="MineKing" type="Node2D" unique_id=742502463]
 
-[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=611373385]
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=884990514]
 sprite_frames = ExtResource("1_gl7j3")
 animation = &"idle"
 autoplay = "idle"
 centered = false
-offset = Vector2(-47.0761, -66.3351)
+offset = Vector2(-64, -128)
 
-[node name="Hurtbox" type="Area2D" parent="." unique_id=589022824]
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1409760666]
 collision_mask = 0
 
-[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1978216556]
-position = Vector2(9.9239, -29.835098)
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1012682270]
+position = Vector2(-4, -39)
 shape = SubResource("RectangleShape2D_gxgbr")
 debug_color = Color(0.2, 0.6, 1, 0.35)
 
-[node name="Feet" type="Area2D" parent="." unique_id=1563526196]
+[node name="Feet" type="Area2D" parent="." unique_id=723538195]
 collision_layer = 2
 collision_mask = 0
 input_pickable = false
 
-[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1780706604]
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1652088497]
 position = Vector2(0, -3)
 shape = SubResource("RectangleShape2D_sayve")
 debug_color = Color(1, 0.3, 0.2, 0.45)

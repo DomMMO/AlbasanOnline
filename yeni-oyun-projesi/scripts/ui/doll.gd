@@ -86,7 +86,9 @@ func render() -> void:
 		if tex:
 			var mirrored := facing == 2 or facing == 0
 			var hand: Vector2 = WeaponView.HAND[facing]
-			var grip = GameData.get_value("WEAPON_GRIPS", {}).get(String(weapon.defId), {"x": 1.5 / 12.0, "y": 10.5 / 12.0})
+			var grip = Art.weapon_grip(String(weapon.defId))
+			if grip == null:
+				grip = {"x": 1.5 / 12.0, "y": 10.5 / 12.0}
 			var fw := tex.get_width() / 2.0
 			var fh := float(tex.get_height())
 			var at := AtlasTexture.new()

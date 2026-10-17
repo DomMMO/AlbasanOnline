@@ -2,12 +2,15 @@ class_name GameMenu
 extends PanelContainer
 
 ## The Esc menu: resume, settings, controls, key
-## bindings, switch character, log out.
+## bindings, switch character, log out; for GMs also a teleport to any zone.
 
 var ui: GameUi
 var _pages := {}
 var _capturing := ""
 var _key_list: VBoxContainer
+## GM only (shown when the player is a GM): straight to any zone.
+var _gm_button: Button
+var _zone_list: VBoxContainer
 
 
 func _init(owner_ui: GameUi) -> void:
@@ -31,9 +34,14 @@ func _init(owner_ui: GameUi) -> void:
 			close()
 			ui.logout.emit()],
 	])
+	_gm_button = UiTheme.button("Işınlan (GM)", "TitleDarkButton", func(): show_page("teleport"))
+	_gm_button.visible = false
+	_pages.main.add_child(_gm_button)
+	_pages.main.move_child(_gm_button, 4)
 	_build_settings(stack)
 	_build_controls(stack)
 	_build_keys(stack)
+	_build_teleport(stack)
 	show_page("main")
 
 
@@ -47,6 +55,40 @@ func _page(parent: Control, title: String, buttons: Array) -> VBoxContainer:
 		page.add_child(UiTheme.button(spec[0], spec[1], spec[2]))
 	parent.add_child(page)
 	return page
+
+
+## GM: every zone, the open maps first, then the dungeons (each opens a fresh instance).
+func _build_teleport(parent: Control) -> void:
+	var page := _page(parent, "Işınlan", [])
+	page.add_child(UiTheme.label("Sadece GM. Seviye ve temizleme şartı aranmaz.", 12, UiTheme.MUTED))
+	var scroll := ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(320, 420)
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	page.add_child(scroll)
+	_zone_list = VBoxContainer.new()
+	_zone_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_zone_list.add_theme_constant_override("separation", 4)
+	scroll.add_child(_zone_list)
+	page.add_child(_back_button())
+	_pages.teleport = page
+
+
+func _render_zones() -> void:
+	for child in _zone_list.get_children():
+		child.queue_free()
+	var here: String = ui.world.zone_id if ui and ui.world else ""
+	for section in [["Açık haritalar", false], ["Zindanlar", true]]:
+		_zone_list.add_child(UiTheme.title_label(section[0], 18))
+		for id in GameData.ZONES:
+			var z: Dictionary = GameData.ZONES[id]
+			if bool(z.get("instanced", false)) != section[1]:
+				continue
+			var label := String(z.get("name", id)) + ("  (buradasın)" if id == here else "")
+			var b := UiTheme.button(label, "DarkButton", func():
+				close()
+				ui.send("gmTeleport", {"zone": id}))
+			b.disabled = id == here
+			_zone_list.add_child(b)
 
 
 func _back_button() -> Button:
@@ -150,6 +192,10 @@ func _input(event: InputEvent) -> void:
 
 func show_page(name: String) -> void:
 	_capturing = ""
+	if name == "teleport":
+		if not ui.is_gm():
+			return
+		_render_zones()
 	for key in _pages:
 		_pages[key].visible = key == name
 	reset_size()
@@ -158,6 +204,7 @@ func show_page(name: String) -> void:
 
 func open() -> void:
 	visible = true
+	_gm_button.visible = ui.is_gm()
 	show_page("main")
 
 

@@ -3,38 +3,38 @@
 [ext_resource type="SpriteFrames" path="res://characters/mobs/tunnel_rat.tres" id="1_kvbf2"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_5fyjc"]
-size = Vector2(53, 27)
+size = Vector2(27, 30)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_awgff"]
 size = Vector2(10, 6)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_govde"]
-radius = 10.6
-height = 42.4
+radius = 5.4
+height = 21.6
 
-[node name="TunnelRat" type="Node2D" unique_id=448126320]
+[node name="TunnelRat" type="Node2D" unique_id=705491105]
 
-[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1760005405]
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1625808409]
 sprite_frames = ExtResource("1_kvbf2")
 animation = &"idle"
 autoplay = "idle"
 centered = false
-offset = Vector2(-28.656, -24.8859)
+offset = Vector2(-32, -64)
 
-[node name="Hurtbox" type="Area2D" parent="." unique_id=339113412]
+[node name="Hurtbox" type="Area2D" parent="." unique_id=770081244]
 collision_mask = 0
 
-[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1065707787]
-position = Vector2(-1.1560001, -11.3859005)
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1285950746]
+position = Vector2(1.5, -15)
 shape = SubResource("RectangleShape2D_5fyjc")
 debug_color = Color(0.2, 0.6, 1, 0.35)
 
-[node name="Feet" type="Area2D" parent="." unique_id=844639687]
+[node name="Feet" type="Area2D" parent="." unique_id=883627142]
 collision_layer = 2
 collision_mask = 0
 input_pickable = false
 
-[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=270997569]
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1967471091]
 position = Vector2(0, -3)
 shape = SubResource("RectangleShape2D_awgff")
 debug_color = Color(1, 0.3, 0.2, 0.45)

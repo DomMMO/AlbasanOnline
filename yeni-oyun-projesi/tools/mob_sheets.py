@@ -28,7 +28,7 @@ BOW_STRING = [None, 3, 0]        # where the drawn string is in each cell
 ARROW_UP = (20, 0, 7, 16)
 ARROW_RIGHT = (32, 4, 16, 7)
 ## Kinds that shoot: drawn this way (with the family's hands as the artist placed them).
-ARCHERS = {"ork_yagmaci", "ork_binici", "elf_avci"}
+ARCHERS = {"ork_yagmaci", "ork_binici", "elf_avci", "haydut_okcu", "haydut_binici"}
 
 ## The elves: the pack's Run.aseprite files have no hands; the artist's hands and weapons are the
 ## top layer of Social/Elfs.aseprite, the same run (frame for frame, pixel for pixel) of the four
@@ -115,8 +115,103 @@ FAMILIES = {
     "elf_hunter": {"dir": FF + "Enemies/Elf - Hunter/", "slot": 2},
     "elf_druid": {"dir": FF + "Enemies/Elf - Druid/", "slot": 3},
 }
+## Armed families: like the orcs, the top layer of Run.aseprite is the artist's hands and what they
+## hold; their hands come from the family's weapon sheet (the pack's), which marks the pivots.
+TOWN_MOBS = "Pixel Crawler - Town/Entities/Mobs/"
+DESERT_GOLD = PACK + "Pixel Crawler - Desert/Weapons/Desert - gold/Desert-Gold.png"
+FIRE = PACK + "Pixel Crawler - Forge/Weapons/Fire Weapons/Fire Weapons.png"
+BONE_HANDS = (HANDS, [(0, 2), (1, 2), (0, 3), (1, 3)])
+MUMMY_HANDS = (DESERT_GOLD, [(9, 0), (10, 0), (9, 1), (10, 1)])
+STONE_HANDS = (FIRE, [(8, 0), (9, 0), (8, 1), (9, 1)])
+FAMILIES.update({
+    "skeleton": {"dir": TOWN_MOBS + "Skeleton Crew/Skeleton - Base/", "cells": BONE_HANDS},
+    "skeleton_warrior": {"dir": TOWN_MOBS + "Skeleton Crew/Skeleton - Warrior/", "cells": BONE_HANDS},
+    "skeleton_mage": {"dir": TOWN_MOBS + "Skeleton Crew/Skeleton - Mage/", "cells": BONE_HANDS},
+    "mummy": {"dir": "Pixel Crawler - Desert/Enemy/Mummy - Base/", "cells": MUMMY_HANDS},
+    "mummy_warrior": {"dir": "Pixel Crawler - Desert/Enemy/Mummy - Warrior/", "cells": MUMMY_HANDS},
+    "mummy_mage": {"dir": "Pixel Crawler - Desert/Enemy/Mummy - Mage/", "cells": MUMMY_HANDS},
+    "stone": {"dir": "Pixel Crawler - Forge/Enemy/Stone - Base/", "cells": STONE_HANDS},
+    "stone_golem": {"dir": "Pixel Crawler - Forge/Enemy/Stone - Golem/", "cells": STONE_HANDS},
+    "stone_lava": {"dir": "Pixel Crawler - Forge/Enemy/Stone - Lava/", "cells": STONE_HANDS},
+})
+
+## Families drawn with no hands to hold anything (zombies, bandits, the Royal Crew, the garden's
+## statues, rats, mushrooms): the same rig built the orcs' way. Their hands are the pair the pack
+## gives them in their own weapon sheet, on the hand tracks the artist drew for Skeleton - Base's
+## run; the front hand holds a weapon of that sheet (placed as the artist places the skeleton's
+## dagger), the back hand may hold a shield (or, for mushrooms, the small rock of their sheet).
+## Hand cells: back (c, r), front (c + 1, r + 1).
+SYNTH_BACK = [(9, 47), (10, 46), (11, 47), (13, 47), (12, 46), (11, 47)]
+SYNTH_FRONT = [(41, 45), (40, 44), (39, 45), (37, 45), (38, 44), (39, 45)]
+CEMETERY = "Pixel Crawler - Cemetery/Entities/Mobs/"
+HIDEOUT = "Pixel Crawler - Hideout/Enemies/Baldits/"
+ROYAL = "Pixel Crawler - Castle Environment 0.3/Enemies/Royal Crew/"
+GARDEN = "Pixel Crawler - Garden Environment/Enemies/"
+SEWER = "Pixel Crawler - Sewer/Enemy/"
+CAVE = "Pixel Crawler - Cave/Enemies/"
+SHEETS = {
+    "cursed": PACK + "Pixel Crawler - Cemetery/Weapons/Cursed Weapons.png",
+    "rustic": PACK + "Pixel Crawler - Hideout/Weapons/Rustic.png",
+    "castle": PACK + "Pixel Crawler - Castle Environment 0.3/Weapons/Weapons.png",
+    "garden": PACK + "Pixel Crawler - Garden Environment/Weapons/Weapons.png",
+    "poison": PACK + "Pixel Crawler - Sewer/Weapons/Poison Weapons/Poison Weapons.png",
+    "spore": PACK + "Pixel Crawler - Cave/Weapons/Spore_Roots/Spore_Roots.png",
+}
+## The weapons used, as boxes on their sheet (x0, y0, x1, y1).
+WEAPONS = {
+    "cursed": {"buyuk_kilic": (1, 0, 15, 48), "kilic": (36, 16, 46, 48), "balta": (48, 16, 64, 48), "topuz": (0, 50, 16, 80), "asa": (66, 0, 79, 48)},
+    "rustic": {"kilic": (20, 16, 30, 64), "kisa_kilic": (37, 32, 45, 64), "hancer": (53, 38, 60, 64), "balta": (99, 25, 112, 64), "kucuk_balta": (117, 32, 128, 64), "asa": (147, 16, 157, 64), "kucuk_asa": (164, 32, 171, 64)},
+    "castle": {"kisa_kilic": (34, 32, 46, 64), "topuz": (34, 87, 46, 128), "degnek": (132, 69, 139, 96), "kalkan": (194, 128, 206, 144)},
+    "garden": {"kisa_kilic": (35, 32, 45, 64), "balta": (98, 27, 112, 64), "asa": (161, 33, 175, 64)},
+    "poison": {"kilic": (2, 2, 14, 48), "kisa_kilic": (35, 16, 45, 46), "balta": (16, 17, 32, 48), "asa": (82, 1, 94, 48)},
+    "spore": {"topuz": (35, 32, 46, 64), "buyuk_topuz": (18, 16, 30, 64), "asa": (129, 64, 141, 96), "tas": (36, 5, 43, 12)},
+}
+SYNTH_HANDS = {"cursed_teal": ("cursed", (4, 5)), "cursed_red": ("cursed", (0, 5)), "cursed_grey": ("cursed", (2, 5)),
+               "rustic": ("rustic", (12, 0)), "castle_steel": ("castle", (13, 2)), "castle_skin": ("castle", (13, 0)),
+               "castle_leather": ("castle", (13, 4)), "garden": ("garden", (11, 17)), "poison": ("poison", (7, 3)),
+               "spore": ("spore", (2, 0))}
+
+
+def synth(body, hands, weapon, back=None, offset=(0, 0)):
+    return {"dir": body, "synth": {"hands": hands, "weapon": weapon, "back": back, "offset": offset}}
+
+
+FAMILIES.update({
+    # Cemetery: the zombies (and the banshee) with cursed weapons.
+    "zombi": synth(CEMETERY + "Zombie - Base/", "cursed_teal", ("cursed", "kilic")),
+    "zombi_kasli": synth(CEMETERY + "Zombie - Muscle/", "cursed_red", ("cursed", "balta")),
+    "zombi_kasli_buyuk": synth(CEMETERY + "Zombie - Muscle/", "cursed_red", ("cursed", "buyuk_kilic")),
+    "zombi_sisman": synth(CEMETERY + "Zombie - Overweight/", "cursed_grey", ("cursed", "topuz")),
+    "banshee": synth(CEMETERY + "Zombie - Banshee/", "cursed_teal", ("cursed", "asa")),
+    # The Hideout's bandits with rustic weapons.
+    "haydut_savasci": synth(HIDEOUT + "Fighter/", "rustic", ("rustic", "kisa_kilic")),
+    "haydut_iri": synth(HIDEOUT + "Tracker/", "rustic", ("rustic", "kucuk_balta")),
+    "haydut_suikastci": synth(HIDEOUT + "Scout/", "rustic", ("rustic", "hancer")),
+    "haydut_okcu": synth(HIDEOUT + "Scout/", "rustic", None),
+    "haydut_buyucu": synth(HIDEOUT + "Sorcerer/", "rustic", ("rustic", "kucuk_asa")),
+    "haydut_reis": synth(HIDEOUT + "Fighter/", "rustic", ("rustic", "kilic")),
+    "haydut_bekci": synth(HIDEOUT + "Tracker/", "rustic", ("rustic", "balta")),
+    "haydut_buyucu_buyuk": synth(HIDEOUT + "Sorcerer/", "rustic", ("rustic", "asa")),
+    # The Castle's Royal Crew.
+    "asker": synth(ROYAL + "Soldier/", "castle_steel", ("castle", "topuz")),
+    "sovalye": synth(ROYAL + "Knight/", "castle_steel", ("castle", "kisa_kilic"), ("castle", "kalkan")),
+    "rahip": synth(ROYAL + "Priest/", "castle_skin", ("castle", "degnek")),
+    # The Garden's statues and Medusa.
+    "bahce_eri": synth(GARDEN + "Masculine/", "garden", ("garden", "kisa_kilic")),
+    "bahce_kadin": synth(GARDEN + "Feminine/", "garden", ("garden", "balta")),
+    "bahce_yasli": synth(GARDEN + "Old/", "garden", ("garden", "asa")),
+    "medusa": synth(GARDEN + "Medusa/", "garden", ("garden", "asa")),
+    # The Sewer's rats.
+    "sican": synth(SEWER + "Rat - Base/", "poison", ("poison", "kisa_kilic")),
+    "sican_savasci": synth(SEWER + "Rat - Warrior/", "poison", ("poison", "balta")),
+    # The Cave's mushrooms, a small rock in the back hand as the pack shows them.
+    "mantar_genc": synth(CAVE + "Immature Fungus/", "spore", ("spore", "topuz"), ("spore", "tas")),
+    "mantar_iri": synth(CAVE + "Heavy Fungus/", "spore", ("spore", "buyuk_topuz"), ("spore", "tas")),
+    "mantar_uzun": synth(CAVE + "Long Fungus/", "spore", ("spore", "topuz"), ("spore", "tas")),
+    "mantar_yasli": synth(CAVE + "Old Fungus/", "spore", ("spore", "asa"), ("spore", "tas")),
+})
 ## Families whose kinds can be archers.
-BOW_FAMILIES = {"orc_rogue", "elf_ranger"}
+BOW_FAMILIES = {"orc_rogue", "elf_ranger", "haydut_okcu"}
 
 ## The game's mob looks: family, which hand's group swings in an attack (the weapon's), how far,
 ## scale (bosses twice the size). Each holds what the artist gave it: the goblin a dagger, the
@@ -136,6 +231,55 @@ KINDS = {
     "elf_avci": ("elf_ranger", "back", 75, 1),
     "elf_koruyucu": ("elf_hunter", "front", 75, 1),
     "elf_druid": ("elf_druid", "front", 60, 1),
+    # The other packs' families (mob -> kind in shared/src/data/mobs.ts and the others).
+    "iskelet": ("skeleton", "front", 75, 1),
+    "iskelet_savasci": ("skeleton_warrior", "back", 75, 1),
+    "iskelet_savasci_buyuk": ("skeleton_warrior", "back", 75, 2),
+    "iskelet_buyucu": ("skeleton_mage", "front", 60, 1),
+    "iskelet_buyucu_buyuk": ("skeleton_mage", "front", 60, 2),
+    "mumya": ("mummy", "front", 75, 1),
+    "mumya_savasci": ("mummy_warrior", "front", 75, 1),
+    "mumya_savasci_buyuk": ("mummy_warrior", "front", 75, 2),
+    "mumya_buyucu": ("mummy_mage", "front", 60, 1),
+    "mumya_buyucu_buyuk": ("mummy_mage", "front", 60, 2),
+    "tas": ("stone", "front", 75, 1),
+    "tas_golem": ("stone_golem", "front", 75, 1),
+    "tas_golem_buyuk": ("stone_golem", "front", 75, 2),
+    "tas_lav": ("stone_lava", "front", 60, 1),
+    "tas_lav_buyuk": ("stone_lava", "front", 60, 2),
+    "zombi": ("zombi", "front", 75, 1),
+    "zombi_kasli": ("zombi_kasli", "front", 75, 1),
+    "zombi_kasli_buyuk": ("zombi_kasli_buyuk", "front", 75, 2),
+    "zombi_sisman": ("zombi_sisman", "front", 75, 1),
+    "banshee": ("banshee", "front", 60, 1),
+    "banshee_buyuk": ("banshee", "front", 60, 2),
+    "haydut_savasci": ("haydut_savasci", "front", 75, 1),
+    "haydut_iri": ("haydut_iri", "front", 75, 1),
+    "haydut_suikastci": ("haydut_suikastci", "front", 75, 1),
+    "haydut_okcu": ("haydut_okcu", "back", 75, 1),
+    "haydut_buyucu": ("haydut_buyucu", "front", 60, 1),
+    "haydut_reis": ("haydut_reis", "front", 75, 2),
+    "haydut_bekci": ("haydut_bekci", "front", 75, 2),
+    "haydut_binici": ("haydut_okcu", "back", 75, 2),
+    "haydut_buyucu_buyuk": ("haydut_buyucu_buyuk", "front", 60, 2),
+    "asker": ("asker", "front", 75, 1),
+    "sovalye": ("sovalye", "front", 75, 1),
+    "sovalye_buyuk": ("sovalye", "front", 75, 2),
+    "rahip": ("rahip", "front", 60, 1),
+    "rahip_buyuk": ("rahip", "front", 60, 2),
+    "bahce_eri": ("bahce_eri", "front", 75, 1),
+    "bahce_eri_buyuk": ("bahce_eri", "front", 75, 2),
+    "bahce_kadin": ("bahce_kadin", "front", 75, 1),
+    "bahce_yasli": ("bahce_yasli", "front", 60, 1),
+    "medusa": ("medusa", "front", 60, 1),
+    "sican": ("sican", "front", 75, 1),
+    "sican_savasci": ("sican_savasci", "front", 75, 1),
+    "mantar_genc": ("mantar_genc", "front", 75, 1),
+    "mantar_iri": ("mantar_iri", "front", 75, 1),
+    "mantar_iri_buyuk": ("mantar_iri", "front", 75, 2),
+    "mantar_uzun": ("mantar_uzun", "front", 75, 1),
+    "mantar_yasli": ("mantar_yasli", "front", 60, 1),
+    "mantar_yasli_buyuk": ("mantar_yasli", "front", 60, 2),
 }
 
 
@@ -252,6 +396,53 @@ def groups(layer, body_mid, hand_cols):
     return out
 
 
+def cell_colours(path, cells):
+    """The colours of a sheet's hand cells, without the outline (the darkest)."""
+    im = Image.open(path).convert("RGBA")
+    out = set()
+    for c, r in cells:
+        for col in im.crop((c * 16, r * 16, c * 16 + 16, r * 16 + 16)).getdata():
+            if col[3] > 0 and sum(col[:3]) > 120:
+                out.add(col)
+    return out
+
+
+_sheet_cache = {}
+
+
+def sheet_image(name):
+    if name not in _sheet_cache:
+        _sheet_cache[name] = Image.open(SHEETS[name]).convert("RGBA")
+    return _sheet_cache[name]
+
+
+def synth_parts(spec):
+    """A synthetic family's hand images (back, front) and its weapon and back item images."""
+    sname, (c, r) = SYNTH_HANDS[spec["hands"]]
+    sh = sheet_image(sname)
+    cell = lambda cc, rr: sh.crop((cc * 16, rr * 16, cc * 16 + 16, rr * 16 + 16))
+    item = lambda w: sheet_image(w[0]).crop(WEAPONS[w[0]][w[1]]) if w else None
+    return cell(c, r), cell(c + 1, r + 1), item(spec["weapon"]), item(spec["back"])
+
+
+def synth_held(spec, k, dy=0):
+    """One frame of a synthetic family's held layer: hands on the skeleton's tracks, the weapon in
+    the front hand as the artist holds the skeleton's dagger (its middle 7.5 px into the hand cell,
+    its end 14 px below the cell's top), the back item likewise in the back hand."""
+    back_hand, front_hand, weapon, back_item = synth_parts(spec)
+    ox, oy = spec["offset"]
+    bx, by = SYNTH_BACK[k][0] + ox, SYNTH_BACK[k][1] + oy + dy
+    fx, fy = SYNTH_FRONT[k][0] + ox, SYNTH_FRONT[k][1] + oy + dy
+    img = Image.new("RGBA", (FRAME, FRAME))
+    if back_item is not None:
+        img.alpha_composite(back_item, (round(bx + 7.5 - back_item.width / 2), by + 10 - back_item.height // 2))
+    img.alpha_composite(back_hand, (bx, by))
+    if weapon is not None:
+        img.alpha_composite(weapon, (round(fx + 7.5 - weapon.width / 2), fy + 14 - weapon.height))
+    img.alpha_composite(front_hand, (fx, fy))
+    return img
+
+
 def find_hands(layer):
     """The pack's hands in a held layer: [(cell position, Hands.png cell)] matched pixel for pixel."""
     hands_im = Image.open(HANDS).convert("RGBA")
@@ -282,6 +473,13 @@ def archer_frames(layer, hands_im, wood):
     ax = min(p[0] for p in item) - bx if item else 2
     ay = min(p[1] for p in item) - by if item else -10
     hand = lambda cell: hands_im.crop((cell[0], cell[1], cell[0] + 16, cell[1] + 16))
+    return archer_at((bx, by), hand(bcell), (fx, fy), hand(fcell), wood, (ax, ay))
+
+
+def archer_at(back_pos, back_hand, front_pos, front_hand, wood, carried=(2, -10)):
+    """An archer's frame with its hands at back_pos / front_pos (16 px cells): the Wood bow in the
+    front hand in its three states, the arrow carried point up in the back hand."""
+    (bx, by), (fx, fy), (ax, ay) = back_pos, front_pos, carried
     crop = lambda r: wood.crop((r[0], r[1], r[0] + r[2], r[1] + r[3]))
     bow = lambda k: wood.crop((BOW_CELLS[k][0], BOW_CELLS[k][1], BOW_CELLS[k][0] + 16, BOW_CELLS[k][1] + 32))
     top = fy - 11
@@ -294,15 +492,15 @@ def archer_frames(layer, hands_im, wood):
             sx = x + BOW_STRING[k]
             mid = top + 16
             img.alpha_composite(crop(ARROW_RIGHT), (sx - 1, mid - 3))
-            img.alpha_composite(hand(fcell), (fx, fy))
-            img.alpha_composite(hand(bcell), (sx - 8, mid - 8))
+            img.alpha_composite(front_hand, (fx, fy))
+            img.alpha_composite(back_hand, (sx - 8, mid - 8))
             nocks.append([sx + 7, mid])
         else:
-            img.alpha_composite(hand(fcell), (fx, fy))
+            img.alpha_composite(front_hand, (fx, fy))
         fronts.append(img)
     back = Image.new("RGBA", (FRAME, FRAME))
     back.alpha_composite(crop(ARROW_UP), (bx + ax, by + ay))
-    back.alpha_composite(hand(bcell), (bx, by))
+    back.alpha_composite(back_hand, (bx, by))
     return {"fronts": fronts, "back": back, "front_pivot": [fx + 8, fy + 8], "back_pivot": [bx + 8, by + 8], "nock": nocks[-1]}
 
 
@@ -396,11 +594,25 @@ for fam, spec in FAMILIES.items():
     if "slot" in spec:
         held_layers = elf_held(spec["slot"])
         cols = ELF_SKIN
+    elif "synth" in spec:
+        held_layers = [synth_held(spec["synth"], k % len(SYNTH_FRONT)) for k in range(len(anims["walk"]))]
+        back_hand, front_hand, _, _ = synth_parts(spec["synth"])
+        cols = {c for im in (back_hand, front_hand) for c in im.getdata() if c[3] > 0 and sum(c[:3]) > 120}
+    elif "cells" in spec:
+        layers, run = read_aseprite(ORIG + spec["dir"] + "Run/Run.aseprite")
+        held_layers = [cels[len(layers) - 1] for cels in run]
+        cols = cell_colours(*spec["cells"])
     else:
         layers, run = read_aseprite(ORIG + spec["dir"] + "Run/Run.aseprite")
         held_layers = [cels[len(layers) - 1] for cels in run]
         cols = hand_colours(spec["hand"])
     held = {"walk": [groups(layer, FRAME / 2, cols) for layer in held_layers]}
+    if "synth" in spec:
+        # The hands are where they were put (their colours may be the weapon's too): pivot on them.
+        ox, oy = spec["synth"]["offset"]
+        for k, ((bimg, _), (fimg, _)) in enumerate(held["walk"]):
+            b, f = SYNTH_BACK[k % 6], SYNTH_FRONT[k % 6]
+            held["walk"][k] = [(bimg, [b[0] + ox + 8, b[1] + oy + 8]), (fimg, [f[0] + ox + 8, f[1] + oy + 8])]
     # Idle has no held layer: the run's first frame's, moved with the idle body.
     run_top = top_of(anims["walk"][0])
     held["idle"] = []
@@ -411,6 +623,8 @@ for fam, spec in FAMILIES.items():
     fps = {}
     for name, key in (("Idle", "idle"), ("Run", "walk"), ("Hit", "hurt"), ("Death", "dead")):
         path = ORIG + spec["dir"] + f"{name}/{name}.aseprite"
+        if not os.path.exists(path):
+            path = ORIG + spec["dir"] + f"{name}.aseprite"
         if os.path.exists(path):
             durs = durations(path)
             fps[key] = round(1000.0 / (sum(durs) / len(durs)), 2)
@@ -422,6 +636,13 @@ for fam, spec in FAMILIES.items():
         if "slot" in spec:
             free_hand = elf_free_hand(elf_held(0)[0])
             bows = {"walk": [elf_archer_frames(layer, free_hand) for layer in held_layers]}
+        elif "synth" in spec:
+            back_hand, front_hand, _, _ = synth_parts(spec["synth"])
+            wood = Image.open(WOOD).convert("RGBA")
+            ox, oy = spec["synth"]["offset"]
+            bows = {"walk": [archer_at((SYNTH_BACK[k % 6][0] + ox, SYNTH_BACK[k % 6][1] + oy), back_hand,
+                                       (SYNTH_FRONT[k % 6][0] + ox, SYNTH_FRONT[k % 6][1] + oy), front_hand, wood)
+                             for k in range(len(anims["walk"]))]}
         else:
             hands_im = Image.open(HANDS).convert("RGBA")
             wood = Image.open(WOOD).convert("RGBA")

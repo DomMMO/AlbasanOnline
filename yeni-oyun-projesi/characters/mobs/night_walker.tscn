@@ -3,38 +3,38 @@
 [ext_resource type="SpriteFrames" path="res://characters/mobs/night_walker.tres" id="1_1iy71"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_cs08o"]
-size = Vector2(18, 25)
+size = Vector2(16, 30)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_qsswl"]
 size = Vector2(10, 6)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_govde"]
-radius = 3.6
-height = 14.4
+radius = 3.2
+height = 12.8
 
-[node name="NightWalker" type="Node2D" unique_id=135476975]
+[node name="NightWalker" type="Node2D" unique_id=605689538]
 
-[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1621012750]
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1997151975]
 sprite_frames = ExtResource("1_1iy71")
 animation = &"idle"
 autoplay = "idle"
 centered = false
-offset = Vector2(-16.31, -26.5732)
+offset = Vector2(-32, -64)
 
-[node name="Hurtbox" type="Area2D" parent="." unique_id=678982694]
+[node name="Hurtbox" type="Area2D" parent="." unique_id=761913171]
 collision_mask = 0
 
-[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=742327058]
-position = Vector2(-0.30999967, -11.073201)
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1371859074]
+position = Vector2(0, -15)
 shape = SubResource("RectangleShape2D_cs08o")
 debug_color = Color(0.2, 0.6, 1, 0.35)
 
-[node name="Feet" type="Area2D" parent="." unique_id=2124663656]
+[node name="Feet" type="Area2D" parent="." unique_id=1455797263]
 collision_layer = 2
 collision_mask = 0
 input_pickable = false
 
-[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=549466300]
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=621312643]
 position = Vector2(0, -3)
 shape = SubResource("RectangleShape2D_qsswl")
 debug_color = Color(1, 0.3, 0.2, 0.45)

@@ -14,6 +14,8 @@ import type { Mob } from "../rooms/schema/WorldState";
 import { hitPlayer } from "./combat";
 import type { Game, MobRuntime } from "./Game";
 import { addThreat, spawnMobAt } from "./mobs";
+import { treasureChests } from "./items";
+import { groupDrops } from "./partyScale";
 
 // Boss mechanics, layered on top of normal mob AI:
 //   - telegraphed abilities used in rotation (slam / leap / charge, see BossAbility)
@@ -274,12 +276,13 @@ export function resetBoss(mob: Mob, runtime: MobRuntime) {
   mob.enraged = false;
 }
 
-export function bossDefeated(game: Game, runtime: MobRuntime) {
+export function bossDefeated(game: Game, runtime: MobRuntime, at: { x: number; y: number }) {
   // Field bosses come back after a while; only dungeon bosses open the way on.
   if (!game.zone.instanced) return announce(game, `${runtime.def.name} yenildi!`);
   // Big dungeons have several bosses: the way out opens with the last one.
   const left = [...game.mobRuntime.values()].filter((r) => r.boss).length;
   if (left > 0) return announce(game, `${runtime.def.name} yenildi! (${left} boss kaldı)`);
   game.state.cleared = true;
-  announce(game, `${runtime.def.name} yenildi! Yeni portal açıldı.`);
+  announce(game, `${runtime.def.name} yenildi! Yeni portal açıldı. Hazine sandıkları açıldı!`);
+  treasureChests(game, at, runtime.def, groupDrops(game));
 }
