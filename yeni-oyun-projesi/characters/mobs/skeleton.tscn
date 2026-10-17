@@ -3,49 +3,49 @@
 [ext_resource type="SpriteFrames" path="res://characters/mobs/skeleton.tres" id="1_tncih"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ucdnn"]
-size = Vector2(21, 26)
+size = Vector2(23, 32)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_g78lg"]
 size = Vector2(10, 6)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_govde"]
-radius = 4.2
-height = 16.8
+radius = 4.6
+height = 18.4
 
-[node name="Skeleton" type="Node2D" unique_id=1227655260]
+[node name="Skeleton" type="Node2D" unique_id=1419660177]
 
-[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=2005842525]
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1075479208]
 sprite_frames = ExtResource("1_tncih")
 animation = &"idle"
 autoplay = "idle"
 centered = false
-offset = Vector2(-17.070301, -29.379398)
+offset = Vector2(-32, -64)
 
-[node name="Hurtbox" type="Area2D" parent="." unique_id=33148277]
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1971048470]
 collision_mask = 0
 
-[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=550055354]
-position = Vector2(-0.5703001, -12.379399)
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox" unique_id=1030958014]
+position = Vector2(2.5, -16)
 shape = SubResource("RectangleShape2D_ucdnn")
 debug_color = Color(0.2, 0.6, 1, 0.35)
 
-[node name="Feet" type="Area2D" parent="." unique_id=1769995797]
+[node name="Feet" type="Area2D" parent="." unique_id=1679448746]
 collision_layer = 2
 collision_mask = 0
 input_pickable = false
 
-[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=405306106]
+[node name="Shape" type="CollisionShape2D" parent="Feet" unique_id=1005148881]
 position = Vector2(0, -3)
 shape = SubResource("RectangleShape2D_g78lg")
 debug_color = Color(1, 0.3, 0.2, 0.45)
 
-[node name="Govde" type="Area2D" parent="." unique_id=1822832040]
+[node name="Govde" type="Area2D" parent="." unique_id=740340240]
 collision_layer = 4
 collision_mask = 0
 monitoring = false
 monitorable = false
 
-[node name="Oval" type="CollisionShape2D" parent="Govde" unique_id=1818113868]
+[node name="Oval" type="CollisionShape2D" parent="Govde" unique_id=1816612715]
 rotation = 1.5707964
 shape = SubResource("CapsuleShape2D_govde")
 debug_color = Color(1, 0.75, 0.2, 0.35)

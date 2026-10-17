@@ -32,9 +32,18 @@ export const MAX_NAME_LENGTH = 16;
 export const MELEE_RANGE = 26;
 /** Mobs stop chasing at this distance and start swinging. */
 export const MOB_ATTACK_RANGE = 18;
-/** A mob that gets this far from its spawn point gives up and walks home at full health. */
-export const MOB_LEASH_RANGE = TILE_SIZE * 18;
-/** Players this many levels above a mob are left alone: it won't attack them and shies away a little. */
+/** A mob archer's shot: drawing the bow takes this long, then the arrow flies at this speed
+ *  (pixels per second); the hit lands when it arrives. The client's animation matches it. */
+export const MOB_ARROW_DRAW_MS = 260;
+export const MOB_ARROW_SPEED = 240;
+/** A mob caster's bolt: the staff is raised this long, then the bolt flies at this speed. */
+export const MOB_BOLT_CAST_MS = 420;
+export const MOB_BOLT_SPEED = 200;
+/** Open world: a mob that gets this far from its spawn point gives up and walks home at full
+ *  health. Dungeon mobs never give up. */
+export const MOB_LEASH_RANGE = TILE_SIZE * 28;
+/** Open world: players this many levels above a mob are left alone: it won't attack them and
+ *  shies away a little. Dungeon mobs attack anyone. */
 export const MOB_FEAR_LEVEL_GAP = 5;
 
 export const GLOBAL_COOLDOWN_MS = 1000;

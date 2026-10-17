@@ -239,6 +239,8 @@ static func effect_lines(skill: Dictionary, ctx: Dictionary) -> Array:
 			return ["%s boyunca aldığın bütün hasar %s azalır." % [_sec(e.durationMs), _pct(float(e.reduction))]]
 		"stun":
 			return ["Hedefe %s vurur ve %s sersemletir: ne yürüyebilir ne saldırabilir." % [hit.call(mult, bonus_v), _sec(e.stunMs)], "Boss'lar sersemlemez; oyunculara (PvP, düello) süre yarıya iner."]
+		"interrupt":
+			return ["Hedefe %s vurur ve yaptığı büyüyü keser." % hit.call(mult, bonus_v), "Sarı barlı büyüler kesilir ve o büyü 10 sn yeniden başlayamaz (boss'larda da). Gri barlı hareketleri kesemez: onları sersemletme durdurur. Global beklemeye girmez."]
 		"blast":
 			return ["Hedefin %s çevresindeki bütün düşmanlara %s vurur." % [_tiles(radius), hit.call(mult)]]
 		"radiance":

@@ -5,6 +5,7 @@ export * from "./movement";
 export * from "./data/appearance";
 export * from "./data/mobs";
 export * from "./data/mobBodies";
+export * from "./data/mobCasts";
 export * from "./data/skills";
 export * from "./data/progression";
 export * from "./data/items";

@@ -1,6 +1,6 @@
-[gd_resource type="SpriteFrames" format=3]
+[gd_resource type="SpriteFrames" format=3 uid="uid://bdd4yc5fqxikw"]
 
-[ext_resource type="Texture2D" path="res://assets/moblar/ork_goblin.png" id="1_bhesf"]
+[ext_resource type="Texture2D" uid="uid://84b2jmwvxjlp" path="res://assets/moblar/ork_goblin.png" id="1_bhesf"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_00h0a"]
 atlas = ExtResource("1_bhesf")
@@ -106,7 +106,7 @@ animations = [{
 }],
 "loop": 1,
 "name": &"idle",
-"speed": 10.0
+"speed": 7.0
 }, {
 "frames": [{
 "duration": 1.0,

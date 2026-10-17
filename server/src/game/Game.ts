@@ -38,6 +38,7 @@ import { fromStored, toStored, type InventoryData, type StoredItem } from "./inv
 import { refreshStats, sendInventory, type LootContents } from "./items";
 import { sendHorseState, syncHorse } from "./stable";
 import type { BossState } from "./boss";
+import type { MobCastState, MobEnrage } from "./mobCasts";
 import { closeStall, type StallState } from "./market";
 import { questsFromStored, sendQuestLog } from "./quests";
 import { nightChanged, spawnInitialMobs, updateMobs } from "./mobs";
@@ -164,6 +165,10 @@ export interface MobRuntime {
   zone: SpawnZone | null;
   /** The pack it belongs to: pull one and the whole pack comes (null = on its own). */
   pack: string | null;
+  /** Chasing round obstacles: the waypoints left, where the target was when they were found, when. */
+  path: { x: number; y: number }[] | null;
+  pathGoal: { x: number; y: number } | null;
+  pathAt: number;
   home: { x: number; y: number };
   mode: MobMode;
   /** sessionId -> threat. Highest threat is the target; this is what party tanking builds on. */
@@ -178,6 +183,12 @@ export interface MobRuntime {
   /** Stun skills: can't move or attack until then. */
   stunnedUntil: number;
   boss?: BossState;
+  /** The ability with a cast bar it is casting now (mobCasts.ts). */
+  cast: MobCastState | null;
+  /** When each of its abilities can be cast next (set when the fight begins; null out of combat). */
+  castReady: Map<string, number> | null;
+  /** Hiddet: harder, faster swings for a while. */
+  enrage: MobEnrage | null;
   /** Stat and reward multiplier: 1, NIGHT_POWER at night outdoors, NIGHT_ONLY_POWER for night creatures. */
   power: number;
 }
@@ -188,6 +199,8 @@ export class Game {
   map: WorldMap;
   readonly playerRuntime = new Map<string, PlayerRuntime>();
   readonly mobRuntime = new Map<string, MobRuntime>();
+  /** Mob arrows in flight: each hits its player when it arrives (combat.ts, landArrows). */
+  readonly arrows: { mobId: string; sessionId: string; at: number; amount: number; crit: boolean }[] = [];
   readonly lootContents = new Map<string, LootContents>();
   readonly minionRuntime = new Map<string, MinionRuntime>();
   readonly random = Math.random;
@@ -195,6 +208,8 @@ export class Game {
   night = false;
   /** Spawn areas of night-only creatures waiting for dark. */
   readonly dormantSpawns: SpawnZone[] = [];
+  /** Open world: the dead of a pack still fighting (pack -> their areas); they come back together once it is all dead. */
+  readonly deadPacks = new Map<string, SpawnZone[]>();
 
   private time = 0;
   /** Most players this (instanced) zone has had at once; bosses are scaled to it. */

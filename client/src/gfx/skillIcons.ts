@@ -488,6 +488,25 @@ function paw(ctx: Ctx, x: number, y: number) {
   }
 }
 
+/** Kesme (every class's interrupt): a speech bubble under a red "no" sign, the spell cut short. */
+function interrupt(ctx: Ctx) {
+  ctx.beginPath();
+  ctx.ellipse(0, -2, 15, 11, 0, 0, Math.PI * 2);
+  ctx.moveTo(-6, 7);
+  ctx.lineTo(-12, 16);
+  ctx.lineTo(2, 8);
+  ink(ctx);
+  for (const [width, colour] of [[8, OUTLINE], [4.5, "#ff6b6b"]] as [number, string][]) {
+    ctx.lineWidth = width;
+    ctx.strokeStyle = colour;
+    ctx.beginPath();
+    ctx.arc(0, 0, 21, 0, Math.PI * 2);
+    ctx.moveTo(-15, 15);
+    ctx.lineTo(15, -15);
+    ctx.stroke();
+  }
+}
+
 function fallback(ctx: Ctx) {
   star(ctx, 0, 0, 16, INK);
 }
@@ -495,6 +514,14 @@ function fallback(ctx: Ctx) {
 // ---- Skill compositions ------------------------------------------------------------
 
 const GLYPHS: Record<string, (ctx: Ctx, color: string) => void> = {
+  // Every class's interrupt
+  pummel: interrupt,
+  windShear: interrupt,
+  throatKick: interrupt,
+  silencingShot: interrupt,
+  thornGag: interrupt,
+  holySilence: interrupt,
+  soulLock: interrupt,
   // Warrior
   heroicStrike: (ctx) => {
     at(ctx, -3, 3, Math.PI / 4, 1.05, () => sword(ctx));

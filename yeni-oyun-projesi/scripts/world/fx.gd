@@ -229,6 +229,91 @@ static func arrow_shot(layer: Node2D, from: Vector2, to: Vector2, on_arrive := C
 			on_arrive.call())
 
 
+## A mob's arrow: the Pixel Crawler pack's wooden arrow (pointing right; or the mob's own, `look`)
+## flying from the bow to the target's chest, following the target as it moves (`target` gives
+## its feet each frame).
+const PACK_ARROW := "res://assetpack/ANOKOLISA/Pixel Crawler - Town/Weapons/Wood/Wood.png"
+const PACK_ARROW_RECT := Rect2(32, 4, 16, 7)
+const ARROW_SPEED := 240.0
+static var _pack_arrow_tex: Texture2D
+
+
+static func pack_arrow(layer: Node2D, from: Vector2, target: Callable, look: Texture2D = null) -> void:
+	if _pack_arrow_tex == null:
+		_pack_arrow_tex = load(PACK_ARROW)
+	var s := Sprite2D.new()
+	if look:
+		s.texture = look
+	else:
+		s.texture = _pack_arrow_tex
+		s.region_enabled = true
+		s.region_rect = PACK_ARROW_RECT
+	var w := Depth.wrap(layer, s)
+	var chest := func() -> Vector2:
+		var feet: Vector2 = target.call()
+		return Vector2(feet.x, feet.y - CHEST)
+	var first: Vector2 = chest.call()
+	var duration := maxf(0.12, from.distance_to(first) / ARROW_SPEED)
+	var fly := func(t: float) -> void:
+		# Towards where the target is now: the arrow homes in and always arrives.
+		var aim: Vector2 = chest.call()
+		var at := from.lerp(aim, t)
+		var ahead := from.lerp(aim, minf(1.0, t + 0.05))
+		if ahead.distance_squared_to(at) > 0.01:
+			s.rotation = (ahead - at).angle()
+		Depth.place(w, at.x, at.y, 100000)
+	fly.call(0.0)
+	var tw := _tw(w)
+	tw.tween_method(fly, 0.0, 1.0, duration)
+	tw.tween_callback(func():
+		var feet: Vector2 = target.call()
+		w.queue_free()
+		burst(layer, feet, Depth.c(0xffe8cc), 3))
+
+
+## A mob caster's bolt: a glowing orb from the staff's head to the target's chest, following it
+## as it moves (`target` gives its feet each frame); the speed is the server's MOB_BOLT_SPEED.
+const BOLT_SPEED := 200.0
+
+
+static func homing_bolt(layer: Node2D, from: Vector2, target: Callable, color: Color) -> void:
+	var g := _add(layer, func(ci: CanvasItem):
+		ci.draw_circle(Vector2.ZERO, 4.0, Color(color, 0.35))
+		ci.draw_circle(Vector2.ZERO, 2.5, Color(color, 0.9))
+		ci.draw_circle(Vector2.ZERO, 1.2, Color(1, 1, 1, 0.95)), from.x, from.y, 100000)
+	var w := g.get_parent() as Node2D
+	var trail := CPUParticles2D.new()
+	trail.amount = 12
+	trail.lifetime = 0.3
+	trail.gravity = Vector2.ZERO
+	trail.initial_velocity_min = 0
+	trail.initial_velocity_max = 4
+	trail.scale_amount_min = 1.5
+	trail.scale_amount_max = 1.5
+	var ramp := Gradient.new()
+	ramp.set_color(0, Color(color, 0.8))
+	ramp.set_color(1, Color(color, 0.0))
+	trail.color_ramp = ramp
+	var add := CanvasItemMaterial.new()
+	add.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+	trail.material = add
+	g.add_child(trail)
+	var chest := func() -> Vector2:
+		var feet: Vector2 = target.call()
+		return Vector2(feet.x, feet.y - CHEST)
+	var first: Vector2 = chest.call()
+	var duration := maxf(0.15, from.distance_to(first) / BOLT_SPEED)
+	var fly := func(t: float) -> void:
+		var at := from.lerp(chest.call(), t)
+		Depth.place(w, at.x, at.y, 100000)
+	var tw := _tw(w)
+	tw.tween_method(fly, 0.0, 1.0, duration)
+	tw.tween_callback(func():
+		var feet: Vector2 = target.call()
+		w.queue_free()
+		burst(layer, feet, color, 6))
+
+
 static func arrow_volley(layer: Node2D, at: Vector2, radius: float) -> void:
 	for i in 12:
 		var tx := at.x + randi_range(int(-radius), int(radius))

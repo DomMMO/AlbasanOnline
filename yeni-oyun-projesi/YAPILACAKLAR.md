@@ -37,7 +37,7 @@ goblin_cave ve jack_lair da 20 odalı yapıya geçti.
 | kurgan | Cemetery | ✅ 144x112, koyu kaya platolar, köknarlar, mumlu mezar kümeleri (onay bekliyor) |
 | canyon | Desert | ✅ 128x96, kum kaplı kızıl mesalar, kaktüsler, kemikler, kervan kampı (onay bekliyor) |
 | volcano | Forge + Town | ✅ 128x96, gri kaya, kül zemin, lav gölleri, kuru ağaçlar (onay bekliyor) |
-| world | Town | ✅ 128x96, çimli kahve kaya, meşe/çam/sonbahar korulukları (onay bekliyor) |
+| world | Town | ✅ onaylandı ("kusursuz"): platolar kullanıcının öğrettiği kurallarla (`tools/plato/OKU.md`), zemin ve plato ayrı katmanda, ağaçlar platolardan uzak ve dağınık. **Bu yöntem diğer bütün haritalara uygulanacak.** |
 | harbor | — | ❌ kaldırıldı: yerine town adasının güneybatı kıyısında tek bir rıhtım var (Town paketinin rıhtım parçaları: halatlı direkler, bank, sandıklar, fener direği). Balık town'da tutuluyor, Balıkçı Rıfat rıhtımda (`tools/rihtim.gd`, güverte görseli `tools/rihtim_gorsel.py`). |
 | portallar | Portal paketi | ✅ oyunun bütün portalları yeşil (Dimensional_Portal), oyuncunun açtığı portal mavi (Portal_sprite, yeşille aynı boya küçültüldü) |
 | frost | Town kar | ✅ 128x96, frost_citadel'in karı ve çamları, buz gölleri, kristaller (onay bekliyor) |
@@ -49,12 +49,69 @@ Açık haritalar `dungeon_theme.gd -- field <tema> <zone>` ile üretiliyor. Yerl
 - El ve silah ayrı parçalar olacak; saldırı, abartısız bir silah savuruşu olacak.
 - Bosslar aynı ailenin büyük ve renk tonu farklı halleri olacak.
 - Pakette karşılığı olmayan moblar (kurt, balçık, ejderha, sırtlan, ayı...) en yakın paket ailesine çevrilecek.
-- ✅ Prototip: ork ailesi (onay bekliyor). goblin, goblin_guard, Grukk, orc, orc_warrior, orc_shaman, orc_brute, Grom, Zulgar ve Mog'Thar.
-  - Sayfaları `tools/mob_sheets.py` üretiyor; çıktı `assets/moblar/` altında.
-  - El ve silah düzeni `scripts/world/mob_rig.gd`'de.
+- ✅ Ork ailesi tamam (onay bekliyor). Görünümler ve eller paketin kendi `.aseprite` el katmanından, kare kare sanatçının yerleşimiyle:
+  - Goblin (hançer): goblin, goblin_guard (gri), kobold_miner (turuncu), frost_kobold (buz).
+  - Ork Rogue (yay ve bıçak): orc.
+  - Ork Savaşçı (kılıç ve kalkan): orc_warrior, orc_brute (toprak tonu).
+  - Ork Şaman (asa ve kitap): orc_shaman.
+  - Bosslar iki kat boyda ve kendi tonlarında: Grukk, Grom, Zulgar, Mog'Thar, Uruk.
+  - Sayfaları `tools/mob_sheets.py` üretiyor, düzeni `scripts/world/mob_rig.gd` çiziyor. Kare hızları paketteki gibi saniyede 10.
+  - war_wolf (hayvan) eşi olmayanlarla birlikte ele alınacak.
 - ✅ Moblar arası mesafe: her mobun ayağında kendi boyunu aşmayan oval bir gövde var. Sunucu ovalleri birbirinden ayırıyor, sahnelerde `Govde` olarak görünüyor (`tools/mob_bodies.py`).
 - ✅ Paket çekme: bir paketten bir mob saldırıya geçince paketin tamamı gelir. Zindanlarda paketler mob sırasından çıkarılıyor; açık haritalarda bir alanın tüm mobları bir paket.
-- ⏳ Sıradakiler: iskelet, haydut, zombi/hayalet, mumya, taş/golem, sıçan/kobold, kraliyet muhafızları, elf, kütüphane, Medusa/bahçe, mantar, yarasa; ardından eşi olmayanlar.
+- ✅ Menzilli moblar ve yol bulma:
+  - Okçular yayı gerip takip eden ok atar (Wood yay kareleri ve okları).
+  - Şamanlar asalarını kaldırıp takip eden büyü mermisi atar.
+  - Hasar mermi varınca işlenir.
+  - Moblar menzilden çıkan ya da görüşten kaçan oyuncuyu engellerin etrafından dolaşarak (A*) kovalar.
+- ✅ Orc Fortress yalnızca orklardan oluşuyor, dört sınıf var:
+  - Yakın dövüş: savaşçı, zorba.
+  - Okçu: Ork Okçu.
+  - Büyücü: şaman.
+  - Rogue: Ork Suikastçı.
+  - Paketler 7 şablondan: tek sınıf (sadece okçu, sadece yakın dövüş) ya da karışık. Savaş kurtları çıkarıldı.
+- 📐 İlke: bir harita hangi paketin malzemesiyle yapıldıysa, o paketin düşman ailesiyle dolar. Onaylanan eşleşme:
+
+  | Harita | Paket | Aile | Durum |
+  |---|---|---|---|
+  | Kara Orman (forest) | Fairy Forest | Elfler | ✅ |
+  | orc_fortress | Hideout | Haydutlar (adı ve bossları da haydut olacak: Haydut Sığınağı) | ⏳ |
+  | world (Başlangıç Vadisi) | Town | Orklar (Orc Fortress'teki orklar buraya taşınacak) | ⏳ |
+  | bone_crypt, khan_barrow, jack_lair, kurgan | Cemetery (+Castle) | Zombiler | ⏳ |
+  | sunken_temple | Garden (+Sewer) | Bahçe halkı ve Medusa | ⏳ |
+  | canyon, buried_caravanserai | Desert | Mumyalar | ⏳ |
+  | volcano, magma_forges, ash_temple, dragon_lair | Forge | Taş ailesi | ⏳ |
+  | mağara zindanları | Cave | Mantarlar | ⏳ |
+  | keep_hall, frost_citadel | Castle | Kraliyet muhafızları | ⏳ |
+- ✅ Elf ailesi (Kara Orman). Eller ve silahlar sanatçının kendi `Social/Elfs.aseprite` dosyasından; koşu kareleriyle piksel piksel aynı:
+  - Elf İzci (orak): dark_wolf, moon_wolf (gece tonu), skeleton (Mezar Soyguncusu).
+  - Elf Avcı (yay ve ok, menzilli): satyr_spearman, orc (Elf Yağmacı), bandit_chief (Kara Murat, iki kat boy, kendi tonu).
+    - Yayı yarım ve tam gerili kareler paketin silah vitrininden (`Social/Weapon.png`) blok blok okundu.
+    - Kendi elf okunu atıyorlar.
+  - Elf Koruyucu (kalkan ve çekiç): bandit, satyr_warrior, satyr_chief, dire_bear (Elf Vahşisi, ayı postlu, iki kat boy).
+  - Elf Druid (kitap ve asa, büyü mermisi): poison_slime, night_wraith, moss_golem.
+  - Görev metinleri elflere göre yeniden yazıldı; hedefler aynı.
+  - Not: jack_lair'deki dark_wolf ve poison_slime şimdilik elf görünüyor; zombi geçişinde düzelecek.
+- ⏳ Sıradakiler: yukarıdaki tablodaki aileler (her zindan kendi paketinin ailesiyle); ardından eşi olmayanlar.
+- ✅ Duruş (idle) animasyonu sanatçının hızının 0,7'si (saniyede 7 kare).
+- ✅ Mob plakası %5 küçük, %10 ince.
+- ✅ Cast barları (WoW gibi; `shared/src/data/mobCasts.ts`, sunucu `server/src/game/mobCasts.ts`):
+  - Sarı (büyü): kesme skilli ya da sersemletme durdurur.
+    - Yıkım Küresi (büyük vuruş), Lanet Patlaması (yere işaretli alan), Şifa Ayini (paketi iyileştirir), Dehşet Laneti (3 sn sersemletir).
+  - Gri (fiziksel): sadece sersemletme durdurur.
+    - Ok Yağmuru (yere işaretli alan), Ezici Darbe, Hiddet (iri moblar, 10 sn daha sert ve hızlı vuruş).
+  - Kim ne atar: casterlar Yıkım Küresi + bir büyü daha; okçular Ok Yağmuru; yakın dövüşçüler Ezici Darbe (iriler Hiddet de). 8. seviye altındaki moblar yetenek kullanmaz.
+  - Kesilen büyü o mobda (boss da dahil) 10 sn yeniden başlayamaz.
+  - Bosslar sersemlemez ama kesmeyi yer: Kan Ayini (kendini iyileştirir, sarı) kesilebilir; Yer Sarsıntısı, Sıçrayış ve Hücum gri bar gösterir.
+  - Cast sürerken plaka yukarı kayar, bar altında belirir; kesilince kırmızı "Kesildi".
+- ✅ Her sınıfa doğuştan kesme skilli (puansız, 1. seviyeden, 12 sn bekleme, global beklemeye girmez; boş hotbar yuvasına kendiliğinden yerleşir):
+  - Savaşçı: Susturan Yumruk
+  - Şaman: Rüzgâr Kesiği
+  - Suikastçı: Boğaz Tekmesi
+  - Okçu: Susturan Ok
+  - Druid: Diken Gemi
+  - Şifacı: Kutsal Sessizlik
+  - Nekromant: Ruh Kilidi
 
 ## 4. Silahlar: ⏳
 - 12 malzeme seti tier sırasına dizilecek: Tahta → Kemik → Rustik → Kale → Bahçe → Elf → Zehir → Mantar → Kütüphane → Lanetli → Altın → Ateş.

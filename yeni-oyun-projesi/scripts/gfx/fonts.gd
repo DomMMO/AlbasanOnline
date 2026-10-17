@@ -92,6 +92,24 @@ static func mono(msdf := true) -> Font:
 	return _cache[key]
 
 
+## Names over heads and on nameplates: Pixelify Sans (OFL, art/fonts), a clear pixel font that
+## has every Turkish letter; MSDF so it stays sharp at the camera's zoom.
+static func names(msdf := true) -> Font:
+	var key := "names:%s" % msdf
+	if _cache.has(key):
+		return _cache[key]
+	var font: Font = null
+	if ResourceLoader.exists("res://art/fonts/PixelifySans.ttf"):
+		var f: FontFile = (load("res://art/fonts/PixelifySans.ttf") as FontFile).duplicate()
+		f.multichannel_signed_distance_field = msdf
+		f.antialiasing = TextServer.FONT_ANTIALIASING_GRAY
+		font = f
+	else:
+		font = title(msdf)
+	_cache[key] = font
+	return font
+
+
 static func label_settings(font: Font, size: int, color: Color, outline := 0, outline_color := Color.BLACK) -> LabelSettings:
 	var s := LabelSettings.new()
 	s.font = font

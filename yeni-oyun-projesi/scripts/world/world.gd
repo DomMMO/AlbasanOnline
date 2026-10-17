@@ -15,6 +15,8 @@ const ENEMY_PLAYER_COLOR := Color("#ff5a5a")
 ## A correction bigger than this is a teleport (respawn), not a prediction error.
 const TELEPORT_DISTANCE := 32.0
 const PING_INTERVAL := 2.0
+## A mob caster's bolt (the orc shamans' green).
+const MOB_BOLT_COLOR := Color(0.55, 0.95, 0.4)
 const CASTER_BOLT := {"priest": 0xffe066, "necromancer": 0x69db7c, "shaman": 0x74c0fc, "druid": 0x8ce99a}
 const FACING := {"up": Dir.UP, "down": Dir.DOWN, "left": Dir.LEFT, "right": Dir.RIGHT}
 const HOTBAR_SLOTS := 10
@@ -155,6 +157,7 @@ func _ready() -> void:
 	add_child(night)
 	hud.minimap.set_zone(map, String(zone.get("name", zone_id)))
 	ui.world_map.set_zone(hud.minimap.ground, hud.minimap.map_size, String(zone.get("name", zone_id)))
+	_make_map_picture()
 	hud.set_death_text(String(zone.get("respawnText", "")))
 	_target_ring = Depth.Painter.new(func(ci: CanvasItem): Depth.stroke_ellipse(ci, 0, 0, 18, 7, _ring_color, 1))
 	_target_ring.visible = false
@@ -167,6 +170,17 @@ func _ready() -> void:
 	_bind_messages()
 	room.send("requestInventory")
 	room.send("ping", Time.get_ticks_usec() / 1000.0)
+
+
+## The minimap and the big map show the zone itself (its map scene drawn small) once it is ready.
+func _make_map_picture() -> void:
+	var back := GameData.rgb(zone_view.background) if zone_view.background != null else Color("#0b0805")
+	var size := Vector2(map.width, map.height) * GameData.TILE_SIZE
+	var texture: ImageTexture = await MapPicture.render(self, "res://maps/%s.tscn" % zone_id, size, back)
+	if texture == null or not is_inside_tree():
+		return
+	hud.minimap.set_picture(texture)
+	ui.world_map.set_picture(texture)
 
 
 func _exit_tree() -> void:
@@ -480,8 +494,10 @@ func _on_mob_add(mob: Schema.Struct, mob_id: String) -> void:
 	var scale := float(def.get("scale", 1))
 	# A boss has its boss behaviour (an object) in its definition; others none.
 	var boss: bool = def.get("boss") != null
-	var view := EntityView.new(sorted, float(f(mob, "x")), float(f(mob, "y")), def.appearance, String(def.name) if boss else "", Color("#ff8c1a"), scale, "mobs/%s" % f(mob, "kind", ""))
+	var view := EntityView.new(sorted, float(f(mob, "x")), float(f(mob, "y")), def.appearance, "", Color("#ff8c1a"), scale, "mobs/%s" % f(mob, "kind", ""))
 	entities.add_child(view)
+	# Every mob's name on its nameplate (a boss's framed in orange).
+	view.set_plate(String(def.name), Color("#ff8c1a") if boss else Color.WHITE)
 	if boss:
 		boss_id = mob_id
 	view.clicked.connect(func(_v, ev: InputEventMouseButton):
@@ -719,6 +735,11 @@ func _bind_messages() -> void:
 	_on("stallContents", func(e): ui.show_stall_contents(e))
 	_on("stallClosed", func(e): ui.on_stall_closed(String(e.sellerId)))
 	_on("bossCast", show_boss_cast)
+	_on("mobCastStart", show_mob_cast)
+	_on("mobCastEnd", func(e):
+		var m: Remote = mobs.get(String(e.mobId))
+		if m:
+			m.view.end_cast(bool(e.interrupted)))
 	_on("castStart", show_cast_start)
 	_on("castEnd", show_cast_end)
 	_on("chatMessage", show_chat)
@@ -814,7 +835,11 @@ func _hotbar_file() -> String:
 
 
 func load_hotbar_layout(name: String, cls: String) -> Array:
-	var skills: Array = GameData.class_of(cls).get("skills", [])
+	var skills: Array = GameData.class_of(cls).get("skills", []).duplicate()
+	# The class's interrupt (Kesme) goes on the bar too, after the skills.
+	var interrupt := String(GameData.class_of(cls).get("interrupt", ""))
+	if not interrupt.is_empty():
+		skills.append(interrupt)
 	var layout: Array = skills.duplicate()
 	var cfg := ConfigFile.new()
 	if cfg.load(_hotbar_file()) == OK and cfg.has_section_key("hotbar", name):
@@ -822,6 +847,13 @@ func load_hotbar_layout(name: String, cls: String) -> Array:
 		layout = []
 		for id in saved:
 			layout.append(id if (id is String and id in skills) else "")
+		# A bar saved before the interrupt existed: it takes the first empty slot.
+		if not interrupt.is_empty() and not (interrupt in layout):
+			var free := layout.find("")
+			if free >= 0:
+				layout[free] = interrupt
+			elif layout.size() < HOTBAR_SLOTS:
+				layout.append(interrupt)
 	var out := []
 	for i in HOTBAR_SLOTS:
 		out.append(layout[i] if i < layout.size() else "")
@@ -1275,8 +1307,76 @@ func on_market_tile() -> bool:
 	return true
 
 
+## A mob begins an ability with a cast bar (MOB_CASTS): the bar under its plate, yellow when an
+## interrupt can stop it, grey when only a stun can; area ones mark the ground where they land.
+func show_mob_cast(e: Dictionary) -> void:
+	var def: Dictionary = GameData.get_value("MOB_CASTS", {}).get(String(e.castId), {})
+	var m: Remote = mobs.get(String(e.mobId))
+	if def.is_empty() or m == null:
+		return
+	m.view.start_cast(String(def.name), float(e.castMs), def.kind == "magic")
+	if e.get("radius") != null:
+		last_casts[String(e.mobId)] = e
+		_mark_ground(float(e.x), float(e.y), float(e.radius), float(e.castMs), Color(String(def.color)))
+
+
+## A circle on the ground filling up until something lands there.
+func _mark_ground(x: float, y: float, radius: float, cast_ms: float, color: Color) -> void:
+	var fill := [0.0]
+	var node := Depth.Painter.new()
+	node.painter = func(ci: CanvasItem):
+		Depth.fill_ellipse(ci, 0, 0, radius * 2, radius, Color(color, 0.15))
+		Depth.fill_ellipse(ci, 0, 0, radius * 2 * fill[0], radius * fill[0], Color(color, 0.35))
+		Depth.stroke_ellipse(ci, 0, 0, radius * 2, radius, Color(color, 0.9), 1)
+	var w := Depth.wrap(sorted, node)
+	Depth.place(w, roundf(x), roundf(y) - 2, 0.5)
+	var t := node.create_tween()
+	t.tween_method(func(v): fill[0] = v; node.queue_redraw(), 0.0, 1.0, cast_ms / 1000.0)
+	t.tween_callback(w.queue_free)
+
+
+## A mob's ability lands: the bolt, the blow, the area, the heal or the rage.
+func show_mob_cast_land(e: Dictionary, source: EntityView, def: Dictionary) -> void:
+	var color := Color(String(def.color))
+	var effect: Dictionary = def.effect
+	var target := view_for(String(e.targetId), String(e.targetKind)) if e.get("targetId") != null and e.get("targetKind") != null else null
+	match String(effect.type):
+		"bolt", "stun":
+			if target == null:
+				return
+			if def.kind == "physical":
+				source.play_attack("heavy", target.position)
+				Fx.burst(sorted, target.position + Vector2(0, -10), color, 10)
+			else:
+				Fx.projectile(sorted, source.position + Vector2(0, -14), target.position + Vector2(0, -10), color, 4, func(): Fx.burst(sorted, target.position + Vector2(0, -10), color, 12))
+			if effect.type == "stun":
+				Fx.floating_text(sorted, target.x, target.head_y - 2, "Sersemledi", color, true)
+		"area":
+			var cast = last_casts.get(String(e.sourceId))
+			var at: Vector2 = Vector2(float(cast.x), float(cast.y)) if cast else source.position
+			var radius := float(effect.radius)
+			if def.kind == "physical":
+				Fx.arrow_volley(sorted, at, radius)
+			Fx.ring(sorted, at.x, at.y - 2, color, radius)
+			if local and local.view.position.distance_to(at) < radius * 1.5:
+				_shake(0.14, 0.005)
+		"mend":
+			Fx.ring(sorted, source.x, source.y - 2, color, maxf(24.0, float(effect.radius) * 0.5))
+		"enrage":
+			source.flash()
+			Fx.floating_text(sorted, source.x, source.head_y - 2, String(def.name) + "!", color, true)
+
+
 func show_boss_cast(e: Dictionary) -> void:
 	last_casts[String(e.mobId)] = e
+	var boss_view: Remote = mobs.get(String(e.mobId))
+	if boss_view:
+		# Its marked moves: a grey bar (a boss can't be stunned, so: get out of the way).
+		boss_view.view.start_cast(String(GameData.get_value("BOSS_ABILITY_NAMES", {}).get(String(e.ability), "")), float(e.castMs), false)
+		var v := boss_view.view
+		get_tree().create_timer(float(e.castMs) / 1000.0).timeout.connect(func():
+			if is_instance_valid(v):
+				v.end_cast(false))
 	var fill := [0.0]
 	var painter: Callable
 	var node := Depth.Painter.new()
@@ -1490,6 +1590,10 @@ func show_attack(e: Dictionary) -> void:
 	if skill_id == "charge":
 		source.play_action("slide", 450)
 		return
+	var mob_cast: Dictionary = GameData.get_value("MOB_CASTS", {}).get(skill_id, {}) if not skill_id.is_empty() else {}
+	if not mob_cast.is_empty():
+		show_mob_cast_land(e, source, mob_cast)
+		return
 	var skill := GameData.skill(skill_id) if not skill_id.is_empty() else {}
 	if not skill.is_empty() and skill.effect.get("type") == "dash" and e.get("fromX") != null:
 		if String(e.sourceId) == room.session_id:
@@ -1500,6 +1604,19 @@ func show_attack(e: Dictionary) -> void:
 	var caster := player_state(String(e.sourceId)) if e.sourceKind == "player" else null
 	if not skill.is_empty() and skill.get("visual") != "melee" and skill.get("visual") != "spin":
 		show_spell(skill, source, target)
+	elif skill.is_empty() and e.get("ranged") and target:
+		# A mob archer draws and the pack's arrow flies from its bow; a caster raises its staff and
+		# a bolt flies from its head. Both follow the target and hit as they arrive.
+		var last := [target.position]
+		var follow := func() -> Vector2:
+			if is_instance_valid(target) and not target.is_queued_for_deletion():
+				last[0] = target.position
+			return last[0]
+		if String(e.ranged) == "bolt":
+			source.play_cast(target.position, func(from: Vector2): Fx.homing_bolt(sorted, from, follow, MOB_BOLT_COLOR))
+		else:
+			var look: Texture2D = source.arrow_texture()
+			source.play_shot(target.position, func(from: Vector2): Fx.pack_arrow(sorted, from, follow, look))
 	elif skill.is_empty() and caster and GameData.class_of(String(f(caster, "cls", "novice"))).get("autoAttack", {}).get("ranged", false) and target:
 		if f(caster, "cls", "") == "archer":
 			Fx.arrow_shot(sorted, source.position, target.position)

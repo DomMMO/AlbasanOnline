@@ -26,6 +26,8 @@ export interface ClassDef {
   autoAttack: { range: number; multiplier: number; ranged: boolean };
   /** Active skills in hotbar order (see SkillDef.level for when each can be learned). */
   skills: string[];
+  /** Its interrupt (Kesme): known from its level without points, not in the skill ranks. */
+  interrupt?: string;
   /** Hotbar slots after the skills. */
   potions: string[];
   starterEquipment: Partial<Record<EquipSlot, string>>;
@@ -66,6 +68,7 @@ export const CLASSES: Record<ClassId, ClassDef> = {
     maxResource: () => 100,
     autoAttack: { range: MELEE_RANGE, multiplier: 1, ranged: false },
     skills: ["heroicStrike", "whirlwind", "secondWind", "hamstring", "leapSlam", "battleShout"],
+    interrupt: "pummel",
     potions: ["minor_hp_potion", "hp_potion"],
     starterEquipment: { weapon: "rusty_sword", chest: "cloth_shirt" },
     starterInventory: [{ defId: "minor_hp_potion", qty: 5 }],
@@ -80,6 +83,7 @@ export const CLASSES: Record<ClassId, ClassDef> = {
     maxResource: (level) => 125 + (level - 1) * 12,
     autoAttack: { range: TILE_SIZE * 7, multiplier: 0.5, ranged: true },
     skills: ["skyLash", "thunderDrum", "ancestorSpirit", "spiritBind", "windWalk", "skyBlessing"],
+    interrupt: "windShear",
     potions: ["minor_hp_potion", "minor_mana_potion"],
     starterEquipment: { weapon: "apprentice_staff", chest: "cloth_shirt" },
     starterInventory: [
@@ -98,6 +102,7 @@ export const CLASSES: Record<ClassId, ClassDef> = {
     maxResource: () => 100,
     autoAttack: { range: MELEE_RANGE, multiplier: 0.9, ranged: false },
     skills: ["sinisterStrike", "fanOfKnives", "eviscerate", "blind", "shadowStep", "adrenaline"],
+    interrupt: "throatKick",
     potions: ["minor_hp_potion", "hp_potion"],
     starterEquipment: { weapon: "rusty_sword", chest: "cloth_shirt" },
     starterInventory: [{ defId: "minor_hp_potion", qty: 5 }],
@@ -114,6 +119,7 @@ export const CLASSES: Record<ClassId, ClassDef> = {
     maxResource: () => 100,
     autoAttack: { range: TILE_SIZE * 7, multiplier: 0.75, ranged: true },
     skills: ["aimedShot", "arrowRain", "quickShot", "pinningShot", "hawkLeap", "eagleEye"],
+    interrupt: "silencingShot",
     potions: ["minor_hp_potion", "hp_potion"],
     starterEquipment: { weapon: "short_bow", chest: "cloth_shirt" },
     starterInventory: [{ defId: "minor_hp_potion", qty: 5 }],
@@ -130,6 +136,7 @@ export const CLASSES: Record<ClassId, ClassDef> = {
     maxResource: (level) => 125 + (level - 1) * 12,
     autoAttack: { range: TILE_SIZE * 7, multiplier: 0.45, ranged: true },
     skills: ["thornLash", "entangle", "rejuvenate", "barkskin", "wildCharge", "springTide"],
+    interrupt: "thornGag",
     potions: ["minor_hp_potion", "minor_mana_potion"],
     starterEquipment: { weapon: "apprentice_staff", chest: "cloth_shirt" },
     starterInventory: [
@@ -149,6 +156,7 @@ export const CLASSES: Record<ClassId, ClassDef> = {
     maxResource: (level) => 130 + (level - 1) * 12,
     autoAttack: { range: TILE_SIZE * 7, multiplier: 0.45, ranged: true },
     skills: ["smite", "heal", "shield", "holyNova", "holyChains", "lightStep", "divineSpirit"],
+    interrupt: "holySilence",
     potions: ["minor_hp_potion", "minor_mana_potion"],
     starterEquipment: { weapon: "apprentice_staff", chest: "cloth_shirt" },
     starterInventory: [
@@ -167,6 +175,7 @@ export const CLASSES: Record<ClassId, ClassDef> = {
     maxResource: (level) => 125 + (level - 1) * 12,
     autoAttack: { range: TILE_SIZE * 7, multiplier: 0.45, ranged: true },
     skills: ["drainLife", "boneNova", "summonSkeleton", "terror", "soulStep", "darkPact"],
+    interrupt: "soulLock",
     potions: ["minor_hp_potion", "minor_mana_potion"],
     starterEquipment: { weapon: "apprentice_staff", chest: "cloth_shirt" },
     starterInventory: [

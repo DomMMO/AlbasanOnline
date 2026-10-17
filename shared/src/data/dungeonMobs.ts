@@ -24,6 +24,8 @@ interface TrashSpec {
   attackSpeedMs?: number;
   material?: string;
   extraDrops?: Drop[];
+  /** An archer or a caster (see MobDef.ranged). */
+  ranged?: { range: number; kind?: "arrow" | "bolt" };
 }
 
 function trash(spec: TrashSpec): MobDef {
@@ -42,6 +44,7 @@ function trash(spec: TrashSpec): MobDef {
     aggroRange: 72,
     respawnMs: 0,
     appearance: spec.appearance,
+    ranged: spec.ranged,
     loot: {
       gold: [level, level * 2],
       drops: [
@@ -69,6 +72,8 @@ interface BossSpec {
   addMob?: string;
   addsAt?: number[];
   extraDrops?: Drop[];
+  /** Shoots arrows or casts bolts between its abilities (see MobDef.ranged). */
+  ranged?: { range: number; kind?: "arrow" | "bolt" };
 }
 
 function boss(spec: BossSpec): MobDef {
@@ -89,6 +94,7 @@ function boss(spec: BossSpec): MobDef {
     respawnMs: 0,
     scale: spec.scale ?? 2,
     appearance: spec.appearance,
+    ranged: spec.ranged,
     boss: {
       abilities: spec.abilities,
       enrageAt: 0.3,
@@ -128,7 +134,7 @@ const human = (tunic: number, skin: number, hair: number, gear?: HumanoidGear): 
 
 const list: MobDef[] = [
   // ---- 1. Terk Edilmiş Maden (Abandoned Mine), Sv 9-12
-  trash({ id: "kobold_miner", name: "Kobold Madenci", level: 9, appearance: { type: "image", key: "goblin", tint: 0xd9a066 }, material: "goblin_ear" }),
+  trash({ id: "kobold_miner", name: "Kobold Madenci", level: 9, appearance: { type: "image", key: "ork_goblin", tint: 0xe8b078 }, material: "goblin_ear" }),
   trash({ id: "rock_slime", name: "Kaya Balçığı", level: 10, hp: 1.3, attack: 0.85, speed: 30, appearance: { type: "slime", color: 0x868e96 }, material: "slime_gel" }),
   trash({ id: "tunnel_rat", name: "Tünel Kurdu", level: 10, attack: 1.1, speed: 72, attackSpeedMs: 1700, appearance: { type: "wolf", fur: 0x5c4b3a }, material: "wolf_pelt" }),
   trash({ id: "kobold_overseer", name: "Minotor Gözcü", level: 11, hp: 1.4, appearance: { type: "image", key: "minotaur_brown" }, material: "goblin_ear", extraDrops: [{ item: "minotaur_club", chance: 0.02 }] }),
@@ -157,12 +163,15 @@ const list: MobDef[] = [
 
   // ---- 4. Ork Kalesi (Orc Fortress), Sv 18-21
   trash({ id: "orc_warrior", name: "Ork Savaşçı", level: 18, hp: 1.2, appearance: { type: "image", key: "ork_savasci" }, material: "orc_tusk" }),
-  trash({ id: "orc_shaman", name: "Ork Şaman", level: 19, hp: 0.9, attack: 1.3, appearance: { type: "image", key: "ork_saman" }, material: "orc_tusk" }),
+  trash({ id: "orc_shaman", name: "Ork Şaman", level: 19, hp: 0.9, attack: 1.3, appearance: { type: "image", key: "ork_saman" }, ranged: { range: 120, kind: "bolt" }, material: "orc_tusk" }),
+  // The fortress's other classes: archers, and cutthroats (quick, light, daggers).
+  trash({ id: "orc_archer", name: "Ork Okçu", level: 18, hp: 0.8, appearance: { type: "image", key: "ork_yagmaci" }, ranged: { range: 112 }, material: "orc_tusk" }),
+  trash({ id: "orc_cutthroat", name: "Ork Suikastçı", level: 18, hp: 0.75, attack: 0.9, speed: 74, attackSpeedMs: 1400, appearance: { type: "image", key: "ork_goblin", tint: 0xa8c890 }, material: "orc_tusk" }),
   trash({ id: "war_wolf", name: "Savaş Kurdu", level: 19, attack: 1.1, speed: 76, attackSpeedMs: 1600, appearance: { type: "wolf", fur: 0x3a2a1a }, material: "dark_wolf_pelt" }),
   trash({ id: "orc_brute", name: "Ork Zorba", level: 20, hp: 1.6, attack: 1.15, speed: 52, appearance: { type: "image", key: "ork_savasci", tint: 0xe0c8a0 }, material: "orc_tusk" }),
   boss({ id: "gate_keeper_grom", name: "Kapı Bekçisi Grom", level: 19, scale: 1, appearance: { type: "image", key: "ork_bekci", tint: 0xd8c0a0 }, abilities: [slam(19)], addMob: "orc_warrior", extraDrops: [{ item: "moonstone_earring", chance: 0.2 }] }),
-  boss({ id: "wolf_rider_uruk", name: "Kurt Binicisi Uruk", level: 20, appearance: { type: "wolf", fur: 0x2a1a0a }, abilities: [charge(20), charge(20, 7000)], addMob: "war_wolf", extraDrops: [{ item: "sapphire_ring", chance: 0.25 }] }),
-  boss({ id: "shaman_zulgar", name: "Şaman Zulgar", level: 20, scale: 1, appearance: { type: "image", key: "ork_saman_buyuk", tint: 0xc8b0ff }, abilities: [leap(20), slam(20, 13_000)], addMob: "orc_shaman", extraDrops: [{ item: "dragon_eye_necklace", chance: 0.25 }] }),
+  boss({ id: "wolf_rider_uruk", name: "Kurt Binicisi Uruk", level: 20, scale: 1, appearance: { type: "image", key: "ork_binici", tint: 0xc8a888 }, ranged: { range: 112 }, abilities: [charge(20), charge(20, 7000)], addMob: "orc_archer", extraDrops: [{ item: "sapphire_ring", chance: 0.25 }] }),
+  boss({ id: "shaman_zulgar", name: "Şaman Zulgar", level: 20, scale: 1, appearance: { type: "image", key: "ork_saman_buyuk", tint: 0xc8b0ff }, ranged: { range: 120, kind: "bolt" }, abilities: [leap(20), slam(20, 13_000)], addMob: "orc_shaman", extraDrops: [{ item: "dragon_eye_necklace", chance: 0.25 }] }),
   boss({ id: "warlord_mogthar", name: "Savaş Lordu Mog'Thar", level: 21, final: true, scale: 1, appearance: { type: "image", key: "ork_lord", tint: 0xffa898 }, abilities: [slam(21), charge(21), leap(21, 14_000)], addMob: "orc_brute", extraDrops: [{ item: "might_ring", chance: 0.15 }, { item: "seal_necklace", chance: 0.15 }] }),
 
   // ---- 5. Ejder İni (Dragon's Lair), Sv 21-24
@@ -198,7 +207,7 @@ const list: MobDef[] = [
   // ---- 8. Buz Mağarası (Frozen Cavern, Ayaz Dağları), Sv 31-34
   trash({ id: "ice_fox", name: "Buz Tilkisi", level: 31, attack: 1.1, speed: 80, attackSpeedMs: 1500, appearance: { type: "wolf", fur: 0xd0e8f5 }, material: "frost_shard" }),
   trash({ id: "crystal_slime", name: "Kristal Balçık", level: 32, hp: 1.3, speed: 30, appearance: { type: "slime", color: 0x9ad5ff }, material: "frost_shard" }),
-  trash({ id: "frost_kobold", name: "Ayaz Koboldu", level: 32, appearance: { type: "image", key: "goblin", tint: 0xa5d8ff }, material: "frost_shard" }),
+  trash({ id: "frost_kobold", name: "Ayaz Koboldu", level: 32, appearance: { type: "image", key: "ork_goblin", tint: 0xb8e0ff }, material: "frost_shard" }),
   trash({ id: "ice_elemental", name: "Buz Elementali", level: 33, hp: 1.6, speed: 46, appearance: { type: "image", key: "golem_stone", tint: 0xb8e0ff }, material: "frost_shard" }),
   trash({ id: "frozen_spirit", name: "Donuk Ruh", level: 34, hp: 0.9, attack: 1.3, appearance: { type: "image", key: "wraith_teal" }, material: "night_essence" }),
   boss({ id: "icebreaker_gorr", name: "Buzkıran Gorr", level: 32, scale: 1, appearance: { type: "image", key: "golem_stone_big", tint: 0xb8e0ff }, abilities: [slam(32), leap(32, 12_000)], addMob: "ice_elemental", addsAt: [0.5] }),

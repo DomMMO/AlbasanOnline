@@ -4908,3 +4908,191 @@ script = ExtResource("9_6v8f5")
 kind = "spawn_zone"
 ref = "moss_golem"
 count = 3
+
+[node name="SatyrSpearmanKarisik" type="Marker2D" parent="Noktalar" unique_id=1909612372]
+position = Vector2(1336, 888)
+script = ExtResource("9_6v8f5")
+kind = "spawn_zone"
+ref = "satyr_spearman"
+count = 2
+radius = 6.0
+
+[node name="BanditKarisik" type="Marker2D" parent="Noktalar" unique_id=132775020]
+position = Vector2(696, 728)
+script = ExtResource("9_6v8f5")
+kind = "spawn_zone"
+ref = "bandit"
+count = 2
+radius = 6.0
+
+[node name="SatyrSpearmanKarisik2" type="Marker2D" parent="Noktalar" unique_id=2131347380]
+position = Vector2(1560, 472)
+script = ExtResource("9_6v8f5")
+kind = "spawn_zone"
+ref = "satyr_spearman"
+count = 2
+radius = 6.0
+
+[node name="PoisonSlimeKarisik" type="Marker2D" parent="Noktalar" unique_id=334957013]
+position = Vector2(472, 376)
+script = ExtResource("9_6v8f5")
+kind = "spawn_zone"
+ref = "poison_slime"
+count = 2
+radius = 6.0
+
+[node name="SkeletonKarisik" type="Marker2D" parent="Noktalar" unique_id=283454649]
+position = Vector2(408, 1080)
+script = ExtResource("9_6v8f5")
+kind = "spawn_zone"
+ref = "skeleton"
+count = 2
+radius = 6.0
+
+[node name="SkeletonKarisik2" type="Marker2D" parent="Noktalar" unique_id=1811637343]
+position = Vector2(888, 984)
+script = ExtResource("9_6v8f5")
+kind = "spawn_zone"
+ref = "skeleton"
+count = 2
+
+[node name="SatyrSpearmanKarisik3" type="Marker2D" parent="Noktalar" unique_id=832191573]
+position = Vector2(1224, 1128)
+script = ExtResource("9_6v8f5")
+kind = "spawn_zone"
+ref = "satyr_spearman"
+count = 2
+radius = 6.0
+
+[node name="SatyrSpearmanKarisik4" type="Marker2D" parent="Noktalar" unique_id=2127356657]
+position = Vector2(1192, 648)
+script = ExtResource("9_6v8f5")
+kind = "spawn_zone"
+ref = "satyr_spearman"
+count = 2
+radius = 6.0
+
+[node name="SatyrSpearmanKarisik5" type="Marker2D" parent="Noktalar" unique_id=1924133923]
+position = Vector2(1400, 1320)
+script = ExtResource("9_6v8f5")
+kind = "spawn_zone"
+ref = "satyr_spearman"
+count = 2
+radius = 6.0
+
+[node name="BanditKarisik2" type="Marker2D" parent="Noktalar" unique_id=1494378089]
+position = Vector2(648, 1176)
+script = ExtResource("9_6v8f5")
+kind = "spawn_zone"
+ref = "bandit"
+count = 2
+radius = 6.0
+
+[node name="BanditKarisik3" type="Marker2D" parent="Noktalar" unique_id=1649666865]
+position = Vector2(920, 328)
+script = ExtResource("9_6v8f5")
+kind = "spawn_zone"
+ref = "bandit"
+count = 2
+radius = 6.0
+
+[node name="BanditKarisik4" type="Marker2D" parent="Noktalar" unique_id=944176782]
+position = Vector2(408, 776)
+script = ExtResource("9_6v8f5")
+kind = "spawn_zone"
+ref = "bandit"
+count = 2
+radius = 6.0
+
+[node name="SatyrSpearmanKarisik6" type="Marker2D" parent="Noktalar" unique_id=1446789952]
+position = Vector2(1560, 760)
+script = ExtResource("9_6v8f5")
+kind = "spawn_zone"
+ref = "satyr_spearman"
+count = 2
+radius = 6.0
+
+[node name="SatyrSpearmanKarisik7" type="Marker2D" parent="Noktalar" unique_id=1123627032]
+position = Vector2(1224, 328)
+script = ExtResource("9_6v8f5")
+kind = "spawn_zone"
+ref = "satyr_spearman"
+count = 2
+radius = 6.0
+
+[node name="SatyrSpearmanKarisik8" type="Marker2D" parent="Noktalar" unique_id=1783753989]
+position = Vector2(1800, 152)
+script = ExtResource("9_6v8f5")
+kind = "spawn_zone"
+ref = "satyr_spearman"
+count = 2
+radius = 6.0
+
+[node name="PoisonSlimeKarisik2" type="Marker2D" parent="Noktalar" unique_id=2017274378]
+position = Vector2(200, 264)
+script = ExtResource("9_6v8f5")
+kind = "spawn_zone"
+ref = "poison_slime"
+count = 2
+radius = 6.0
+
+[node name="PoisonSlimeKarisik3" type="Marker2D" parent="Noktalar" unique_id=687780500]
+position = Vector2(232, 568)
+script = ExtResource("9_6v8f5")
+kind = "spawn_zone"
+ref = "poison_slime"
+count = 2
+radius = 6.0
+
+[node name="PoisonSlimeKarisik4" type="Marker2D" parent="Noktalar" unique_id=2120698128]
+position = Vector2(696, 200)
+script = ExtResource("9_6v8f5")
+kind = "spawn_zone"
+ref = "poison_slime"
+count = 2
+radius = 6.0
+
+[node name="SkeletonKarisik3" type="Marker2D" parent="Noktalar" unique_id=981469860]
+position = Vector2(184, 1368)
+script = ExtResource("9_6v8f5")
+kind = "spawn_zone"
+ref = "skeleton"
+count = 2
+radius = 6.0
+
+[node name="SkeletonKarisik4" type="Marker2D" parent="Noktalar" unique_id=1659990471]
+position = Vector2(168, 984)
+script = ExtResource("9_6v8f5")
+kind = "spawn_zone"
+ref = "skeleton"
+count = 2
+radius = 6.0
+
+[node name="SkeletonKarisik5" type="Marker2D" parent="Noktalar" unique_id=2006370152]
+position = Vector2(456, 1384)
+script = ExtResource("9_6v8f5")
+kind = "spawn_zone"
+ref = "skeleton"
+count = 2
+radius = 6.0
+
+[node name="SkeletonKarisik6" type="Marker2D" parent="Noktalar" unique_id=1795612849]
+position = Vector2(808, 1384)
+script = ExtResource("9_6v8f5")
+kind = "spawn_zone"
+ref = "skeleton"
+count = 2
+
+[node name="SkeletonKarisik7" type="Marker2D" parent="Noktalar" unique_id=897764895]
+position = Vector2(600, 936)
+script = ExtResource("9_6v8f5")
+kind = "spawn_zone"
+ref = "skeleton"
+count = 2
+
+[node name="SkeletonKarisik8" type="Marker2D" parent="Noktalar" unique_id=461843771]
+position = Vector2(1016, 792)
+script = ExtResource("9_6v8f5")
+kind = "spawn_zone"
+ref = "skeleton"
+count = 2

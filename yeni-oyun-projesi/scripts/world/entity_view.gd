@@ -38,6 +38,26 @@ var _hp_bar: Depth.Painter
 var _hp_w: Node2D
 var _hp_ratio := 1.0
 var _hp_visible := false
+## A mob's nameplate: its name inside a bar that empties with its health (empty = no plate).
+var _plate_name := ""
+var _plate_color := Color.WHITE
+## The cast bar under the plate: what it casts, its colour (yellow: an interrupt stops it; grey:
+## only a stun), when it began and how long it takes (ms; 0 = not casting). After a stop the bar
+## shows "Kesildi" until _cast_flash_until.
+var _cast_name := ""
+var _cast_color := Color.WHITE
+var _cast_start := 0
+var _cast_ms := 0.0
+var _cast_flash_until := 0
+const CAST_YELLOW := Color(0.95, 0.75, 0.15)
+const CAST_GREY := Color(0.62, 0.64, 0.66)
+const CAST_FLASH_MS := 700
+const PLATE_FONT_SIZE := 7
+## The whole plate drawn at this scale (text and width); its height 90% of the 9 px it was.
+const PLATE_SCALE := 0.95
+const PLATE_HEIGHT := 9.0 * 0.9 / PLATE_SCALE
+const CAST_BAR_HEIGHT := 7.0
+const CAST_FONT_SIZE := 6
 var _raw := Vector2.ZERO
 var _facing := Dir.DOWN
 var _offset := Vector2.ZERO
@@ -113,7 +133,7 @@ func _init(world_layer: Node2D, x: float, y: float, appearance: Dictionary, name
 	if not name_text.is_empty():
 		_label = Label.new()
 		_label.text = name_text
-		_label.label_settings = Fonts.label_settings(Fonts.title(true), 5, name_color, 1, Color.BLACK)
+		_label.label_settings = Fonts.label_settings(Fonts.names(), 7, name_color, 2, Color.BLACK)
 		_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		_label_holder = Node2D.new()
 		_label_holder.add_child(_label)
@@ -420,7 +440,7 @@ func set_gm_tag(on: bool) -> void:
 		_gm_w.queue_free()
 		_gm = null
 		_gm_w = null
-		set_process(false)
+		set_process(_cast_ms > 0.0 or Time.get_ticks_msec() < _cast_flash_until)
 		return
 	_gm = Label.new()
 	_gm.text = "GM"
@@ -435,6 +455,16 @@ func set_gm_tag(on: bool) -> void:
 
 
 func _process(_delta: float) -> void:
+	# Gone (killed mid-cast, say): its plate is freed, nothing more to draw.
+	if _destroyed or not is_instance_valid(_hp_bar):
+		set_process(false)
+		return
+	if _cast_ms > 0.0 or _cast_flash_until > 0:
+		if _cast_ms <= 0.0 and Time.get_ticks_msec() >= _cast_flash_until:
+			_cast_flash_until = 0
+			if _gm == null:
+				set_process(false)
+		_hp_bar.queue_redraw()
 	if _gm:
 		# A steady little bounce (Quad ease out, 320 ms each way).
 		var t := fmod(Time.get_ticks_msec() / 320.0, 2.0)
@@ -473,7 +503,12 @@ func set_position(px_raw: float, py_raw: float) -> void:
 		if _gallop_w:
 			Depth.place(_gallop_w, px, py - 2.0, py - 0.3)
 	var top := py - lift - set.height * _scale
-	Depth.place(_hp_w, px - HP_BAR_WIDTH / 2.0, top - 4.0, 100000.0 + py)
+	if _plate_name.is_empty():
+		Depth.place(_hp_w, px - HP_BAR_WIDTH / 2.0, top - 4.0, 100000.0 + py)
+	else:
+		# Over the head itself (the pack's frames are much taller than what is drawn in them).
+		var head := py - lift + (_opaque_rect().position.y - set.origin.y * set.height) * _scale
+		Depth.place(_hp_w, px, head - 3.0, 100000.0 + py)
 	if _label_w:
 		Depth.place(_label_w, px, (top - 5.0) if _hp_visible else (top - 1.0), 100000.0 + py)
 	_layout_overhead(px, py, top)
@@ -609,6 +644,48 @@ func play_attack(kind: String, target: Variant = null) -> void:
 	Fx.slash(layer, _raw.x + dx / length * reach, _raw.y - 6 + dy / length * reach, angle, color, 16.0 if heavy else 12.0, heavy)
 
 
+## A mob's shot: turn to the target, draw, and when the string is let go `on_release` gets the
+## bow's place (the arrow flies from there).
+func play_shot(target: Vector2, on_release: Callable) -> void:
+	var dx := target.x - _raw.x
+	if set.kind == "image" and dx != 0.0:
+		sprite.flip_h = dx < 0
+		_apply_origin()
+	if _rig and _rig.can_draw():
+		_rig.draw_and_loose(_layout_rig, func(at: Vector2):
+			if not _destroyed:
+				on_release.call(at))
+		return
+	if _rig:
+		_rig.shoot(_layout_rig)
+	get_tree().create_timer(0.12).timeout.connect(func():
+		if _destroyed:
+			return
+		on_release.call(_rig.front_point() if _rig else Vector2(_raw.x, _raw.y - 10)))
+
+
+## The arrow this mob shoots, when it has its own (null: the Wood sheet's).
+func arrow_texture() -> Texture2D:
+	return _rig.arrow_texture() if _rig else null
+
+
+## A mob caster's bolt: turn to the target, raise the staff, and `on_release` gets where the bolt
+## leaves from (the staff's head).
+func play_cast(target: Vector2, on_release: Callable) -> void:
+	var dx := target.x - _raw.x
+	if set.kind == "image" and dx != 0.0:
+		sprite.flip_h = dx < 0
+		_apply_origin()
+	if _rig:
+		_rig.raise_and_cast(_layout_rig, func(at: Vector2):
+			if not _destroyed:
+				on_release.call(at))
+		return
+	get_tree().create_timer(0.42).timeout.connect(func():
+		if not _destroyed:
+			on_release.call(Vector2(_raw.x, _raw.y - 18)))
+
+
 ## Quick hop towards the target and back (mobs and unarmed attackers).
 func lunge(dx: float, dy: float) -> void:
 	var length := sqrt(dx * dx + dy * dy)
@@ -717,7 +794,19 @@ func _idle_name(dir: int) -> String:
 
 # ---- Health bar ----
 
+## A mob's nameplate over its head, always shown: its name on a bar that empties with its health.
+func set_plate(plate_name: String, frame_color: Color) -> void:
+	_plate_name = plate_name
+	_plate_color = frame_color
+	_hp_visible = true
+	_hp_bar.visible = _visible
+	_hp_bar.queue_redraw()
+	set_position(_raw.x, _raw.y)
+
+
 func set_health(hp: float, max_hp: float, visible: bool) -> void:
+	if not _plate_name.is_empty():
+		visible = true
 	_hp_visible = visible
 	_hp_bar.visible = visible and _visible
 	if visible:
@@ -727,9 +816,79 @@ func set_health(hp: float, max_hp: float, visible: bool) -> void:
 
 
 func _paint_hp(ci: CanvasItem) -> void:
+	if not _plate_name.is_empty():
+		_paint_plate(ci)
+		return
 	ci.draw_rect(Rect2(-1, -1, HP_BAR_WIDTH + 2, 4), Color(0, 0, 0, 0.8))
 	ci.draw_rect(Rect2(0, 0, HP_BAR_WIDTH, 2), Depth.c(0x5a1a1a))
 	ci.draw_rect(Rect2(0, 0, ceilf(HP_BAR_WIDTH * _hp_ratio), 2), Depth.c(0x4cd964) if _hp_ratio > 0.3 else Depth.c(0xe74c3c))
+
+
+## A cast bar under the plate: `interruptible` yellow (an interrupt stops it), else grey (only a
+## stun does). It fills over `cast_ms`.
+func start_cast(cast_name: String, cast_ms: float, interruptible: bool) -> void:
+	if _destroyed:
+		return
+	_cast_name = cast_name
+	_cast_color = CAST_YELLOW if interruptible else CAST_GREY
+	_cast_start = Time.get_ticks_msec()
+	_cast_ms = maxf(1.0, cast_ms)
+	_cast_flash_until = 0
+	set_process(true)
+
+
+## The cast is over: done (the bar goes), or stopped (it shows "Kesildi" a moment).
+func end_cast(interrupted: bool) -> void:
+	if _cast_ms <= 0.0 or _destroyed or not is_instance_valid(_hp_bar):
+		_cast_ms = 0.0
+		return
+	_cast_ms = 0.0
+	_cast_flash_until = Time.get_ticks_msec() + CAST_FLASH_MS if interrupted else 0
+	_hp_bar.queue_redraw()
+
+
+## The plate: a dark frame, the health in red, the name in the middle (white, outlined).
+func _paint_plate(ci: CanvasItem) -> void:
+	var font := Fonts.names()
+	var text_w := font.get_string_size(_plate_name, HORIZONTAL_ALIGNMENT_LEFT, -1, PLATE_FONT_SIZE).x
+	var w := maxf(26.0, ceilf(text_w) + 8.0)
+	var h := PLATE_HEIGHT
+	var casting := _cast_ms > 0.0 or Time.get_ticks_msec() < _cast_flash_until
+	var cast_label := "Kesildi" if _cast_ms <= 0.0 else _cast_name
+	if casting:
+		# The cast bar gets as wide as its spell's name needs.
+		w = maxf(w, ceilf(font.get_string_size(cast_label, HORIZONTAL_ALIGNMENT_LEFT, -1, CAST_FONT_SIZE).x) + 8.0)
+	var x0 := -roundf(w / 2.0)
+	# Casting: the plate moves up and the cast bar takes its place over the head.
+	var y0 := -h - ((CAST_BAR_HEIGHT + 2.0) if casting else 0.0)
+	ci.draw_set_transform(Vector2.ZERO, 0.0, Vector2(PLATE_SCALE, PLATE_SCALE))
+	ci.draw_rect(Rect2(x0 - 1, y0 - 1, w + 2, h + 2), Color(_plate_color, 0.9) if _plate_color != Color.WHITE else Color(0, 0, 0, 0.85))
+	ci.draw_rect(Rect2(x0, y0, w, h), Color(0.08, 0.06, 0.07, 0.82))
+	ci.draw_rect(Rect2(x0, y0, roundf(w * _hp_ratio), h), Color(0.62, 0.12, 0.12, 0.92))
+	ci.draw_rect(Rect2(x0, y0, roundf(w * _hp_ratio), 2), Color(0.82, 0.25, 0.22, 0.92))
+	var base := Vector2(-roundf(text_w / 2.0), y0 + roundf((h + font.get_ascent(PLATE_FONT_SIZE) - font.get_descent(PLATE_FONT_SIZE)) / 2.0))
+	ci.draw_string_outline(font, base, _plate_name, HORIZONTAL_ALIGNMENT_LEFT, -1, PLATE_FONT_SIZE, 2, Color(0, 0, 0, 0.95))
+	ci.draw_string(font, base, _plate_name, HORIZONTAL_ALIGNMENT_LEFT, -1, PLATE_FONT_SIZE, Color(1, 1, 1))
+	if casting:
+		_paint_cast(ci, font, x0, y0 + h + 2.0, w, cast_label)
+
+
+## The cast bar, as wide as the plate, just under it: the spell's name on it, filling as it goes.
+func _paint_cast(ci: CanvasItem, font: Font, x0: float, y0: float, w: float, label: String) -> void:
+	var now := Time.get_ticks_msec()
+	var flashing := _cast_ms <= 0.0
+	var h := CAST_BAR_HEIGHT
+	var progress := 1.0 if flashing else clampf((now - _cast_start) / _cast_ms, 0.0, 1.0)
+	var fill := Color(0.85, 0.2, 0.18) if flashing else _cast_color
+	ci.draw_rect(Rect2(x0 - 1, y0 - 1, w + 2, h + 2), Color(0, 0, 0, 0.85))
+	ci.draw_rect(Rect2(x0, y0, w, h), Color(0.08, 0.06, 0.07, 0.82))
+	ci.draw_rect(Rect2(x0, y0, roundf(w * progress), h), Color(fill, 0.95))
+	ci.draw_rect(Rect2(x0, y0, roundf(w * progress), 1), Color(fill.lightened(0.35), 0.95))
+	var size := CAST_FONT_SIZE
+	var text_w := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x
+	var base := Vector2(-roundf(text_w / 2.0), y0 + roundf((h + font.get_ascent(size) - font.get_descent(size)) / 2.0))
+	ci.draw_string_outline(font, base, label, HORIZONTAL_ALIGNMENT_LEFT, -1, size, 2, Color(0, 0, 0, 0.95))
+	ci.draw_string(font, base, label, HORIZONTAL_ALIGNMENT_LEFT, -1, size, Color(1, 1, 1))
 
 
 # ---- Tints, lighting, flashes ----
