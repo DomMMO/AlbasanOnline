@@ -250,7 +250,8 @@ func _opaque_rect() -> Rect2:
 		if set.frames.has_animation(name):
 			tex = set.frames.get_frame_texture(name, 0)
 			break
-	if tex is AtlasTexture:
+	# A sheet saved without its texture (art/licensed missing where it was saved) has a null atlas.
+	if tex is AtlasTexture and (tex as AtlasTexture).atlas:
 		var image := (tex as AtlasTexture).atlas.get_image()
 		if image:
 			if image.is_compressed():
